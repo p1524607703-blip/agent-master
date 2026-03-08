@@ -29,10 +29,3 @@
 
 - `chub`：获取最新 API 文档
 - `defuddle`：从网页提取干净 Markdown
-
-## 跨设备同步说明
-
-- 仓库已推送到 GitHub，通过 git 同步
-- 克隆后需手动将 `.claude/memory/MEMORY.md` 复制到系统路径：
-  `C:\Users\<用户名>\.claude\projects\<项目路径编码>\memory\MEMORY.md`
-- 路径编码规则：盘符+路径中的 `\` 和 `:` 转为 `-`，如 `D:\Download\agent-master` → `D--Download-agent-master`
