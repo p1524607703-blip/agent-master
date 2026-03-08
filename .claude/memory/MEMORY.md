@@ -24,6 +24,13 @@
 | `日记/` | `日记` | 创建今日日记 |
 | `周记/` | `周记` | 创建本周回顾 |
 | `收集/` | `收集` | 快速收集想法/任务/URL |
+| `GitHub同步/` | `GitHub同步` | 推送/拉取仓库，同步记忆文件 |
+
+## GitHub 仓库
+
+- 地址：`https://github.com/p1524607703-blip/agent-master.git`
+- 推送需要 Classic token（`ghp_` 开头），在 https://github.com/settings/tokens 生成，勾选 `repo` 权限
+- remote URL 格式：`https://<ghp_token>@github.com/p1524607703-blip/agent-master.git`
 
 ## 已安装 CLI 工具
 

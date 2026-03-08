@@ -48,13 +48,12 @@ CHANGES=$(git status --porcelain)
 MSG="同步更新 $(date '+%Y-%m-%d %H:%M')"
 git commit -m "$MSG"
 
-# 步骤5：推送
-git push origin main
+# 步骤5：推送（使用 Windows SSL 后端避免 TLS 错误）
+git -c http.sslBackend=schannel push origin main
 ```
 
-> **Token 说明**：如果推送失败提示认证错误，需要在 remote URL 中嵌入 token：
-> `git remote set-url origin https://<TOKEN>@github.com/p1524607703-blip/agent-master.git`
-> Classic token 以 `ghp_` 开头，在 https://github.com/settings/tokens 生成，勾选 `repo` 权限。
+> **Token 说明**：推送使用 Classic token（无期限），生成地址 https://github.com/settings/tokens
+> 更新 token 命令：`git remote set-url origin https://<TOKEN>@github.com/p1524607703-blip/agent-master.git`
 
 ---
 
