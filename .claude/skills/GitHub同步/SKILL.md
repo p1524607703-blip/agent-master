@@ -103,8 +103,51 @@ cp "D:/Download/agent-master/.claude/memory/MEMORY.md" "${SYS_MEMORY_DIR}/MEMORY
 
 ---
 
+## 操作四：开启收集箱定时巡检（每次新会话启动后执行）
+
+当用户说"开启巡检"、"开启收集箱监控"、"恢复定时任务"时，用 CronCreate 工具创建以下定时任务：
+
+- cron：`*/5 * * * *`
+- recurring：true
+- prompt 内容如下（完整复制）：
+
+```
+执行以下两步：
+
+## 第一步：处理收集箱
+
+读取 D:/Download/agent-master/任务清单/收集箱.md，对所有未处理的条目执行以下操作：
+
+分类规则：
+1. 工作开发需求（客户要求、功能变更、bug）→ 追加到 D:/Download/agent-master/任务梳理/需求跟踪.md 的表格
+2. 重要工作任务（本周必做、关键里程碑）→ 追加到 D:/Download/agent-master/任务梳理/主线任务.md 的「本周主线」
+3. SOP/流程相关 → 追加到 D:/Download/agent-master/任务梳理/SOP整理.md
+4. Claude 可直接执行的任务（创建文件、画图、整理文档等）→ 立即执行完成
+5. 学习、生活、购物等个人事项 → 保留在收集箱，打上对应标签分组
+6. 无意义条目（闲聊、已过期）→ 直接删除
+
+处理完后：已分类移走的条目在收集箱标记 [x] 并注明去向，已执行完的任务标记 [x]。
+
+## 第二步：同步到 GitHub
+
+检查 D:/Download/agent-master 是否有变更，有则执行：
+1. cp "C:/Users/15246/.claude/projects/D--Download-agent-master/memory/MEMORY.md" "D:/Download/agent-master/.claude/memory/MEMORY.md"
+2. cd D:/Download/agent-master && git add .
+3. git status --porcelain，若有变更则 git commit -m "自动同步 $(date '+%Y-%m-%d %H:%M')"
+4. git -c http.sslBackend=schannel push https://<GITHUB_TOKEN>@github.com/p1524607703-blip/agent-master.git main
+   # <GITHUB_TOKEN> 即当前有效的 Classic token，从 git remote get-url origin 中提取
+5. 若无变更则跳过提交和推送
+
+最后简要汇报：处理了哪些收集箱条目、是否有内容推送到 GitHub。
+```
+
+> 注意：定时任务仅在当前 Claude Code 会话有效，每次重新打开 Claude Code 后需重新执行此操作。
+
+---
+
 ## 注意事项
 
 - `.gitignore` 已排除 `.obsidian/workspace.json`（设备特有，不同步）
 - 记忆文件双向同步：推送时「系统→仓库」，拉取时「仓库→系统」
 - 每次推送前自动同步记忆，确保记忆不丢失
+- **每次新会话开始后，说"开启巡检"即可恢复定时任务**
