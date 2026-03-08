@@ -1,0 +1,7 @@
+# Obsidian 会话状态（不同设备不同）
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+
+# 系统文件
+.DS_Store
+Thumbs.db
