@@ -9,7 +9,10 @@
       "Glob(*)",
       "WebFetch(*)",
       "TodoRead(*)",
-      "TodoWrite(*)"
+      "TodoWrite(*)",
+      "Skill(飞书MCP)",
+      "WebSearch",
+      "Skill(n8n部署)"
     ],
     "deny": []
   },

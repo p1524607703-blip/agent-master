@@ -1,0 +1,21 @@
+{
+	"nodes":[
+		{"id":"center","type":"text","text":"# Mac Mini M4\n\n## 16+256\n\n### 跨境电商开发工作站","x":300,"y":20,"width":320,"height":260,"color":"5"},
+		{"id":"keyboard","type":"text","text":"## 键鼠（已有）✅","x":300,"y":510,"width":240,"height":60,"color":"4"},
+		{"id":"scene","type":"text","text":"# 使用场景\n\n- n8n 工作流自动化\n- API 调用（Claude/OpenAI）\n- 竞品数据采集分析\n- 亚马逊运营监控","x":740,"y":-100,"width":320,"height":170,"color":"6"},
+		{"id":"network","type":"text","text":"# 网络区域\n\n**网线直连**\n稳定低延迟\n\nAPI 调用更可靠","x":740,"y":120,"width":320,"height":150,"color":"4"},
+		{"id":"budget","type":"text","text":"# 预算分配\n\nMac Mini M4  ~¥4300\n显示器 G27U   ~¥1500\n绿联扩展坞    ~¥200\n───────────────\n总计          ~¥6000","x":740,"y":280,"width":320,"height":210,"color":"3"},
+		{"id":"display","type":"text","text":"# 显示区域\n\n**Redmi G27U**\n4K 分辨率\n\n一根线直连 / 或通过扩展坞","x":-140,"y":-60,"width":240,"height":150,"color":"4"},
+		{"id":"dock","type":"text","text":"# 扩展区域\n\n**绿联扩展坞**\nUSB-A ×2 | USB-C ×2\nHDMI | 网口 | 音频\n\n键鼠 + 移动设备充电","x":-140,"y":140,"width":240,"height":190,"color":"4"},
+		{"id":"storage","type":"text","text":"# 存储区域\n\n**2TB 外置 SSD**\n三星 T7 / 西数 My Passport\n\n等促销 ¥700 左右购入","x":-140,"y":360,"width":240,"height":170,"color":"4"}
+	],
+	"edges":[
+		{"id":"e1","fromNode":"center","fromSide":"left","toNode":"display","toSide":"right"},
+		{"id":"e2","fromNode":"center","fromSide":"left","toNode":"dock","toSide":"right"},
+		{"id":"e3","fromNode":"center","fromSide":"bottom","toNode":"keyboard","toSide":"top"},
+		{"id":"e4","fromNode":"center","fromSide":"left","toNode":"storage","toSide":"right"},
+		{"id":"e5","fromNode":"center","fromSide":"right","toNode":"network","toSide":"left"},
+		{"id":"e6","fromNode":"center","fromSide":"right","toNode":"scene","toSide":"left"},
+		{"id":"e7","fromNode":"center","fromSide":"right","toNode":"budget","toSide":"left"}
+	]
+}

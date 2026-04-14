@@ -5,3 +5,31 @@
 # 系统文件
 .DS_Store
 Thumbs.db
+
+# 环境变量（含密钥，不提交）
+.env
+node_modules
+*/node_modules
+
+# 嵌入的 git 仓库/子模块
+.claude/skills/codex
+.claude/skills/gemini-designer
+.claude/skills/ui-ux-pro-max
+.claude/worktrees
+01-产品/优西四海官网/芯威霆企业网站-admin
+
+# 其他临时文件
+*.tmp
+*.log
+__pycache__
+*.pyc
+
+# 包含密钥的文件
+.openclaw/
+.env*
+*.env
+config.json
+settings.json
+*secret*
+*key*
+*token*

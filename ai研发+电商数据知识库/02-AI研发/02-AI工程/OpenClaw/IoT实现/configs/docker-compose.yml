@@ -1,0 +1,30 @@
+# docker-compose.yml — go2rtc v1.9.13 + Home Assistant
+# 用途：小米 C700 摄像头接入 OpenClaw AI 系统
+# 注意：go2rtc 锁定 v1.9.13，规避 v1.9.14 CS2 timeout 回归（issue #2048）
+
+services:
+  go2rtc:
+    image: alexxit/go2rtc:1.9.13
+    container_name: go2rtc
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - ./go2rtc.yaml:/config/go2rtc.yaml
+    environment:
+      - TZ=Asia/Shanghai
+
+  homeassistant:
+    image: ghcr.io/home-assistant/home-assistant:stable
+    container_name: homeassistant
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - ha_config:/config
+    environment:
+      - TZ=Asia/Shanghai
+    depends_on:
+      - go2rtc
+
+volumes:
+  ha_config:
+    driver: local

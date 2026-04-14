@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "skills": {
+    "sonoscli": {
+      "version": "1.0.0",
+      "installedAt": 1774168982594
+    },
+    "agent-team-orchestration": {
+      "version": "1.0.0",
+      "installedAt": 1774170782476
+    },
+    "agent-browser": {
+      "version": "0.2.0",
+      "installedAt": 1774171682213
+    },
+    "self-improving-agent": {
+      "version": "3.0.5",
+      "installedAt": 1774178583648
+    }
+  }
+}

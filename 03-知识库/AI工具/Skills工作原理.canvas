@@ -1,0 +1,25 @@
+{
+	"nodes":[
+		{"id":"n-title","type":"text","x":500,"y":-370,"width":700,"height":70,"text":"# Claude Code Skills 工作原理"},
+		{"id":"n-struct","type":"text","x":380,"y":-280,"width":680,"height":210,"color":"3","text":"## SKILL.md 结构\n```yaml\n---\nname: 命令名              # → /命令名\ndescription: 自动触发条件  # Claude 匹配上下文用\nallowed-tools: Bash, Read  # 限制可用工具\ndisable-model-invocation: true  # 禁止 Claude 自动触发\ncontext: fork              # 启动独立子 Agent\n---\n\n正文指令... $ARGUMENTS 接收用户传入的参数\n```"},
+		{"id":"g-trigger","type":"group","x":-30,"y":120,"width":330,"height":260,"label":"触发方式","color":"2"},
+		{"id":"n-manual","type":"text","x":0,"y":145,"width":285,"height":90,"color":"2","text":"**手动触发**\n用户输入 `/skill-name [参数]`\n→ $ARGUMENTS 接收参数"},
+		{"id":"n-auto","type":"text","x":0,"y":258,"width":285,"height":95,"color":"2","text":"**自动触发**\nClaude 判断对话内容\n是否匹配 `description` 字段"},
+		{"id":"n-read","type":"text","x":380,"y":160,"width":300,"height":120,"color":"5","text":"**① 读取文件**\n从对应层级加载 SKILL.md\n解析 frontmatter + 正文指令"},
+		{"id":"n-inject","type":"text","x":760,"y":160,"width":300,"height":120,"color":"5","text":"**② 注入上下文**\n将指令 + `$ARGUMENTS`\n写入当前对话 context window"},
+		{"id":"n-exec","type":"text","x":1140,"y":160,"width":300,"height":120,"text":"**③ Claude 执行**\n按指令逐步操作\n调用 allowed-tools 完成任务"},
+		{"id":"n-subagent","type":"text","x":1140,"y":370,"width":300,"height":110,"color":"6","text":"**子 Agent（可选）**\n`context: fork`\n独立沙箱执行\n保护主对话上下文"},
+		{"id":"n-output","type":"text","x":1520,"y":160,"width":260,"height":120,"color":"4","text":"**④ 输出结果**\n返回给用户\n或写入文件 / 调用外部 API"},
+		{"id":"n-scope","type":"text","x":380,"y":410,"width":620,"height":150,"text":"## 存储层级（优先级由高到低）\n\n🏢 **企业级** — managed settings（组织统一下发）\n👤 **个人级** — `~/.claude/skills/`（所有项目生效）\n📁 **项目级** — `.claude/skills/`（当前仓库生效）"}
+	],
+	"edges":[
+		{"id":"e-manual-read","fromNode":"n-manual","fromSide":"right","toNode":"n-read","toSide":"left","fromEnd":"none","toEnd":"arrow"},
+		{"id":"e-auto-read","fromNode":"n-auto","fromSide":"right","toNode":"n-read","toSide":"left","fromEnd":"none","toEnd":"arrow"},
+		{"id":"e-struct-read","fromNode":"n-struct","fromSide":"bottom","toNode":"n-read","toSide":"top","fromEnd":"none","toEnd":"arrow","label":"加载"},
+		{"id":"e-read-inject","fromNode":"n-read","fromSide":"right","toNode":"n-inject","toSide":"left","fromEnd":"none","toEnd":"arrow"},
+		{"id":"e-inject-exec","fromNode":"n-inject","fromSide":"right","toNode":"n-exec","toSide":"left","fromEnd":"none","toEnd":"arrow"},
+		{"id":"e-exec-output","fromNode":"n-exec","fromSide":"right","toNode":"n-output","toSide":"left","fromEnd":"none","toEnd":"arrow"},
+		{"id":"e-exec-subagent","fromNode":"n-exec","fromSide":"bottom","toNode":"n-subagent","toSide":"top","fromEnd":"none","toEnd":"arrow","label":"context: fork","color":"6"},
+		{"id":"e-subagent-output","fromNode":"n-subagent","fromSide":"right","toNode":"n-output","toSide":"bottom","fromEnd":"none","toEnd":"arrow","color":"6"}
+	]
+}

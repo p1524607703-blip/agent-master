@@ -1,0 +1,202 @@
+filters:
+  and:
+    - file.inFolder("竞品分析")
+    - file.hasTag("竞品数据")
+formulas:
+  月销售额估算: 售价 * 月销量
+  包邮标识: if(是否包邮, "✅ 包邮", "💰 需运费")
+  官方店标识: if(是否官方店, "🏪 官方", "普通店")
+  跟卖评级: if(是否值得跟卖 == "值得", "🟢 值得", if(是否值得跟卖 == "观察", "🟡 观察", "🔴 不值得"))
+properties:
+  平台:
+    displayName: 平台
+  搜索关键词:
+    displayName: 搜索关键词
+  商品名称:
+    displayName: 商品名称
+  商品链接:
+    displayName: 商品链接
+  商品ID:
+    displayName: 商品ID
+  主图:
+    displayName: 主图
+  采集时间:
+    displayName: 采集时间
+  售价:
+    displayName: 售价
+  原价:
+    displayName: 原价/划线价
+  起订量MOQ:
+    displayName: 起订量 MOQ
+  月销量:
+    displayName: 月销量
+  formula.月销售额估算:
+    displayName: 月销售额估算
+  销量排名:
+    displayName: 销量排名
+  评分:
+    displayName: 评分
+  评价数:
+    displayName: 评价数
+  关键词标签:
+    displayName: 关键词/标签
+  商品分类:
+    displayName: 商品分类
+  品牌:
+    displayName: 品牌
+  规格变体数:
+    displayName: 规格/变体数
+  详情图数量:
+    displayName: 详情图数量
+  店铺名称:
+    displayName: 店铺名称
+  店铺评分:
+    displayName: 店铺评分
+  formula.官方店标识:
+    displayName: 官方店
+  发货地:
+    displayName: 发货地
+  运费:
+    displayName: 运费
+  formula.包邮标识:
+    displayName: 包邮
+  预计配送时效:
+    displayName: 配送时效
+  formula.跟卖评级:
+    displayName: 跟卖评级
+  差异化机会:
+    displayName: 差异化机会
+  备注:
+    displayName: 备注
+views:
+  - type: table
+    name: 全部商品
+    groupBy:
+      property: 搜索关键词
+      direction: ASC
+    order:
+      - 平台
+      - 搜索关键词
+      - 商品名称
+      - 售价
+      - 评分
+      - formula.月销售额估算
+      - 销量排名
+      - 月销量
+      - 评价数
+      - formula.跟卖评级
+      - 差异化机会
+      - 备注
+    columnSize:
+      note.平台: 120
+      note.搜索关键词: 161
+      note.商品名称: 412
+      note.售价: 105
+      note.评分: 90
+      formula.月销售额估算: 117
+      note.销量排名: 97
+      note.月销量: 92
+      note.评价数: 96
+      formula.跟卖评级: 92
+      note.差异化机会: 113
+  - type: table
+    name: 1688 商品
+    filters:
+      and:
+        - 平台 == "1688"
+    groupBy:
+      property: 搜索关键词
+      direction: ASC
+    order:
+      - 搜索关键词
+      - 商品名称
+      - 售价
+      - 起订量MOQ
+      - 月销量
+      - formula.月销售额估算
+      - 评分
+      - 评价数
+      - 店铺名称
+      - formula.跟卖评级
+  - type: table
+    name: Amazon 商品
+    filters:
+      and:
+        - 平台 == "Amazon"
+    groupBy:
+      property: 搜索关键词
+      direction: ASC
+    order:
+      - 搜索关键词
+      - 商品名称
+      - 售价
+      - 销量排名
+      - 月销量
+      - formula.月销售额估算
+      - 评分
+      - 评价数
+      - formula.官方店标识
+      - formula.跟卖评级
+  - type: table
+    name: Temu 商品
+    filters:
+      and:
+        - 平台 == "Temu"
+    groupBy:
+      property: 搜索关键词
+      direction: ASC
+    order:
+      - 搜索关键词
+      - 商品名称
+      - 售价
+      - 销量排名
+      - 月销量
+      - formula.月销售额估算
+      - 评分
+      - 评价数
+      - formula.跟卖评级
+  - type: table
+    name: Shopee 商品
+    filters:
+      and:
+        - 平台 == "Shopee"
+    groupBy:
+      property: 搜索关键词
+      direction: ASC
+    order:
+      - 搜索关键词
+      - 商品名称
+      - 售价
+      - 月销量
+      - formula.月销售额估算
+      - 评分
+      - 评价数
+      - formula.官方店标识
+      - formula.跟卖评级
+  - type: table
+    name: 值得跟卖
+    filters:
+      and:
+        - 是否值得跟卖 == "值得"
+    groupBy:
+      property: 平台
+      direction: ASC
+    order:
+      - 平台
+      - 搜索关键词
+      - 商品名称
+      - 售价
+      - 月销量
+      - formula.月销售额估算
+      - 差异化机会
+      - 备注
+  - type: cards
+    name: 卡片浏览
+    order:
+      - 主图
+      - 商品名称
+      - 平台
+      - 售价
+      - formula.月销售额估算
+      - 评分
+      - formula.跟卖评级

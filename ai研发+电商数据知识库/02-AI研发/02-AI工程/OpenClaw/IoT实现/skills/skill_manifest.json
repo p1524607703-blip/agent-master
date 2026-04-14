@@ -1,0 +1,64 @@
+{
+  "skills": [
+    {
+      "name": "camera_snapshot",
+      "description": "通过 Home Assistant REST API 获取摄像头截图，返回 base64 编码图像",
+      "module": "camera_snapshot",
+      "functions": [
+        {
+          "name": "take_snapshot",
+          "description": "获取单个摄像头截图",
+          "input": {
+            "entity_id": { "type": "string", "required": true, "example": "camera.xiaomi_c700" },
+            "ha_url": { "type": "string", "required": false, "default": "env:HA_URL" },
+            "ha_token": { "type": "string", "required": false, "default": "env:HA_TOKEN" },
+            "timeout": { "type": "integer", "required": false, "default": 15 }
+          },
+          "output": {
+            "success": { "type": "boolean" },
+            "image_base64": { "type": "string", "description": "JPEG base64 编码" },
+            "content_type": { "type": "string" },
+            "timestamp": { "type": "string", "format": "iso8601" },
+            "entity_id": { "type": "string" }
+          }
+        },
+        {
+          "name": "take_snapshots",
+          "description": "批量获取多个摄像头截图",
+          "input": {
+            "entity_ids": { "type": "array", "items": "string", "required": true }
+          },
+          "output": {
+            "type": "array",
+            "items": "take_snapshot output（失败时含 error 字段）"
+          }
+        }
+      ],
+      "env": {
+        "HA_URL": "Home Assistant 地址（例如 http://192.168.1.100:8123）",
+        "HA_TOKEN": "Home Assistant 长期访问令牌"
+      }
+    },
+    {
+      "name": "person_detection",
+      "description": "调用摄像头截图 + 多模态大模型，检测画面中是否有人",
+      "module": "person_detection",
+      "depends_on": ["camera_snapshot"],
+      "status": "ready"
+    },
+    {
+      "name": "scene_analysis",
+      "description": "通用场景分析：识别场景类型、物体、异常情况",
+      "module": "scene_analysis",
+      "depends_on": ["camera_snapshot"],
+      "status": "ready"
+    },
+    {
+      "name": "intrusion_alert",
+      "description": "定时入侵检测 + 飞书 Webhook 推送告警",
+      "module": "intrusion_alert",
+      "depends_on": ["person_detection"],
+      "status": "ready"
+    }
+  ]
+}

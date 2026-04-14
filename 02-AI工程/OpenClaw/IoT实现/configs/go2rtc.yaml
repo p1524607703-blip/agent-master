@@ -1,0 +1,20 @@
+# go2rtc 配置 — 小米智能摄像机 C700（chuangmi.camera.81ac1）
+# 账号：2167879033 | DID：1190512086 | IP：192.168.2.2
+
+api:
+  listen: ":1984"
+
+# 米家账号 passToken（go2rtc 需要 passToken，不是 serviceToken）
+xiaomi:
+  "2167879033": "V1:pwROAesIuzMBPe5slLSsQjg/FIvFD2dJjGqnsQLo+1CDZTJMvbJIMbRLic/YrQcT6lv23gbq63n4ruesJk7F1rc4LeARoKNu89uNjzobTFjRA3kLOlhyIpjeW7TRk441ZmgfM51g0mFrhtSyk7T3zZa8DMtrkIeQyOyzKFz4PwVSHtfOcYZru4RErE5CYW8Ss4p8Dy0/SciahCTaBIM0YrDcPms6/zyexlr+wzQUr+bHSo29qk/Nfw9QztLItWfoliaVRTlpXPX0ERSGL5B13ThxpMmMLBk4qS4bOQo6zZk="
+
+streams:
+  xiaomi_cam:
+    - xiaomi://2167879033:cn@192.168.2.2?did=1190512086&model=chuangmi.camera.81ac1
+
+webrtc:
+  candidates:
+    - stun:stun.l.google.com:19302
+
+log:
+  level: debug
