@@ -51,6 +51,10 @@
 - MiniMax M2.5 最佳实践见 `reference_minimax_best_practices.md`
 - 所有密钥存储在 `.env`（不提交 git）
 
+## 操作规范
+
+- [不要抢占浏览器页面](../../../.claude/projects/-Users-panjinlong-Documents-agent-master/memory/feedback_browser_usage.md) — 抓取内容用后台 API/curl，禁止 AppleScript 控制 Safari 跳转
+
 ## 团队协作工作流
 
 见 `feedback_team_workflow.md`

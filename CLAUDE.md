@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Type
 
-This is primarily an **Obsidian vault** (knowledge base). The working directory `D:\Download\agent-master` is the vault root. It also contains `选品工具/`, a full-stack software project (Vue 3 + NestJS).
+This is primarily an **Obsidian vault** (knowledge base). The working directory `/Users/panjinlong/Documents/agent-master` is the vault root. It also contains `选品工具/`, a full-stack software project (Vue 3 + NestJS).
 
 ## Vault Structure
 
@@ -134,12 +134,11 @@ Skills live in `.claude/skills/`. Invoke with `/skill-name` or let Claude auto-a
 | `市场调研` | Systematic product category research |
 | `摄像头监控` | Xiaomi C700 camera: screenshots, detection (requires go2rtc.exe) |
 | `agent-browser` | Headless browser automation (Rust CLI) |
-| `gemini-designer` | Delegate UI/web design to Gemini via ZenMux |
-| `codex` | Delegate coding tasks to Codex CLI |
+| `浏览器截图` | Browser screenshot capture |
 | `tavily` | Production Tavily web search integration |
 | `self-improving-agent` | Capture errors/learnings for continuous improvement |
-| `ui-ux-pro-max` | Professional UI/UX design |
 | `sonoscli` | Control Sonos speakers |
+| `glm抢购` | 每日10:00抢购GLM Coding Pro月付 ¥149（captcha预备 + 精准时间点调 payPreviewFn） |
 
 ## Installed CLI Tools
 
