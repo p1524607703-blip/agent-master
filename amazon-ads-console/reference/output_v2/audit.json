@@ -1,0 +1,31 @@
+{
+  "whitin_effective_products": 100,
+  "oudesi_confirmed_products": 14,
+  "whitin_main_raw": {
+    "spend": "29897.86",
+    "units": "3177",
+    "sales": "104832.67",
+    "unallocated_groups": 0
+  },
+  "oudesi_main_raw": {
+    "spend": "11097.12",
+    "units": "1159",
+    "sales": "33368.23",
+    "blocked_special_spend": "39.10",
+    "outside_scope_spend": "48.69"
+  },
+  "ams_raw": {
+    "spend": "4414.64",
+    "units": "571",
+    "sales": "20056.70",
+    "blocked_missing_business_spend": "464.89",
+    "blocked_units": "45"
+  },
+  "reference_product_totals": {
+    "川鹏_spend": "33055.07",
+    "川鹏_units": "3648.00",
+    "欧德思_spend": "11801.89",
+    "欧德思_units": "1205"
+  },
+  "audit_rows": 95
+}

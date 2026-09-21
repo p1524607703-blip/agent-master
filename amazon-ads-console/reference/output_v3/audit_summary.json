@@ -1,0 +1,105 @@
+{
+  "records": 118,
+  "unique_operator_products": 116,
+  "operators": {
+    "AJ1": {
+      "all": 2,
+      "published": 2,
+      "blocked": 0
+    },
+    "DD1": {
+      "all": 15,
+      "published": 14,
+      "blocked": 1
+    },
+    "LB1": {
+      "all": 11,
+      "published": 11,
+      "blocked": 0
+    },
+    "LW1": {
+      "all": 11,
+      "published": 11,
+      "blocked": 0
+    },
+    "XH1": {
+      "all": 13,
+      "published": 12,
+      "blocked": 1
+    },
+    "XM1": {
+      "all": 14,
+      "published": 14,
+      "blocked": 0
+    },
+    "XM2": {
+      "all": 8,
+      "published": 5,
+      "blocked": 3
+    },
+    "YS1": {
+      "all": 11,
+      "published": 11,
+      "blocked": 0
+    },
+    "YT1": {
+      "all": 3,
+      "published": 3,
+      "blocked": 0
+    },
+    "ZF1": {
+      "all": 11,
+      "published": 11,
+      "blocked": 0
+    },
+    "ZJ1": {
+      "all": 19,
+      "published": 17,
+      "blocked": 2
+    }
+  },
+  "whitin_main_raw_spend": "29897.86",
+  "whitin_main_raw_units": "3177",
+  "oudesi_main_raw_spend": "11097.12",
+  "oudesi_raw_units": "1159",
+  "oudesi_blocked_special_spend": "39.10",
+  "oudesi_blocked_special_units": "4",
+  "oudesi_unknown_spend": "0.00",
+  "ams_by_date": [
+    {
+      "date": "2026-08-26",
+      "target": "川鹏",
+      "raw_spend": "4414.64",
+      "raw_units": "571",
+      "selected_spend": "3157.19",
+      "selected_units": "471",
+      "blocked_rule_spend": "18.53",
+      "blocked_rule_units": "4",
+      "missing_business_spend": "446.36",
+      "missing_business_units": "41",
+      "date_mismatch_spend": "792.56",
+      "date_mismatch_units": "55"
+    },
+    {
+      "date": "2026-08-25",
+      "target": "欧德思",
+      "raw_spend": "4785.94",
+      "raw_units": "639",
+      "selected_spend": "830.82",
+      "selected_units": "61",
+      "blocked_rule_spend": "0.00",
+      "blocked_rule_units": "0",
+      "missing_business_spend": "476.59",
+      "missing_business_units": "60",
+      "date_mismatch_spend": "3478.53",
+      "date_mismatch_units": "518"
+    }
+  ],
+  "allocated_exact_spend": "44943.8900",
+  "allocated_exact_units": "4864.00",
+  "merged_exact_spend": "44943.8900",
+  "merged_exact_units": "4864.00",
+  "internal_product_spend_rounded_sum": "44943.91",
+  "internal_product_units": "4864.00",
+  "audit_rows": 45
+}

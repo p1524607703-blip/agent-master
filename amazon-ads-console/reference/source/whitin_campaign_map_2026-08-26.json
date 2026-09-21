@@ -1,0 +1,4434 @@
+[
+  {
+    "campaign_id": "113659045012851",
+    "campaign_name": "AJ1-S87 手动只降低wide-20260724",
+    "ad_product": "Sponsored Products",
+    "operator_group": "AJ1",
+    "canonical_product_code": "S87",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "291202455396996",
+    "campaign_name": "AJ1-S87 自动同类低价-20251231",
+    "ad_product": "Sponsored Products",
+    "operator_group": "AJ1",
+    "canonical_product_code": "S87",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "272368287575723",
+    "campaign_name": "AJ1-S87 自动超低价-20260709",
+    "ad_product": "Sponsored Products",
+    "operator_group": "AJ1",
+    "canonical_product_code": "S87",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "127882682325091",
+    "campaign_name": "DD1- S81-手动Running/Walking低价-广告位+TOS/ROS",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "S81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "556122679187615",
+    "campaign_name": "DD1- S81-手动广泛whitin shoes for men+首页",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "S81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "123726963187027",
+    "campaign_name": "DD1-C10 头条arch support-New to Brand受众",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "DD1",
+    "canonical_product_code": null,
+    "product_map_status": "excluded"
+  },
+  {
+    "campaign_id": "33882428605013",
+    "campaign_name": "DD1-C10 展示-GUBARUN",
+    "ad_product": "Sponsored Display",
+    "operator_group": "DD1",
+    "canonical_product_code": null,
+    "product_map_status": "excluded"
+  },
+  {
+    "campaign_id": "232444433368790",
+    "campaign_name": "DD1-C10 展示-KIIU",
+    "ad_product": "Sponsored Display",
+    "operator_group": "DD1",
+    "canonical_product_code": null,
+    "product_map_status": "excluded"
+  },
+  {
+    "campaign_id": "80396028890465",
+    "campaign_name": "DD1-C10 展示-KUBUA",
+    "ad_product": "Sponsored Display",
+    "operator_group": "DD1",
+    "canonical_product_code": null,
+    "product_map_status": "excluded"
+  },
+  {
+    "campaign_id": "232099272453205",
+    "campaign_name": "DD1-C10 展示-PULLTOP",
+    "ad_product": "Sponsored Display",
+    "operator_group": "DD1",
+    "canonical_product_code": null,
+    "product_map_status": "excluded"
+  },
+  {
+    "campaign_id": "77533877578684",
+    "campaign_name": "DD1-C10-手动广泛+mens flip flops低价+ROS",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": null,
+    "product_map_status": "excluded"
+  },
+  {
+    "campaign_id": "149390498757478",
+    "campaign_name": "DD1-C10-手动广泛arch support+首页",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": null,
+    "product_map_status": "excluded"
+  },
+  {
+    "campaign_id": "213016630875211",
+    "campaign_name": "DD1-C10-自动低价",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": null,
+    "product_map_status": "excluded"
+  },
+  {
+    "campaign_id": "123307756493018",
+    "campaign_name": "DD1-S25 头条-广泛+WHITIN-三款合",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "DD1",
+    "canonical_product_code": "S25",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "254041723343058",
+    "campaign_name": "DD1-S25 头条-广泛+zero drop-三款合",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "DD1",
+    "canonical_product_code": "S25",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "168877360517438",
+    "campaign_name": "DD1-S25 头条-精准WHITIN-三款合",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "DD1",
+    "canonical_product_code": "S25",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "170516317045829",
+    "campaign_name": "DD1-S25 展示-相似ASIN-3",
+    "ad_product": "Sponsored Display",
+    "operator_group": "DD1",
+    "canonical_product_code": "S25",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "137424681703461",
+    "campaign_name": "DD1-S25 展示-相似ASIN-4",
+    "ad_product": "Sponsored Display",
+    "operator_group": "DD1",
+    "canonical_product_code": "S25",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "513954118942410",
+    "campaign_name": "DD1-S25-手动广泛whitin shoes for women",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "S25",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "488830466826777",
+    "campaign_name": "DD1-S25-手动广泛zero drop shoes women-低价+首页-7.14",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "S25",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "30460162351065",
+    "campaign_name": "DD1-S25-自动低价-三款合",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "S25",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "226629222693452",
+    "campaign_name": "DD1-S25-自动商品-动态-受众",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "S25",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "107339054212131",
+    "campaign_name": "DD1-S81 头条-Wide词-已购买受众-改低价-广告位+TOS 8.26",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "DD1",
+    "canonical_product_code": "S81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "203868397475552",
+    "campaign_name": "DD1-S81 展示-Altra ASIN-1",
+    "ad_product": "Sponsored Display",
+    "operator_group": "DD1",
+    "canonical_product_code": "S81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "172305550353996",
+    "campaign_name": "DD1-S81 展示-Altra ASIN-2-分时",
+    "ad_product": "Sponsored Display",
+    "operator_group": "DD1",
+    "canonical_product_code": "S81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "151225018470039",
+    "campaign_name": "DD1-S81 展示-Altra ASIN-4",
+    "ad_product": "Sponsored Display",
+    "operator_group": "DD1",
+    "canonical_product_code": "S81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "125889740845346",
+    "campaign_name": "DD1-S81 展示-出单asin 图",
+    "ad_product": "Sponsored Display",
+    "operator_group": "DD1",
+    "canonical_product_code": "S81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "110066935992781",
+    "campaign_name": "DD1-S81 展示-推荐商品-每千次展示量",
+    "ad_product": "Sponsored Display",
+    "operator_group": "DD1",
+    "canonical_product_code": "S81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "106401205775796",
+    "campaign_name": "DD1-S81 展示-相似ASIN-1",
+    "ad_product": "Sponsored Display",
+    "operator_group": "DD1",
+    "canonical_product_code": "S81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "111387683485014",
+    "campaign_name": "DD1-S81 展示-相似ASIN-2",
+    "ad_product": "Sponsored Display",
+    "operator_group": "DD1",
+    "canonical_product_code": "S81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "116130855003458",
+    "campaign_name": "DD1-S81 展示-相似ASIN-3",
+    "ad_product": "Sponsored Display",
+    "operator_group": "DD1",
+    "canonical_product_code": "S81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "274352431528052",
+    "campaign_name": "DD1-S81 展示投男运动鞋VCPM-S71W转",
+    "ad_product": "Sponsored Display",
+    "operator_group": "DD1",
+    "canonical_product_code": "S81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "71314760290982",
+    "campaign_name": "DD1-S81 视频-广泛+WHITIN-B0BRXC4HXB",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "DD1",
+    "canonical_product_code": "S81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "47881317435470",
+    "campaign_name": "DD1-S81 视频-广泛WHITIN-B0BRXCK2MP--改低价-广告位+TOS 8.26",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "DD1",
+    "canonical_product_code": "S81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "411822854523169",
+    "campaign_name": "DD1-S81 视频-广泛Zero drop词-B0BRXCK2MP",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "DD1",
+    "canonical_product_code": "S81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "541742792408763",
+    "campaign_name": "DD1-S81 视频-广泛whitin shoes for men-B0BRXC3799",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "DD1",
+    "canonical_product_code": "S81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "209956331097267",
+    "campaign_name": "DD1-S81-手动广泛+wide-分时测试",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "S81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "14766265351521",
+    "campaign_name": "DD1-S81-手动广泛Zero Drop -AI广告",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "S81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "484592026432410",
+    "campaign_name": "DD1-S81-手动广泛Zero Drop 低价0.1-广告位8.20",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "S81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "404947193147936",
+    "campaign_name": "DD1-S81-自动0.85",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "S81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "445585566898640",
+    "campaign_name": "DD1-S81-自动1-仅降低",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "S81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "230554838774209",
+    "campaign_name": "DD1-S81-自动低价-提高或降低",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "S81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "139170043233536",
+    "campaign_name": "DD1-S882 展示-相似ASIN-1",
+    "ad_product": "Sponsored Display",
+    "operator_group": "DD1",
+    "canonical_product_code": "S882",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "273327267589342",
+    "campaign_name": "DD1-S882 展示-类目再营销",
+    "ad_product": "Sponsored Display",
+    "operator_group": "DD1",
+    "canonical_product_code": "S882",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "147260546676919",
+    "campaign_name": "DD1-S882 视频-广泛+WHITIN-B0DWJLBHY6改低价+TOS8.27",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "DD1",
+    "canonical_product_code": "S882",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "216612755044644",
+    "campaign_name": "DD1-S882 视频-广泛wide-B0DWJWV1JH",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "DD1",
+    "canonical_product_code": "S882",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "205575703071927",
+    "campaign_name": "DD1-S882-手动广泛+WIDE+组",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "S882",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "43891617237655",
+    "campaign_name": "DD1-S882-手动广泛Wide低价TOSROS+广告位PP-8.21",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "S882",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "59350622341784",
+    "campaign_name": "DD1-S882-手动广泛whitin shoes for women",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "S882",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "6387789492271",
+    "campaign_name": "DD1-S882-自动低价+PP",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "S882",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "493917226984820",
+    "campaign_name": "DD1-S885 头条zero drop shoes women-低价0.16+首页",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "DD1",
+    "canonical_product_code": "S885",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "2897274292174",
+    "campaign_name": "DD1-S885 展示-ALTRA -VCPM 2",
+    "ad_product": "Sponsored Display",
+    "operator_group": "DD1",
+    "canonical_product_code": "S885",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "272291519762612",
+    "campaign_name": "DD1-S885 展示-相似ASIN",
+    "ad_product": "Sponsored Display",
+    "operator_group": "DD1",
+    "canonical_product_code": "S885",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "190227697419534",
+    "campaign_name": "DD1-S885 展示-相似ASIN-1",
+    "ad_product": "Sponsored Display",
+    "operator_group": "DD1",
+    "canonical_product_code": "S885",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "196273139742390",
+    "campaign_name": "DD1-S885-手动广泛+WHITIN低价-仅降低",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "S885",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "464741952754479",
+    "campaign_name": "DD1-S885-手动广泛WHITIN",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "S885",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "134676682363330",
+    "campaign_name": "DD1-S885-手动广泛Wide-降价+广告位",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "S885",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "178914282897258",
+    "campaign_name": "DD1-S885-手动广泛zero drop-AI分时",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "S885",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "80893876977640",
+    "campaign_name": "DD1-S885-自动0.1-固定+ROS/TOS",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "S885",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "354381045763413",
+    "campaign_name": "DD1-S885-自动0.65固定-商品",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "S885",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "135320397521385",
+    "campaign_name": "DD1-S885-自动低价0.1-词",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "S885",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "135991126374267",
+    "campaign_name": "DD1-S8K1 头条-WHITIN-两款合",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "DD1",
+    "canonical_product_code": "S8K1",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "225121269316089",
+    "campaign_name": "DD1-S8K1 头条-Wide-两款合",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "DD1",
+    "canonical_product_code": "S8K1",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "106566786899776",
+    "campaign_name": "DD1-S8K1 展示-相似asin",
+    "ad_product": "Sponsored Display",
+    "operator_group": "DD1",
+    "canonical_product_code": "S8K1",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "46936457993933",
+    "campaign_name": "DD1-S8K1 自动低价-动态7.21",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "S8K1",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "345002904945851",
+    "campaign_name": "DD1-S8K1-手动-广泛WHITIN",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "S8K1",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "540004592231715",
+    "campaign_name": "DD1-S8K1-手动-广泛Wide",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "S8K1",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "313562458044662",
+    "campaign_name": "DD1-S8K1-手动-广泛wide toe box shoes kids-加video-受众",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "S8K1",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "126719871275059",
+    "campaign_name": "DD1-S8K1-手动低价-running shoes",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "S8K1",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "106264189365695",
+    "campaign_name": "DD1-S8K5 展示-推荐",
+    "ad_product": "Sponsored Display",
+    "operator_group": "DD1",
+    "canonical_product_code": "S8K5",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "76803212500753",
+    "campaign_name": "DD1-S8K5 展示-相似asin",
+    "ad_product": "Sponsored Display",
+    "operator_group": "DD1",
+    "canonical_product_code": "S8K5",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "498942097683799",
+    "campaign_name": "DD1-S8K5 手动广泛WHITIN-受众",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "S8K5",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "32249707060760",
+    "campaign_name": "DD1-S8K5 手动广泛wide-AI广告",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "S8K5",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "150645300983308",
+    "campaign_name": "DD1-S8K5 自动低价0.06-动态-广告位首页+ROS 8.26",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "S8K5",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "441220861499762",
+    "campaign_name": "DD1-S8K5 自动词-提高或降低",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "S8K5",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "451201566397123",
+    "campaign_name": "DD1-S8K5 视频-广泛WHITIN",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "DD1",
+    "canonical_product_code": "S8K5",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "90910947492321",
+    "campaign_name": "DD1-S8K5 视频-精准WHITIN-B0FH417SLV",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "DD1",
+    "canonical_product_code": "S8K5",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "120672927272433",
+    "campaign_name": "DD1-S8K5 视频-精准barefoot-B0FH4KBCGQ-受众",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "DD1",
+    "canonical_product_code": "S8K5",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "61946742472144",
+    "campaign_name": "DD1-S8K5-手动低价-running shoes0.1+广告位ROS",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "S8K5",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "113946499918935",
+    "campaign_name": "DD1-S8K5-手动低价-shoes-广告位+TOS/ROS",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "S8K5",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "141615656299507",
+    "campaign_name": "DD1-S8K5-手动低价-tennis shoes+TOS/ROS",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "S8K5",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "161873199660702",
+    "campaign_name": "DD1-T1-自动低价",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "T1",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "194901871202056",
+    "campaign_name": "DD1-W606 头条-fashion sneaker",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "DD1",
+    "canonical_product_code": "W606",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "473084294483917",
+    "campaign_name": "DD1-W606 头条wide toe box shoes women",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "DD1",
+    "canonical_product_code": "W606",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "370253662334618",
+    "campaign_name": "DD1-W606 头条zero drop shoes women",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "DD1",
+    "canonical_product_code": "W606",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "253239784657246",
+    "campaign_name": "DD1-W606 展示-相似 Asin",
+    "ad_product": "Sponsored Display",
+    "operator_group": "DD1",
+    "canonical_product_code": "W606",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "417861534632055",
+    "campaign_name": "DD1-W606 视频-barefoot shoes women-B0F7LHZQ29-分时8.18",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "DD1",
+    "canonical_product_code": "W606",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "403081783829691",
+    "campaign_name": "DD1-W606 视频-whitin shoes for women-B0F7LFXZ73-分时8.18",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "DD1",
+    "canonical_product_code": "W606",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "559647395846747",
+    "campaign_name": "DD1-W606-手动广泛whitin shoes for women-分时测试-8.14",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "W606",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "14658054284045",
+    "campaign_name": "DD1-W606-手动广泛zero drop AI-分时测试",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "W606",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "155185733842501",
+    "campaign_name": "DD1-W606-自动低价0.05-8.5-广告位",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "W606",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "73038714643908",
+    "campaign_name": "DD1-W822男 视频-WHITIN-B0CGWG4NWK",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "DD1",
+    "canonical_product_code": "W822",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "442431253603993",
+    "campaign_name": "DD1-W822男-手动广泛whitin shoes for men-分时测试8.17",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "W822",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "530986370636139",
+    "campaign_name": "DD1-W822男-自动-0.85",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "W822",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "19760675207402",
+    "campaign_name": "DD1-W8K22 展示 相似asin 4",
+    "ad_product": "Sponsored Display",
+    "operator_group": "DD1",
+    "canonical_product_code": "W8K22",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "177057169296147",
+    "campaign_name": "DD1-W8K22 视频-Whitin-B0D8T1N7DT",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "DD1",
+    "canonical_product_code": "W8K22",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "218288222862712",
+    "campaign_name": "DD1-W8K22-手动广泛Barefoot-AI广告",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "W8K22",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "128858895514187",
+    "campaign_name": "DD1-W8K22-手动广泛wide-AI  广告",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "W8K22",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "448969745191838",
+    "campaign_name": "DD1-W8K22-自动低价-动态-7.23改",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "W8K22",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "92005134199838",
+    "campaign_name": "DD1-W8K7 展示-相似asin-1",
+    "ad_product": "Sponsored Display",
+    "operator_group": "DD1",
+    "canonical_product_code": "W8K7",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "152042101043487",
+    "campaign_name": "DD1-W8K7 展示-相似asin-2",
+    "ad_product": "Sponsored Display",
+    "operator_group": "DD1",
+    "canonical_product_code": "W8K7",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "129191833055217",
+    "campaign_name": "DD1-W8K7 展示-相似asin-3",
+    "ad_product": "Sponsored Display",
+    "operator_group": "DD1",
+    "canonical_product_code": "W8K7",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "274902812463499",
+    "campaign_name": "DD1-W8K7 展示-相似asin-4",
+    "ad_product": "Sponsored Display",
+    "operator_group": "DD1",
+    "canonical_product_code": "W8K7",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "393247100641476",
+    "campaign_name": "DD1-W8K7-手动广泛WHITIN",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "W8K7",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "531216076655648",
+    "campaign_name": "DD1-W8K7-手动广泛WIDE-受众",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "W8K7",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "22206648711428",
+    "campaign_name": "DD1-W8K7-自动低价",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "W8K7",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "10499429661915",
+    "campaign_name": "DD1-W96 头条-广泛+WHITIN-搜索词受众-降出价+广告位",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "DD1",
+    "canonical_product_code": "W96",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "270280381610280",
+    "campaign_name": "DD1-W96 头条-广泛+Zero Drop-分时8.19",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "DD1",
+    "canonical_product_code": "W96",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "35751459439001",
+    "campaign_name": "DD1-W96 头条-广泛Vans",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "DD1",
+    "canonical_product_code": "W96",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "156301716458557",
+    "campaign_name": "DD1-W96 展示-Adidas足球风-1",
+    "ad_product": "Sponsored Display",
+    "operator_group": "DD1",
+    "canonical_product_code": "W96",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "202988631596050",
+    "campaign_name": "DD1-W96 展示-VCPM-图片",
+    "ad_product": "Sponsored Display",
+    "operator_group": "DD1",
+    "canonical_product_code": "W96",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "219667482078062",
+    "campaign_name": "DD1-W96 展示-VCPM-图片1",
+    "ad_product": "Sponsored Display",
+    "operator_group": "DD1",
+    "canonical_product_code": "W96",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "129386508111087",
+    "campaign_name": "DD1-W96 视频-fashion-分时8.19",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "DD1",
+    "canonical_product_code": "W96",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "7967741860866",
+    "campaign_name": "DD1-W96 视频-广泛+WHITIN-关键词受众-分时",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "DD1",
+    "canonical_product_code": "W96",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "22517131650218",
+    "campaign_name": "DD1-W96 视频-广泛Vans-B0GXCW3YN5-分时8.20",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "DD1",
+    "canonical_product_code": "W96",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "258350247446889",
+    "campaign_name": "DD1-W96-手动广泛+WHITIN-广告位正常降出价+%",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "W96",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "48759127095008",
+    "campaign_name": "DD1-W96-手动广泛+Wide低价",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "W96",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "98976538790781",
+    "campaign_name": "DD1-W96-手动广泛fashion sneaker低价动态-分时测试",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "W96",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "189709283038179",
+    "campaign_name": "DD1-W96-自动低价-提高或降低-广告位",
+    "ad_product": "Sponsored Products",
+    "operator_group": "DD1",
+    "canonical_product_code": "W96",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "310845169969634",
+    "campaign_name": "LB1-W824 头条 asin高帮 1219+W81 0106受众ntb0627",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LB1",
+    "canonical_product_code": "W824",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "330971105631225",
+    "campaign_name": "LB1-W824 头条 high top 0106",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LB1",
+    "canonical_product_code": "W824",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "41522914047506",
+    "campaign_name": "LB1-W824 头条 赤足 0805",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LB1",
+    "canonical_product_code": "W824",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "96324998250518",
+    "campaign_name": "LB1-W824 头条精准赤足 0130",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LB1",
+    "canonical_product_code": "W824",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "441565374237085",
+    "campaign_name": "LB1-W824手动 TG W823 1113",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LB1",
+    "canonical_product_code": "W824",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "557683045932308",
+    "campaign_name": "LB1-W824自动 1114动态",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LB1",
+    "canonical_product_code": "W824",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "183804407952603",
+    "campaign_name": "LB1-W872 手动barefoot低价+高百分 0822",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LB1",
+    "canonical_product_code": "W872",
+    "product_map_status": "direct_exact"
+  },
+  {
+    "campaign_id": "386181862458700",
+    "campaign_name": "LB1-W872女自动 1128提高降低",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LB1",
+    "canonical_product_code": "W872",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "322107209160238",
+    "campaign_name": "LB1-W87女 头条 W8asin 0106",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LB1",
+    "canonical_product_code": "NVW87",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "246017348853848",
+    "campaign_name": "LB1-W87女 头条赤足Barefoot 0612（受众加购未买优惠券）高",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LB1",
+    "canonical_product_code": "NVW87",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "8060409911244",
+    "campaign_name": "LB1-W87女 自动 动态 0507+受众addbrand0624",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LB1",
+    "canonical_product_code": "NVW87",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "179300435251557",
+    "campaign_name": "LB1-W87女 视频barefoot 0714 BKWT",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LB1",
+    "canonical_product_code": "NVW87",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "85963458475179",
+    "campaign_name": "LB1-W87女头条 赤足词wide Toe+Zero 0522",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LB1",
+    "canonical_product_code": "NVW87",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "60316854183644",
+    "campaign_name": "LB1-W87男 头条 Asitvo asin 0225+受众ntb 0707",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LB1",
+    "canonical_product_code": "W87",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "293380402934238",
+    "campaign_name": "LB1-W87男 头条 W8asin 1212 AI+受众NTB0624",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LB1",
+    "canonical_product_code": "W87",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "349130291698962",
+    "campaign_name": "LB1-W87男 头条 zero minimalist 0107+受众ntb0627",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LB1",
+    "canonical_product_code": "W87",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "42211488753879",
+    "campaign_name": "LB1-W87男 头条精准词0425+受众0627",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LB1",
+    "canonical_product_code": "W87",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "11359688278123",
+    "campaign_name": "LB1-W87男 展示 VCPM W63-0805",
+    "ad_product": "Sponsored Display",
+    "operator_group": "LB1",
+    "canonical_product_code": "W87",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "189467707135906",
+    "campaign_name": "LB1-W87男 手动 barefoot 低价高百分比 0731",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LB1",
+    "canonical_product_code": "W87",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "171676981164773",
+    "campaign_name": "LB1-W87男自动 动态 0401",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LB1",
+    "canonical_product_code": "W87",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "8838176458990",
+    "campaign_name": "LB1-W8K9 头条 wide toe精准0728",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LB1",
+    "canonical_product_code": "W8K9",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "252071712967575",
+    "campaign_name": "LB1-W8K9 头条 赤足大词 0522+NTB0625",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LB1",
+    "canonical_product_code": "W8K9",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "182826850129608",
+    "campaign_name": "LB1-W8K9 头条赤足广泛 0513",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LB1",
+    "canonical_product_code": "W8K9",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "83437288706779",
+    "campaign_name": "LB1-W8K9 手动 Little kid 0805动",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LB1",
+    "canonical_product_code": "W8K9",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "155025769649256",
+    "campaign_name": "LB1-W8K9 手动 TG W8K2- 0805",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LB1",
+    "canonical_product_code": "W8K9",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "116824064851401",
+    "campaign_name": "LB1-W8K9 手动 wide toe精准 0729",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LB1",
+    "canonical_product_code": "W8K9",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "9936342577569",
+    "campaign_name": "LB1-W8K9 手动 出单词广泛 0711",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LB1",
+    "canonical_product_code": "W8K9",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "123494822024061",
+    "campaign_name": "LB1-W93 头条 出单词flat 0812 落地页",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LB1",
+    "canonical_product_code": "W93",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "158578570972142",
+    "campaign_name": "LB1-W93 头条赤足出单词 0812落地页",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LB1",
+    "canonical_product_code": "W93",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "265747564108871",
+    "campaign_name": "LB1-W93手动 Barefoot广泛0228",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LB1",
+    "canonical_product_code": "W93",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "443609386450746",
+    "campaign_name": "LB1-W93自动 1113紧密/关联+受众1210",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LB1",
+    "canonical_product_code": "W93",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "352596729035452",
+    "campaign_name": "LB1-W93自动BK-251016低价+受众01.5",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LB1",
+    "canonical_product_code": "W93",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "34512057062210",
+    "campaign_name": "LB1-W93自动宽泛 0115提高降低+受众0602",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LB1",
+    "canonical_product_code": "W93",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "211652533245146",
+    "campaign_name": "LB1-W94 头条 wide toe精准词 0729",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LB1",
+    "canonical_product_code": "W94",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "205590660492792",
+    "campaign_name": "LB1-W94 头条 精准Mary Jane出单词 0117+受众加购未买0623",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LB1",
+    "canonical_product_code": "W94",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "21215266259642",
+    "campaign_name": "LB1-W94 头条精准出单词 0331新SD定制-受众",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LB1",
+    "canonical_product_code": "W94",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "255045193805958",
+    "campaign_name": "LB1-W94 头条精准出单词 0723 受众（愿望清单）",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LB1",
+    "canonical_product_code": "W94",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "89060630947128",
+    "campaign_name": "LB1-W94 手动 dress精准词低价+高百分比0824",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LB1",
+    "canonical_product_code": "W94",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "151833225005358",
+    "campaign_name": "LB1-W94 手动 mary jane 低价+百分比 0807+TOS/ROS",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LB1",
+    "canonical_product_code": "W94",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "250045203807895",
+    "campaign_name": "LB1-W94 自动关联低价0.2+高百分比 0819",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LB1",
+    "canonical_product_code": "W94",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "320787631806857",
+    "campaign_name": "LB1-W94 视频Mary jane广泛 1112-BN 改AI 1217+受众0604",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LB1",
+    "canonical_product_code": "W94",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "49701132568419",
+    "campaign_name": "LB1-W94 视频精准词 0814 BE",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LB1",
+    "canonical_product_code": "W94",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "530705243400267",
+    "campaign_name": "LB1-W94手动 wide Toe box 1029+video1127+受众0603降低+8.26预算",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LB1",
+    "canonical_product_code": "W94",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "284065701641417",
+    "campaign_name": "LB1-W94自动低价0.5-251009 BK+受众0604+0822首位10%",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LB1",
+    "canonical_product_code": "W94",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "129648594334819",
+    "campaign_name": "LB1-W94自动关联 0226 动态+受众0603",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LB1",
+    "canonical_product_code": "W94",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "281681512178206",
+    "campaign_name": "LB1-W94自动同类 1115降低+受众1223+紧密0226+竞价预算规则0820",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LB1",
+    "canonical_product_code": "W94",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "52521925010484",
+    "campaign_name": "LB1-W95 头条wide toe精准词 0729",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LB1",
+    "canonical_product_code": "W95",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "251114147163164",
+    "campaign_name": "LB1-W95 手动 Wide Toe 0719+8.17预算规则",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LB1",
+    "canonical_product_code": "W95",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "177288195850748",
+    "campaign_name": "LB1-W95 手动mary jane 低价+高百分比 0819+ROS 0824",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LB1",
+    "canonical_product_code": "W95",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "239108620346796",
+    "campaign_name": "LB1-W9K01 头条 ASIN 玛丽简 0804落地页",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LB1",
+    "canonical_product_code": "W9K01",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "160076864144346",
+    "campaign_name": "LB1-W9K01 头条ASIN WK系列 0728",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LB1",
+    "canonical_product_code": "W9K01",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "22594621002450",
+    "campaign_name": "LB1-W9K01 手动 Kids shoes低价0.2+高百分比 0825",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LB1",
+    "canonical_product_code": "W9K01",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "40594137146655",
+    "campaign_name": "LB1-W9K01 手动 mary jane 0805",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LB1",
+    "canonical_product_code": "W9K01",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "207519572628450",
+    "campaign_name": "LB1-W9K01 自动 低价+高百分比 0804 BK+调竞价0826",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LB1",
+    "canonical_product_code": "W9K01",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "267810003979780",
+    "campaign_name": "LB1-W9K01 视频 Barefoot 0822 BK-AI 受众NTB",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LB1",
+    "canonical_product_code": "W9K01",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "38912150408844",
+    "campaign_name": "LB1-W9K01 视频Kids shoes 0826 BE-AI",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LB1",
+    "canonical_product_code": "W9K01",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "232325412841571",
+    "campaign_name": "LB1-W9K01 视频kid Shoes 0811 BK",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LB1",
+    "canonical_product_code": "W9K01",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "271285717395681",
+    "campaign_name": "LB1-W9K01头条 barefoot/Wide 0327SD定制",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LB1",
+    "canonical_product_code": "W9K01",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "52982775818816",
+    "campaign_name": "LB1-W9K01手动 Wide Toe广泛 0321",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LB1",
+    "canonical_product_code": "W9K01",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "4372023274316",
+    "campaign_name": "LB1-W9K01手动 barefoot广泛0321+受众add brand 产品0725",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LB1",
+    "canonical_product_code": "W9K01",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "163796151175011",
+    "campaign_name": "LB1-W9K01手动 girl shoes 动态 0321+预算规则",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LB1",
+    "canonical_product_code": "W9K01",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "207230277051456",
+    "campaign_name": "LB1-W9K01自动 0320 动态+受众添加品牌 0722+预算规则08.06",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LB1",
+    "canonical_product_code": "W9K01",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "24599294993754",
+    "campaign_name": "LW1-C51 头条ASIN",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LW1",
+    "canonical_product_code": "C51",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "10969023569392",
+    "campaign_name": "LW1-C51 手动hiking-0.2+百分500-8.19",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LW1",
+    "canonical_product_code": "C51",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "110054910134879",
+    "campaign_name": "LW1-C51 手动hiking/walking-AI-8.19",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LW1",
+    "canonical_product_code": "C51",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "180366104428886",
+    "campaign_name": "LW1-C51 视频hikingsandals5.10",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LW1",
+    "canonical_product_code": "C51",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "127608675479976",
+    "campaign_name": "LW1-C51-手动-ASIN-3.6",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LW1",
+    "canonical_product_code": "C51",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "189477122190604",
+    "campaign_name": "LW1-C51-自动0.25提高降低TOS测试-3.19",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LW1",
+    "canonical_product_code": "C51",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "81491599828592",
+    "campaign_name": "LW1-C51-自动提高降低-3.20",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LW1",
+    "canonical_product_code": "C51",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "96062931900251",
+    "campaign_name": "LW1-S303 头条ASIN7.22",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LW1",
+    "canonical_product_code": "S303",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "196131251986882",
+    "campaign_name": "LW1-S303 头条wide shoes women8.4",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LW1",
+    "canonical_product_code": "S303",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "214086310070426",
+    "campaign_name": "LW1-S303 手动-wide toe box-3.10",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LW1",
+    "canonical_product_code": "S303",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "230223967438940",
+    "campaign_name": "LW1-S303 手动wide walking 提高降低7.23",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LW1",
+    "canonical_product_code": "S303",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "28048113043866",
+    "campaign_name": "LW1-S303 自动0.2固定+300TOS-8.20",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LW1",
+    "canonical_product_code": "S303",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "12354334731937",
+    "campaign_name": "LW1-S303 视频ASIN 8.11",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LW1",
+    "canonical_product_code": "S303",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "217596422428994",
+    "campaign_name": "LW1-S303 视频WHITIN8.7",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LW1",
+    "canonical_product_code": "S303",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "230706394350727",
+    "campaign_name": "LW1-S303-手动-ASIN-3.26",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LW1",
+    "canonical_product_code": "S303",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "177884005332082",
+    "campaign_name": "LW1-S303-自动-3.10",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LW1",
+    "canonical_product_code": "S303",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "114258225389475",
+    "campaign_name": "LW1-S82 手动zero drop-0.2TOS300-3.17",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LW1",
+    "canonical_product_code": "S82",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "143751259082638",
+    "campaign_name": "LW1-S82-手动-ASIN-3.14",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LW1",
+    "canonical_product_code": "S82",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "51742204689744",
+    "campaign_name": "LW1-S82-自动-3.14",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LW1",
+    "canonical_product_code": "S82",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "442157408452733",
+    "campaign_name": "LW1-S85-手动-ASIN-10.15",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LW1",
+    "canonical_product_code": "S85",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "183550695426236",
+    "campaign_name": "LW1-S85-自动-1.28",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LW1",
+    "canonical_product_code": "S85",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "91418836390493",
+    "campaign_name": "LW1-S880 头条 +zero drop 3.28",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LW1",
+    "canonical_product_code": "S880",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "242765084923985",
+    "campaign_name": "LW1-S880 头条ASIN7.14",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LW1",
+    "canonical_product_code": "S880",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "163604206089387",
+    "campaign_name": "LW1-S880 头条wide7.24",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LW1",
+    "canonical_product_code": "S880",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "20588741641754",
+    "campaign_name": "LW1-S880 手动wide 0.15固定TOS500测试7.9",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LW1",
+    "canonical_product_code": "S880",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "310967812658394",
+    "campaign_name": "LW1-S880 视频 wide shoes 11.8",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LW1",
+    "canonical_product_code": "S880",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "11716634377838",
+    "campaign_name": "LW1-S880 视频+wide running-8.21",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LW1",
+    "canonical_product_code": "S880",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "222815657446731",
+    "campaign_name": "LW1-S880 视频zero drop-8.11",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LW1",
+    "canonical_product_code": "S880",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "462231591958554",
+    "campaign_name": "LW1-S880-手动-ASIN-12.2",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LW1",
+    "canonical_product_code": "S880",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "473638822794981",
+    "campaign_name": "LW1-S880-自动-11.30",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LW1",
+    "canonical_product_code": "S880",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "88945702178737",
+    "campaign_name": "LW1-W710 头条-barefoot-2.4",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LW1",
+    "canonical_product_code": "W710",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "218872928452282",
+    "campaign_name": "LW1-W710 头条-wide-2.16",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LW1",
+    "canonical_product_code": "W710",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "54536186455887",
+    "campaign_name": "LW1-W710 展示-触达-8.11",
+    "ad_product": "Sponsored Display",
+    "operator_group": "LW1",
+    "canonical_product_code": "W710",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "6023457523583",
+    "campaign_name": "LW1-W710 手动barefoot 0.1固定TOS+500-8.20",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LW1",
+    "canonical_product_code": "W710",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "35806309514255",
+    "campaign_name": "LW1-W710 手动barefoot提高降低7.27",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LW1",
+    "canonical_product_code": "W710",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "93662937020419",
+    "campaign_name": "LW1-W710 自动提高降低-7.24",
+    "ad_product": "Sponsored Products",
+    "operator_group": "LW1",
+    "canonical_product_code": "W710",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "3350795084975",
+    "campaign_name": "LW1-W710 视频-barefoot-2.4",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LW1",
+    "canonical_product_code": "W710",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "278247188022130",
+    "campaign_name": "LW1-W710 视频-whitin-2.4",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "LW1",
+    "canonical_product_code": "W710",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "7644753678552",
+    "campaign_name": "XH1 W8K21-barefoot shoes kids-广泛-AI",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XH1",
+    "canonical_product_code": "W8K21",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "225322947391513",
+    "campaign_name": "XH1 W8K21-提高和降低-词",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XH1",
+    "canonical_product_code": "W8K21",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "180235643054540",
+    "campaign_name": "XH1 W8K3-barefoot广泛-增加组",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XH1",
+    "canonical_product_code": "W8K3",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "102360126262253",
+    "campaign_name": "XH1 W8K3-自动-提高和降低-商品",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XH1",
+    "canonical_product_code": "W8K3",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "163572733096937",
+    "campaign_name": "XH1 W8K3-自动-提高和降低-词-",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XH1",
+    "canonical_product_code": "W8K3",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "63250930458556",
+    "campaign_name": "XH1 W8K8-提高和降低",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XH1",
+    "canonical_product_code": "W8K8",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "355607579545448",
+    "campaign_name": "XH1 W8K8-赤足-广泛",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XH1",
+    "canonical_product_code": "W8K8",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "61707234620407",
+    "campaign_name": "XH1 W8K8-赤足boy-广泛",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XH1",
+    "canonical_product_code": "W8K8",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "12133219064362",
+    "campaign_name": "XH1 Z21-自动提高和降低-超低价+900",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XH1",
+    "canonical_product_code": "Z21",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "48401015791761",
+    "campaign_name": "XH1-K8-toddler-广泛-增加组",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XH1",
+    "canonical_product_code": "W8K8",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "206034776952366",
+    "campaign_name": "XH1-W71V5 展示-一起购买的",
+    "ad_product": "Sponsored Display",
+    "operator_group": "XH1",
+    "canonical_product_code": "W71V5",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "26321126980635",
+    "campaign_name": "XH1-W71V5 视频-barefoot词组2",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "XH1",
+    "canonical_product_code": "W71V5",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "122194196423466",
+    "campaign_name": "XH1-W71V5-自动提高和降低-词1",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XH1",
+    "canonical_product_code": "W71V5",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "194668631794768",
+    "campaign_name": "XH1-W75V2 头条-water shoes-广泛2",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "XH1",
+    "canonical_product_code": "W75V2",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "63842053705851",
+    "campaign_name": "XH1-W75V2 头条water shoes women-词组",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "XH1",
+    "canonical_product_code": "W75V2",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "134264524006711",
+    "campaign_name": "XH1-W75V2 展示-类目water shoes",
+    "ad_product": "Sponsored Display",
+    "operator_group": "XH1",
+    "canonical_product_code": "W75V2",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "44572333736084",
+    "campaign_name": "XH1-W75V2 展示-类目water shoes1",
+    "ad_product": "Sponsored Display",
+    "operator_group": "XH1",
+    "canonical_product_code": "W75V2",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "67629244347245",
+    "campaign_name": "XH1-W81K 头条back to school/童鞋系列-广泛",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "XH1",
+    "canonical_product_code": "W81K",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "145405265028114",
+    "campaign_name": "XH1-W81K 展示-kid shoes",
+    "ad_product": "Sponsored Display",
+    "operator_group": "XH1",
+    "canonical_product_code": "W81K",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "93780471501779",
+    "campaign_name": "XH1-W81K 展示-类目-kid shoes",
+    "ad_product": "Sponsored Display",
+    "operator_group": "XH1",
+    "canonical_product_code": "W81K",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "161553308134194",
+    "campaign_name": "XH1-W81K 展示-触达",
+    "ad_product": "Sponsored Display",
+    "operator_group": "XH1",
+    "canonical_product_code": "W81K",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "234043886201582",
+    "campaign_name": "XH1-W81K-kid shoes-广泛",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XH1",
+    "canonical_product_code": "W81K",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "225590979612890",
+    "campaign_name": "XH1-W81K-kid-广泛",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XH1",
+    "canonical_product_code": "W81K",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "5265036477680",
+    "campaign_name": "XH1-W81K-toddler shoes广泛0.02+900-8.25-0.1",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XH1",
+    "canonical_product_code": "W81K",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "63222643384884",
+    "campaign_name": "XH1-W81K-toddler-广泛",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XH1",
+    "canonical_product_code": "W81K",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "529192490077219",
+    "campaign_name": "XH1-W81K-自动-提高和降低+High interest AMC",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XH1",
+    "canonical_product_code": "W81K",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "537967528173765",
+    "campaign_name": "XH1-W81K-赤足词语-广泛",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XH1",
+    "canonical_product_code": "W81K",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "198562694027983",
+    "campaign_name": "XH1-W81女 头条-赤足大词-词组-新-8.27-首页加50",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "XH1",
+    "canonical_product_code": "W81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "602071960015",
+    "campaign_name": "XH1-W81女 展示-再营销定向",
+    "ad_product": "Sponsored Display",
+    "operator_group": "XH1",
+    "canonical_product_code": "W81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "534888495320767",
+    "campaign_name": "XH1-W81女 展示-每千次可见展示成本-SD-增加预算规则",
+    "ad_product": "Sponsored Display",
+    "operator_group": "XH1",
+    "canonical_product_code": "W81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "143036592633707",
+    "campaign_name": "XH1-W81女 自动-提高和降低-0.5-预算规则-8.18",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XH1",
+    "canonical_product_code": "W81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "106554622350936",
+    "campaign_name": "XH1-W81女-barefoot shoes广泛0.02+900-8.19-ROS-600%",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XH1",
+    "canonical_product_code": "W81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "118123067543506",
+    "campaign_name": "XH1-W81女-wide toe bos广泛-0.3+TOS200-固定",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XH1",
+    "canonical_product_code": "W81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "551176628822947",
+    "campaign_name": "XH1-W81女-women赤足广泛-0.6-29-应用预估值-增加组-8.15",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XH1",
+    "canonical_product_code": "W81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "449654031939480",
+    "campaign_name": "XH1-W81女-出单词-推荐-40%-不加",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XH1",
+    "canonical_product_code": "W81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "255193867911414",
+    "campaign_name": "XH1-W81女-自动-提高和降低-0.3",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XH1",
+    "canonical_product_code": "W81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "362939181037281",
+    "campaign_name": "XH1-W81女-超大词广泛-不加",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XH1",
+    "canonical_product_code": "W81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "191889710879837",
+    "campaign_name": "XH1-W8K21 头条-广泛high top",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "XH1",
+    "canonical_product_code": "W8K21",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "13503250006985",
+    "campaign_name": "XH1-W8K3-Target-童鞋",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XH1",
+    "canonical_product_code": "W8K3",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "173548313455314",
+    "campaign_name": "XH1-W8K6 头条-barefoot shoes-广泛",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "XH1",
+    "canonical_product_code": "W8K6",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "255912289209389",
+    "campaign_name": "XH1-W8K6 头条-赤足词语-广泛",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "XH1",
+    "canonical_product_code": "W8K6",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "245378169006034",
+    "campaign_name": "XH1-W8K6 展示-再营销定向-增加流的受众-8.19",
+    "ad_product": "Sponsored Display",
+    "operator_group": "XH1",
+    "canonical_product_code": "W8K6",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "261835001319072",
+    "campaign_name": "XH1-W8K6 展示视频类似于推广的商品",
+    "ad_product": "Sponsored Display",
+    "operator_group": "XH1",
+    "canonical_product_code": "W8K6",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "91548531603228",
+    "campaign_name": "XH1-W8K6 手动-kids shoes-固定-0.1+900",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XH1",
+    "canonical_product_code": "W8K6",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "581687968872816513",
+    "campaign_name": "XH1-W8K6 流媒体-详情页",
+    "ad_product": "Sponsored TV",
+    "operator_group": "XH1",
+    "canonical_product_code": "W8K6",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "143255689412890",
+    "campaign_name": "XH1-W8K6-shoes-广泛-限制在亚马逊站外的花费-8.2-预算规则",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XH1",
+    "canonical_product_code": "W8K6",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "380978490949995",
+    "campaign_name": "XH1-W8K6-自动-提高和降低",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XH1",
+    "canonical_product_code": "W8K6",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "513277088867997",
+    "campaign_name": "XH1-W8K6-赤足词语-广泛-企20-VD-5-7.23-预算400",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XH1",
+    "canonical_product_code": "W8K6",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "232602378953149",
+    "campaign_name": "XH1-W8K8 头条-canvas shoes-广泛",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "XH1",
+    "canonical_product_code": "W8K8",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "173589401755902",
+    "campaign_name": "XH1-W8K8 头条赤足大词",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "XH1",
+    "canonical_product_code": "W8K8",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "14187466315501",
+    "campaign_name": "XH1-W8K8 展示-类似推广的商品",
+    "ad_product": "Sponsored Display",
+    "operator_group": "XH1",
+    "canonical_product_code": "W8K8",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "529188574902862",
+    "campaign_name": "XH1-W8K8 展示WHITIN-SD",
+    "ad_product": "Sponsored Display",
+    "operator_group": "XH1",
+    "canonical_product_code": "W8K8",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "62850593519268",
+    "campaign_name": "XH1-Z1K02 头条-boys/girls 广泛",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "XH1",
+    "canonical_product_code": "Z1K02",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "233861393980576",
+    "campaign_name": "XH1-Z1K02 头条-water shoes for kids-广8.22",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "XH1",
+    "canonical_product_code": "Z1K02",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "82443173405767",
+    "campaign_name": "XH1-Z1K02 头条-water shoes-6.03",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "XH1",
+    "canonical_product_code": "Z1K02",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "63144653050920",
+    "campaign_name": "XH1-Z1K02 头条-water shoes-8.22",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "XH1",
+    "canonical_product_code": "Z1K02",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "125271655341938",
+    "campaign_name": "XH1-Z1K02 展示水鞋-AI场景图X",
+    "ad_product": "Sponsored Display",
+    "operator_group": "XH1",
+    "canonical_product_code": "Z1K02",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "499939457657",
+    "campaign_name": "XH1-Z1K02 展示视频-water shoes 类目",
+    "ad_product": "Sponsored Display",
+    "operator_group": "XH1",
+    "canonical_product_code": "Z1K02",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "51195758221671",
+    "campaign_name": "XH1-Z1K02 视频-water shoes 词组-ABK-33-6.03",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "XH1",
+    "canonical_product_code": "Z1K02",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "116035808041720",
+    "campaign_name": "XH1-Z1K02-kids water shoes-词组-6.03",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XH1",
+    "canonical_product_code": "Z1K02",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "132670064949290",
+    "campaign_name": "XH1-Z1K02-提高和降低-0.03+800-8.19-ROS+100",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XH1",
+    "canonical_product_code": "Z1K02",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "186834911927925",
+    "campaign_name": "XH1-Z21 头条-water shoes-广泛1+8.02+0.1",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "XH1",
+    "canonical_product_code": "Z21",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "108413877115998",
+    "campaign_name": "XH1-Z21 头条-women's water shoes-广泛2+8.0+0.03",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "XH1",
+    "canonical_product_code": "Z21",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "104733524259813",
+    "campaign_name": "XH1-Z21 展示-Z2",
+    "ad_product": "Sponsored Display",
+    "operator_group": "XH1",
+    "canonical_product_code": "Z21",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "70058981575603",
+    "campaign_name": "XH1-Z21 展示-再营销定向",
+    "ad_product": "Sponsored Display",
+    "operator_group": "XH1",
+    "canonical_product_code": "Z21",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "85796137116578",
+    "campaign_name": "XH1-Z21 展示视频-water shoes类目2",
+    "ad_product": "Sponsored Display",
+    "operator_group": "XH1",
+    "canonical_product_code": "Z21",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "91561276678558",
+    "campaign_name": "XH1-Z21-提高和降低-词-5.27",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XH1",
+    "canonical_product_code": "Z21",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "120394197852114",
+    "campaign_name": "XM1-S71W-手动wide女",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XM1",
+    "canonical_product_code": "S71W",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "2458065146737",
+    "campaign_name": "XM1-S71W-手动wide男",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XM1",
+    "canonical_product_code": "S71W",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "16561074458193",
+    "campaign_name": "XM1-S71W-自动只降低",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XM1",
+    "canonical_product_code": "S71W",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "30336716706522",
+    "campaign_name": "XM1-V202 视频多词",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "XM1",
+    "canonical_product_code": "V202",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "61266390534472",
+    "campaign_name": "XM1-Y70 展示型投Beslip",
+    "ad_product": "Sponsored Display",
+    "operator_group": "XM1",
+    "canonical_product_code": "Y70",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "248814395661763",
+    "campaign_name": "XM1-Y70 展示型投ChayChax",
+    "ad_product": "Sponsored Display",
+    "operator_group": "XM1",
+    "canonical_product_code": "Y70",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "56509114307510",
+    "campaign_name": "XM1-Y70 展示型投INMINPIN",
+    "ad_product": "Sponsored Display",
+    "operator_group": "XM1",
+    "canonical_product_code": "Y70",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "159307026486893",
+    "campaign_name": "XM1-Y70 展示投首页",
+    "ad_product": "Sponsored Display",
+    "operator_group": "XM1",
+    "canonical_product_code": "Y70",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "231565073182173",
+    "campaign_name": "XM1-Y70 自动低价",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XM1",
+    "canonical_product_code": "Y70",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "45126342394384",
+    "campaign_name": "XM1-Y70-手动crocswomen低价",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XM1",
+    "canonical_product_code": "Y70",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "63070658629106",
+    "campaign_name": "XM1-Y70-手动crocs广泛提高或降低",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XM1",
+    "canonical_product_code": "Y70",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "277312963961501",
+    "campaign_name": "XM1-Y70-手动投类目mule",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XM1",
+    "canonical_product_code": "Y70",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "38922089805914",
+    "campaign_name": "XM1-Y71 头条crocs词",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "XM1",
+    "canonical_product_code": "Y71",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "189921338387655",
+    "campaign_name": "XM1-Y71-手动crocswomen-低价",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XM1",
+    "canonical_product_code": "Y71",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "249970977327385",
+    "campaign_name": "XM1-Y71-手动只降低",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XM1",
+    "canonical_product_code": "Y71",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "158762180004595",
+    "campaign_name": "XM1-Y71-自动低价",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XM1",
+    "canonical_product_code": "Y71",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "23679277433959",
+    "campaign_name": "XM1-Y71-自动只降低",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XM1",
+    "canonical_product_code": "Y71",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "341767890664232",
+    "campaign_name": "XM1-YG02 视频Sock",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "XM1",
+    "canonical_product_code": "YG02",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "11975518459883",
+    "campaign_name": "XM1-YG02-手动+sock shoes",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XM1",
+    "canonical_product_code": "YG02",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "171364064585217",
+    "campaign_name": "XM1-YG02-手动投Skinners",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XM1",
+    "canonical_product_code": "YG02",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "491442802999730",
+    "campaign_name": "XM1-YG02-手动投joomra",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XM1",
+    "canonical_product_code": "YG02",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "45507096089254",
+    "campaign_name": "XM1-YG02-自动-提高或降低",
+    "ad_product": "Sponsored Products",
+    "operator_group": "XM1",
+    "canonical_product_code": "YG02",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "203596171891951",
+    "campaign_name": "YS1-S24 头条ASIN-08.13",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "YS1",
+    "canonical_product_code": "S24",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "4298938567433",
+    "campaign_name": "YS1-S24 展示S881-08.06-VCPM",
+    "ad_product": "Sponsored Display",
+    "operator_group": "YS1",
+    "canonical_product_code": "S24",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "139087832088975",
+    "campaign_name": "YS1-S24 展示触达S25",
+    "ad_product": "Sponsored Display",
+    "operator_group": "YS1",
+    "canonical_product_code": "S24",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "190039572152572",
+    "campaign_name": "YS1-S24 手动Zero drop +Wide toe box固定精准-AI投放-08.13",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YS1",
+    "canonical_product_code": "S24",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "232165384591839",
+    "campaign_name": "YS1-S24 手动wide +Zero广泛+AI-08.01添加+分时测试",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YS1",
+    "canonical_product_code": "S24",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "202394530329481",
+    "campaign_name": "YS1-S24 自动全开固定0.39+广告位溢价-0.826",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YS1",
+    "canonical_product_code": "S24",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "193299028241910",
+    "campaign_name": "YS1-S24 视频wide词广泛-8.12+受众+分时测试8.19",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "YS1",
+    "canonical_product_code": "S24",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "80162152329608",
+    "campaign_name": "YS1-S302 展示触达S3系列",
+    "ad_product": "Sponsored Display",
+    "operator_group": "YS1",
+    "canonical_product_code": "S302",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "165997089596164",
+    "campaign_name": "YS1-S302 手动Wide固定广泛-AI+ROS百分比-8.21",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YS1",
+    "canonical_product_code": "S302",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "66115884534855",
+    "campaign_name": "YS1-S881 展示S24-VCPM",
+    "ad_product": "Sponsored Display",
+    "operator_group": "YS1",
+    "canonical_product_code": "S881",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "179380742269473",
+    "campaign_name": "YS1-S881 手动Zero固定广泛-AI投放+搜索页百分比-8.21",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YS1",
+    "canonical_product_code": "S881",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "31535551677168",
+    "campaign_name": "YS1-S881 手动加S24WHITIN广泛-动态+受众+7.14新增组测试",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YS1",
+    "canonical_product_code": "S881",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "73673852210561",
+    "campaign_name": "YS1-S881 自动紧密+宽泛低价固定-7.13",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YS1",
+    "canonical_product_code": "S881",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "263496941971681",
+    "campaign_name": "YS1-S890 头条推荐词广泛-08.05",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "YS1",
+    "canonical_product_code": "S890",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "210423831563841",
+    "campaign_name": "YS1-S890 手动food service shoes固定广泛-AI",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YS1",
+    "canonical_product_code": "S890",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "132946043842079",
+    "campaign_name": "YS1-S890 自动低价广告位加百分比-8.24",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YS1",
+    "canonical_product_code": "S890",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "74520666708754",
+    "campaign_name": "YS1-S890 自动宽泛超低价-动态+加ROS百分比-8.21",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YS1",
+    "canonical_product_code": "S890",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "86395379895085",
+    "campaign_name": "YS1-W30 展示JOOMRA-VCPM",
+    "ad_product": "Sponsored Display",
+    "operator_group": "YS1",
+    "canonical_product_code": "W30",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "70200023248527",
+    "campaign_name": "YS1-W30 手动barefoot低价动态+首页百分比-08.11",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YS1",
+    "canonical_product_code": "W30",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "50048230578517",
+    "campaign_name": "YS1-W30 手动running/hiking低价动态+首页百分比-08.14",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YS1",
+    "canonical_product_code": "W30",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "136401935475939",
+    "campaign_name": "YS1-W30 手动赤足词不加性别广泛-固定",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YS1",
+    "canonical_product_code": "W30",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "65744980869197",
+    "campaign_name": "YS1-W30 自动仅降低紧密-06.17",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YS1",
+    "canonical_product_code": "W30",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "128837139495547",
+    "campaign_name": "YS1-W30 自动超低价动态-广告位测试-8.26",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YS1",
+    "canonical_product_code": "W30",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "46460024704258",
+    "campaign_name": "YS1-W30 视频两词广泛-08.14",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "YS1",
+    "canonical_product_code": "W30",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "255675044964827",
+    "campaign_name": "YS1-W63 头条出单词广泛-08.04",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "YS1",
+    "canonical_product_code": "W63",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "116254107563539",
+    "campaign_name": "YS1-W63 展示VCPM-W85女-1",
+    "ad_product": "Sponsored Display",
+    "operator_group": "YS1",
+    "canonical_product_code": "W63",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "34228111997829",
+    "campaign_name": "YS1-W63 手动barefoot大词-AI投放-07.23",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YS1",
+    "canonical_product_code": "W63",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "6587188451724",
+    "campaign_name": "YS1-W63 自动超低价+首页百分900-4.24+广告位测试-8.20",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YS1",
+    "canonical_product_code": "W63",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "77060581575686",
+    "campaign_name": "YS1-W63 视频推荐词广泛-08.06-B09FZ4TBK9-分时测试-8.19",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "YS1",
+    "canonical_product_code": "W63",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "247327674359374",
+    "campaign_name": "YS1-W85 头条barefoot广泛+受众+新增组8.24",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "YS1",
+    "canonical_product_code": "W85",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "546075714735960",
+    "campaign_name": "YS1-W85 头条running广泛+TOS加价-8.24",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "YS1",
+    "canonical_product_code": "W85",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "137076520297666",
+    "campaign_name": "YS1-W85 展示targetW81女重开-VCPM",
+    "ad_product": "Sponsored Display",
+    "operator_group": "YS1",
+    "canonical_product_code": "W85",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "164113790022681",
+    "campaign_name": "YS1-W85 自动仅降低-06.18+受众",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YS1",
+    "canonical_product_code": "W85",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "158710242188433",
+    "campaign_name": "YS1-W85 视频hf相关词广泛-8.25",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "YS1",
+    "canonical_product_code": "W85",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "208188550146053",
+    "campaign_name": "YS1-W85 视频赤足词广泛-其余位置百分比-8.15",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "YS1",
+    "canonical_product_code": "W85",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "200068819256537",
+    "campaign_name": "YS1-W892 头条Wide广泛-07.29",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "YS1",
+    "canonical_product_code": "W892",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "10619788501225",
+    "campaign_name": "YS1-W892 展示W883-VCPM",
+    "ad_product": "Sponsored Display",
+    "operator_group": "YS1",
+    "canonical_product_code": "W892",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "234174510512438",
+    "campaign_name": "YS1-W892 手动赤足词固定新广泛",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YS1",
+    "canonical_product_code": "W892",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "101665424388902",
+    "campaign_name": "YS1-Z10 展示-触达",
+    "ad_product": "Sponsored Display",
+    "operator_group": "YS1",
+    "canonical_product_code": "Z10",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "164075917556953",
+    "campaign_name": "YS1-Z10 展示VCPM-Mishansha",
+    "ad_product": "Sponsored Display",
+    "operator_group": "YS1",
+    "canonical_product_code": "Z10",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "33674826689802",
+    "campaign_name": "YS1-Z10 展示搜索VCPM",
+    "ad_product": "Sponsored Display",
+    "operator_group": "YS1",
+    "canonical_product_code": "Z10",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "156007006832014",
+    "campaign_name": "YS1-Z10 展示触达-搜索页",
+    "ad_product": "Sponsored Display",
+    "operator_group": "YS1",
+    "canonical_product_code": "Z10",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "278155378383736",
+    "campaign_name": "YS1-Z10 手动camping词组广泛低价+百分比-08.20",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YS1",
+    "canonical_product_code": "Z10",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "592354892028523754",
+    "campaign_name": "YS1-Z10 流媒体-2026.06.09",
+    "ad_product": "Sponsored TV",
+    "operator_group": "YS1",
+    "canonical_product_code": "Z10",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "167968441174298",
+    "campaign_name": "YS1-Z10 自动全开+受众14D加车未买-7.14新加首页加50%",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YS1",
+    "canonical_product_code": "Z10",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "455741015824063",
+    "campaign_name": "YS1-Z10 自动宽泛+紧密-动态-2026.01.05",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YS1",
+    "canonical_product_code": "Z10",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "247355034353803",
+    "campaign_name": "YS1-Z10 自动超低价-2026.01.20+广告位测试-8.20",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YS1",
+    "canonical_product_code": "Z10",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "153487090565714",
+    "campaign_name": "YS1-Z1K01 头条Kids water广泛",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "YS1",
+    "canonical_product_code": "Z1K01",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "120629871379011",
+    "campaign_name": "YS1-Z1K01 头条boys/girls water shoes广泛-05.28",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "YS1",
+    "canonical_product_code": "Z1K01",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "205545928091675",
+    "campaign_name": "YS1-Z1K01 展示搜索页VCPM",
+    "ad_product": "Sponsored Display",
+    "operator_group": "YS1",
+    "canonical_product_code": "Z1K01",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "65749688890002",
+    "campaign_name": "YS1-Z1K01 展示触达",
+    "ad_product": "Sponsored Display",
+    "operator_group": "YS1",
+    "canonical_product_code": "Z1K01",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "268720005921774",
+    "campaign_name": "YS1-Z1K01 展示触达-搜索页",
+    "ad_product": "Sponsored Display",
+    "operator_group": "YS1",
+    "canonical_product_code": "Z1K01",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "96245317350743",
+    "campaign_name": "YS1-Z1K01 自动超低价-5.11",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YS1",
+    "canonical_product_code": "Z1K01",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "251874747796969",
+    "campaign_name": "YS1-Z20 头条+water shoes广泛",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "YS1",
+    "canonical_product_code": "Z20",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "46179838223744",
+    "campaign_name": "YS1-Z20 展示Vsufim-VCPM",
+    "ad_product": "Sponsored Display",
+    "operator_group": "YS1",
+    "canonical_product_code": "Z20",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "250246875529253",
+    "campaign_name": "YS1-Z20 展示WHITIN-VCPM",
+    "ad_product": "Sponsored Display",
+    "operator_group": "YS1",
+    "canonical_product_code": "Z20",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "172702184510067",
+    "campaign_name": "YS1-Z20 自动超低价0.03-2026.01.20",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YS1",
+    "canonical_product_code": "Z20",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "253472642885637",
+    "campaign_name": "YS1-Z20 自动超低价全开-02.07",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YS1",
+    "canonical_product_code": "Z20",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "147994224610986",
+    "campaign_name": "YT1-W702 头条 高价赤足 8.6",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "YT1",
+    "canonical_product_code": "W702",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "29191552440177",
+    "campaign_name": "YT1-W702 展示 自动 图片 vcpm 8.13",
+    "ad_product": "Sponsored Display",
+    "operator_group": "YT1",
+    "canonical_product_code": "W702",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "187351688576891",
+    "campaign_name": "YT1-W702 手动 广泛动态 bid0.05+tos900 8.20",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YT1",
+    "canonical_product_code": "W702",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "274630596811684",
+    "campaign_name": "YT1-W702 手动 广泛固定 bid0.2+tos200+分时100 8.25",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YT1",
+    "canonical_product_code": "W702",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "86632642962541",
+    "campaign_name": "YT1-W702 手动 时间+受众+AI 8.17",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YT1",
+    "canonical_product_code": "W702",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "36323628093550",
+    "campaign_name": "YT1-W702 手动 精准降低 中TOS 8.26",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YT1",
+    "canonical_product_code": "W702",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "119343813181090",
+    "campaign_name": "YT1-W702 手动-whitin-2.6",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YT1",
+    "canonical_product_code": "W702",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "119591716153237",
+    "campaign_name": "YT1-W702 自动 bid0.05+tos900+动态 8.17",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YT1",
+    "canonical_product_code": "W702",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "158916375383040",
+    "campaign_name": "YT1-W702 自动 女赤足忠诚用户受众测试  7.4",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YT1",
+    "canonical_product_code": "W702",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "261039188541736",
+    "campaign_name": "YT1-W702 自动 测试 base0.2 低价慢升 8.26",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YT1",
+    "canonical_product_code": "W702",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "205540460039751",
+    "campaign_name": "YT1-WK101 展示-102-vcpm",
+    "ad_product": "Sponsored Display",
+    "operator_group": "YT1",
+    "canonical_product_code": "WK101",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "1306281320095",
+    "campaign_name": "YT1-WK101 手动 低价动态 8.18",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YT1",
+    "canonical_product_code": "WK101",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "207931050376975",
+    "campaign_name": "YT1-WK101 手动-barefoot-广泛固定",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YT1",
+    "canonical_product_code": "WK101",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "193427391379272",
+    "campaign_name": "YT1-WK101 手动-barefoot-精准大组",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YT1",
+    "canonical_product_code": "WK101",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "135779546581392",
+    "campaign_name": "YT1-WK101 手动-kids-广泛固定",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YT1",
+    "canonical_product_code": "WK101",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "579888354343015078",
+    "campaign_name": "YT1-WK101 流媒体 开学季 动态 8.7",
+    "ad_product": "Sponsored TV",
+    "operator_group": "YT1",
+    "canonical_product_code": "WK101",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "585058557987540386",
+    "campaign_name": "YT1-WK101 流媒体 开学季 手动定位类目人群 7.30",
+    "ad_product": "Sponsored TV",
+    "operator_group": "YT1",
+    "canonical_product_code": "WK101",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "173177760501209",
+    "campaign_name": "YT1-WK101 自动 低价动态 7.21",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YT1",
+    "canonical_product_code": "WK101",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "186860933202254",
+    "campaign_name": "YT1-WK101 自动 紧密动态 7.29",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YT1",
+    "canonical_product_code": "WK101",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "246951583624474",
+    "campaign_name": "YT1-WK101 视频-词-受众-加购未购",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "YT1",
+    "canonical_product_code": "WK101",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "15188226581110",
+    "campaign_name": "YT1-WK103 展示 ASIN 图片 触达 8.17",
+    "ad_product": "Sponsored Display",
+    "operator_group": "YT1",
+    "canonical_product_code": null,
+    "product_map_status": "unmapped"
+  },
+  {
+    "campaign_id": "71086123158633",
+    "campaign_name": "YT1-WK103 手动 广泛动态 kids bid0.05+tos900 8.18",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YT1",
+    "canonical_product_code": null,
+    "product_map_status": "unmapped"
+  },
+  {
+    "campaign_id": "77269409526610",
+    "campaign_name": "YT1-WK103 手动 广泛动态 赤足+wide bid0.25+tos200 8.19",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YT1",
+    "canonical_product_code": null,
+    "product_map_status": "unmapped"
+  },
+  {
+    "campaign_id": "185472544836087",
+    "campaign_name": "YT1-WK103 手动 广泛固定 赤足 bid0.35+tos300 8.18",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YT1",
+    "canonical_product_code": null,
+    "product_map_status": "unmapped"
+  },
+  {
+    "campaign_id": "23284420393196",
+    "campaign_name": "YT1-WK103 手动 广泛降低 赤足 视频 8.26",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YT1",
+    "canonical_product_code": null,
+    "product_map_status": "unmapped"
+  },
+  {
+    "campaign_id": "157854814786622",
+    "campaign_name": "YT1-WK103 手动 精准固定 8.18",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YT1",
+    "canonical_product_code": null,
+    "product_map_status": "unmapped"
+  },
+  {
+    "campaign_id": "29686770172674",
+    "campaign_name": "YT1-WK103 自动 bid0.05+tos900 动态 8.17",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YT1",
+    "canonical_product_code": null,
+    "product_map_status": "unmapped"
+  },
+  {
+    "campaign_id": "130609551414832",
+    "campaign_name": "YT1-WK103 自动 仅降低 8.26",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YT1",
+    "canonical_product_code": null,
+    "product_map_status": "unmapped"
+  },
+  {
+    "campaign_id": "175314608330279",
+    "campaign_name": "YT1-WK103 自动 动态紧密 8.17",
+    "ad_product": "Sponsored Products",
+    "operator_group": "YT1",
+    "canonical_product_code": null,
+    "product_map_status": "unmapped"
+  },
+  {
+    "campaign_id": "41907062113449",
+    "campaign_name": "YT1-WK103 视频  wide+zero RD31 8.17",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "YT1",
+    "canonical_product_code": null,
+    "product_map_status": "unmapped"
+  },
+  {
+    "campaign_id": "159431922530782",
+    "campaign_name": "YT1-WK103 视频 kids WR32 受众 8.17",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "YT1",
+    "canonical_product_code": null,
+    "product_map_status": "unmapped"
+  },
+  {
+    "campaign_id": "202661148993920",
+    "campaign_name": "YT1-WK103 视频 赤足 RD31 TOS50 8.26",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "YT1",
+    "canonical_product_code": null,
+    "product_map_status": "unmapped"
+  },
+  {
+    "campaign_id": "17601707143949",
+    "campaign_name": "ZF1-S8K2 头条-Asin S8K",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "ZF1",
+    "canonical_product_code": "S8K2",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "276437901258025",
+    "campaign_name": "ZF1-S8K2 头条-广泛-1.30",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "ZF1",
+    "canonical_product_code": "S8K2",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "374520003950116",
+    "campaign_name": "ZF1-S8K2 手动-wide toe box shoes kids-广泛",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZF1",
+    "canonical_product_code": "S8K2",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "84392684298692",
+    "campaign_name": "ZF1-S8K2 手动wide running shoes kids-广泛动态-6.1",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZF1",
+    "canonical_product_code": "S8K2",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "37362465138015",
+    "campaign_name": "ZF1-S8K2 手动zero drop shoes kids-广泛",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZF1",
+    "canonical_product_code": "S8K2",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "255978505213870",
+    "campaign_name": "ZF1-W601 头条-barefoot-2.11",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "ZF1",
+    "canonical_product_code": "NVW601",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "89671315394744",
+    "campaign_name": "ZF1-W601 头条-人群Bunion/wide feet相关的词-出价0.6",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "ZF1",
+    "canonical_product_code": "NVW601",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "198830028905955",
+    "campaign_name": "ZF1-W601 展示型-VCPMW81-6.27",
+    "ad_product": "Sponsored Display",
+    "operator_group": "ZF1",
+    "canonical_product_code": "NVW601",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "153638721448348",
+    "campaign_name": "ZF1-W601 展示型-W81/W85-7.1",
+    "ad_product": "Sponsored Display",
+    "operator_group": "ZF1",
+    "canonical_product_code": "NVW601",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "112965031401780",
+    "campaign_name": "ZF1-W601 展示型-vcpmAsinW608-7.12",
+    "ad_product": "Sponsored Display",
+    "operator_group": "ZF1",
+    "canonical_product_code": "NVW601",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "261382866359713",
+    "campaign_name": "ZF1-W601 手动-barefoot shoes women-ROS200%-8.25",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZF1",
+    "canonical_product_code": "NVW601",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "243351185501397",
+    "campaign_name": "ZF1-W601 手动-wide toe box shoes women-除首页位置",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZF1",
+    "canonical_product_code": "NVW601",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "124651292533533",
+    "campaign_name": "ZF1-W601 手动-前三点击份额偏低热门搜索词-词组-7.7",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZF1",
+    "canonical_product_code": "NVW601",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "122669041867082",
+    "campaign_name": "ZF1-W601 自动-低价",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZF1",
+    "canonical_product_code": "NVW601",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "161260714080732",
+    "campaign_name": "ZF1-W601 视频AI-wide 相关的词",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "ZF1",
+    "canonical_product_code": "NVW601",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "271712126304971",
+    "campaign_name": "ZF1-W607 头条+号高转化词-6.17",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W607",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "54556602737803",
+    "campaign_name": "ZF1-W607 展示型-W93Asin-7.12",
+    "ad_product": "Sponsored Display",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W607",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "67835941386057",
+    "campaign_name": "ZF1-W607 展示型-W94Asin-7.12",
+    "ad_product": "Sponsored Display",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W607",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "97263195153128",
+    "campaign_name": "ZF1-W607 自动-TOS 200%-8.19-测试",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W607",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "47325717425297",
+    "campaign_name": "ZF1-W607 自动-低价-0.2-提高降低",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W607",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "48031285632133",
+    "campaign_name": "ZF1-W607 自动-固定-1.30-分段测试",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W607",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "231656916455172",
+    "campaign_name": "ZF1-W607 视频-AI-品牌加wide-8.14",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W607",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "86408464862043",
+    "campaign_name": "ZF1-W608 头条-barefoot-8.11",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W608",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "175794771285838",
+    "campaign_name": "ZF1-W608 展示-AsinS24-7.24",
+    "ad_product": "Sponsored Display",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W608",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "116007296417773",
+    "campaign_name": "ZF1-W608 展示-AsinW87女-7.24",
+    "ad_product": "Sponsored Display",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W608",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "16439134659094",
+    "campaign_name": "ZF1-W608 展示型-Asin-W81-6.27",
+    "ad_product": "Sponsored Display",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W608",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "109009429210930",
+    "campaign_name": "ZF1-W608 展示型-AsinW601-7.6",
+    "ad_product": "Sponsored Display",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W608",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "78306233135628",
+    "campaign_name": "ZF1-W608 展示型AsinW85-7.6",
+    "ad_product": "Sponsored Display",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W608",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "116615382071389",
+    "campaign_name": "ZF1-W608 展示型AsinW882女-7.7",
+    "ad_product": "Sponsored Display",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W608",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "237909453344114",
+    "campaign_name": "ZF1-W608 手动 barefoot shoes women",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W608",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "11930432585614",
+    "campaign_name": "ZF1-W608 自动-固定-3.12",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W608",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "144667683952745",
+    "campaign_name": "ZF1-W608 视频-whitin-8.17",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W608",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "229367816073774",
+    "campaign_name": "ZF1-W608 视频-赤足相关-8.11",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W608",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "14671181216706",
+    "campaign_name": "ZF1-W863 头条-Asin-5.25",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W863",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "134490043318952",
+    "campaign_name": "ZF1-W863 头条-slip on-2.11",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W863",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "371487782850182",
+    "campaign_name": "ZF1-W863 头条-whitin/slip on-1.8",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W863",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "111351260531911",
+    "campaign_name": "ZF1-W863 头条-精准-1.30",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W863",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "224427856756380",
+    "campaign_name": "ZF1-W863 手动-barefoot slip on men-低价首页百分比200-7.11",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W863",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "26353016728537",
+    "campaign_name": "ZF1-W863 手动-whitin slip on men-低价首页百分比200-7.11",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W863",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "310880296543802",
+    "campaign_name": "ZF1-W863 自动-提高和降低",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W863",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "243245877445095",
+    "campaign_name": "ZF1-W863 视频-AI-slip on-8.10",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W863",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "16139700382935",
+    "campaign_name": "ZF1-W882女 头条-出单词-1.22",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "ZF1",
+    "canonical_product_code": "NVW882",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "220431346271892",
+    "campaign_name": "ZF1-W882女 头条-品牌-8.17",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "ZF1",
+    "canonical_product_code": "NVW882",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "177757713061607",
+    "campaign_name": "ZF1-W882女 头条-相关词-分时预算-8.25",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "ZF1",
+    "canonical_product_code": "NVW882",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "57463067450447",
+    "campaign_name": "ZF1-W882女 头条-精准",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "ZF1",
+    "canonical_product_code": "NVW882",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "146470260614435",
+    "campaign_name": "ZF1-W882女 手动-minimalist shoes women-低价-7.29",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZF1",
+    "canonical_product_code": "NVW882",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "198821797069057",
+    "campaign_name": "ZF1-W882女 手动wide toe box shoes women-低价-7.29",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZF1",
+    "canonical_product_code": "NVW882",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "158470798200216",
+    "campaign_name": "ZF1-W882女 自动-固定-3.9",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZF1",
+    "canonical_product_code": "NVW882",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "279202278355744",
+    "campaign_name": "ZF1-W882男 头条-+whitin-3.31",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W882",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "105610621050926",
+    "campaign_name": "ZF1-W882男 头条hf stride-拉新-7.7",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W882",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "17326822953679",
+    "campaign_name": "ZF1-W882男 展示型-vcpm AsinW81-GNNJ-6.27",
+    "ad_product": "Sponsored Display",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W882",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "204416451115849",
+    "campaign_name": "ZF1-W882男 展示型-vcpm--AsinW863-7.24",
+    "ad_product": "Sponsored Display",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W882",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "54570650602613",
+    "campaign_name": "ZF1-W882男 展示型-vcpm-AsinW30-7.24",
+    "ad_product": "Sponsored Display",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W882",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "142294255067741",
+    "campaign_name": "ZF1-W882男 展示型-vcpm-AsinW63",
+    "ad_product": "Sponsored Display",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W882",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "198498812970076",
+    "campaign_name": "ZF1-W882男 展示型-vcpm-AsinW85-7.24",
+    "ad_product": "Sponsored Display",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W882",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "235212115379417",
+    "campaign_name": "ZF1-W882男 手动-barefoot shoes men-广泛",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W882",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "256943445238976",
+    "campaign_name": "ZF1-W882男 手动-wide toe box shoes men-100%ROS-8.21",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W882",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "303615602698890",
+    "campaign_name": "ZF1-W882男 自动-固定-1.13",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W882",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "284339041082419",
+    "campaign_name": "ZF1-W882男 自动动态-12.30",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W882",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "243216603155534",
+    "campaign_name": "ZF1-W882男 视频-+whitinAi-6.25-放量",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W882",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "141924630176250",
+    "campaign_name": "ZF1-W882男 视频-主色-主码-add brand受众-艳耀",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W882",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "253602176453702",
+    "campaign_name": "ZF1-W883 头条-+minimalist/barefoot/wide-8.27",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W883",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "195660309153866",
+    "campaign_name": "ZF1-W883 头条-杂词广泛-低价-3.21",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W883",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "50183373372606",
+    "campaign_name": "ZF1-W883 头条出单词-2款合1-8.27-新",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W883",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "48206326547888",
+    "campaign_name": "ZF1-W883 展示型-VCPM-W882-7.12",
+    "ad_product": "Sponsored Display",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W883",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "223660110984197",
+    "campaign_name": "ZF1-W883 手动-barefoot shoes men-广泛-受众W882",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W883",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "13158111632379",
+    "campaign_name": "ZF1-W883 自动-动态-首页占比800",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W883",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "116090546488902",
+    "campaign_name": "ZF1-W883 自动商品详情页面/受众500%-8.26",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W883",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "118517397574037",
+    "campaign_name": "ZF1-W883 视频+whitin-受众-亚马逊自带 add to cart 6.26",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "ZF1",
+    "canonical_product_code": "W883",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "117665953303865",
+    "campaign_name": "ZJ1-W20 AUTO 动态0.65 4.13",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W20",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "174873268527179",
+    "campaign_name": "ZJ1-W20 AUTO 动态低价 0.04 8.19",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W20",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "114613564592461",
+    "campaign_name": "ZJ1-W20 Barefoot Shoes 广泛动态低价 0.05 7.21",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W20",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "453913973631261",
+    "campaign_name": "ZJ1-W20 target W30 5.17",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W20",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "154246086552710",
+    "campaign_name": "ZJ1-W20 杂词 广泛动态低价 0.05 8.13",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W20",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "278929760566914",
+    "campaign_name": "ZJ1-W2030 Wide Zero 广泛动态 3.5",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W2030",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "269172420948556",
+    "campaign_name": "ZJ1-W2030 running 广泛动态 低价0.03 7.9",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W2030",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "203273711641212",
+    "campaign_name": "ZJ1-W2030 running 广泛动态 低价0.2 8.27",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W2030",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "328352666637596",
+    "campaign_name": "ZJ1-W2030 大词广泛minimalist no men 7.8",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W2030",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "500039993307062",
+    "campaign_name": "ZJ1-W30 AUTO deal 动态0.55 3.19",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W30",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "38675700473910",
+    "campaign_name": "ZJ1-W30 AUTO 动态低价 0.04 8.19",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W30",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "88501406611724",
+    "campaign_name": "ZJ1-W30 Barefoot Shoes广泛动态 低价0.05 7.21",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W30",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "54607442051890",
+    "campaign_name": "ZJ1-W51 Minimalist 广泛动态低价 0.2 8.26",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W51",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "348045177941227",
+    "campaign_name": "ZJ1-W51 target W30 1.31",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W51",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "200861053916675",
+    "campaign_name": "ZJ1-W51男 AUTO 动态 0.05 TOS900 ROS/PP300 8.18 3.7",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W51",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "407435181653226",
+    "campaign_name": "ZJ1-W51男 AUTO 动态 0.7 150 3.19",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W51",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "189936452062372",
+    "campaign_name": "ZJ1-W51男 Barefoot 广泛动态 规则7.30-8.9 2.13",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W51",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "415863057583672",
+    "campaign_name": "ZJ1-W51男 Running 广泛动态 6.19",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W51",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "175349048566994",
+    "campaign_name": "ZJ1-W51男 Wide 广泛动态低价0.1 8.13",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W51",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "55142813383807",
+    "campaign_name": "ZJ1-W51男 杂词 广泛动态低价0.05 8.13",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W51",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "323042298061642",
+    "campaign_name": "ZJ1-W51男 视频 AI Video 12.13",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W51",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "533804381974776",
+    "campaign_name": "ZJ1-W63 AUTO 动态 0.65 5.30",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W63",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "68556230367997",
+    "campaign_name": "ZJ1-W63 AUTO 动态低价 0.05 3.5",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W63",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "163249529129008",
+    "campaign_name": "ZJ1-W63 AUTO 宽泛同类 动态 4.30",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W63",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "171985853896531",
+    "campaign_name": "ZJ1-W63 Running 广泛动态 0.05 4.30",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W63",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "314850739323048",
+    "campaign_name": "ZJ1-W63 WHITIN 广泛 80 5.30",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W63",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "387747233741174",
+    "campaign_name": "ZJ1-W63 barefoot 大词广泛 8.21",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W63",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "209975845075681",
+    "campaign_name": "ZJ1-W63 杂词 广泛动态 低价0.1 8.26",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W63",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "36825863020025",
+    "campaign_name": "ZJ1-W75V2 AUTO 紧密0.58 4.20",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W75V2",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "126162317051409",
+    "campaign_name": "ZJ1-W75V2 AUTO宽泛0.48 7.7",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W75V2",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "63748219949268",
+    "campaign_name": "ZJ1-W75V2 camping周边词 广泛动态 7.25",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W75V2",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "108792224046064",
+    "campaign_name": "ZJ1-W75V2 water shoes men 广泛动态 2.9",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W75V2",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "95604866402765",
+    "campaign_name": "ZJ1-W75V2 water shoes 广泛动态 低价0.04 7.9",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W75V2",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "398416701178974",
+    "campaign_name": "ZJ1-W81 AUTO deal 动态0.5 2.13",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "250899160811907",
+    "campaign_name": "ZJ1-W81 AUTO 动态低价 0.03 7.11",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "410027390873064",
+    "campaign_name": "ZJ1-W81 AUTO 动态紧密 100 6.5",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "6018931913896",
+    "campaign_name": "ZJ1-W81 Barefoot 广泛动态 2.10",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "211415306689140",
+    "campaign_name": "ZJ1-W81 Wide 广泛动态低价0.1 7.14",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "89182252092273",
+    "campaign_name": "ZJ1-W81 minimalist 广泛动态 2.13",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "189034841793984",
+    "campaign_name": "ZJ1-W81 杂词 广泛固定改动态 低价0.2改0.05 7.9",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "244212605511734",
+    "campaign_name": "ZJ1-W81 视频 wide 广泛 2.12",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W81",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "197653917353527",
+    "campaign_name": "ZJ1-W81V2 AUTO 只降低 50 4.14",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W81V2",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "195751328042888",
+    "campaign_name": "ZJ1-W81V2 Barefoot 广泛动态 低价0.2 8.25",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W81V2",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "101285928568226",
+    "campaign_name": "ZJ1-W81V2 展示 SD W87 8.25",
+    "ad_product": "Sponsored Display",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W81V2",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "221849671677205",
+    "campaign_name": "ZJ1-W81V2 杂词 广泛动态 低价0.1 8.25",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W81V2",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "332048650476141",
+    "campaign_name": "ZJ1-W823女 AUTO 动态 1.9",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "WTNVW823",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "57756259796677",
+    "campaign_name": "ZJ1-W823女 AUTO 动态0.04 3.24",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "WTNVW823",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "215869160798139",
+    "campaign_name": "ZJ1-W823女 大词广泛动态 低价0.05 8.13",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "WTNVW823",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "123894472498070",
+    "campaign_name": "ZJ1-W823女 展示 优化投放 8.19",
+    "ad_product": "Sponsored Display",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "WTNVW823",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "178086216571042",
+    "campaign_name": "ZJ1-W823女 视频 大词 8.19",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "WTNVW823",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "70270184070398",
+    "campaign_name": "ZJ1-W823男 AUTO 动态0.04 3.7",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "WTW823",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "245448319588199",
+    "campaign_name": "ZJ1-W823男 AUTO 动态deal 0.5 6.23",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "WTW823",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "230055711832979",
+    "campaign_name": "ZJ1-W823男 Barefoot 动态低价0.05改0.07 8.26 7.9",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "WTW823",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "386014752621158",
+    "campaign_name": "ZJ1-W823男 WHITIN 广泛 100 10.12",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "WTW823",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "382448371175335",
+    "campaign_name": "ZJ1-W823男 target W81 3.10",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "WTW823",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "252507042849523",
+    "campaign_name": "ZJ1-W85 AUTO 动态0.05-3.4",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W85",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "266036500663000",
+    "campaign_name": "ZJ1-W85 AUTO 宽泛动态 8.13",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W85",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "136279188101202",
+    "campaign_name": "ZJ1-W85 AUTO 紧密动态 150 3.5",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W85",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "131053385876362",
+    "campaign_name": "ZJ1-W85 Minimalist Zero 广泛动态低价 0.1 8.13",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W85",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "115658455628178",
+    "campaign_name": "ZJ1-W85 barefoot 广泛 只降低 8.13",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W85",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "514542988259417",
+    "campaign_name": "ZJ1-W85 target W81 100 2.18",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W85",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "89329208394993",
+    "campaign_name": "ZJ1-W85 展示 target W710 8.13",
+    "ad_product": "Sponsored Display",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W85",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "78399768682709",
+    "campaign_name": "ZJ1-W85 展示 target W81 8.13",
+    "ad_product": "Sponsored Display",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W85",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "188189071088301",
+    "campaign_name": "ZJ1-W85 杂词广泛动态 0.05 8.13",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W85",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "253944247381551",
+    "campaign_name": "ZJ1-W85 视频 AI gym 小词广泛 8.15",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W85",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "41581664008003",
+    "campaign_name": "ZJ1-W85 视频 AI 大词广泛 8.15",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W85",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "3526672406299",
+    "campaign_name": "ZJ1-W8K2- AUTO 动态 低价0.05 TOS900 ROS/PP200 8.18 7.9",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W8K2",
+    "product_map_status": "direct_exact"
+  },
+  {
+    "campaign_id": "966719895869",
+    "campaign_name": "ZJ1-W8K2- AUTO 动态宽泛 0.48 6.5",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W8K2",
+    "product_map_status": "direct_exact"
+  },
+  {
+    "campaign_id": "472439703280198",
+    "campaign_name": "ZJ1-W8K2- AUTO 动态紧密0.7 3.13",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W8K2",
+    "product_map_status": "direct_exact"
+  },
+  {
+    "campaign_id": "19027149623806",
+    "campaign_name": "ZJ1-W8K2- WK102 school 广泛动态 7.21",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W8K2",
+    "product_map_status": "direct_exact"
+  },
+  {
+    "campaign_id": "36939466127892",
+    "campaign_name": "ZJ1-W8K2- kids shoes 广泛动态 低价 7.21",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W8K2",
+    "product_map_status": "direct_exact"
+  },
+  {
+    "campaign_id": "381182865458426",
+    "campaign_name": "ZJ1-W8K2- kids shoes 广泛动态 调bid广告位8.26 12.18",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W8K2",
+    "product_map_status": "direct_exact"
+  },
+  {
+    "campaign_id": "433437795096600",
+    "campaign_name": "ZJ1-W8K2- toddler 广泛动态-竞价规则ZY7.24 8.1",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W8K2",
+    "product_map_status": "direct_exact"
+  },
+  {
+    "campaign_id": "58455980767079",
+    "campaign_name": "ZJ1-W8K2- 大词 广泛动态 低价0.05 TOS900 ROS/PP 300 8.18 7.9",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W8K2",
+    "product_map_status": "direct_exact"
+  },
+  {
+    "campaign_id": "188878361891659",
+    "campaign_name": "ZJ1-W8K2- 展示 再营销 8.18",
+    "ad_product": "Sponsored Display",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W8K2",
+    "product_map_status": "direct_exact"
+  },
+  {
+    "campaign_id": "588795002530335947",
+    "campaign_name": "ZJ1-W8K2- 流媒体 开学季 7.28",
+    "ad_product": "Sponsored TV",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W8K2",
+    "product_map_status": "direct_exact"
+  },
+  {
+    "campaign_id": "35852738946020",
+    "campaign_name": "ZJ1-W8K23 AUTO 动态 2.3",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W8K23",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "252255402332673",
+    "campaign_name": "ZJ1-W8K23 AUTO 动态 低价 0.04 7.14",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W8K23",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "182653285092075",
+    "campaign_name": "ZJ1-W8K23 Kids 广泛动态 低价0.05 TOS900 ROS/PP200 8.18 8.13",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W8K23",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "489055428107612",
+    "campaign_name": "ZJ1-W8K23 视频 AI 12.10",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "W8K23",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "221107181928311",
+    "campaign_name": "ZJ1-WK102 AUTO 动态低价0.05 7.22",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "WK102",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "197680469089686",
+    "campaign_name": "ZJ1-WK102 AUTO 动态紧密 6.12",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "WK102",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "37863758955701",
+    "campaign_name": "ZJ1-WK102 Kids 广泛动态 低价0.05 7.11",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "WK102",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "51926868778408",
+    "campaign_name": "ZJ1-WK102 Wide 广泛 3.2",
+    "ad_product": "Sponsored Products",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "WK102",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "123102423566689",
+    "campaign_name": "ZJ1-WK102 展示 VCPM 6.8",
+    "ad_product": "Sponsored Display",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "WK102",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "26131139229799",
+    "campaign_name": "ZJ1-WK102 展示 再营销 转化CPC 8.18",
+    "ad_product": "Sponsored Display",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "WK102",
+    "product_map_status": "alias_resolved"
+  },
+  {
+    "campaign_id": "142963547165739",
+    "campaign_name": "ZJ1-WK102 视频 Kids 广泛 8.10",
+    "ad_product": "Sponsored Brands",
+    "operator_group": "ZJ1",
+    "canonical_product_code": "WK102",
+    "product_map_status": "alias_resolved"
+  }
+]

@@ -1,0 +1,1 @@
+<script setup lang="ts">const props=defineProps<{status:string}>(); const labels:Record<string,string>={PROCESSING:'处理中',NEEDS_REVIEW:'待确认',READY:'可发布',PUBLISHED:'已发布',BLOCKED:'阻断',NORMAL:'正常'};</script><template><span class="status-badge" :class="status.toLowerCase()">{{labels[props.status] || props.status}}</span></template>

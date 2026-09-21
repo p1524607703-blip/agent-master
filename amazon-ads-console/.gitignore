@@ -1,0 +1,27 @@
+.DS_Store
+.env
+frontend/node_modules/
+frontend/dist/
+backend/.venv/
+backend/.local/
+backend/.env
+**/__pycache__/
+*.pyc
+
+# Backup safety: generated/runtime artifacts and sensitive key material
+**/dist/
+**/build/
+**/.cache/
+**/cache/
+**/logs/
+*.log
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+*.dump
+*.backup
+*.bak
+backend/.cpo_uploads/
+backend/.tmp_*
