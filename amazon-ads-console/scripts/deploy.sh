@@ -81,12 +81,12 @@ if [ ! -f "$release/release.json" ]; then
   ln -s "$base/shared/backend.env" "$staging/amazon-ads-console/backend/.env"
   ln -s "$base/shared/uploads" "$staging/amazon-ads-console/backend/.cpo_uploads"
   if ! command -v node >/dev/null || ! command -v npm >/dev/null; then
-    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y nodejs npm
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends nodejs npm
   fi
   uv="$HOME/.local/bin/uv"
   [ -x "$uv" ] || { printf 'Install the Python uv runtime before preparing a release.\n' >&2; exit 5; }
   "$uv" venv --python 3.12 "$staging/.venv"
-  "$uv" pip install --python "$staging/.venv/bin/python" -r "$staging/amazon-ads-console/backend/requirements.txt"
+  "$uv" pip install --python "$staging/.venv/bin/python" -r "$staging/amazon-ads-console/backend/requirements.lock.txt"
   (
     cd "$staging/amazon-ads-console/frontend"
     npm ci --no-audit --no-fund --fetch-retries=1 --fetch-timeout=30000
@@ -125,6 +125,11 @@ sudo cat /etc/systemd/system/cpo-console.service > "$unit_backup"
 chmod 600 "$unit_backup"
 write_event ACTIVATING
 activating=1
+if [ -z "$old_current" ] && [ -d /home/ubuntu/cpo-release/amazon-ads-console/backend/.cpo_uploads ]; then
+  # First switch: finish in-flight uploads before the final shared-file copy.
+  sudo systemctl stop cpo-console
+  cp -a /home/ubuntu/cpo-release/amazon-ads-console/backend/.cpo_uploads/. "$base/shared/uploads/"
+fi
 ln -s "$release" "$base/current.next-$audit_id"
 mv -Tf "$base/current.next-$audit_id" "$base/current"
 sudo ln -s "$base/current/amazon-ads-console/frontend/dist" "/var/www/cpo-console.next-$audit_id"
