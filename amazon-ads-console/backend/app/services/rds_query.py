@@ -23,6 +23,12 @@ def _pg_setting(name: str) -> str:
 
 def _run(sql: str) -> str:
     env = os.environ.copy()
+    for key in ('PASSWORD', 'SSLMODE', 'SSLROOTCERT'):
+        value = env.get(f'RDS_PG{key}')
+        if value is not None:
+            env[f'PG{key}'] = value
+        else:
+            env.pop(f'PG{key}', None)
     proc = subprocess.run(
         ['psql', '-h', _pg_setting('HOST'), '-p', _pg_setting('PORT'),
          '-U', _pg_setting('USER'), '-d', _pg_setting('DATABASE'),

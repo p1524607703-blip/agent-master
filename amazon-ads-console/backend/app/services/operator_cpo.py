@@ -112,6 +112,19 @@ def _portfolio(mapping: dict[str, dict[str, str]]) -> dict[str, set[str]]:
     out: dict[str, set[str]] = defaultdict(set)
     for item in mapping.values():
         out[item["operatorName"]].add(item["productCode"])
+
+    # Roster is the stable product portfolio. Only use rows whose owner_group
+    # has already been resolved to a fine operator code (AJ1/XM2/etc.);
+    # coarse historical groups remain excluded until they are reconciled.
+    rows = app_query_rows("""
+        SELECT product_code, owner_group
+        FROM app.product_roster
+        WHERE is_listed=true
+          AND product_code IS NOT NULL AND product_code<>''
+          AND owner_group ~ '^[A-Z]{2}[0-9]+$'
+    """)
+    for row in rows:
+        out[_operator_name(row["owner_group"])].add(row["product_code"])
     return out
 
 

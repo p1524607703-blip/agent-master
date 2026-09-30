@@ -20,7 +20,7 @@ from .cache import invalidate_data_read_models
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 UPLOAD_ROOT = PROJECT_ROOT / 'backend' / '.cpo_uploads'
-AD_IMPORTER_PATH = Path('/Users/panjinlong/Documents/agent-master/ad-reports-export/subscribed_reports_to_rds.py')
+AD_IMPORTER_PATH = Path(os.environ.get('AD_IMPORTER_PATH', str(PROJECT_ROOT.parent / 'ad-reports-export' / 'subscribed_reports_to_rds.py')))
 
 ACCOUNTS = {
     '川鹏': ('amzn1.ads-account.g.42jh8psyvhiiiitpm4rnj4qhh', 'WHITIN'),

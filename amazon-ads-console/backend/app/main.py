@@ -1,7 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes import router
-from app.api.auth import router as auth_router
+from app.api.auth import router as auth_router, require_session
 from app.core.config import settings
 from app.services.operator_cpo import operator_cpo_summary
 
@@ -19,7 +19,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(auth_router, prefix=settings.api_prefix)
-app.include_router(router, prefix=settings.api_prefix)
+app.include_router(router, prefix=settings.api_prefix, dependencies=[Depends(require_session)])
 
 
 @app.on_event("startup")

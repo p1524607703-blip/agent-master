@@ -1,7 +1,8 @@
 # AdSight 数据架构与 ER 图
 
-> 生成日期：2026-09-15　|　**全部内容基于阿里云 RDS 实测**（`information_schema` + `pg_constraint` + `pg_indexes` + 行数统计），非设计稿推测。
-> 实例：`pgm-bp1p3g11alay2d21vo.pg.rds.aliyuncs.com:5432` · PostgreSQL 18.4 · 时区 `Asia/Shanghai` · 账号 `amazon_ads_admin`
+> 生成日期：2026-09-15　|　**全部内容基于数据库实测**（`information_schema` + `pg_constraint` + `pg_indexes` + 行数统计），非设计稿推测。
+> 实例：**腾讯云服务器自建 PostgreSQL 18.6**（服务器 `193.112.27.91`，2026-09-30 由阿里云 RDS 迁入）· 时区 `Asia/Shanghai` · 账号 `amazon_ads_admin`
+> 本机连接：经 SSH 隧道 `127.0.0.1:15432` → 服务器 `127.0.0.1:5432`，`sslmode=disable`。旧地址 `pgm-bp1p3g11alay2d21vo.pg.rds.aliyuncs.com:5432` **已停写**。
 >
 > 📄 **配套文档**：`五层分表设计与连接方案.md` —— 解释 5 个 `data_level` 之间的 NULL 成因、扇出关系、以及拆表后的建联方案（含可执行 DDL）。
 
@@ -471,12 +472,13 @@ flowchart LR
 ```bash
 export PGPASSWORD=$(grep -oE 'amazon_ads_admin:[^@]+' \
   /Users/panjinlong/Documents/agent-master/amazon-ads-console/backend/.env | cut -d: -f2)
-export PGSSLMODE=verify-full PGSSLROOTCERT=~/.postgresql/root.crt
-H=pgm-bp1p3g11alay2d21vo.pg.rds.aliyuncs.com
+export PGSSLMODE=disable          # 2026-09-30 迁腾讯云：外层 SSH 已加密
+H=127.0.0.1                       # 本机 SSH 隧道入口
+P=15432                           # 隧道本地端口（服务器侧仍是 5432）
 
 # 两库对象总览
-psql -w -h $H -U amazon_ads_admin -d amazon_ads    -c '\dt *.*'
-psql -w -h $H -U amazon_ads_admin -d amazon_ads_v2 -c '\dt *.*'
+psql -w -h $H -p $P -U amazon_ads_admin -d amazon_ads    -c '\dt *.*'
+psql -w -h $H -p $P -U amazon_ads_admin -d amazon_ads_v2 -c '\dt *.*'
 
 # ad_daily 各 data_level 分布
 psql -w -h $H -U amazon_ads_admin -d amazon_ads_v2 -c \

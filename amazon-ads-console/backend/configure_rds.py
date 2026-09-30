@@ -1,4 +1,13 @@
-"""Safely validate the new RDS password and configure backend/.env."""
+"""Safely validate the database password and configure backend/.env.
+
+2026-09-30：数据库已从阿里云 RDS 全量迁至腾讯云服务器自建 PostgreSQL。
+连接经本机常驻 SSH 隧道访问：
+
+    本机 127.0.0.1:15432  →  SSH Agent-server  →  服务器 127.0.0.1:5432
+
+因此 host/port 是隧道入口，数据库层不再套 TLS（外层 SSH 已加密），
+旧阿里云 CA（~/.postgresql/root.crt）与 sslmode=verify-full 组合已作废。
+"""
 from __future__ import annotations
 
 import getpass
@@ -8,12 +17,11 @@ import subprocess
 import tempfile
 from urllib.parse import quote
 
-HOST = "pgm-bp1p3g11alay2d21vo.pg.rds.aliyuncs.com"
-PORT = "5432"
+HOST = "127.0.0.1"
+PORT = "15432"          # 本机 SSH 隧道端口；服务器侧数据库仍是 5432
 DATABASE = "amazon_ads"
 USER = "amazon_ads_admin"
-SSLMODE = "verify-full"
-SSLROOTCERT = Path.home() / ".postgresql" / "root.crt"
+SSLMODE = "disable"
 ENV_PATH = Path(__file__).resolve().parent / ".env"
 
 
@@ -25,8 +33,12 @@ def _error_category(stderr: str) -> str:
         return "ssl_not_enabled"
     if any(term in text for term in ("root certificate file", "certificate verify failed", "server certificate", "ssl error")):
         return "ssl_certificate"
-    if any(term in text for term in ("could not translate host name", "could not connect to server", "connection timed out", "timeout expired")):
-        return "network_or_dns"
+    if any(term in text for term in (
+        "could not translate host name", "could not connect to server",
+        "connection timed out", "timeout expired", "connection refused",
+    )):
+        # 2026-09-30 起最常见的原因是本机 SSH 隧道没起来
+        return "tunnel_or_network"
     return "other"
 
 
@@ -34,7 +46,6 @@ def _test_password(password: str) -> tuple[bool, str]:
     env = os.environ.copy()
     env["PGPASSWORD"] = password
     env["PGSSLMODE"] = SSLMODE
-    env["PGSSLROOTCERT"] = str(SSLROOTCERT)
     env["PGCONNECT_TIMEOUT"] = "8"
     proc = subprocess.run(
         [
@@ -53,10 +64,9 @@ def _database_url(password: str) -> str:
     encoded_user = quote(USER, safe="")
     encoded_password = quote(password, safe="")
     encoded_db = quote(DATABASE, safe="")
-    encoded_root = quote(str(SSLROOTCERT), safe="/")
     return (
         f"postgresql+asyncpg://{encoded_user}:{encoded_password}@{HOST}:{PORT}/{encoded_db}"
-        f"?sslmode={SSLMODE}&sslrootcert={encoded_root}"
+        f"?sslmode={SSLMODE}"
     )
 
 
@@ -82,19 +92,26 @@ def _write_env(password: str) -> None:
 
 
 def main() -> int:
-    if not SSLROOTCERT.is_file():
-        print("error_category=ssl_certificate")
-        return 2
+    # 隧道体检：数据库只监听服务器本地，这里连的其实是本机隧道的入口
+    tunnel = subprocess.run(
+        ["/usr/sbin/lsof", "-nP", "-iTCP:" + PORT, "-sTCP:LISTEN"],
+        capture_output=True, text=True,
+    )
+    if tunnel.returncode != 0:
+        print("error_category=tunnel_or_network")
+        print(f"hint=本机 {PORT} 未监听，先执行："
+              "launchctl kickstart -k gui/$(id -u)/com.panjinlong.agent-server-db-tunnel")
+        return 3
 
     for attempt in range(1, 3):
-        password = getpass.getpass(f"RDS password attempt {attempt}/2: ")
+        password = getpass.getpass(f"database password attempt {attempt}/2: ")
         if not password:
             print("error_category=credentials_invalid")
             continue
         try:
             ok, category = _test_password(password)
         except subprocess.TimeoutExpired:
-            ok, category = False, "network_or_dns"
+            ok, category = False, "tunnel_or_network"
         if ok:
             _write_env(password)
             print(f"host={HOST}")
@@ -103,10 +120,11 @@ def main() -> int:
             print(f"database={DATABASE}")
             print("password_present=True")
             print(f"sslmode={SSLMODE}")
+            print("tunnel=ok")
             print("config_written=True")
             return 0
         print(f"error_category={category}")
-        if category in {"ssl_not_enabled", "ssl_certificate", "network_or_dns"}:
+        if category in {"ssl_not_enabled", "ssl_certificate", "tunnel_or_network"}:
             return 3
 
     return 1

@@ -24,7 +24,7 @@ sys.path.insert(0, str(BACKEND_ROOT))
 from app.core.passwords import hash_password  # noqa: E402
 
 ENV_PATH = BACKEND_ROOT / ".env"
-ALLOWED_HOST_SUFFIX = ".pg.rds.aliyuncs.com"   # 只允许 RDS，避免误写本地库
+ALLOWED_HOSTS = ("127.0.0.1", "localhost")   # 2026-09-30：迁腾讯云后经本机 SSH 隧道访问，避免误写本地库
 
 # (username, display_name, role_code, operator_code)
 SEED_USERS = [
@@ -52,7 +52,7 @@ def load_dsn() -> dict:
     if not raw:
         raise SystemExit("backend/.env 里没有 DATABASE_URL")
     p = urlsplit(raw)
-    if not p.hostname or not p.hostname.endswith(ALLOWED_HOST_SUFFIX):
+    if p.hostname not in ALLOWED_HOSTS:
         raise SystemExit(f"拒绝执行：host={p.hostname} 不是 RDS 主机（本脚本只允许 RDS）")
     q = parse_qs(p.query)
     return {

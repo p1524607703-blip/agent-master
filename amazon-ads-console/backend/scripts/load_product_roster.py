@@ -30,7 +30,7 @@ OUT_DIR = PROJECT_ROOT / "reference" / "product_mapping"
 NORM_CSV = OUT_DIR / "在售产品_规范化.csv"
 NAME_MAP_CSV = OUT_DIR / "运营人名组码映射.csv"
 ENV_PATH = BACKEND_ROOT / ".env"
-ALLOWED_HOST_SUFFIX = ".pg.rds.aliyuncs.com"
+ALLOWED_HOSTS = ("127.0.0.1", "localhost")   # 2026-09-30：迁腾讯云后经本机 SSH 隧道访问（旧 .pg.rds.aliyuncs.com 已停用）
 
 ASIN_RE = re.compile(r"/dp/([A-Z0-9]{10})")
 STRICT_ASIN = re.compile(r"^[A-Z0-9]{10}$")
@@ -110,7 +110,7 @@ def load_dsn() -> dict:
     if not raw:
         raise SystemExit("backend/.env 里没有 DATABASE_URL")
     p = urlsplit(raw)
-    if not p.hostname or not p.hostname.endswith(ALLOWED_HOST_SUFFIX):
+    if p.hostname not in ALLOWED_HOSTS:
         raise SystemExit(f"拒绝执行：host={p.hostname} 不是 RDS 主机")
     q = parse_qs(p.query)
     return {"host": p.hostname, "port": str(p.port or 5432), "user": unquote(p.username or ""),
