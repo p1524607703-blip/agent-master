@@ -73,7 +73,11 @@ trap cleanup EXIT
 
 if [ ! -f "$release/release.json" ]; then
   mkdir -p "$staging"
-  GIT_NO_LAZY_FETCH=1 git --git-dir="$repo" archive "$commit" amazon-ads-console database_config.py ad-reports-export/subscribed_reports_to_rds.py | tar -xf - -C "$staging"
+  mkdir -p "$staging/amazon-ads-console" "$staging/ad-reports-export"
+  # Archive the CPO subtree: Git must not hydrate unrelated vault files.
+  GIT_NO_LAZY_FETCH=1 git --git-dir="$repo" archive "$commit:amazon-ads-console" | tar -xf - -C "$staging/amazon-ads-console"
+  GIT_NO_LAZY_FETCH=1 git --git-dir="$repo" show "$commit:database_config.py" > "$staging/database_config.py"
+  GIT_NO_LAZY_FETCH=1 git --git-dir="$repo" show "$commit:ad-reports-export/subscribed_reports_to_rds.py" > "$staging/ad-reports-export/subscribed_reports_to_rds.py"
   ln -s "$base/shared/backend.env" "$staging/amazon-ads-console/backend/.env"
   ln -s "$base/shared/uploads" "$staging/amazon-ads-console/backend/.cpo_uploads"
   if ! command -v node >/dev/null || ! command -v npm >/dev/null; then
