@@ -18,8 +18,8 @@ const RETIRED: Record<string, string> = { '/products': '产品明细', '/ad-type
 
 // 角色首页：运营登录后直接落到自己的页面（只含「CPO 单双数据情况」一个模块）
 export const ROLE_HOME: Record<string, string> = {
-  super_admin: '/dashboard',
-  management: '/dashboard',
+  super_admin: '/operator-cpo',
+  management: '/operator-cpo',
   operator: '/my-cpo',
 }
 export const homeFor = (role?: string | null) => ROLE_HOME[role || ''] || '/dashboard'
@@ -31,7 +31,7 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
     { path: '/login', component: LoginView, meta: { public: true } },
-    { path: '/', redirect: '/dashboard' },
+    { path: '/', component: OperatorCpoView, meta: { roleHome: true } },
     { path: '/dashboard', component: DashboardView },
     { path: '/cpo-jobs', component: CpoJobsView },
     { path: '/issues', component: IssuesView },
@@ -66,6 +66,7 @@ router.beforeEach(async (to) => {
   }
 
   const role = session.user?.roleCode
+  if (to.meta.roleHome) return homeFor(role)
   // 运营：只能进自己的页面，其余访问一律回 /my-cpo
   if (role === 'operator' && !OPERATOR_ALLOWED.has(to.path)) {
     return '/my-cpo'

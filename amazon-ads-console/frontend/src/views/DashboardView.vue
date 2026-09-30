@@ -1,32 +1,56 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import FilterBar from '../components/FilterBar.vue'
 import KpiCard from '../components/KpiCard.vue'
 import AdTypeCard from '../components/AdTypeCard.vue'
 import AdSpendPieChart from '../components/AdSpendPieChart.vue'
 import CpoTrendChart from '../components/CpoTrendChart.vue'
-import { getJson } from '../api/client'
+import { getJsonStrict } from '../api/client'
 import DataSkeleton from '../components/DataSkeleton.vue'
-import { dashboardOverview, dashboardTrend } from '../api/mock'
 
-const data = ref<any>(dashboardOverview)
-const trend = ref<any[]>(dashboardTrend)
-const query = ref({ accountId: 'amzn1.ads-account.g.42jh8psyvhiiiitpm4rnj4qhh', date: '2026-08-26' })
+const data = ref<any>({ ad_types: [] })
+const trend = ref<any[]>([])
+const query = ref({ accountId: 'amzn1.ads-account.g.42jh8psyvhiiiitpm4rnj4qhh', date: '' })
 const selected = ref<'SP' | 'SB' | 'SD' | 'STV'>('SP')
 const loading = ref(true)
 
-const load = async () => {
-  loading.value = true
+const error = ref('')
+let requestVersion = 0
+let refreshTimer: ReturnType<typeof setInterval> | undefined
+const load = async (silent = false) => {
+  if (loading.value && silent) return
+  const version = ++requestVersion
+  if (!silent) loading.value = true
+  error.value = ''
   try {
-    const q = `?account_id=${encodeURIComponent(query.value.accountId)}&date=${query.value.date}`
-    data.value = await getJson(`/dashboard/overview${q}`, dashboardOverview as any)
-    trend.value = await getJson(`/dashboard/trend?account_id=${encodeURIComponent(query.value.accountId)}&end_date=${query.value.date}&days=14`, dashboardTrend as any)
+    const params = new URLSearchParams({ account_id: query.value.accountId })
+    if (query.value.date) params.set('date', query.value.date)
+    const overview = await getJsonStrict<any>(`/dashboard/overview?${params}`)
+    const series = await getJsonStrict<any[]>(`/dashboard/trend?account_id=${encodeURIComponent(overview.account_id || query.value.accountId)}&end_date=${overview.data_date}&days=14`)
+    if (version !== requestVersion) return
+    data.value = overview
+    trend.value = series
+  } catch (err) {
+    if (version !== requestVersion) return
+    error.value = err instanceof Error ? err.message : '数据读取失败，请重新查询'
   } finally {
-    loading.value = false
+    if (version === requestVersion) loading.value = false
   }
 }
 const runQuery = async (payload: { accountId: string; date: string }) => { query.value = payload; await load() }
-onMounted(load)
+const refreshLatest = () => {
+  if (!query.value.date && document.visibilityState === 'visible') void load(true)
+}
+onMounted(() => {
+  void load()
+  refreshTimer = setInterval(refreshLatest, 60_000)
+  document.addEventListener('visibilitychange', refreshLatest)
+})
+onUnmounted(() => {
+  requestVersion++
+  if (refreshTimer) clearInterval(refreshTimer)
+  document.removeEventListener('visibilitychange', refreshLatest)
+})
 const money = (v: any) => v == null ? '—' : `$${Number(v).toLocaleString(undefined, { maximumFractionDigits: 2 })}`
 const num = (v: any) => v == null ? '—' : Number(v).toLocaleString()
 const ratio = (v: any, suffix = '') => v == null ? '—' : `${Number(v).toFixed(2)}${suffix}`
@@ -58,13 +82,14 @@ const selectSecondary = (adType: string) => {
       <button class="btn">导出 CSV</button>
     </div>
 
-    <FilterBar @query="runQuery" />
+    <FilterBar :latest-date="data.data_date" :loading="loading" @query="runQuery" />
+    <div v-if="error" role="alert" class="data-audit-bar">{{ error }}</div>
 
     <DataSkeleton v-if="loading" variant="dashboard" />
 
-    <div v-if="!loading" class="data-audit-bar">RDS · {{ data.store || data.account_name }} · 数据日 {{ data.data_date || query.date }} · CPO事实 {{ data.ad_fact_rows ?? '—' }} 行 · 业务报告 {{ data.business_report_rows ?? '—' }} 行</div>
+    <div v-if="!loading && !error" class="data-audit-bar">RDS · {{ data.store || data.account_name }} · 数据日 {{ data.data_date || query.date }} · CPO事实 {{ data.ad_fact_rows ?? '—' }} 行 · 业务报告 {{ data.business_report_rows ?? '—' }} 行</div>
 
-    <div v-if="!loading" class="kpi-grid">
+    <div v-if="!loading && !error" class="kpi-grid">
       <KpiCard label="广告花费" :value="money(data.ad_spend)" desc="CPO推广商品总成本" />
       <KpiCard label="全部订单" :value="num(data.total_orders)" desc="业务报告已订购商品数量" />
       <KpiCard label="广告单" :value="num(data.ad_orders)" desc="已售商品数量" />
@@ -73,7 +98,7 @@ const selectSecondary = (adType: string) => {
       <KpiCard label="TACOS" :value="ratio(data.tacos_pct, '%')" desc="广告花费 / 总销售额" />
     </div>
 
-    <div v-if="!loading" class="two-col ad-overview-grid revised-layout">
+    <div v-if="!loading && !error" class="two-col ad-overview-grid revised-layout">
       <div class="card panel primary-type-panel">
         <div class="panel-head">
           <div>
@@ -145,7 +170,7 @@ const selectSecondary = (adType: string) => {
       </div>
     </div>
 
-    <div v-if="!loading" class="card panel">
+    <div v-if="!loading && !error" class="card panel">
       <div class="panel-head">
         <div>
           <h2>综合 CPO / 广告单 / 自然单趋势</h2>

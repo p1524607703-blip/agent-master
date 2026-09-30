@@ -12,18 +12,18 @@ const session = useSessionStore()
 // 运营只保留「CPO 单双数据情况」一个模块，且不可拖拽/不写入本地布局缓存
 const isOperator = computed(() => session.user?.roleCode === 'operator')
 
-// v2：下架「产品明细」「广告类型」两个模块（2026-09-15 用户要求暂时隐藏）。
+// v3：CPO 置顶；v2 下架「产品明细」「广告类型」两个模块（2026-09-15 用户要求暂时隐藏）。
 // 注意：布局会缓存到 localStorage，改默认值必须同时提升 STORAGE_KEY 版本，
 // 否则老用户读到的仍是带这两个入口的旧布局，等于没改。
-const STORAGE_KEY = 'adsight.sidebar.layout.v2'
+const STORAGE_KEY = 'adsight.sidebar.layout.v3'
 
 // 已下架模块的路由路径：即使旧的本地布局里残留，渲染前也会被剔除
 const RETIRED_PATHS = new Set(['/products', '/ad-types'])
 
 const DEFAULT_GROUPS: NavGroup[] = [
+  {title:'CPO',items:[['/operator-cpo','CPO 单双数据情况']]},
   {title:'概览',items:[['/dashboard','概览看板']]},
   {title:'数据处理',items:[['/cpo-jobs','CPO处理中心'],['/issues','待确认异常']]},
-  {title:'数据分析',items:[['/operator-cpo','运营单双情况']]},
   {title:'规则与数据',items:[['/product-mappings','产品映射'],['/rules','规则管理'],['/reports','报告管理']]},
 ]
 

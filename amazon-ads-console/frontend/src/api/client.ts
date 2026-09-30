@@ -6,11 +6,15 @@ function authHeaders(): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {}
 }
 
+export async function getJsonStrict<T>(path: string): Promise<T> {
+  const response = await fetch(`${API_BASE}${path}`, { headers: authHeaders() })
+  if (!response.ok) throw new Error(`数据读取失败（${response.status}）`)
+  return await response.json() as T
+}
+
 export async function getJson<T>(path: string, fallback: T): Promise<T> {
   try {
-    const response = await fetch(`${API_BASE}${path}`, { headers: authHeaders() })
-    if (!response.ok) throw new Error(String(response.status))
-    return await response.json() as T
+    return await getJsonStrict<T>(path)
   } catch {
     return fallback
   }
