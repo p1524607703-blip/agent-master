@@ -7,9 +7,9 @@ from pathlib import Path
 repo, release, commit = sys.argv[1:]
 root = Path(release)
 paths = ['amazon-ads-console', 'database_config.py', 'ad-reports-export/subscribed_reports_to_rds.py']
-output = subprocess.check_output(['git', '--git-dir=' + repo, 'ls-tree', '-r', commit, '--', *paths], text=True)
+output = subprocess.check_output(['git', '--git-dir=' + repo, 'ls-tree', '-r', '-z', commit, '--', *paths], text=True)
 count = 0
-for line in output.splitlines():
+for line in filter(None, output.split('\0')):
     metadata, path = line.split('\t', 1)
     mode, kind, expected = metadata.split()
     assert kind == 'blob' and mode in {'100644', '100755'}, f'Unsupported Git entry: {path}'

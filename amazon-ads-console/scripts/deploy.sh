@@ -73,7 +73,7 @@ trap cleanup EXIT
 
 if [ ! -f "$release/release.json" ]; then
   mkdir -p "$staging"
-  git --git-dir="$repo" archive "$commit" amazon-ads-console database_config.py ad-reports-export/subscribed_reports_to_rds.py | tar -xf - -C "$staging"
+  GIT_NO_LAZY_FETCH=1 git --git-dir="$repo" archive "$commit" amazon-ads-console database_config.py ad-reports-export/subscribed_reports_to_rds.py | tar -xf - -C "$staging"
   ln -s "$base/shared/backend.env" "$staging/amazon-ads-console/backend/.env"
   ln -s "$base/shared/uploads" "$staging/amazon-ads-console/backend/.cpo_uploads"
   if ! command -v node >/dev/null || ! command -v npm >/dev/null; then
@@ -102,7 +102,7 @@ PY
   mv "$staging" "$release"
 fi
 # These checks run again even for a previously prepared release.
-python3 "$release/amazon-ads-console/deploy/verify_release.py" "$repo" "$release" "$commit"
+git --git-dir="$repo" show "$commit":amazon-ads-console/deploy/verify_release.py | python3 - "$repo" "$release" "$commit"
 (
   cd "$release/amazon-ads-console/backend"
   "$release/.venv/bin/python" ../deploy/health_check.py "$release"

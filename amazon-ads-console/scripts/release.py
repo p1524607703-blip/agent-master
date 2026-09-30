@@ -39,10 +39,11 @@ def main():
                 'public_url': args.public_url}
     # A small partial Git mirror: commit + trees + CPO blobs, not the whole knowledge vault.
     objects = {commit, published['tree']['sha']}
-    for line in git('ls-tree', '-r', '-t', commit).splitlines():
+    tree_entries = subprocess.check_output(['git', '-C', str(ROOT), 'ls-tree', '-r', '-t', '-z', commit]).decode().split('\0')
+    for line in filter(None, tree_entries):
         metadata, path = line.split('\t', 1)
         mode, kind, oid = metadata.split()
-        if kind == 'tree' or path.startswith('amazon-ads-console/') or path in {
+        if kind == 'tree' or path.endswith('.gitattributes') or path.startswith('amazon-ads-console/') or path in {
             'database_config.py', 'ad-reports-export/subscribed_reports_to_rds.py'}:
             objects.add(oid)
     bootstrap = f'''set -eu
