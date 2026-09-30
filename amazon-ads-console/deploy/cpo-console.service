@@ -1,0 +1,20 @@
+[Unit]
+Description=CPO Console API (Git release)
+After=network.target postgresql.service
+Requires=postgresql.service
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/opt/agent/cpo/current/amazon-ads-console/backend
+ExecStart=/opt/agent/cpo/current/.venv/bin/python run_rds.py
+Environment=PYTHONUNBUFFERED=1
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

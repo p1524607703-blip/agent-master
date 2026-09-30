@@ -1,10 +1,11 @@
+import os
 from pathlib import Path
 from typing import Optional
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-ENV_FILE = Path(__file__).resolve().parents[2] / ".env"
+ENV_FILE = Path(os.environ.get("CPO_ENV_FILE", str(Path(__file__).resolve().parents[2] / ".env"))).expanduser()
 
 
 class Settings(BaseSettings):
