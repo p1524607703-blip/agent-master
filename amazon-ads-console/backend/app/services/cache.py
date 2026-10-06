@@ -98,7 +98,7 @@ cache = MemoryTTLCache()
 
 
 def invalidate_data_read_models() -> int:
-    return cache.invalidate_prefix(
+    cleared = cache.invalidate_prefix(
         'dashboard:',
         'trend:',
         'operator:',
@@ -106,3 +106,9 @@ def invalidate_data_read_models() -> int:
         'products:',
         'reports:',
     )
+    try:
+        from .build_cache import build_cache
+        cleared += build_cache.clear()
+    except Exception:
+        pass
+    return cleared

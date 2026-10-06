@@ -16,6 +16,7 @@ from datetime import date, timedelta
 from typing import Any, Optional
 
 from .app_db import query_rows as app_query_rows
+from .build_cache import build_cache
 from .rds_query import query_one, query_rows
 
 OPERATOR_NAMES = {
@@ -237,7 +238,21 @@ def _campaign_prefix_identity_map(
     return out
 
 
-def _complete_days(start: Optional[str] = None, end: Optional[str] = None) -> list[str]:
+def _data_revision() -> str:
+    row = query_one("""
+        SELECT COALESCE(max(batch_id),0)::bigint revision
+        FROM core.import_batches
+        WHERE target_table IN (
+            'core.report_business_child_asin_daily',
+            'core.report_business_parent_asin_period',
+            'core.report_advertised_product_daily',
+            'core.report_purchased_product_daily'
+        )
+    """) or {}
+    return str(row.get("revision") or 0)
+
+
+def _complete_days_uncached(start: Optional[str] = None, end: Optional[str] = None) -> list[str]:
     """Dates with complete ads plus either complete child-business or legacy parent-business."""
     c_range = ""
     b_range = ""
@@ -291,14 +306,28 @@ def _complete_days(start: Optional[str] = None, end: Optional[str] = None) -> li
     return [r["d"] for r in rows]
 
 
+def _complete_days(
+    start: Optional[str] = None,
+    end: Optional[str] = None,
+    revision: Optional[str] = None,
+) -> list[str]:
+    revision = revision or _data_revision()
+    return build_cache.get_or_set_complete_days(
+        start,
+        end,
+        revision,
+        lambda: _complete_days_uncached(start, end),
+    )
+
+
 def _date_filter(column: str, days: list[str]) -> str:
     if not days:
         return "1=0"
     return f"{column} IN (" + ",".join(f"DATE '{d}'" for d in days) + ")"
 
 
-def _source_days(start: str, end: str) -> dict[str, Any]:
-    days = _complete_days(start, end)
+def _source_days(start: str, end: str, revision: Optional[str] = None) -> dict[str, Any]:
+    days = _complete_days(start, end, revision)
     n = len(days)
     return {
         "advertisedProductDays": n,
@@ -349,7 +378,8 @@ def _new_product(meta: dict[str, str]) -> dict[str, Any]:
     }
 
 
-def _build(start: str, end: str) -> dict[str, Any]:
+def _build_uncached(start: str, end: str, revision: Optional[str] = None) -> dict[str, Any]:
+    revision = revision or _data_revision()
     parent_mapping = _mapping()
     child_mapping = _child_mapping()
     blocked_child_keys = {
@@ -370,7 +400,7 @@ def _build(start: str, end: str) -> dict[str, Any]:
         if scope and group and code:
             campaign_prefix_mapping_scopes[f"{group}-{code}"].add(scope)
     portfolio = _portfolio(parent_mapping)
-    complete_days = _complete_days(start, end)
+    complete_days = _complete_days(start, end, revision)
 
     # A date uses exactly one business denominator source: child if all seller
     # accounts have child facts, otherwise the entire date falls back to legacy parent.
@@ -713,10 +743,20 @@ def _build(start: str, end: str) -> dict[str, Any]:
         "businessOutOfScopeOrders":round(business_out_of_scope_orders,2),
         "businessOutOfScopeParents":sorted(business_out_of_scope_parents),
         "purchasedUnmappedRows":purchased_unmapped_rows,"unknownAdTypes":sorted(unknown_ad_types),
-        "mappingCount":len(parent_mapping),"childMappingCount":len(child_mapping),"sourceDays":_source_days(start,end),
+        "mappingCount":len(parent_mapping),"childMappingCount":len(child_mapping),"sourceDays":_source_days(start,end,revision),
         "businessSource":business_source,"businessAudit":business_audit,"adMappingAudit":ad_audit,
         "amsScopeAudit":ams_scope_audit,"canonicalAdLineage":True,
     }
+
+
+def _build(start: str, end: str) -> dict[str, Any]:
+    revision = _data_revision()
+    return build_cache.get_or_set(
+        start,
+        end,
+        revision,
+        lambda: _build_uncached(start, end, revision),
+    )
 
 
 def _summarize(data: dict[str, Any]) -> list[dict[str, Any]]:
