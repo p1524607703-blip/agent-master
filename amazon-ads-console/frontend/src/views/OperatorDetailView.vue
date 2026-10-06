@@ -21,7 +21,11 @@ const operatorName = computed(() => {
 })
 const operatorOptions = ['爱菊','丹丹','丽斌','林文','鑫华','雪敏','雨珊','雅婷','珍凤','子娟']
 const operatorSelectOptions = operatorOptions.map(value => ({ label:value, value }))
-const adTypes = ['SP', 'SB', 'SD', 'STV'] as const
+const baseAdTypes = ['SP', 'SB', 'SD', 'STV'] as const
+const showDsp = ref(false)
+const visibleAdTypes = computed(() => showDsp.value ? [...baseAdTypes, 'DSP'] : [...baseAdTypes])
+const typeGroupColspan = computed(() => visibleAdTypes.value.length)
+const detailColumnCount = computed(() => 9 + visibleAdTypes.value.length * 2)
 const selectedDate = ref(String(route.query.date || ''))
 const period = ref<Period>(['weekly','monthly'].includes(String(route.query.period)) ? route.query.period as Period : 'daily')
 const periods = ref<PeriodData>({ daily:[],weekly:[],monthly:[] })
@@ -222,7 +226,7 @@ const tablePeriod = computed(() => period.value === 'weekly'
       <span v-if="period !== 'daily'">覆盖 {{ detail.coverageDays ?? 0 }}/{{ detail.expectedDays ?? (period==='weekly' ? 7 : 0) }} 天</span>
       <span>全部账户合并</span>
       <span>{{ detail.final_cpo === false ? '跨账户归属预览' : '正式口径' }}</span>
-      <span>DSP 暂无可并入口径时显示 —</span>
+      <span>DSP 默认折叠，可在明细表中展开</span>
     </div>
 
     <div v-if="!loading" class="card ad-detail-card">
@@ -231,6 +235,7 @@ const tablePeriod = computed(() => period.value === 'weekly'
           <h2>广告类型明细</h2>
           <p>广告费用与广告单按类型展开；总费用、全部订单、CPO、ROAS、TACOS 保留在同一行。</p>
         </div>
+        <NButton size="small" quaternary @click="showDsp = !showDsp">{{ showDsp ? '收起 DSP' : '展开 DSP' }}</NButton>
       </div>
 
       <div class="ad-detail-table-wrap">
@@ -240,8 +245,8 @@ const tablePeriod = computed(() => period.value === 'weekly'
               <th rowspan="2" class="sticky-product">产品</th>
               <th rowspan="2" class="sticky-date">{{ period === 'weekly' ? '周区间' : period === 'monthly' ? '月份' : '日期' }}</th>
               <th rowspan="2" class="data-status-col">数据状态</th>
-              <th colspan="4" class="group-divider">广告费用</th>
-              <th colspan="4" class="group-divider">广告单</th>
+              <th :colspan="typeGroupColspan" class="group-divider">广告费用</th>
+              <th :colspan="typeGroupColspan" class="group-divider">广告单</th>
               <th rowspan="2" class="metric-start">总费用</th>
               <th rowspan="2">总广告单</th>
               <th rowspan="2">全部订单</th>
@@ -250,8 +255,8 @@ const tablePeriod = computed(() => period.value === 'weekly'
               <th rowspan="2">TACOS</th>
             </tr>
             <tr class="sub-head">
-              <th v-for="type in adTypes" :key="`spend-${type}`">{{ type }}</th>
-              <th v-for="type in adTypes" :key="`orders-${type}`">{{ type }}</th>
+              <th v-for="type in visibleAdTypes" :key="`spend-${type}`">{{ type }}</th>
+              <th v-for="type in visibleAdTypes" :key="`orders-${type}`">{{ type }}</th>
             </tr>
           </thead>
 
@@ -264,8 +269,8 @@ const tablePeriod = computed(() => period.value === 'weekly'
                   {{ detail.final_cpo === false ? '非完整口径' : '完整口径' }}
                 </span>
               </td>
-              <td v-for="type in adTypes" :key="`sum-s-${type}`">{{ money(typeTotal('adTypeSpend', type)) }}</td>
-              <td v-for="type in adTypes" :key="`sum-o-${type}`">{{ num(typeTotal('adTypeOrders', type)) }}</td>
+              <td v-for="type in visibleAdTypes" :key="`sum-s-${type}`">{{ money(typeTotal('adTypeSpend', type)) }}</td>
+              <td v-for="type in visibleAdTypes" :key="`sum-o-${type}`">{{ num(typeTotal('adTypeOrders', type)) }}</td>
               <td class="metric-start"><strong>{{ money(detail.summary?.spend) }}</strong></td>
               <td>{{ num(detail.summary?.adOrders) }}</td>
               <td>{{ num(detail.summary?.totalOrders) }}</td>
@@ -278,10 +283,10 @@ const tablePeriod = computed(() => period.value === 'weekly'
               <td class="sticky-date date-cell">{{ tablePeriod }}</td>
               <td class="data-status-col"><span class="data-status-pill" :class="{ missing: product.dataStatus==='缺当日数据' || product.dataStatus==='缺周数据' || product.dataStatus==='缺月数据', partial: product.dataStatus==='仅广告数据' || product.dataStatus==='仅业务数据' || product.dataStatus==='缺广告侧' || product.dataStatus==='缺业务侧' || product.dataStatus==='缺业务报告' }">{{ product.dataStatus || '有数据' }}</span></td>
 
-              <td v-for="type in adTypes" :key="`s-${product.code}-${type}`">
+              <td v-for="type in visibleAdTypes" :key="`s-${product.code}-${type}`">
                 {{ money(typeValue(product, 'adTypeSpend', type)) }}
               </td>
-              <td v-for="type in adTypes" :key="`o-${product.code}-${type}`">
+              <td v-for="type in visibleAdTypes" :key="`o-${product.code}-${type}`">
                 {{ num(typeValue(product, 'adTypeOrders', type)) }}
               </td>
 
@@ -294,7 +299,7 @@ const tablePeriod = computed(() => period.value === 'weekly'
             </tr>
 
             <tr v-if="!products.length">
-              <td colspan="17" class="empty-row">该日期没有可用于该运营产品级 CPO 的完整数据。</td>
+              <td :colspan="detailColumnCount" class="empty-row">该日期没有可用于该运营产品级 CPO 的完整数据。</td>
             </tr>
           </tbody>
 
@@ -328,7 +333,7 @@ const tablePeriod = computed(() => period.value === 'weekly'
 .simple-data-note strong { color: #344054; }
 
 .ad-detail-card { overflow: hidden; }
-.ad-detail-title { padding: 16px 18px 12px; border-bottom: 1px solid #e8ebf0; }
+.ad-detail-title { display:flex; align-items:center; justify-content:space-between; gap:12px; padding: 16px 18px 12px; border-bottom: 1px solid #e8ebf0; }
 .ad-detail-title h2 { margin: 0 0 5px; font-size: 16px; color: #2f3a4d; }
 .ad-detail-title p { margin: 0; color: #8a93a2; font-size: 11px; }
 

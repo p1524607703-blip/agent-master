@@ -23,7 +23,7 @@ OPERATOR_NAMES = {
     "DD": "丹丹", "YS": "雨珊", "LB": "丽斌", "XH": "鑫华",
     "LW": "林文", "ZF": "珍凤",
 }
-AD_TYPES = ("SP", "SB", "SD", "STV")
+AD_TYPES = ("SP", "SB", "SD", "STV", "DSP")
 AD_PRODUCT_TYPE_MAP = {
     "Sponsored Products": "SP",
     "SP": "SP",
@@ -33,6 +33,8 @@ AD_PRODUCT_TYPE_MAP = {
     "SD": "SD",
     "Sponsored TV": "STV",
     "STV": "STV",
+    "Amazon DSP": "DSP",
+    "DSP": "DSP",
 }
 
 

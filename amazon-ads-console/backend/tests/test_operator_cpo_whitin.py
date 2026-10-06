@@ -10,6 +10,11 @@ class WhitinAccountScopeTests(unittest.TestCase):
         self.assertIn("WHITIN", operator_cpo.AD_ACCOUNTS)
         self.assertEqual(len(operator_cpo.AD_ACCOUNTS), 4)
 
+    def test_amazon_dsp_is_classified_explicitly(self):
+        self.assertIn("DSP", operator_cpo.AD_TYPES)
+        self.assertEqual(operator_cpo._classify_ad_type("Amazon DSP"), "DSP")
+        self.assertEqual(operator_cpo._classify_ad_type("DSP"), "DSP")
+
     def test_complete_days_requires_all_ad_accounts(self):
         captured = {}
 
