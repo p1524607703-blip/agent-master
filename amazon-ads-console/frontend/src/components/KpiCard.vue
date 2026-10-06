@@ -1,0 +1,1 @@
+<script setup lang="ts">defineProps<{label:string,value:string,desc:string}>()</script><template><div class="card kpi"><div class="muted small">{{label}}</div><div class="kpi-value">{{value}}</div><div class="small positive">{{desc}}</div></div></template>
