@@ -129,6 +129,7 @@ def _portfolio(mapping: dict[str, dict[str, str]]) -> dict[str, set[str]]:
 
 
 DIRECT_AD_TO_BUSINESS = {
+    "WHITIN": "WHITIN",
     "BLOOMNEXT": "BLOOMNEXT",
     "JOOMRA DIRECT": "JOOMRA DIRECT",
 }
