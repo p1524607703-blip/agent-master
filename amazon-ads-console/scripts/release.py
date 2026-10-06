@@ -43,8 +43,7 @@ def main():
     for line in filter(None, tree_entries):
         metadata, path = line.split('\t', 1)
         mode, kind, oid = metadata.split()
-        if kind == 'tree' or path.endswith('.gitattributes') or path.startswith('amazon-ads-console/') or path in {
-            'database_config.py', 'ad-reports-export/subscribed_reports_to_rds.py'}:
+        if kind == 'tree' or path.endswith('.gitattributes') or path.startswith('amazon-ads-console/'):
             objects.add(oid)
     bootstrap = f'''set -eu
 sudo install -d -o ubuntu -g ubuntu -m 755 {SERVER_ROOT} {SERVER_ROOT}/releases {SERVER_ROOT}/tooling

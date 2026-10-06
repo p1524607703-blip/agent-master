@@ -6,7 +6,7 @@ from pathlib import Path
 
 repo, release, commit = sys.argv[1:]
 root = Path(release)
-paths = ['amazon-ads-console', 'database_config.py', 'ad-reports-export/subscribed_reports_to_rds.py']
+paths = ['amazon-ads-console']
 output = subprocess.check_output(['git', '--git-dir=' + repo, 'ls-tree', '-r', '-z', commit, '--', *paths], text=True)
 count = 0
 for line in filter(None, output.split('\0')):
