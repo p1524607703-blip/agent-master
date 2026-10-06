@@ -23,7 +23,7 @@ class WhitinAccountScopeTests(unittest.TestCase):
             return []
 
         with patch.object(operator_cpo, "query_rows", side_effect=fake_query):
-            self.assertEqual(operator_cpo._complete_days(), [])
+            self.assertEqual(operator_cpo._complete_days(revision="test"), [])
 
         sql = captured["sql"]
         self.assertIn("WHITIN", sql)
