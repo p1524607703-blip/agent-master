@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="pxrt3xWIySyEyUNQBt4Yq3">
+<head data-page-node-id="3twO4gCPoN6PF3QMknA3GC">
+<meta charset="UTF-8" data-page-node-id="JARmeYI8OUDHaRObFa5yoI">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="ofr5gBqlVPOc5qwNVOKojH">
+<title>WHITIN DSP 实测诊断 · 30 天在投数据分析</title>
+<style>
+:root{
+  --bg:#f5f6f8; --card:#fff; --bd:#e2e6eb; --bd2:#eef1f4;
+  --tx:#15181d; --tx2:#59616d; --tx3:#8d97a3;
+  --acc:#0d5c63; --acc-bg:#e8f2f3;
+  --amber:#a15c07; --amber-bg:#fdf3e3;
+  --red:#b3352b; --red-bg:#fdeceb;
+  --grn:#1a7a54; --grn-bg:#e8f5ef;
+  --blu:#1d4ed8; --blu-bg:#eaf0fd;
+  --r:10px; --r2:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);
+  font:15px/1.75 -apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding:48px 28px 96px}
+.hd{border-bottom:2px solid var(--tx);padding-bottom:20px;margin-bottom:8px}
+.kicker{font-size:12px;letter-spacing:.16em;color:var(--acc);font-weight:700;text-transform:uppercase}
+h1{font-size:31px;line-height:1.3;margin:10px 0 12px;letter-spacing:-.4px;font-weight:800}
+.sub{color:var(--tx2);font-size:15px;max-width:780px}
+.meta{margin-top:16px;font-size:12.5px;color:var(--tx3);display:flex;gap:18px;flex-wrap:wrap}
+.meta b{color:var(--tx2);font-weight:600}
+.verdict{background:var(--card);border:1px solid var(--bd);border-left:4px solid var(--acc);
+  border-radius:var(--r);padding:22px 26px;margin:28px 0 40px}
+.verdict h2{font-size:16px;margin-bottom:10px;color:var(--acc)}
+.verdict p{color:var(--tx2);font-size:14.5px}
+.verdict p+p{margin-top:9px}
+.verdict strong{color:var(--tx)}
+section{margin-bottom:56px}
+h2.sec{font-size:22px;font-weight:800;letter-spacing:-.2px;margin-bottom:6px;display:flex;align-items:baseline;gap:12px}
+h2.sec .n{font-size:12px;font-weight:700;color:var(--acc);background:var(--acc-bg);
+  padding:3px 9px;border-radius:20px;letter-spacing:.05em;flex:none}
+.lead{color:var(--tx2);font-size:14.5px;margin-bottom:22px;max-width:840px}
+h3{font-size:16.5px;font-weight:700;margin:30px 0 12px;letter-spacing:-.1px}
+h4{font-size:14.5px;font-weight:700;margin:20px 0 8px;color:var(--tx)}
+p{font-size:14.5px;color:var(--tx2);margin-bottom:12px}
+p strong,li strong{color:var(--tx);font-weight:600}
+ul,ol{margin:0 0 14px 20px}
+li{font-size:14.5px;color:var(--tx2);margin-bottom:7px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);padding:22px 24px;margin-bottom:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:820px){.grid2,.grid3{grid-template-columns:1fr}}
+.note{border-radius:var(--r2);padding:14px 18px;margin:14px 0;font-size:14px;line-height:1.7}
+.note .t{font-weight:700;display:block;margin-bottom:4px;font-size:13px;letter-spacing:.03em}
+.n-warn{background:var(--amber-bg);border-left:3px solid var(--amber);color:#6b4207}
+.n-warn .t{color:var(--amber)}
+.n-bad{background:var(--red-bg);border-left:3px solid var(--red);color:#7d241c}
+.n-bad .t{color:var(--red)}
+.n-good{background:var(--grn-bg);border-left:3px solid var(--grn);color:#125c3e}
+.n-good .t{color:var(--grn)}
+.n-info{background:var(--blu-bg);border-left:3px solid var(--blu);color:#1a3a8f}
+.n-info .t{color:var(--blu)}
+.tw{overflow-x:auto;margin:14px 0 18px;border:1px solid var(--bd);border-radius:var(--r);background:var(--card)}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{background:#f8f9fb;text-align:left;padding:11px 14px;font-weight:700;font-size:12.5px;
+  color:var(--tx2);border-bottom:1px solid var(--bd);white-space:nowrap;letter-spacing:.02em}
+td{padding:10px 14px;border-bottom:1px solid var(--bd2);color:var(--tx2);vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:#fafbfc}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+td.k{color:var(--tx);font-weight:600;white-space:nowrap}
+.tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11.5px;font-weight:700;white-space:nowrap}
+.t-good{background:var(--grn-bg);color:var(--grn)}
+.t-bad{background:var(--red-bg);color:var(--red)}
+.t-warn{background:var(--amber-bg);color:var(--amber)}
+.t-neu{background:#eef1f4;color:var(--tx2)}
+.t-acc{background:var(--acc-bg);color:var(--acc)}
+pre{background:#1c2026;color:#dfe4ea;border-radius:var(--r);padding:18px 20px;overflow-x:auto;
+  font:12.5px/1.7 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;margin:12px 0 18px}
+code{font:12.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:#eef1f4;padding:1.5px 6px;border-radius:4px;color:#2d3540}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:18px 0}
+@media(max-width:820px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);padding:16px 18px}
+.kpi .v{font-size:24px;font-weight:800;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
+.kpi .l{font-size:12px;color:var(--tx3);margin-top:3px}
+.kpi .d{font-size:12px;margin-top:6px;color:var(--tx2)}
+.acts{margin:18px 0}
+.act{display:flex;gap:14px;padding:16px 0;border-bottom:1px solid var(--bd2)}
+.act:last-child{border-bottom:none}
+.act .pn{flex:none;width:54px;height:26px;border-radius:20px;font-size:12px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;margin-top:2px}
+.p0{background:var(--red-bg);color:var(--red)}
+.p1{background:var(--amber-bg);color:var(--amber)}
+.p2{background:var(--blu-bg);color:var(--blu)}
+.act .bd{flex:1}
+.act h4{margin:0 0 6px;font-size:15px}
+.act p{margin:0;font-size:13.5px}
+footer{margin-top:64px;padding-top:20px;border-top:1px solid var(--bd);font-size:12.5px;color:var(--tx3)}
+</style>
+</head>
+<body data-page-node-id="6RcEnDo5VFZA6j9dXYm5zF">
+<div class="wrap" data-page-node-id="tnoLBWz61nAZCdDlF5TyeE">
+
+<div class="hd" data-page-node-id="VMLCDxb5ubagCphZFuw87r">
+  <div class="kicker" data-page-node-id="pGdFNj2U1IfY3EAG9akjbZ">WHITIN × Amazon DSP · 实测诊断 v1</div>
+  <h1 data-page-node-id="Q1vIuOqgW6Ri6zvQSGCaBN">DSP 已经跑起来了：<br data-page-node-id="RcUicPOleLHCJhyRHVrZUk">27 天、$4,515 花费、ROAS 10.70 的实测盘点</h1>
+  <p class="sub" data-page-node-id="r4x7J6M4xDStoWeQX28OEv">基于《DSP_广告活动_30D_日期.csv》391 行日粒度数据（2026-08-14 ~ 09-09，27 天），在投产品线为 Toddler（W81K 童鞋）与 Clogs（Y71）。含与站内 RDS 数据的逐项对标。</p>
+  <div class="meta" data-page-node-id="t61drlYVAkyvxZLzuWnfLF">
+    <span data-page-node-id="SoFWwRYWKYb2glao3K65zp"><b data-page-node-id="YwzyLGWgiQMAYQIyFdqKJg">数据源</b> DSP_广告活动_30D_日期.csv（391 行）+ amazon_ads.core（站内 90 天）</span>
+    <span data-page-node-id="BwjEmdUUFRVDt6k6YfIBml"><b data-page-node-id="AYV1eqSk54dA8FkM5bbevU">在投账户</b> WHITIN SNEAKER_US / BRONAX SNEAKER_US / JOOMRA DIRECT_US</span>
+  </div>
+</div>
+
+<div class="verdict" data-page-node-id="I25o19zqMJGoznk41a2PhC">
+  <h2 data-page-node-id="dlH0VBAJkTTLDg2bR091JA">一句话结论</h2>
+  <p data-page-node-id="JQQD4gC4Otiif4UZgdbb1F">DSP 已经是 WHITIN 效率最高的广告渠道，ROAS 10.70，是站内 Sponsored Products 的 2.7 倍。但它现在只占认知层预算的 14.4%，而且近 70% 的展示不可见。<strong data-page-node-id="SNJ4RqKBJ9oUOc7AtTnIFl">当务之急不是加预算，是先把漏掉的钱堵上，再谈放量。</strong></p>
+  <p data-page-node-id="9DLyQwmIixd7BgTNbcHonG">同时提示一个数据管线的缺口：DSP 数据目前没有进 <code data-page-node-id="wuQ7ZmWWz5EoYypdN1UWho">amazon_ads</code> 库，只有手动导出的 CSV 能看到。所有自动化分析现在只能看见半张牌。</p>
+</div>
+
+<!-- 1 -->
+<section data-page-node-id="lcXAtfXFrzpBM8wf8Psr9h">
+  <h2 class="sec" data-page-node-id="mjcoXQ2KazEDgmxAwjF4gO"><span class="n" data-page-node-id="qpUqi9xdLmnsx9nZCNXXGN">§ 1</span> 成绩单：DSP 是你们目前效率最高的渠道</h2>
+  <p class="lead" data-page-node-id="LMAkaWS8R8cn8L5DrKxEAx">27 天，WHITIN DSP 花了 $4,515，卖了 $48,308。ROAS 10.70——这个数字需要放在站内数据的旁边才有意义。</p>
+
+  <div class="kpis" data-page-node-id="key5zVcr92dDZpJltIkrbD">
+    <div class="kpi" data-page-node-id="A0ba7puBCIWjHnp5FvOtvc"><div class="v" data-page-node-id="pTFGODd8TgW1aB0DxAptfx">10.70</div><div class="l" data-page-node-id="wd1yfeQcmD35ZkGSD2ZYvQ">DSP ROAS（即时）</div><div class="d" data-page-node-id="Mxge2rQD2zodOU7MWacSyr">长期 ROAS 13.75，高出 28.5%</div></div>
+    <div class="kpi" data-page-node-id="qzBmh3g80vTfeIkdFuLw0n"><div class="v" data-page-node-id="8kd3rOHDJGz0DbYADuqBDY">55.1%</div><div class="l" data-page-node-id="I9cXMeqTGJB89LrWr4ntlj">NTB 订单占比</div><div class="d" data-page-node-id="T4PNH1DrGPTLEMdpQ3HviR">945 个新客订单 / 1,714 单</div></div>
+    <div class="kpi" data-page-node-id="YxRoDDeSFviFsK0FWAxfYv"><div class="v" data-page-node-id="O70w83c5xBCbp6rOkDnfgr">$2.63</div><div class="l" data-page-node-id="yQLvBvsn59XbMErzeiyXRm">CPA 获客成本</div><div class="d" data-page-node-id="NNBXcibFpZPnLNQeP8aA8J">站内 W81K 约 $11.38</div></div>
+    <div class="kpi" data-page-node-id="B3mPwIkcAO5iSjDbWIBCLW"><div class="v" data-page-node-id="uN19uwzTrjAK0M2aVEocV4">30.8%</div><div class="l" data-page-node-id="AQt4srv6UllSM8pSrWG9zO">展示可见率</div><div class="d" data-page-node-id="CACkecSEclA5WhD1XJN7Vk">近 70% 的展示不可见</div></div>
+  </div>
+
+  <h3 data-page-node-id="INZ23byRMvBC5vUSJC58vp">1.1 渠道横向对比</h3>
+  <div class="tw" data-page-node-id="UrN8usBhTQ8LeCEZHZUBy5"><table data-page-node-id="11kQrwlv79GcJK1Qc4xfli">
+    <thead data-page-node-id="56JrnuugmtMlAILK09rmwJ"><tr data-page-node-id="7pKntg6G6MhnYex8IKZVKj"><th data-page-node-id="p20lXyg9UuUoukEqkL6tsF">渠道</th><th class="n" data-page-node-id="mKnhVVUpJfrh8i3a5HnDEX">花费</th><th class="n" data-page-node-id="dsyad8ZakV0VHdKtm64Not">销售额</th><th class="n" data-page-node-id="DPxWE6KqIfFWXl1t0hJUIh">ROAS</th><th class="n" data-page-node-id="AyC4UAjgKkJwNfF3UlnsCC">NTB 订单</th><th class="n" data-page-node-id="pXvqIavxINI2rsBzY8tqEi">NTB 占比</th><th data-page-node-id="0HfmxvByiTCCwfYf7iEjui">相对 DSP</th></tr></thead>
+    <tbody data-page-node-id="11K9GUUs8FpkZwPN2GGRcG">
+      <tr data-page-node-id="xCEjza0tr5rD1x2rCVplH6"><td class="k" data-page-node-id="KxkMzD7oShHbwsO5Eng7Ng">Amazon DSP <span class="tag t-acc" data-page-node-id="ZV3LH5f2CkNoGLlhCbUFXP">27 天</span></td><td class="n" data-page-node-id="Aqgvjh6ZRM2lTmpmyhAs38">$4,515</td><td class="n" data-page-node-id="EQ7HQaEbAN4PMTizKWZrqp">$48,308</td><td class="n" data-page-node-id="kbWaK8uakgiYiRzBDecNlN">10.70</td><td class="n" data-page-node-id="Fqwq2KgYdDElLQA6QWZNAb">945</td><td class="n" data-page-node-id="FvzVDFmkGrSP9GC292TudY">55.1%</td><td data-page-node-id="HYQvctuwpmjXEhGgoZLL0z"><span class="tag t-good" data-page-node-id="wGdDc9RrltWfmaza3lWuz4">基准</span></td></tr>
+      <tr data-page-node-id="rXxt7gsfjbqFF3TfUsgcLC"><td class="k" data-page-node-id="r4qgvykTANfpGB3VaEihCB">Sponsored Display <span class="tag t-neu" data-page-node-id="GxDkaWEdi1OKYSEQRhzRfR">90 天</span></td><td class="n" data-page-node-id="YCwU1Xhd7KbtCtLCz74RVR">$99,192</td><td class="n" data-page-node-id="hZUB13KUiFBSivkojmLf1U">$553,557</td><td class="n" data-page-node-id="Zdj2r6eicQLFES8D4k0MuX">5.58</td><td class="n" data-page-node-id="82EZadBuyZoD6h7gK4eXLe">16,572</td><td class="n" data-page-node-id="Jvqh14C6RAmoVeN15zm5Wr">70%</td><td data-page-node-id="OIct7vYE9Ay5HHH0O3J3Qj">DSP 是它的 <strong data-page-node-id="SfEazPEYuEFSTuOddBfw89">1.9 倍</strong></td></tr>
+      <tr data-page-node-id="EZwrTHFZGZxDX1iEgAW1H2"><td class="k" data-page-node-id="ZB3IwJITskxDfg8UHZ2UD8">Sponsored Products <span class="tag t-neu" data-page-node-id="y4nOPezsztixh6kGy9wTEU">90 天</span></td><td class="n" data-page-node-id="AM35RBaFRRt1IhB3ZdbkZb">$1,954,257</td><td class="n" data-page-node-id="TXiKC1ndjIUQ2OGBVEcKsV">$7,648,687</td><td class="n" data-page-node-id="oplzu90F3sXnyJn4Lgna6p">3.91</td><td class="n" data-page-node-id="PGjbi6gVjgDyULolX8sSES">1,502</td><td class="n" data-page-node-id="0Dha055MKoYySEIxw5GCeE">0.6%</td><td data-page-node-id="S2cpqQWAZybXszK5R1vGkY">DSP 是它的 <strong data-page-node-id="iHClnq0EPoIVWb90jgiRe3">2.7 倍</strong></td></tr>
+      <tr data-page-node-id="b6LmF8EGEYVQk6drqRvA6V"><td class="k" data-page-node-id="UIzCUwnr1UguUZeDdwr4sC">Sponsored TV <span class="tag t-neu" data-page-node-id="mFDYqqZU1WZg722mh1JGNS">90 天</span></td><td class="n" data-page-node-id="GVMNYbBIXGsuHeZ2VBaxkf">$18,400</td><td class="n" data-page-node-id="UGL0ss3XOwkpwg4TMtz7Ht">$63,163</td><td class="n" data-page-node-id="sbuvZhRggrpDq7tXOxOn6V">3.43</td><td class="n" data-page-node-id="mFKE3Ft6PWmlw5oW3KHJEw">1,787</td><td class="n" data-page-node-id="EpV8yDNmZigZWyvXeMgpom">—</td><td data-page-node-id="WEhIirYl3QE49noqqayqeQ">DSP 是它的 <strong data-page-node-id="15bqA69ICOAHUBcfYAjPaX">3.1 倍</strong></td></tr>
+      <tr data-page-node-id="XROvZNyTQmJXMQTCdxUNKh"><td class="k" data-page-node-id="U5wFnnuTLVmBuQ91ZTeYUN">Sponsored Brands <span class="tag t-neu" data-page-node-id="qfpG9B6UOfdXyWbNQCq7Ld">90 天</span></td><td class="n" data-page-node-id="xIKl8k2W5bWDDWbYBZTaH9">$391,602</td><td class="n" data-page-node-id="CpH42x5nrfyG1tKQ2kHcyG">$1,292,428</td><td class="n" data-page-node-id="GVCYy0OArMqY7GaNZ0oLem">3.30</td><td class="n" data-page-node-id="ypZU0LRZOdOnYcZcCnRPrl">39,942</td><td class="n" data-page-node-id="zUTmm6MsPi4PJ0MzVxHiz5">77%</td><td data-page-node-id="kgw2bOBdayQaWQbBNfuc6q">DSP 是它的 <strong data-page-node-id="jVEXTarFPgyeEgdbXqOImw">3.2 倍</strong></td></tr>
+    </tbody>
+  </table></div>
+  <div class="note n-warn" data-page-node-id="7AW4rNQ2yP05MBy4pLHDPZ"><span class="t" data-page-node-id="WS5T2WLdotIGCFOCHwAWT3">口径说明（别直接拿这张表去要预算）</span>
+  三处不可比，必须说明：<strong data-page-node-id="U1AljjGl0Wq71v2ePa5rOl">①时间窗口不同</strong>（DSP 27 天 vs 站内 90 天）；<strong data-page-node-id="Qqp3G80DAusaAG6vM34Vle">②归因口径不同</strong>（DSP 报告含 view-through，2026-01-01 起已收紧）；<strong data-page-node-id="ZDOOMxmSEQhbUb0PN1QADR">③销售口径</strong>——DSP 报的"销售额"通常是<em data-page-node-id="7NYKOroCkmVjUqYCiUhc3z">品牌全口径</em>（含跨 ASIN 购买），站内 CPO 表同样含光环（W81K 高达 93.8%），两者可比性尚可，但与 SP 的"广告归因销售额"不是一回事。<br data-page-node-id="SDJLpkiSwQeR2F62VPAkai">
+  即便如此，<strong data-page-node-id="depsgVEX8lXCiBTq6FLc0Q">2.7 倍的差距远超任何口径误差能解释的范围</strong>。这个结论站得住。
+  </div>
+
+  <h3 data-page-node-id="A4TGhWixdyxotAhXlA3nGz">1.2 长期销售：你低估了自己 28.5%</h3>
+  <p data-page-node-id="8wvADXwET9i40ObhzOYVAm">DSP 报表里有一个站内没有的字段——<code data-page-node-id="QmV8M8qGYHXaBgUa0rQ3gS">长期销售 / 长期 ROAS</code>。它统计的是广告触达后在更长窗口内产生的全部销售。</p>
+  <div class="tw" data-page-node-id="FrT9hv7F1Nr5VFjDHA0LoB"><table data-page-node-id="jDxuwdUD11Fn3IUtbInEpi">
+    <thead data-page-node-id="gg4tGCw77RTDOv2a52VJnL"><tr data-page-node-id="g9lcTSrBobFH7UiPgh7GMV"><th data-page-node-id="u6qsjIXmyn6Lxw8G7v5NhZ">口径</th><th class="n" data-page-node-id="ZwmfhdIdSRz1FB311Og0qa">即时 ROAS</th><th class="n" data-page-node-id="MGyPqZesFgwSVON8aWoyGP">长期 ROAS</th><th class="n" data-page-node-id="En9gnMM3fxgXh15vCk2T4H">差值</th><th data-page-node-id="WnCGuDYYcSDt1oGECEHC8d">含义</th></tr></thead>
+    <tbody data-page-node-id="kGJoFHoqDjWQv8HR6Hb45a">
+      <tr data-page-node-id="AGCGpS8EpCeVZ0n7LLNk91"><td class="k" data-page-node-id="eIzabFNT6WQPtNXhOJ137F">WHITIN 整体</td><td class="n" data-page-node-id="CvuBvEGrCSA19f1guCkszi">10.70</td><td class="n" data-page-node-id="EZWUXAnVwolrEnaZeHYmb2">13.75</td><td class="n" data-page-node-id="AOlyadwo4zGVVKQ6wb74wh">+28.5%</td><td data-page-node-id="rNzELiPUi5sWT2HQnH6Dnx">每花 $1，即时看到 $10.70，实际长期产出 $13.75</td></tr>
+      <tr data-page-node-id="EyyarYV6UHS2pFi6q8qATi"><td class="k" data-page-node-id="pf6C7IpK5dfgtzr1sBjhK0">Clogs（Y71）</td><td class="n" data-page-node-id="RKUrTiRom1mXbKzSH3sCid">11.98</td><td class="n" data-page-node-id="lYOFbNpLk0IrPlvGM6hfAi">16.04</td><td class="n" data-page-node-id="OILVENT4XOwfqngbnlAVHD">+33.9%</td><td data-page-node-id="0TLKPh08jMwadqOCkF5MJY">拖鞋的决策链更长，滞后收益最大</td></tr>
+      <tr data-page-node-id="HT2M1EqkGdOk3iNTREtXl9"><td class="k" data-page-node-id="B00W6RoCioViSbNeg6OAfw">Toddler（W81K）</td><td class="n" data-page-node-id="ZXGURESDwFLHl2Y7kTP9tC">10.02</td><td class="n" data-page-node-id="sS7O8pdL4ScossHDHRme1q">12.53</td><td class="n" data-page-node-id="imOuTDT5iO8eyOTA39J27e">+25.0%</td><td data-page-node-id="JjzwGizMWQfQQEzcz6RQPH">童鞋相对即时决策</td></tr>
+      <tr data-page-node-id="bQHU4B1DWM7J5h2e8fA7BQ"><td class="k" data-page-node-id="uPI0GNm24uNZEeaYLxNkeO">Awareness 层</td><td class="n" data-page-node-id="E1jPyVv8oEiMVuTtvfGtGt">16.65</td><td class="n" data-page-node-id="qufQg8qLHvKFDZO8AowUDV">19.46</td><td class="n" data-page-node-id="C47kRZ2WY3Z7RjIediM4C9">+16.9%</td><td data-page-node-id="0gBpNpmplOaYIXpzB5uhB1">—</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note n-good" data-page-node-id="NiF2IrLAzf683L8XteIO3d"><span class="t" data-page-node-id="vdSAdC6KWr7GRJCHGKoeDa">这是申请预算时最好用的一张表</span>
+  DSP 的价值有 1/4 到 1/3 不会出现在即时 ROAS 里。站内报表没有这个字段，所以你永远看不到品牌广告的完整回报。<strong data-page-node-id="Za0KQ22HX3ZFJL8Uq8Hui7">下次有人质疑 DSP 的 ROAS 数字，把"长期 ROAS"这一列推过去。</strong>
+  </div>
+</section>
+
+<!-- 2 -->
+<section data-page-node-id="JHO7HpFdosJkoIX4q7tHTI">
+  <h2 class="sec" data-page-node-id="o6WoYIluPPtFYAVOHKlgzr"><span class="n" data-page-node-id="P6mn7SosaWG6s9YCMOlUoZ">§ 2</span> 产品线对比：预算又给错了人</h2>
+  <p class="lead" data-page-node-id="anWfH3S3UJ25RvZgFdR2tp">这是我在你们数据里第三次看到同样的模式——效率更高的那个，拿到的钱更少。上次是站内的 W8K7 / WK101 对 W81，这次是 Clogs 对 Toddler。</p>
+
+  <div class="tw" data-page-node-id="2gyY8pa16nYwr4gyXAra0l"><table data-page-node-id="kbAWHk1N0xlZBMPEeVc33j">
+    <thead data-page-node-id="YKBK3AGCHt6TH0MoRTf5ze"><tr data-page-node-id="S4fB1iRZSaQgtv7qZQzVTl"><th data-page-node-id="ISHYrDQo5UzsVDY8LsEEMz">产品线</th><th class="n" data-page-node-id="cCAqhQqaSUEBHLdy7oAz6p">花费</th><th class="n" data-page-node-id="dke9sz2AM38n54OYBEATKF">预算占比</th><th class="n" data-page-node-id="cftiqH6UXwKwRVvhXHv7z0">ROAS</th><th class="n" data-page-node-id="ecRTmg2w0L0iNAgDhaFCHx">长期 ROAS</th><th class="n" data-page-node-id="CbhQGHTqeihZpF9S0TKEu0">订单</th><th class="n" data-page-node-id="HEIqX3Yirss6z3tIeYMxPS">NTB 占比</th><th class="n" data-page-node-id="B9QCZz1xZyZJCYn1db6BqE">CPA</th><th class="n" data-page-node-id="6gqs7iDPHaqooqqFWXt7Lz">可见率</th></tr></thead>
+    <tbody data-page-node-id="V0MQGQbQAjAO6WHnw21DYl">
+      <tr data-page-node-id="FWMjoaDstB295zpDbDaKxT"><td class="k" data-page-node-id="PPteXZPCFjYAyrhsM5rO5n">Clogs（Y71）</td><td class="n" data-page-node-id="YXN3fVN6cCkGKL3NR9aPzg">$1,568</td><td class="n" data-page-node-id="33RE4Vgj9gLLFZtHWyhCiu">34.7%</td><td class="n" data-page-node-id="p2UxVnZlHH3gnTKxpmkzbM"><strong data-page-node-id="BkxxUe65GOwbRpHQ0cSX6x">11.98</strong></td><td class="n" data-page-node-id="Q9cLdDsGR0TU25E5SZMwX3"><strong data-page-node-id="Awc6DK90fop0AJbPOambxw">16.04</strong></td><td class="n" data-page-node-id="gD2CxDadWHEwQgUevJlYVP">853</td><td class="n" data-page-node-id="IAvTmfxY8cfwGVy1SbH8Xu"><strong data-page-node-id="Z6eS2ySEx1VUBnHYpVP8vP">67.9%</strong></td><td class="n" data-page-node-id="Xh4OtqS4ZevQaOEtAIX4Pu"><strong data-page-node-id="uzFqJoxENPsURLEZ7JeKhE">$1.84</strong></td><td class="n" data-page-node-id="zcY2Dis1fysOjuxFb7719w">34.9%</td></tr>
+      <tr data-page-node-id="yyi6g5RjBQyeC5wqmq2hEY"><td class="k" data-page-node-id="4nYniYNqes4NwDQcPEs2DX">Toddler（W81K）</td><td class="n" data-page-node-id="blJJl3YtgDwzuhsNaypPZp">$2,947</td><td class="n" data-page-node-id="FJyFTRDTU6Z9iiVUAAgRKt">65.3%</td><td class="n" data-page-node-id="81AJj1ZaZ4kfvDfaoKqcOW">10.02</td><td class="n" data-page-node-id="wtAiNWr1sbSLxWM8wzYnB0">12.53</td><td class="n" data-page-node-id="MZy2YcDp1B4qt07JbNF6yM">861</td><td class="n" data-page-node-id="sqxrKhB7K1Pkv7HBHyusUZ">42.5%</td><td class="n" data-page-node-id="ba3Bom89uK4D6C8wREcdOP">$3.42</td><td class="n" data-page-node-id="c5Sa0FiVnsLG9JEF7VHBwF">28.1%</td></tr>
+    </tbody>
+  </table></div>
+
+  <p data-page-node-id="Xm0xtPMmZ47BS25bteWXg4"><strong data-page-node-id="TRa80iYNpcx2tuO0j5mtfx">Clogs 在五个维度上全线碾压 Toddler</strong>：ROAS 高 20%、长期 ROAS 高 28%、CPA 只有 54%、NTB 占比高 25 个百分点、可见率高 6.8 个百分点。<strong data-page-node-id="y7Wz2v0tTONZ5Nv3g5IMlv">它只分到 34.7% 的预算。</strong></p>
+
+  <div class="note n-bad" data-page-node-id="bY20NUEHAvNqx6vLOnsaYG"><span class="t" data-page-node-id="mzoZmrfSQM0CFBTo4y1jNc">注意：这不是说 Clogs 该拿更多钱</span>
+   Toddler 的 NTB 占比 42.5% 偏低，说明它在大量触达<em data-page-node-id="l0nmRP3fFO6BkVr0VmkCnf">已经认识你</em>的人（Remarketing 活动占了 $1,161 / 39%）。如果你是想用童鞋做品类扩张，<strong data-page-node-id="ktov58PTLD5PwnWfPqBDQq">Toddler 的问题不是量不够，是投错了受众</strong>——再营销占比过高。<br data-page-node-id="DGzrNEpWOFUYXPpVx8RXfq">
+  正确的动作是<strong data-page-node-id="4d88K0aUADH2W5eGX30A4S">双向调整</strong>：Clogs 加预算（它便宜又高效），Toddler 调结构（把再营销的钱挪到 Customer Acquisition）。而不是简单把 Toddler 的钱搬给 Clogs。
+  </div>
+
+  <h3 data-page-node-id="hpoD61h4BHeikYjHHBot7f">2.1 活动级排行</h3>
+  <div class="tw" data-page-node-id="Lf5sEeQjZzCK3ls4vge5EG"><table data-page-node-id="zkOK1zgEHfAhwL9oB4RS4z">
+    <thead data-page-node-id="zGDeX7O11GlRUSbBSZmae8"><tr data-page-node-id="HGI0MpAGZDG47eaEg5J3GG"><th data-page-node-id="nil4OW1ZWSJMkjPbi5Sd9Q">活动（按 ROAS 排序）</th><th class="n" data-page-node-id="4zhLwGsQqcLJABv880ocsa">花费</th><th class="n" data-page-node-id="AqLLtDr2eHJDCrsaobh9CT">销售</th><th class="n" data-page-node-id="HdfMEtAFReONmUq1zx1Gh4">ROAS</th><th class="n" data-page-node-id="txSaJgQQfcGNMF3ZYSx01G">长期 ROAS</th><th class="n" data-page-node-id="0fOQlSX7ar1ljk6lV3ZA24">订单</th><th class="n" data-page-node-id="P82yAVPVJlO4rVVm5Y2oou">NTB%</th><th class="n" data-page-node-id="W4dkQ66EiF6OhBHbuPM7nd">CPA</th><th data-page-node-id="J7hTPeF4usaN3Ru8FzIjQm">动作</th></tr></thead>
+    <tbody data-page-node-id="cUZKsJdvPxsmraOgzfeEpH">
+      <tr data-page-node-id="S3vxFETKXohnALQOSAa1oS"><td class="k" data-page-node-id="UCfgqmLATKge5FATejBvfo">Clogs · AW · All Audiences</td><td class="n" data-page-node-id="46uoTqVg11Lh4STD7O4QDu">$536</td><td class="n" data-page-node-id="lkGlxyjD6tpeEjmLMJDEZW">$10,562</td><td class="n" data-page-node-id="je5cck15J82xcwyMvD3Va7">19.69</td><td class="n" data-page-node-id="pyXTxdbm2Erscg4xrfOkAO">23.94</td><td class="n" data-page-node-id="PTIBZw6as3NRo5dzVf58Av">443</td><td class="n" data-page-node-id="U5T0YqpyWC6CLEtBKnGJJ6">65.7%</td><td class="n" data-page-node-id="cyshTJFU2yYPb7bQAtH9xF">$1.21</td><td data-page-node-id="peHASZLoldR76hg4DdQX46"><span class="tag t-good" data-page-node-id="RUUNqi3f9rjszwp6GmMjEH">明星 · 立即加预算</span></td></tr>
+      <tr data-page-node-id="saK0Vj8Sm6rbmVJk5ESqgz"><td class="k" data-page-node-id="juvezJAW73cSBOpyKYCrir">Toddler · CS · Remarketing P+</td><td class="n" data-page-node-id="LB5IDsWZFT3KUgjKtNfIHJ">$1,161</td><td class="n" data-page-node-id="enXALlEbDJ0xwj37KsCVKX">$13,532</td><td class="n" data-page-node-id="kHj2dtgtc5FQXjvCxORO3S">11.66</td><td class="n" data-page-node-id="qIWTMmdw0XXYqDKennlkQl">13.78</td><td class="n" data-page-node-id="S5HLfvTWTcAsAKFt11DgwD">376</td><td class="n" data-page-node-id="QAmPNolObd5NMBmnjdguaN">45.7%</td><td class="n" data-page-node-id="tXQIqzMBk6VBfqrZbtDKg4">$3.09</td><td data-page-node-id="svLmItFAxFeqHeYxzh5z8E"><span class="tag t-warn" data-page-node-id="8fpyRmOVH0k05HmlIQ0hoo">花费最大，NTB 偏低</span></td></tr>
+      <tr data-page-node-id="NJRjIiXH290GXedxTbzRCj"><td class="k" data-page-node-id="uy3DKgbotrnKCpaWyoD5vP">Clogs · CS · SIM</td><td class="n" data-page-node-id="F0enOKkr71jQGlRAEC4uGv">$135</td><td class="n" data-page-node-id="CYoGfXfUNnlGfbwHtbXrXM">$1,463</td><td class="n" data-page-node-id="pUpPQPvAWQ12iZTclvpBeK">10.80</td><td class="n" data-page-node-id="sd5Efuo9RFAQWiDxjcoKcW">14.61</td><td class="n" data-page-node-id="tSSlNydEbKeXU27dlC5O7u">70</td><td class="n" data-page-node-id="taAGIiE1VufUd4rjW3JunM">67.1%</td><td class="n" data-page-node-id="EateyuykxaWYbGDzC4Gcyg">$1.94</td><td data-page-node-id="dTLcK1o6Fhh2CaKemjqN9g"><span class="tag t-good" data-page-node-id="u4VrzBUSqvJpl5BT5CxTWx">加预算</span></td></tr>
+      <tr data-page-node-id="jk2oQUdkx2DJ34mg5Tgj3A"><td class="k" data-page-node-id="CexQcUDOqy0d78H3CljGBX">Clogs · CS · Customer Acquisition P+</td><td class="n" data-page-node-id="awFghiBlABfCEYyfo4q3Tx">$341</td><td class="n" data-page-node-id="DHYNH8iqHOePTTeLTDJLwj">$3,553</td><td class="n" data-page-node-id="cmdIl2MmX1aJjpezMSiTii">10.41</td><td class="n" data-page-node-id="Anfy7DLEsBRVvn23K88rt2">15.19</td><td class="n" data-page-node-id="YaCDLsorCYJatHflgNsYp9">190</td><td class="n" data-page-node-id="UX9omNwjD5eSluJiz7E6mN">68.9%</td><td class="n" data-page-node-id="73DNvAzRP00K3WdwOOEYQ2">$1.80</td><td data-page-node-id="ygAMnUtsYjazxXyEhjwpYP"><span class="tag t-good" data-page-node-id="T2JIXLxYHCmzud6bn486kd">加预算</span></td></tr>
+      <tr data-page-node-id="CHu9wPyY1HtWYJ2d7Gb3Jb"><td class="k" data-page-node-id="agiA4KQ5zGKDmCFXMatQ70">Toddler · CS · Customer Acquisition P+</td><td class="n" data-page-node-id="2Kh1HB7EUaer58n407mE2v">$1,134</td><td class="n" data-page-node-id="rMN8rCiDwqtND2ZQzAawNM">$10,335</td><td class="n" data-page-node-id="3JofBrfxZhKt6OesO1uqO6">9.11</td><td class="n" data-page-node-id="YcO3GLi8hMgHZTCD3dqwSX">11.76</td><td class="n" data-page-node-id="DmXSPTC2motP7K1V7HonFw">300</td><td class="n" data-page-node-id="YsWqjlBnsp7V6ywoRA7rXz">36.0%</td><td class="n" data-page-node-id="m5HhLJLmvH8NO1inqyFhVF">$3.78</td><td data-page-node-id="v4G1i9VrwdcrO17xT3IBwp"><span class="tag t-warn" data-page-node-id="UFx6vLt4oJE2INHk6pJN2b">NTB 仅 36%，拓新效率低</span></td></tr>
+      <tr data-page-node-id="p7GLEJn9FCJLfZl8zYUgzR"><td class="k" data-page-node-id="66Atilp9YfErK9msRAb3uJ">Toddler · CS · SIM</td><td class="n" data-page-node-id="d0htdjElrIKVkE7LXEfhlZ">$202</td><td class="n" data-page-node-id="hGlnYn2HrdIgpfZKlm9pBq">$1,802</td><td class="n" data-page-node-id="m747Kp99ltCIGFHWL0hy4G">8.91</td><td class="n" data-page-node-id="MnwaSEXer9yZ3D9EqJEABM">10.35</td><td class="n" data-page-node-id="Qjp7VxD3haGUBEVikO46ju">52</td><td class="n" data-page-node-id="qiMwZ3Bu6rSDZ2D2V48uDi">40.4%</td><td class="n" data-page-node-id="UAezEU76tszyOqInvJTgMe">$3.89</td><td data-page-node-id="DtEYNJ0I3MSWTRMwqIXhgE"><span class="tag t-neu" data-page-node-id="9qny1Us5ChF0XFcBPHB13H">观察</span></td></tr>
+      <tr data-page-node-id="xhznKrEY4cNbmVeTn8HdRc"><td class="k" data-page-node-id="AnNbyLSK3moT3SiHapQucG">Toddler · CS · CMP</td><td class="n" data-page-node-id="mTnW9boNzpGTitifrIpkEd">$450</td><td class="n" data-page-node-id="Bw4WwkR8AkYH9uKxmIKK7D">$3,851</td><td class="n" data-page-node-id="05qu3jum56ArBHoVAkxcH6">8.56</td><td class="n" data-page-node-id="7NakBlViG1cvCpchOC2CS9">12.20</td><td class="n" data-page-node-id="xD9HoD6REMCaiJtz08tiVb">133</td><td class="n" data-page-node-id="qygQaQMHgaMpAYPFAVtGlv">48.9%</td><td class="n" data-page-node-id="YohzRoxri2WD0ciPQAq8lo">$3.38</td><td data-page-node-id="M87HrFvn8sajdRWQG5JRRG"><span class="tag t-neu" data-page-node-id="TVOvl78QAp3rrsECpAMvv1">观察</span></td></tr>
+      <tr data-page-node-id="M3MeFLxtjWgYACC0fDQTRg"><td class="k" data-page-node-id="y5HxhLhFlIF6y2qR75Q97L">Clogs · CS · Remarketing P+</td><td class="n" data-page-node-id="wGKXSxHuoGVcpDPcxYcnBW">$306</td><td class="n" data-page-node-id="9OtdWbQOzDrsys7nvFZJz2">$2,278</td><td class="n" data-page-node-id="pMtuTv0R62f02rSCMz9irs">7.45</td><td class="n" data-page-node-id="5eUX42FUtz1gz7JEsKUxDP">10.92</td><td class="n" data-page-node-id="ghH5tiqk5PfwIr3PaQp1dS">111</td><td class="n" data-page-node-id="6OLeHF71ZiN3AKjfavECsl">72.1%</td><td class="n" data-page-node-id="a36XvRy311FcLGfK9T92QD">$2.76</td><td data-page-node-id="w8exLtRAUZW8ocWkhvNElz"><span class="tag t-neu" data-page-node-id="3mMzPLnIH4ZYFWEknj2skL">NTB 高，保留</span></td></tr>
+      <tr data-page-node-id="SnDVxm6AXBFNdfeXvlrGzY"><td class="k" data-page-node-id="SblwdCz4Fv7MWAQfpB81bL">Clogs · CS · CMP</td><td class="n" data-page-node-id="3UWGDpB5CVKooBinXHTvaF">$134</td><td class="n" data-page-node-id="4DrwVoyeECrieE1whiOwue">$659</td><td class="n" data-page-node-id="GjxntdHsISIjm5LxbqbBBs">4.91</td><td class="n" data-page-node-id="g6qCgFbySQaazeTNeghhH9">8.12</td><td class="n" data-page-node-id="K5zVHKeA9KeDYMthByYDze">28</td><td class="n" data-page-node-id="9g3lHmKoQJkMF3vEMh1VhG">75.0%</td><td class="n" data-page-node-id="qH6ePVL0HsRoILSr66D4Jz">$4.79</td><td data-page-node-id="DeYJG0iXG23l4p3X7mlTjD"><span class="tag t-warn" data-page-node-id="VsWxwrHPaOlE7rNTLnWjef">CPA 偏高</span></td></tr>
+      <tr data-page-node-id="J9Ok1lhcc7gHqSoQ8XnNXN"><td class="k" data-page-node-id="iN6bmebcS14to2ykWOgiM1">Clogs · AW · Mules and Clogs · CPDPV</td><td class="n" data-page-node-id="EsyOug8fcVfqlGZsQcqyft">$114</td><td class="n" data-page-node-id="HxbmZLuyGoxxIf08GHCGUP">$272</td><td class="n" data-page-node-id="Jby0GcNgAPgHQxQaE7fOiB">2.38</td><td class="n" data-page-node-id="tU7182riXqmBtrOvHjIban">6.20</td><td class="n" data-page-node-id="0hdcA4PepzgIWGdi3GGCwN">11</td><td class="n" data-page-node-id="49FObcPKjhbdPimj3ij8xs">81.8%</td><td class="n" data-page-node-id="BRs9GchWHdtmX9rT92mZ2o">$10.39</td><td data-page-node-id="v16EZLRhoD8yljQry78MmS"><span class="tag t-bad" data-page-node-id="2mmS9Noi0mDT2J5Xbpx2Bn">CPA $10.39 · 砍</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <p data-page-node-id="9xO6moj0t8kfoXbuyibtz5"><strong data-page-node-id="2zFrxWUFGrvKZZF9DzTFae">最刺眼的一行</strong>：ROAS 19.69 的 <code data-page-node-id="YBJG6RIf8OiXxXHckwxK46">Clogs · AW · All Audiences</code> 只花了 $536（占总盘 11.9%），而 ROAS 9.11 的 <code data-page-node-id="DF3eHGsrL2MVp6Mqv32Dsy">Toddler · CS · Customer Acquisition</code> 花了 $1,134。<strong data-page-node-id="J6AneopyYSE4r9isV6O32A">钱又一次流向了效率更低的地方。</strong></p>
+</section>
+
+<!-- 3 -->
+<section data-page-node-id="dcXkamZ6m4inhz8V8YEmCK">
+  <h2 class="sec" data-page-node-id="V4QPiL808ze3E6SpVPlmUH"><span class="n" data-page-node-id="kWwwjYUQ8M19IaMEl3voJJ">§ 3</span> 漏斗阶段：Awareness 是被埋没的优等生</h2>
+  <p class="lead" data-page-node-id="VqeoSd5tk0YgEK71vhrJFC">按活动名里的阶段标识（AW = Awareness 认知 / CS = Consideration 考虑）拆分，结果反直觉。</p>
+
+  <div class="tw" data-page-node-id="nZs9h7UIfWiOwGsJB3i1fB"><table data-page-node-id="R8ZL5wxomXCP9Y6OxXFL61">
+    <thead data-page-node-id="dsOlkICUA2iRrqWgaFxYDx"><tr data-page-node-id="RrUOrq8gjupa5p3OVkmfZv"><th data-page-node-id="ljF4Vni3KjDOtQtekE2MsC">阶段</th><th class="n" data-page-node-id="KO79iPp7qfXRBMrvHGPg8E">花费</th><th class="n" data-page-node-id="l7uDEuAiWjHFXS7lQvv7mb">预算占比</th><th class="n" data-page-node-id="iZHeDtz984iqAn8B4pDCLg">ROAS</th><th class="n" data-page-node-id="zdu7PC72f7dzewFrwQ7YXD">长期 ROAS</th><th class="n" data-page-node-id="PAJF4PpF84H5bz6KZpmxnt">订单</th><th class="n" data-page-node-id="FYoCHx3VORPFPfsonACmkM">NTB 占比</th><th class="n" data-page-node-id="7P5qQiYl5E0qOyDfVGSFVz">CPA</th><th class="n" data-page-node-id="mtd9WYYFVTWSIKj1HU93W6">可见率</th></tr></thead>
+    <tbody data-page-node-id="uzTetcNjX9xD8DA5oED3YC">
+      <tr data-page-node-id="PVlE5Qiom2aMYF8zDBCcCs"><td class="k" data-page-node-id="eh3hF8UXdK2yiJ72kkZaQA">AW · Awareness</td><td class="n" data-page-node-id="tLROWJqEuKLI7m2LwKYqVp">$651</td><td class="n" data-page-node-id="PNjMG39FhWcwMmFJPW4lI7"><strong data-page-node-id="voJjbXKoHGPIDriLpVJAkh">14.4%</strong></td><td class="n" data-page-node-id="YQtZSsqhAgT7KIEwDiWC54"><strong data-page-node-id="nUKmeJRXr8vDh2MWfBJH2E">16.65</strong></td><td class="n" data-page-node-id="m3UIHzl0DliDBZv7qhF3mw">19.46</td><td class="n" data-page-node-id="ldZlHKkRVKzBF5OOKRHVxe">454</td><td class="n" data-page-node-id="PJrwcQvLbx5g4pFZ0oczQb"><strong data-page-node-id="V6FEB1SNes3CxfDa0B9NYf">66.1%</strong></td><td class="n" data-page-node-id="c7v1dxMeuTI2UKtSdkkF4h"><strong data-page-node-id="AWh2BAzVYMCGosika40F9Q">$1.43</strong></td><td class="n" data-page-node-id="fWoY1gFcxF6jJ8pjJAyTE9"><strong data-page-node-id="fhp6aWulTyqfwl6qKhbuve">45.7%</strong></td></tr>
+      <tr data-page-node-id="R7cdlnchSX36KbYZhFm29N"><td class="k" data-page-node-id="1ZA3ROEUreBxves8GrbZpQ">CS · Consideration</td><td class="n" data-page-node-id="nz4jyOS3JwkEiWYwQptiHD">$3,864</td><td class="n" data-page-node-id="vw11Y3ZemYs028bWEZrwPh">85.6%</td><td class="n" data-page-node-id="dMckWK4R7P0EwFXXBp71jr">9.70</td><td class="n" data-page-node-id="e50zMAKJ8oOq9HbzgLA8Xr">—</td><td class="n" data-page-node-id="exgfGCe8dEhL2R5AWHnX4m">1,260</td><td class="n" data-page-node-id="AOmETjKNdaJgpppVGVogRs">51.2%</td><td class="n" data-page-node-id="fGn7A7wmXJFU1j0nJXyobo">$3.07</td><td class="n" data-page-node-id="Pv5DTnxAvlnZBAerQd04Pz">24.9%</td></tr>
+    </tbody>
+  </table></div>
+
+  <p data-page-node-id="9SxcZrgPiH8yeYdz5rnXce"><strong data-page-node-id="kmUfjkyYJAqCfJJzEKqSwS">AW 层用 14.4% 的预算，跑出 16.65 的 ROAS、66.1% 的 NTB 占比、$1.43 的 CPA、45.7% 的可见率——四个指标全部优于 CS 层。</strong></p>
+
+  <div class="note n-warn" data-page-node-id="HZK3J1T7HmkADv07JTKXX5"><span class="t" data-page-node-id="8oNbbqbZyqEnjhevylNutb">先别激动，这里有个样本量陷阱</span>
+  AW 层只有 2 个活动，其中 <code data-page-node-id="UjmGJK7WQ0xieUDHVldzAr">Clogs · AW · All Audiences</code>（ROAS 19.69）贡献了 97.5% 的 AW 销售额，另一个 <code data-page-node-id="3PF9Pm7RRCjpPoDltLJHPU">Mules and Clogs · CPDPV</code>（ROAS 2.38）是拖后腿的。所以"AW 层优于 CS 层"这个结论，<strong data-page-node-id="4LCbflNRiK3iRnfQjG9rFd">本质是"有一个 AW 活动特别猛"，不能推广成"Awareness 普遍比 Consideration 好"</strong>。<br data-page-node-id="Qtx3WdYIrQBUP5CCuxCaoE">
+  但即使剔除那个差活动，单看 <code data-page-node-id="TEfXCuGRQFEtwlaCnAnppD">Clogs · AW · All Audiences</code>：ROAS 19.69、CPA $1.21、443 单——<strong data-page-node-id="DpNCv8SFS1ezKOkziQEW0j">它是全场 10 个活动里最好的，却只拿到 $536</strong>。这个结论不受样本量影响。
+  </div>
+
+  <h3 data-page-node-id="BBrRJ50AkJGmIdYDVmbgDY">3.1 可见率：被忽略的最大杠杆</h3>
+  <p data-page-node-id="kwHAu7gudck32eNxNk1T7m">WHITIN DSP 的整体可见率只有 <strong data-page-node-id="VGI3g45h6yVJarYDT0QIua">30.8%</strong>，CS 层更是低到 <strong data-page-node-id="yZcPrR4YWJVEfSXvUCIcdL">24.9%</strong>。也就是说——<strong data-page-node-id="cS3jFgDEPkab3yqhTYPn9Q">接近 70% 的展示，用户根本没机会看到</strong>。</p>
+  <div class="grid3" data-page-node-id="3IK2gWHeYXrjgl4XXPdeAG">
+    <div class="card" data-page-node-id="B4uusI7ezil7GUgCJjpyXx"><h4 style="margin-top:0" data-page-node-id="H4PEER8cSVoOGcVv6Wps0R">如果按 CPM 计费</h4><p style="font-size:13.5px;margin:0" data-page-node-id="UwQLKG0cCtOoQlqpnZtoqg">你在为不可见的展示付全价。可见率 30.8% ≈ <strong data-page-node-id="olIxSAdHmMe7XGVgGD1PeZ">70% 的媒体费打了水漂</strong>。改成 <strong data-page-node-id="LInj5LIBV1tcpJs6t84Mh0">vCPM</strong>（只为可见曝光付费）是零风险的改变。</p></div>
+    <div class="card" data-page-node-id="7zZg4wexWzpVVlgSuYH9dy"><h4 style="margin-top:0" data-page-node-id="ylLrjWE8AEla1bYuUqyjGH">如果已是 vCPM</h4><p style="font-size:13.5px;margin:0" data-page-node-id="Ngit0Mu0HMFmuvBGqNwGRB">那说明你在买大量低质量版位（页面折叠下方、MFA 站群）。需要在 DSP 里<strong data-page-node-id="oDKYC1vFsM446coeuirNeC">开第三方 pre-bid 品牌安全 + 屏蔽低质库存</strong>。</p></div>
+    <div class="card" data-page-node-id="pTVUlmqHMTmzoB2DvGQGDc"><h4 style="margin-top:0" data-page-node-id="PqmfYwcCDLp8IzrFYskTTk">量级估算</h4><p style="font-size:13.5px;margin:0" data-page-node-id="43eY2UvAD1QpYosAjo6slK">可见率从 30.8% 提到 55%（行业及格线），等效于<strong data-page-node-id="kPVMZdNaAcRQkAxTNvjn7n">有效 CPM 降低约 44%</strong>——比任何其他优化动作的杠杆都大。</p></div>
+  </div>
+  <div class="note n-bad" data-page-node-id="GK4aSRMC7Emgj00HhIYHIa"><span class="t" data-page-node-id="rSFz06YVxEQsFGx61f8Vxp">P0：先去确认计费方式</span>
+  打开 DSP 后台看这两个活动的计费设置。这是<strong data-page-node-id="NV2rKasCPbE94hjUEyszwK">本报告里唯一一个"什么都不用改、只改一个设置就能省一大笔钱"的动作</strong>，优先级高于所有加预算的讨论。
+  </div>
+</section>
+
+<!-- 4 -->
+<section data-page-node-id="VpBwEPISoire3hjHGklGSk">
+  <h2 class="sec" data-page-node-id="YLqKJ6VF3ZJ9YtCymYksjK"><span class="n" data-page-node-id="WBoQzLBsIbfeBsuBA92WGd">§ 4</span> 加量实验：一次天然对照实验的证据</h2>
+  <p class="lead" data-page-node-id="ZAbmw2ERg6BYyl4FBcN2gh">9 月 3 日，两个品牌的 DSP 日预算同时上调了约 50–70%。这是一次天然对照实验——而对照组给出了很明确的答案。</p>
+
+  <div class="tw" data-page-node-id="mrQTkcY85CehbqGp7aDjLC"><table data-page-node-id="HRjxEcUqWMWKXT7FAVnp5g">
+    <thead data-page-node-id="5pvsz0ET2tSzsNFYXGG4dZ"><tr data-page-node-id="oIgqgrFfRU9ocec3rP8Eb0"><th data-page-node-id="nW2TylaKSNP9YfWudKzMs0">品牌</th><th data-page-node-id="QWfOZf1uHxuNXjiE7sADOC">阶段</th><th class="n" data-page-node-id="87rF35q6aLOVgB0lqidD3m">日均花费</th><th class="n" data-page-node-id="GIcAOvp53YJeOjUYEEyWaV">ROAS</th><th class="n" data-page-node-id="XV4m4kJBuHGGdxVHK0oLhV">日均订单</th><th data-page-node-id="4xZ9XKPd3MJzkBRz4XhS0X">受返校季影响？</th></tr></thead>
+    <tbody data-page-node-id="Q9isqNbAU1AiH2W6LobljL">
+      <tr data-page-node-id="B64s43ATGEFKkrCAO9w3ex"><td class="k" rowspan="2" data-page-node-id="RaX9ToTBNmo1JV1dfc6aPY">WHITIN<br data-page-node-id="kNqdC3VciKiey2BD0ym0fq"><span style="font-weight:400;font-size:12px;color:var(--tx3)" data-page-node-id="FMO1QqRXhMyCL3cCdpo5S6">童鞋+拖鞋</span></td><td data-page-node-id="SvxBpz9nWjHseRRrqiXoor">A · 8/23–9/2</td><td class="n" data-page-node-id="GJAOHJwltx4TM2QVdJ2LGb">$152.72</td><td class="n" data-page-node-id="l6M3DGHazCPfqBE2kf7slf"><strong data-page-node-id="Y9Z2XQKqiCUDobk1ZDnhKj">15.40</strong></td><td class="n" data-page-node-id="XDSNy6mJ60MnEdDC5mFbX0">83.7</td><td rowspan="2" data-page-node-id="VN75FF5G8J1OH2S0V59kuf"><span class="tag t-warn" data-page-node-id="4bqRTi7axJ3KQca7CNQWpD">受影响</span></td></tr>
+      <tr data-page-node-id="qRcxZF86qEBjq729jwQ6CR"><td data-page-node-id="ItT4d5nsaduWcAZ8HYiE9z">B · 9/3–9/8</td><td class="n" data-page-node-id="iONyuEPTwyUTwhpSS6JgDj">$235.44 <span style="color:var(--red)" data-page-node-id="Zhv9mzxbTAl3bRqfcElQuJ">+54%</span></td><td class="n" data-page-node-id="95Cb6cfXwdVeoFDocQgdHg"><strong data-page-node-id="CiItSzo4bVlu9YyXYYdpEd">8.78</strong> <span style="color:var(--red)" data-page-node-id="Mu4zof9UwHgHvHFG5ExYdO">−43%</span></td><td class="n" data-page-node-id="sH8MsCwku3lADLMvAXM21D">76.3 <span style="color:var(--red)" data-page-node-id="bl4DkFhqgZbvLd0RMxxsQG">−9%</span></td></tr>
+      <tr data-page-node-id="iwW9g96c7ZiToye6pGj6nv"><td class="k" rowspan="2" data-page-node-id="EEOFPS90L7EDEihua7vuEQ">BRONAX<br data-page-node-id="9aUG8shGjtdouLmLK572nZ"><span style="font-weight:400;font-size:12px;color:var(--tx3)" data-page-node-id="gQB73zm5UZ7nIVHKLILA4e">拖鞋（对照组）</span></td><td data-page-node-id="sQ2hdbXgcWDKIjIhPmH7rg">A · 8/23–9/2</td><td class="n" data-page-node-id="g6GekJBVzugksQffgt0iuB">$56.20</td><td class="n" data-page-node-id="azrjreIlRMenHz1ZIutIvX"><strong data-page-node-id="kKAYlNwWaxW4S3QQdqOknH">13.95</strong></td><td class="n" data-page-node-id="YEn6hGW5HLd886ebBm2Al0">33.0</td><td rowspan="2" data-page-node-id="elD5mXyMOAKjDChFYW3ULg"><span class="tag t-good" data-page-node-id="NbFePk6zKEcIVSYYSZW5Bw">不受影响</span></td></tr>
+      <tr data-page-node-id="2ZAFOxXieRhV0kQiWbygop"><td data-page-node-id="tGr8lCEIhkmLlQXCsJE7Iz">B · 9/3–9/8</td><td class="n" data-page-node-id="r3W6bMFWn75nzh6V4upHRo">$94.98 <span style="color:var(--red)" data-page-node-id="erj2wxJt4rYCWspzkJxOs1">+69%</span></td><td class="n" data-page-node-id="GeVthbbIcu2cbGQeqkAi8N"><strong data-page-node-id="d7WFgN5yV908QFYkGA2UIb">9.97</strong> <span style="color:var(--red)" data-page-node-id="bfSMKuIfd944Vc9D64k8B9">−29%</span></td><td class="n" data-page-node-id="pCaB1skD4uGTJAWvwqWNjP">40.2 <span style="color:var(--grn)" data-page-node-id="MOJbsrnkhwo6k0GB2HHxyk">+22%</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <p data-page-node-id="hDQrlXJAAB30HxTfZFH0Od"><strong data-page-node-id="BT11jdo72CXmd9AsJiHR2P">关键在 BRONAX 这一行</strong>：它卖拖鞋，跟返校季八竿子打不着。但它跟 WHITIN 同步加量、同步掉效（ROAS −29%）。<strong data-page-node-id="uHUkriE8nD2IJCPsuOWa7r">这排除了"返校季结束导致下滑"的解释，指向同一个原因——加量打崩了效率。</strong></p>
+
+  <div class="note n-warn" data-page-node-id="WFDqSRvDuhr1BnZPpO3Ebr"><span class="t" data-page-node-id="rgAI4BxLHEf5OSyrPrHL07">但真实降幅没有 43% 那么夸张</span>
+  DSP 转化有 1–3 天归因延迟，越靠近报表导出日（9/9）的数据越不完整。证据：<strong data-page-node-id="PX1vHPoELPY0EMj3D2DjoR">9/9 当天 WHITIN ROAS 只有 4.12、BRONAX 4.47</strong>——两个品牌同时腰斩，这不是效率崩溃，是数据没闭合。<br data-page-node-id="x19NXffO7NEgG3brsb8ikq">
+  剔除 9/7–9/9 后重算，WHITIN 阶段 B 的 ROAS 约 <strong data-page-node-id="Ek1E39nMLHRn29fHykd3ZP">9.3–10.0</strong>。所以<strong data-page-node-id="ralSk1tpzEFKgQZMqWUAqo">保守估计真实降幅在 25–35%</strong>，仍然显著，但没有 43% 那么吓人。
+  </div>
+
+  <h3 data-page-node-id="uY7zwniCR6VQ62xR5a1aiM">4.1 这对你意味着什么</h3>
+  <div class="grid2" data-page-node-id="LG7Fn66ekIF0GYw3YkXQn6">
+    <div class="card" style="border-left:3px solid var(--grn)" data-page-node-id="96O9XINKmfmDJLBpFbHfE4">
+      <h4 style="margin-top:0" data-page-node-id="sP69H7bLdstq3Kfym3X0Gc">好消息</h4>
+      <p style="font-size:13.5px;margin:0" data-page-node-id="xSLy39jSNoUTCRFXfNcQWK">ROAS 8.78（即使打折后约 9.3–10.0）仍然是站内 SP（3.91）的 <strong data-page-node-id="bFNR8K7MszZfFTh0uybC1e">2.2–2.5 倍</strong>。<strong data-page-node-id="eQauaog8z0awt0Gdgi5B6n">边际效率下降 ≠ 不该加量</strong>，只是不能再野蛮加。</p>
+    </div>
+    <div class="card" style="border-left:3px solid var(--amber)" data-page-node-id="JFRpepwJaRJcEnqvm2Wk24">
+      <h4 style="margin-top:0" data-page-node-id="6ufG1V9Bip5j6ubp2MODzH">纪律</h4>
+      <p style="font-size:13.5px;margin:0" data-page-node-id="el3vDJYcDegZrxinz7ZV4C"><strong data-page-node-id="ylEKN6aPPIcBaeFjQWlsFe">单次加量 ≤ 20–30%，之后固定观察 5–7 天</strong>再决定下一步。这次一次加 54%，等于跳过了学习期的观察窗口。</p>
+    </div>
+  </div>
+  <p data-page-node-id="MGdL1ww7wdMBGkpYUAqYBk"><strong data-page-node-id="BSm3H6YFBLfRv5f1Bl1KaD">加量的正确顺序</strong>：先修可见率（30.8% → 50%+）→ 再优化活动结构（砍掉 CPA $10.39 的、加码 ROAS 19.69 的）→ <em data-page-node-id="UsqYVFl1GbWDoGwBqQIxjC">最后</em>才加预算。<strong data-page-node-id="1X3UUWaHBUktbd81gdsfX8">顺序反了，你就是在给一个漏水的桶加大水流量。</strong></p>
+</section>
+
+<!-- 5 -->
+<section data-page-node-id="EYW7JXLlaC1ZgGOAh5ElYX">
+  <h2 class="sec" data-page-node-id="qBu2vnDedInrznthBcmjC2"><span class="n" data-page-node-id="ubHNyCqUk8Z7VNX2vsJYWC">§ 5</span> 站内 vs 站外：同一个产品，两个世界</h2>
+  <p class="lead" data-page-node-id="5LCMWJeeD5hem2wqiFv6F8">W81K 和 Y71 同时投了站内和 DSP，这是一次难得的可比对照。</p>
+
+  <div class="tw" data-page-node-id="nDICMDMM0mgEH68LNB9hnd"><table data-page-node-id="5JBgg5OR7WvNx17eJgYMBY">
+    <thead data-page-node-id="0qRVBDCBomCd9nFwyxWHYz"><tr data-page-node-id="hqVJ7kFHizkqxdMcvwFYsZ"><th data-page-node-id="JopHDy01AIBQK3L1DH0stT">产品</th><th data-page-node-id="rI2CLeDLQItz0qMrHl4E5B">渠道</th><th class="n" data-page-node-id="Hut2GAp7JvGhXz53f4sYAq">花费</th><th class="n" data-page-node-id="iXUkxnGgUXSUIqALj9Hdux">ROAS</th><th class="n" data-page-node-id="wA3h7uOij1GfgqEp2BNNgF">CPA</th><th data-page-node-id="Hbv4LcMRP2Dkj7Y2WzvvBx">说明</th></tr></thead>
+    <tbody data-page-node-id="BYaoo0egBSAsEDGFQxPd6l">
+      <tr data-page-node-id="AmdIkEkUhLWjWNw2wfl6fp"><td class="k" rowspan="2" data-page-node-id="glcfiyhqglJdxvcnLpqFdl">W81K<br data-page-node-id="VnaWv64Inc9EfLRpngfpvU"><span style="font-weight:400;font-size:12px;color:var(--tx3)" data-page-node-id="n0mxjCq3D0l3nR18pdEnQM">赤足童鞋 22–37</span></td><td data-page-node-id="caUAMlHGYQl9ssymYLuDdY">站内（XH1-W81K 系列，90 天）</td><td class="n" data-page-node-id="xiAuyp0AehKplpqBE52hhd">$51,704</td><td class="n" data-page-node-id="mShWtHoz8S0GSF9LM34G5b">3.75</td><td class="n" data-page-node-id="8bwNlzxewqOv6zM6E4DGo0">≈ $11.38</td><td data-page-node-id="y5uopBCyFtlJnimt566aLI">CPC $1.11，全店最贵之一</td></tr>
+      <tr data-page-node-id="u6vBCTHAuBdduymI6sUq44"><td data-page-node-id="DTKnHNPMxrYcwgzok5gQQ1">DSP Toddler（27 天）</td><td class="n" data-page-node-id="OE9atbHamjAYHKXk56XeE5">$2,947</td><td class="n" data-page-node-id="FLPYNjpnFSfqiuKNAI5CVE"><strong data-page-node-id="mVxRi7j8fsUU6UuD9gK3SQ">10.02</strong></td><td class="n" data-page-node-id="9BCdU1EZVW0nyCvaAzdOjN"><strong data-page-node-id="iBxBIMi1GztmsJdVOBW3XB">$3.42</strong></td><td data-page-node-id="j7KnfdEeQciMNN6tJH3SOz"><span class="tag t-good" data-page-node-id="JY06y7ghFy2gk4flc6ZAeC">ROAS 2.7 倍 / CPA 30%</span></td></tr>
+      <tr data-page-node-id="FwIS1IqbuPZKsp1boZoCN2"><td class="k" rowspan="2" data-page-node-id="YFRkH3ACaANmH0bk57b8Lo">Y71<br data-page-node-id="7kH7RSzAD0o08mU6M9OVRo"><span style="font-weight:400;font-size:12px;color:var(--tx3)" data-page-node-id="HsvqjhKFfH0Fs75Fkp1WwB">EVA 拖鞋 36–47</span></td><td data-page-node-id="66Vkbg29YiV6CeDVt4z91a">站内（Y71 系列，90 天）</td><td class="n" data-page-node-id="0YPlynmhh5F6hMZAvQIHO4">$65,681</td><td class="n" data-page-node-id="TdI21tqANDgxJZIyVgH1DM">4.08</td><td class="n" data-page-node-id="UYXRezMNyHW2axXrbnvtYs">—</td><td data-page-node-id="Udm5E8vMLkiWfMSB4sU0IQ">其中 XM2-Y71B 花了 $31,374 却只有 ROAS 2.57</td></tr>
+      <tr data-page-node-id="9SgpxBXDO06hl78yOTC1L8"><td data-page-node-id="moER7DWl78QYGGMvhSeS9I">DSP Clogs（27 天）</td><td class="n" data-page-node-id="RKF6AqYPRVLfZkEtKIZdlX">$1,568</td><td class="n" data-page-node-id="1YTNBFXF1fiIih9QMAJWuF"><strong data-page-node-id="SgZvHq8gIKkTZqvRqBd87p">11.98</strong></td><td class="n" data-page-node-id="WKk0Obu5OR8q4QR0Qjtg64"><strong data-page-node-id="EmRWyiEjLIPxlMQiLeLveo">$1.84</strong></td><td data-page-node-id="qc5sfyuoTKEgMG4pC9rP1k"><span class="tag t-good" data-page-node-id="DOF7C7r69JwoMk2cIiewml">ROAS 2.9 倍</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="note n-info" data-page-node-id="ZvFqVEpcij2hOHnKyQ3ux9"><span class="t" data-page-node-id="GYJIIVy9yuycpHbjuw9ajs">为什么 DSP 能做得更好</span>
+  DSP 是<strong data-page-node-id="Dply7b52wibCTAyvAfCjpZ">按人群</strong>买（行为、兴趣、生活方式），CPM 计价；站内 SP 是<strong data-page-node-id="r2Qd8OLajYLLw6NgAhwIlo">按关键词</strong>买，CPC 竞价。在 W81K 这个案例里，站内 CPC 已经卷到 $1.11（全店最贵之一），而 DSP 的 CPA 只有 $3.42——<strong data-page-node-id="JopxOgIyJE3rRDVF8h62pT">说明站内这个词的竞价已经超出它本身的价值了，而 DSP 绕开了这场竞价</strong>。<br data-page-node-id="mgGRti9V19H9L0sSFKH0rd">
+  底部漏斗的过度竞争，使得仅靠 SP 获取新客变得昂贵——现在有数据可以验证了。
+  </div>
+
+  <h3 data-page-node-id="UjYrGPAtq9IGMsWBRxmh7I">5.1 顺手发现：站内 Y71 也有同样的毛病</h3>
+  <div class="tw" data-page-node-id="RsH5rkzXRVRsYTpSOhTOAq"><table data-page-node-id="m8vRg0SJ5gzQ6r329OG9JM">
+    <thead data-page-node-id="thGC0Z7DPya6Eww7coNnkc"><tr data-page-node-id="08D5bWY3WPWEKZnz7iDjJ0"><th data-page-node-id="36ANGHUbcIyQMtOhzpAdB9">站内活动</th><th class="n" data-page-node-id="myBWXJCMcllF9EDLLyDBKC">花费</th><th class="n" data-page-node-id="2XG7zVDxPW5MMncajaZl3Y">ROAS</th><th class="n" data-page-node-id="6SF0Trj5JqFokbc5lEBFNR">CPC</th><th class="n" data-page-node-id="LIyGuZcBUyoiZBRdaBIdyc">NTB 单</th></tr></thead>
+    <tbody data-page-node-id="48rRsX2CiajXvvYKA2sZYq">
+      <tr data-page-node-id="aGh3fHJPQgMNowfBUMAYhM"><td class="k" data-page-node-id="pkSnaMxRFWeF1F0LNwSf28">XM2-Y71B</td><td class="n" data-page-node-id="4fd49ozftDjXYRnYQbuPBb">$31,374</td><td class="n" data-page-node-id="PAUikt4N00iq1yusJyGcXD">2.57</td><td class="n" data-page-node-id="qKorOLjcNWKUACidTHpbxR">$0.80</td><td class="n" data-page-node-id="3CNHwGLs1bDB2NZmKtx2CW">0</td></tr>
+      <tr data-page-node-id="UUlXD05tHpZ54hZsQLDvjN"><td class="k" data-page-node-id="ZmivtlzM0xSrqOxFBMBOnG">XM1-Y71</td><td class="n" data-page-node-id="hH6ilSKL3CM1GXjWeE85Kr">$23,429</td><td class="n" data-page-node-id="m8JUVMoOvUGfqUKPzwJFjX">5.21</td><td class="n" data-page-node-id="fG99KWvk4A4eiiLBYAFKDP">$0.57</td><td class="n" data-page-node-id="rTXO59ZrjJvFoqMUSjZ8lr">0</td></tr>
+      <tr data-page-node-id="MQFMxyp9fFQW8dT5TyGEEs"><td class="k" data-page-node-id="RFwsCku9JT9CiY23SsyrM6">XM1-Y71 头条 crocs 词</td><td class="n" data-page-node-id="dCFnuXxVoInvEpbI1jh9jB">$10,878</td><td class="n" data-page-node-id="LDMI14fajxqRJiaJqeTFmH">5.99</td><td class="n" data-page-node-id="BcgcuUqnKgPukI3UZtNCWa">$0.48</td><td class="n" data-page-node-id="QXP0P3qnmEAaBzZkABGTVs">2,501</td></tr>
+      <tr data-page-node-id="cT5I26rBOtPsfcyxNFiTzf"><td class="k" data-page-node-id="1Cwl0ORm8RCIRbpDvSH9IL">XH1-W81K 头条 back to school / 童鞋系列</td><td class="n" data-page-node-id="JTdlBACrWMGA8lQGIn6mVB">$935</td><td class="n" data-page-node-id="03JGDFrPewq2aeG8D5dLow">1.87</td><td class="n" data-page-node-id="OGymCHIYbaOpIZ2aIdeL5R">$1.60</td><td class="n" data-page-node-id="DOScgny4AOXCltGuc5Xnwg">27</td></tr>
+    </tbody>
+  </table></div>
+  <p data-page-node-id="WII96euUFm8KGZo0hIvlws">又是同一个模式：<strong data-page-node-id="M3vajcqAtQTyxWFyQDTsZq">XM2-Y71B 花了最多的 $31,374，ROAS 只有 2.57</strong>；而投竞品词（crocs）的头条活动 ROAS 5.99 且带来 2,501 个 NTB 单，只花了 $10,878。</p>
+</section>
+
+<!-- 6 -->
+<section data-page-node-id="Ew8mxbNZ6DtZd7ETYmrXGo">
+  <h2 class="sec" data-page-node-id="BXegOf6ZoDiftHG4eBcFWY"><span class="n" data-page-node-id="tNrCgADm4GHsOK1ECv2Afu">§ 6</span> 两个必须确认的疑点</h2>
+
+  <div class="note n-bad" data-page-node-id="uIbwvMXunvFrYOwCe5cwHE"><span class="t" data-page-node-id="zJM1PQng1s7HC9fv9yUWfh">疑点 1：Y71 不是童鞋</span>
+  你说"在投的童鞋产品是 Y71 和 W81K"。按《在售产品.xlsx》（2026-09-08）：<br data-page-node-id="jbuf0JFEeT31oC7xCeYMed">
+  · <strong data-page-node-id="Bc9GiGXcC7Nn4xpFzDv4ja">W81K</strong> = 赤足鞋，码段 <strong data-page-node-id="nvMreTEDsBCwnghrHxUcOh">22–37</strong> → 确实是童鞋 ✓<br data-page-node-id="cbIqhJ4S6slyi9Py0Jcpo4">
+  · <strong data-page-node-id="DUQ4cScplpXFJKwZtT5zrS">Y71</strong> = EVA拖鞋，码段 <strong data-page-node-id="XXIVUv0C7XxISrCSOTtp61">36–47</strong> → 这是<strong data-page-node-id="TePTnSB5uRzpQOQezSDu7D">成人</strong>拖鞋 ✗<br data-page-node-id="H5zl2G5wQxw19u8v22SKt9"><br data-page-node-id="tzHcIHSUOd1cmX3GULHh98">
+  DSP 活动名里的 <code data-page-node-id="5YPLl6G1URNWx8C5VFAKlr">Clogs</code>（洞洞鞋/木底鞋）对应 Y71 更符合产品形态，但码段对不上"童鞋"。<strong data-page-node-id="A03Cw1fnrobBainLRhIkho">可能情况</strong>：①DSP 投的其实是别的款；②Y71 有童款没登记在表里；③活动命名用的是品类词而非款号。<br data-page-node-id="zqTDdlSJpI7DNzFPhzDUFh">
+  <strong data-page-node-id="2wVKmET0Qsty4QHHuKgEG4">为什么重要</strong>：如果后续要配 Brand+ 的 featured ASIN，映射错了会直接投偏人群。请确认后再动手。
+  </div>
+
+  <div class="note n-warn" data-page-node-id="nOK0c8DtgAo3FRIAI4zKzB"><span class="t" data-page-node-id="HWOFiZ2CbB5hR44rCz3sls">疑点 2：Toddler 活动里到底投了哪些 ASIN？</span>
+  活动名叫 "Toddler"（幼儿，通常对应 22–33 码段），而 W81K 是 22–37。同时 <strong data-page-node-id="VDrtJKGwlmU5uxjZEzJP2Y">W8K2（22–33）、W8K3（24–37）、W8K6（28–37）、W8K7（28–37）全部落在这个范围</strong>。<br data-page-node-id="KEyRhYG5IJ3V0pDzFQRCu8">
+  如果 Toddler 活动投的是整个童鞋系列，那 <strong data-page-node-id="VymmfKZSuRaHy1LM6YoG8K">W8K2 已经在 DSP 里了</strong>——你上一轮说的"想用 W8K2 做 DSP 品牌投放"，可能已经在跑，只是你不知道。<br data-page-node-id="8rM1CDPY0obPHkMnAM3Ty1">
+  <strong data-page-node-id="k8sC5WTCMwVrB7kIFnMsSy">请确认</strong>：Toddler 活动的 ASIN 清单是只有 W81K，还是整个童鞋系列？这直接决定下一步是该"新建 W8K2 活动"还是"优化现有活动"。
+  </div>
+</section>
+
+<!-- 7 -->
+<section data-page-node-id="RE4Q5rlPj3G3YTlU7MkXBC">
+  <h2 class="sec" data-page-node-id="7YpRBpHews5uEXJxUAHLXD"><span class="n" data-page-node-id="36RU4RIwmNqFS9WPwNvUu8">§ 7</span> 行动清单</h2>
+  <div class="acts" data-page-node-id="6wFYG5iw5B0ju4rhU1F74S">
+    <div class="act" data-page-node-id="wvZyzZwCVooyAR52oEYTCN">
+      <div class="pn p0" data-page-node-id="B8LuBF3aUXaYR6jVsytkH3">P0</div>
+      <div class="bd" data-page-node-id="umzb5SYg8doQChyuQWQhZr">
+        <h4 data-page-node-id="lLkWgMlZISI3m87JXJKFTv">确认 DSP 计费方式是 CPM 还是 vCPM</h4>
+        <p data-page-node-id="0uDngoTHp25n2hPT0UGNIh">可见率只有 30.8%（CS 层 24.9%）。若为 CPM，改 vCPM 是零风险、立竿见影的省钱动作。若已是 vCPM，则需开 pre-bid 品牌安全 + 屏蔽低质库存。<strong data-page-node-id="FGnC1He3tUd77OgFcA2cqv">在搞清楚之前，不要加任何预算。</strong></p>
+      </div>
+    </div>
+    <div class="act" data-page-node-id="NoUAtgdf9yK4U3JEEvXPE7">
+      <div class="pn p0" data-page-node-id="bdcPxf9vTQTyZUMBTpe6n5">P0</div>
+      <div class="bd" data-page-node-id="yrzqTvEvC4ClX3GlK6qrHR">
+        <h4 data-page-node-id="G4VCMEbmKbV3d5r5cIlmfC">确认 Toddler / Clogs 活动对应的 ASIN 清单</h4>
+        <p data-page-node-id="TIMFI1ZrubsU8leQnG9CgG">特别是：Toddler 是否包含 W8K2 等全童鞋系列？Y71（36–47 成人码）为何归在"童鞋"？映射确认前不要配 Brand+ 的 featured ASIN。</p>
+      </div>
+    </div>
+    <div class="act" data-page-node-id="1haDUg5p9EOrpSUlpatJOA">
+      <div class="pn p0" data-page-node-id="VFwL1TR4Nuw744M5yGASdy">P0</div>
+      <div class="bd" data-page-node-id="k5k6vlSkjEaeJwmLsr0gzg">
+        <h4 data-page-node-id="KvYXHFBJhJHNJZFuleTmKB">把 DSP 报告纳入日常入库</h4>
+        <p data-page-node-id="FNw942532V17SVzG5FNg05">RDS 的 <code data-page-node-id="cBfhXMJL5WmHTFvNDymTw4">campaign_daily</code> 只有 SP/SB/SD/STV，DSP 完全缺失。<strong data-page-node-id="gHUHToWCHp1O3a06aNwLxI">没有它，所有分析都只看半张牌。</strong>建议加一张 <code data-page-node-id="yiAd044mxnfNKaVax3UxsA">dsp_campaign_daily</code>（按 广告主账户 + 活动编号 + 日期 建主键，含长期销售/NTB 字段）。</p>
+      </div>
+    </div>
+    <div class="act" data-page-node-id="jPP2AyFF13oecYd6F0XboW">
+      <div class="pn p1" data-page-node-id="spFQBoVK8H7rFBmuGzLoWp">P1</div>
+      <div class="bd" data-page-node-id="AQfaJvEVcrnhKkobcjjGwp">
+        <h4 data-page-node-id="SH5X2En3DAFYLzC2RvgwKi">加码 ROAS 19.69 的明星活动</h4>
+        <p data-page-node-id="2Hwvia6DB8U0PjGxN9KAux"><code data-page-node-id="YC2U2T9alc5MZZl1liDbqq">Clogs · AW · All Audiences</code>：ROAS 19.69、长期 ROAS 23.94、CPA $1.21、443 单，却只花了 $536（占总盘 11.9%）。<strong data-page-node-id="rV8YTg2CqaRPFDi6XaQ7FH">按 20–30% 步进加预算，观察 5–7 天</strong>，别一次翻倍。</p>
+      </div>
+    </div>
+    <div class="act" data-page-node-id="APsLNe0trTCqjZEffuC9XG">
+      <div class="pn p1" data-page-node-id="SnBO1MRpmkhD8nbTGw5kER">P1</div>
+      <div class="bd" data-page-node-id="PLwXh3av8kGkAiMp3bNyNf">
+        <h4 data-page-node-id="JraVVb9nYYCfuxPsuvFuM6">砍掉 CPA $10.39 的活动</h4>
+        <p data-page-node-id="sNb7lnBBZ9ftZDfAfCGV30"><code data-page-node-id="kLHuTqTQFt2FFRX5ZinZ4g">Clogs · AW · Mules and Clogs · CPDPV</code>：ROAS 2.38、CPA $10.39、11 单。是全场唯一明显不达标的。<code data-page-node-id="xbMSm0JQUiOqBs2YTlQt7Z">Clogs · CS · CMP</code>（ROAS 4.91 / CPA $4.79）列入观察，两周内不改善也砍。</p>
+      </div>
+    </div>
+    <div class="act" data-page-node-id="Hq2C6alCx6eLyEYccIAt8T">
+      <div class="pn p1" data-page-node-id="lbHvz4k902EcvVVonSiV3o">P1</div>
+      <div class="bd" data-page-node-id="KxMImJqsauVWPsgK9448JM">
+        <h4 data-page-node-id="WYRGb1PhnSXgr8Rg2RMVbY">调 Toddler 的受众结构，不是加它的预算</h4>
+        <p data-page-node-id="93Lq2HJDIBQfwaWJqZFohl">Toddler 的 NTB 只有 42.5%，因为 Remarketing 占了 $1,161 / 39%。<strong data-page-node-id="tHHGufrGDgJYqlIo4ojqOy">把再营销的份额压到 20–25%，把钱挪到 Customer Acquisition</strong>——否则你是在反复触达已知人群，做不了品类扩张。</p>
+      </div>
+    </div>
+    <div class="act" data-page-node-id="AKq6UVmzdRdpks95oNSiQl">
+      <div class="pn p2" data-page-node-id="zXkiAQQubMBUhSnyav08VS">P2</div>
+      <div class="bd" data-page-node-id="vy3WYAuNQ9SBGtvxqDgKrE">
+        <h4 data-page-node-id="Zlsix2FnBQkmuo6ROM5SYe">等 9/3–9/9 归因闭合后重算</h4>
+        <p data-page-node-id="bIELIHUyd6hhsAAWvyUoXB">9/9 的 ROAS 4.12 明显是数据未闭合。<strong data-page-node-id="xU7tPGcMDLOfZTEI7Np2Fy">9 月 15 日后重拉一次报表</strong>，用完整数据重新评估加量的真实影响，再决定后续节奏。</p>
+      </div>
+    </div>
+    <div class="act" data-page-node-id="86nIs1jTQ3BDg0XPgpm0Px">
+      <div class="pn p2" data-page-node-id="5hUrmS9CHCEzefzqqrr3Bm">P2</div>
+      <div class="bd" data-page-node-id="COCP2kmatg7EQEj4JmeJA1">
+        <h4 data-page-node-id="6MjGdHp0buCjhggRa2reoU">把 DSP 的"长期 ROAS"引入评估体系</h4>
+        <p data-page-node-id="EAIvrQpewHbRTCFchYFNSz">站内报表没有这个字段。DSP 的价值有 25–34% 不在即时 ROAS 里。<strong data-page-node-id="SWxqqMh8dqLlnQU4EhfZTK">建议所有 DSP 汇报统一用长期 ROAS 作为主指标</strong>，否则每一次复盘中品牌广告都会被低估。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="note n-good" data-page-node-id="QViaO3fvJoq8i8LcLwQrqT"><span class="t" data-page-node-id="wlrAdusFUM5Ovdy8YQEDbj">一句话总结</span>
+  DSP 不是"要不要上"的问题——<strong data-page-node-id="NA7lLlWyk8wcHn7YdEvyRe">它已经跑通了，而且是目前全渠道效率最高的那个</strong>。现在的问题不是证明它有用，而是：<strong data-page-node-id="VApqEF2lFggX6t9BplTEm5">①别再用错误的方式为看不见的展示付钱（可见率 30.8%）；②别再把钱给效率低的那一半（Clogs vs Toddler、明星活动 vs 大花费活动）；③别再野蛮加量（一次 +54% 换来 −29%~−43%）</strong>。修完这三点，再把预算从 SP 那边搬过来。
+  </div>
+</section>
+
+<footer data-page-node-id="QEoiRefIrztG9Y6SnfUtdi">
+  数据源：《DSP_广告活动_30D_日期.csv》（391 行，2026-08-14 ~ 09-09，27 个投放日，3 个广告主账户：WHITIN SNEAKER_US / BRONAX SNEAKER_US / JOOMRA DIRECT_US）；站内对比数据来自 <code data-page-node-id="5GzHVb39MBtzd6DS8cODZx">amazon_ads.core.campaign_daily</code>（2026-07-01 ~ 08-31）与 <code data-page-node-id="5LeEiNc0pxEF60c6DUMEYe">core.subscribed_product_cpo_daily</code>（近 90 天）。<br data-page-node-id="3ZCl6u9EqGBbDXw4y4MZzO">
+  口径提醒：DSP 与站内时间窗口不同（27 天 vs 90 天）、归因方式不同（DSP 含 view-through）、销售口径不同（DSP 为品牌全口径）。9/7–9/9 数据受归因延迟影响偏低，阶段 B 的 ROAS 已做保守修正。本报告所有 DSP 数字均由原始 CSV 逐行汇总得出，可复核。
+</footer>
+
+</div>
+</body>
+</html>

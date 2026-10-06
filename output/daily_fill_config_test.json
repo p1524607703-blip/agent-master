@@ -1,0 +1,15 @@
+{
+  "reports": {
+    "business": "/Users/panjinlong/Library/Application Support/ziniaobrowserdatas/ziniao browser/欧德思美站/欧德思业务报告8月25号当天.csv",
+    "advertised_product": "/Users/panjinlong/Library/Application Support/ziniaobrowserdatas/ziniao browser/欧德思美站/欧德思推广的商品8月25号.csv"
+  },
+  "output_dir": "/Users/panjinlong/Documents/agent-master/output",
+  "products": [
+    {
+      "name": "S600",
+      "record_file": "/Users/panjinlong/Documents/agent-master/output/S600广告记录_测试副本.csv",
+      "parent_asin": "B0H41HL3M6",
+      "campaign_keyword": "S600"
+    }
+  ]
+}

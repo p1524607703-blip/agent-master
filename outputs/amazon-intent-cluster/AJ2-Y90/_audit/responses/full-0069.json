@@ -1,0 +1,2181 @@
+{
+  "records": [
+    {
+      "source_term": "arched sandals for women",
+      "normalized_term": "arched sandals for women",
+      "term_id": "b5e325b7f915eac2",
+      "query_kind": "keyword",
+      "language": "en",
+      "primary_domain": "clothing_shoes_jewelry",
+      "secondary_domain": [],
+      "product_type": [
+        "sandal"
+      ],
+      "audience_intent": [
+        "women"
+      ],
+      "function_intent": [
+        "arch_support"
+      ],
+      "capability_intent": [
+        "arch_support"
+      ],
+      "event_intent": [],
+      "location_intent": [],
+      "body_need_intent": [],
+      "time_intent": [],
+      "substitute_intent": [],
+      "complement_intent": [],
+      "latent_task": "用户希望购买带有足弓支撑设计的女士凉鞋，满足日常穿着的足部舒适需求。",
+      "intent_stage": "consideration",
+      "evidence_type": [
+        "explicit",
+        "page_validated"
+      ],
+      "confidence_level": "high",
+      "intent_cluster": "womens_arch_support_sandals",
+      "routing_action": "cluster_route",
+      "field_evidence": {
+        "product_type": [
+          {
+            "value": "sandal",
+            "evidence_type": "explicit",
+            "source_span": "sandals",
+            "fact_ids": [],
+            "rationale": ""
+          }
+        ],
+        "audience_intent": [
+          {
+            "value": "women",
+            "evidence_type": "explicit",
+            "source_span": "women",
+            "fact_ids": [],
+            "rationale": ""
+          },
+          {
+            "value": "women",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "title_womens_flip_flop"
+            ],
+            "rationale": "该槽位与商品基准中的明示页面事实一致。"
+          }
+        ],
+        "capability_intent": [
+          {
+            "value": "arch_support",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "arch_support"
+            ],
+            "rationale": "arched指足弓支撑功能"
+          },
+          {
+            "value": "arch_support",
+            "evidence_type": "inferred",
+            "source_span": "",
+            "fact_ids": [],
+            "rationale": "该能力由搜索词表达的任务或问题推断；页面事实仅用于验证商品承接。"
+          }
+        ],
+        "primary_domain": [
+          {
+            "value": "clothing_shoes_jewelry",
+            "evidence_type": "inferred",
+            "source_span": "",
+            "fact_ids": [],
+            "rationale": "该值由搜索词整体语义推断，未作为页面明示属性。"
+          }
+        ]
+      },
+      "ambiguity_flags": [],
+      "asin_fit": "match",
+      "asin_fit_evidence": [
+        "title_womens_flip_flop",
+        "arch_support",
+        "style_flip_flop"
+      ],
+      "review_status": "accepted",
+      "schema_version": "1.0.0",
+      "prompt_version": "1.1.0",
+      "model_name": "deepseek/deepseek-v4-pro",
+      "run_id": "aj2-y90-20260714T234810-0bea2f52"
+    },
+    {
+      "source_term": "womens flip flops white",
+      "normalized_term": "womens flip flops white",
+      "term_id": "d73366ace0567cd6",
+      "query_kind": "keyword",
+      "language": "en",
+      "primary_domain": "clothing_shoes_jewelry",
+      "secondary_domain": [],
+      "product_type": [
+        "flip_flop"
+      ],
+      "audience_intent": [
+        "women"
+      ],
+      "function_intent": [],
+      "capability_intent": [],
+      "event_intent": [],
+      "location_intent": [],
+      "body_need_intent": [],
+      "time_intent": [],
+      "substitute_intent": [],
+      "complement_intent": [],
+      "latent_task": "用户想要购买白色的女士人字拖，用于日常休闲穿着。",
+      "intent_stage": "high_intent",
+      "evidence_type": [
+        "explicit",
+        "page_validated"
+      ],
+      "confidence_level": "high",
+      "intent_cluster": "womens_white_flip_flops",
+      "routing_action": "cluster_route",
+      "field_evidence": {
+        "product_type": [
+          {
+            "value": "flip_flop",
+            "evidence_type": "explicit",
+            "source_span": "flip flops",
+            "fact_ids": [],
+            "rationale": ""
+          },
+          {
+            "value": "flip_flop",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "style_flip_flop"
+            ],
+            "rationale": "该槽位与商品基准中的明示页面事实一致。"
+          }
+        ],
+        "audience_intent": [
+          {
+            "value": "women",
+            "evidence_type": "explicit",
+            "source_span": "womens",
+            "fact_ids": [],
+            "rationale": ""
+          },
+          {
+            "value": "women",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "title_womens_flip_flop"
+            ],
+            "rationale": "该槽位与商品基准中的明示页面事实一致。"
+          }
+        ],
+        "color": [
+          {
+            "value": "white",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "colors_visible"
+            ],
+            "rationale": "该颜色在商品页面可见颜色选择中得到明确支持。"
+          }
+        ],
+        "primary_domain": [
+          {
+            "value": "clothing_shoes_jewelry",
+            "evidence_type": "inferred",
+            "source_span": "",
+            "fact_ids": [],
+            "rationale": "该值由搜索词整体语义推断，未作为页面明示属性。"
+          }
+        ]
+      },
+      "ambiguity_flags": [],
+      "asin_fit": "match",
+      "asin_fit_evidence": [
+        "title_womens_flip_flop",
+        "colors_visible"
+      ],
+      "review_status": "accepted",
+      "schema_version": "1.0.0",
+      "prompt_version": "1.1.0",
+      "model_name": "deepseek/deepseek-v4-pro",
+      "run_id": "aj2-y90-20260714T234810-0bea2f52"
+    },
+    {
+      "source_term": "quick dry sandals women",
+      "normalized_term": "quick dry sandals women",
+      "term_id": "62c768624de59437",
+      "query_kind": "keyword",
+      "language": "en",
+      "primary_domain": "clothing_shoes_jewelry",
+      "secondary_domain": [],
+      "product_type": [
+        "sandal"
+      ],
+      "audience_intent": [
+        "women"
+      ],
+      "function_intent": [
+        "quick_dry"
+      ],
+      "capability_intent": [
+        "quick_dry"
+      ],
+      "event_intent": [],
+      "location_intent": [],
+      "body_need_intent": [],
+      "time_intent": [],
+      "substitute_intent": [],
+      "complement_intent": [],
+      "latent_task": "用户寻找能快速干燥的女士凉鞋，适合涉水或潮湿环境使用。",
+      "intent_stage": "consideration",
+      "evidence_type": [
+        "explicit",
+        "inferred"
+      ],
+      "confidence_level": "medium",
+      "intent_cluster": "womens_quick_dry_sandals",
+      "routing_action": "listing_gap_review",
+      "field_evidence": {
+        "product_type": [
+          {
+            "value": "sandal",
+            "evidence_type": "explicit",
+            "source_span": "sandals",
+            "fact_ids": [],
+            "rationale": ""
+          }
+        ],
+        "audience_intent": [
+          {
+            "value": "women",
+            "evidence_type": "explicit",
+            "source_span": "women",
+            "fact_ids": [],
+            "rationale": ""
+          },
+          {
+            "value": "women",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "title_womens_flip_flop"
+            ],
+            "rationale": "该槽位与商品基准中的明示页面事实一致。"
+          }
+        ],
+        "function_intent": [
+          {
+            "value": "quick_dry",
+            "evidence_type": "explicit",
+            "source_span": "quick dry",
+            "fact_ids": [],
+            "rationale": ""
+          }
+        ],
+        "capability_intent": [
+          {
+            "value": "quick_dry",
+            "evidence_type": "inferred",
+            "source_span": "quick dry",
+            "fact_ids": [],
+            "rationale": "页面未声称快干功能"
+          }
+        ],
+        "primary_domain": [
+          {
+            "value": "clothing_shoes_jewelry",
+            "evidence_type": "inferred",
+            "source_span": "",
+            "fact_ids": [],
+            "rationale": "该值由搜索词整体语义推断，未作为页面明示属性。"
+          }
+        ]
+      },
+      "ambiguity_flags": [],
+      "asin_fit": "partial_match",
+      "asin_fit_evidence": [
+        "title_womens_flip_flop"
+      ],
+      "review_status": "accepted",
+      "schema_version": "1.0.0",
+      "prompt_version": "1.1.0",
+      "model_name": "deepseek/deepseek-v4-pro",
+      "run_id": "aj2-y90-20260714T234810-0bea2f52"
+    },
+    {
+      "source_term": "indoor flip flops for women for back pain",
+      "normalized_term": "indoor flip flops for women for back pain",
+      "term_id": "e15b481a78f8032c",
+      "query_kind": "keyword",
+      "language": "en",
+      "primary_domain": "clothing_shoes_jewelry",
+      "secondary_domain": [],
+      "product_type": [
+        "flip_flop"
+      ],
+      "audience_intent": [
+        "women"
+      ],
+      "function_intent": [
+        "pain_relief"
+      ],
+      "capability_intent": [],
+      "event_intent": [],
+      "location_intent": [
+        "indoor"
+      ],
+      "body_need_intent": [
+        "back_pain"
+      ],
+      "time_intent": [],
+      "substitute_intent": [],
+      "complement_intent": [],
+      "latent_task": "患有背部疼痛的女性用户寻找适合室内穿着的人字拖以缓解不适。",
+      "intent_stage": "consideration",
+      "evidence_type": [
+        "explicit",
+        "inferred"
+      ],
+      "confidence_level": "medium",
+      "intent_cluster": "indoor_flip_flops_back_pain",
+      "routing_action": "listing_gap_review",
+      "field_evidence": {
+        "product_type": [
+          {
+            "value": "flip_flop",
+            "evidence_type": "explicit",
+            "source_span": "flip flops",
+            "fact_ids": [],
+            "rationale": ""
+          },
+          {
+            "value": "flip_flop",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "style_flip_flop"
+            ],
+            "rationale": "该槽位与商品基准中的明示页面事实一致。"
+          }
+        ],
+        "audience_intent": [
+          {
+            "value": "women",
+            "evidence_type": "explicit",
+            "source_span": "women",
+            "fact_ids": [],
+            "rationale": ""
+          },
+          {
+            "value": "women",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "title_womens_flip_flop"
+            ],
+            "rationale": "该槽位与商品基准中的明示页面事实一致。"
+          }
+        ],
+        "location_intent": [
+          {
+            "value": "indoor",
+            "evidence_type": "explicit",
+            "source_span": "indoor",
+            "fact_ids": [],
+            "rationale": ""
+          }
+        ],
+        "body_need_intent": [
+          {
+            "value": "back_pain",
+            "evidence_type": "explicit",
+            "source_span": "back pain",
+            "fact_ids": [],
+            "rationale": ""
+          }
+        ],
+        "function_intent": [
+          {
+            "value": "pain_relief",
+            "evidence_type": "inferred",
+            "source_span": "back pain",
+            "fact_ids": [],
+            "rationale": "背痛暗示需要缓解疼痛功能"
+          }
+        ],
+        "primary_domain": [
+          {
+            "value": "clothing_shoes_jewelry",
+            "evidence_type": "inferred",
+            "source_span": "",
+            "fact_ids": [],
+            "rationale": "该值由搜索词整体语义推断，未作为页面明示属性。"
+          }
+        ]
+      },
+      "ambiguity_flags": [
+        "back_pain_relief_unverified"
+      ],
+      "asin_fit": "partial_match",
+      "asin_fit_evidence": [
+        "title_womens_flip_flop",
+        "arch_support",
+        "lightweight_breathable"
+      ],
+      "review_status": "accepted",
+      "schema_version": "1.0.0",
+      "prompt_version": "1.1.0",
+      "model_name": "deepseek/deepseek-v4-pro",
+      "run_id": "aj2-y90-20260714T234810-0bea2f52"
+    },
+    {
+      "source_term": "orthopedic thong sandal",
+      "normalized_term": "orthopedic thong sandal",
+      "term_id": "d525f4106776f2b1",
+      "query_kind": "keyword",
+      "language": "en",
+      "primary_domain": "clothing_shoes_jewelry",
+      "secondary_domain": [],
+      "product_type": [
+        "sandal"
+      ],
+      "audience_intent": [],
+      "function_intent": [
+        "orthopedic_support"
+      ],
+      "capability_intent": [
+        "orthopedic_support"
+      ],
+      "event_intent": [],
+      "location_intent": [],
+      "body_need_intent": [
+        "orthopedic"
+      ],
+      "time_intent": [],
+      "substitute_intent": [],
+      "complement_intent": [],
+      "latent_task": "用户需要具有矫形支撑功能的夹趾凉鞋，用于足部健康改善或矫正需求。",
+      "intent_stage": "consideration",
+      "evidence_type": [
+        "explicit",
+        "inferred"
+      ],
+      "confidence_level": "medium",
+      "intent_cluster": "orthopedic_thong_sandals",
+      "routing_action": "listing_gap_review",
+      "field_evidence": {
+        "product_type": [
+          {
+            "value": "sandal",
+            "evidence_type": "explicit",
+            "source_span": "sandal",
+            "fact_ids": [],
+            "rationale": ""
+          }
+        ],
+        "body_need_intent": [
+          {
+            "value": "orthopedic",
+            "evidence_type": "explicit",
+            "source_span": "orthopedic",
+            "fact_ids": [],
+            "rationale": ""
+          }
+        ],
+        "function_intent": [
+          {
+            "value": "orthopedic_support",
+            "evidence_type": "inferred",
+            "source_span": "orthopedic",
+            "fact_ids": [],
+            "rationale": "矫形需求暗示支撑功能"
+          }
+        ],
+        "capability_intent": [
+          {
+            "value": "orthopedic_support",
+            "evidence_type": "inferred",
+            "source_span": "",
+            "fact_ids": [],
+            "rationale": "该值由搜索词整体语义推断，未作为页面明示属性。"
+          }
+        ],
+        "primary_domain": [
+          {
+            "value": "clothing_shoes_jewelry",
+            "evidence_type": "inferred",
+            "source_span": "",
+            "fact_ids": [],
+            "rationale": "该值由搜索词整体语义推断，未作为页面明示属性。"
+          }
+        ]
+      },
+      "ambiguity_flags": [
+        "orthopedic_claim_unverified"
+      ],
+      "asin_fit": "partial_match",
+      "asin_fit_evidence": [
+        "style_thong",
+        "arch_support",
+        "padded_cushioning"
+      ],
+      "review_status": "accepted",
+      "schema_version": "1.0.0",
+      "prompt_version": "1.1.0",
+      "model_name": "deepseek/deepseek-v4-pro",
+      "run_id": "aj2-y90-20260714T234810-0bea2f52"
+    },
+    {
+      "source_term": "white flipflops women",
+      "normalized_term": "white flipflops women",
+      "term_id": "278397970ba6b037",
+      "query_kind": "keyword",
+      "language": "en",
+      "primary_domain": "clothing_shoes_jewelry",
+      "secondary_domain": [],
+      "product_type": [
+        "flip_flop"
+      ],
+      "audience_intent": [
+        "women"
+      ],
+      "function_intent": [],
+      "capability_intent": [],
+      "event_intent": [],
+      "location_intent": [],
+      "body_need_intent": [],
+      "time_intent": [],
+      "substitute_intent": [],
+      "complement_intent": [],
+      "latent_task": "用户想购买白色的女士人字拖鞋用于日常穿着。",
+      "intent_stage": "high_intent",
+      "evidence_type": [
+        "explicit",
+        "page_validated"
+      ],
+      "confidence_level": "high",
+      "intent_cluster": "womens_white_flip_flops",
+      "routing_action": "cluster_route",
+      "field_evidence": {
+        "product_type": [
+          {
+            "value": "flip_flop",
+            "evidence_type": "explicit",
+            "source_span": "flipflops",
+            "fact_ids": [],
+            "rationale": ""
+          },
+          {
+            "value": "flip_flop",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "style_flip_flop"
+            ],
+            "rationale": "该槽位与商品基准中的明示页面事实一致。"
+          },
+          {
+            "value": "flip_flop",
+            "evidence_type": "inferred",
+            "source_span": "",
+            "fact_ids": [],
+            "rationale": "该能力由搜索词表达的任务或问题推断；页面事实仅用于验证商品承接。"
+          }
+        ],
+        "audience_intent": [
+          {
+            "value": "women",
+            "evidence_type": "explicit",
+            "source_span": "women",
+            "fact_ids": [],
+            "rationale": ""
+          },
+          {
+            "value": "women",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "title_womens_flip_flop"
+            ],
+            "rationale": "该槽位与商品基准中的明示页面事实一致。"
+          }
+        ],
+        "color": [
+          {
+            "value": "white",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "colors_visible"
+            ],
+            "rationale": "该颜色在商品页面可见颜色选择中得到明确支持。"
+          }
+        ],
+        "primary_domain": [
+          {
+            "value": "clothing_shoes_jewelry",
+            "evidence_type": "inferred",
+            "source_span": "",
+            "fact_ids": [],
+            "rationale": "该值由搜索词整体语义推断，未作为页面明示属性。"
+          }
+        ]
+      },
+      "ambiguity_flags": [],
+      "asin_fit": "match",
+      "asin_fit_evidence": [
+        "title_womens_flip_flop",
+        "colors_visible"
+      ],
+      "review_status": "accepted",
+      "schema_version": "1.0.0",
+      "prompt_version": "1.1.0",
+      "model_name": "deepseek/deepseek-v4-pro",
+      "run_id": "aj2-y90-20260714T234810-0bea2f52"
+    },
+    {
+      "source_term": "flip flops eva",
+      "normalized_term": "flip flops eva",
+      "term_id": "8c5a904491739bc1",
+      "query_kind": "keyword",
+      "language": "en",
+      "primary_domain": "clothing_shoes_jewelry",
+      "secondary_domain": [],
+      "product_type": [
+        "flip_flop"
+      ],
+      "audience_intent": [],
+      "function_intent": [],
+      "capability_intent": [],
+      "event_intent": [],
+      "location_intent": [],
+      "body_need_intent": [],
+      "time_intent": [],
+      "substitute_intent": [],
+      "complement_intent": [],
+      "latent_task": "用户寻找EVA材质的人字拖，注重材质的轻便与耐用特性。",
+      "intent_stage": "consideration",
+      "evidence_type": [
+        "explicit",
+        "page_validated"
+      ],
+      "confidence_level": "high",
+      "intent_cluster": "eva_flip_flops",
+      "routing_action": "cluster_route",
+      "field_evidence": {
+        "product_type": [
+          {
+            "value": "flip_flop",
+            "evidence_type": "explicit",
+            "source_span": "flip flops",
+            "fact_ids": [],
+            "rationale": ""
+          },
+          {
+            "value": "flip_flop",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "style_flip_flop"
+            ],
+            "rationale": "该槽位与商品基准中的明示页面事实一致。"
+          }
+        ],
+        "material": [
+          {
+            "value": "eva",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "material_eva"
+            ],
+            "rationale": "产品外底材质为EVA"
+          }
+        ],
+        "primary_domain": [
+          {
+            "value": "clothing_shoes_jewelry",
+            "evidence_type": "inferred",
+            "source_span": "",
+            "fact_ids": [],
+            "rationale": "该值由搜索词整体语义推断，未作为页面明示属性。"
+          }
+        ]
+      },
+      "ambiguity_flags": [],
+      "asin_fit": "match",
+      "asin_fit_evidence": [
+        "material_eva",
+        "style_flip_flop"
+      ],
+      "review_status": "accepted",
+      "schema_version": "1.0.0",
+      "prompt_version": "1.1.0",
+      "model_name": "deepseek/deepseek-v4-pro",
+      "run_id": "aj2-y90-20260714T234810-0bea2f52"
+    },
+    {
+      "source_term": "flip flops for women arch support",
+      "normalized_term": "flip flops for women arch support",
+      "term_id": "4449ad67ed5fd04a",
+      "query_kind": "keyword",
+      "language": "en",
+      "primary_domain": "clothing_shoes_jewelry",
+      "secondary_domain": [],
+      "product_type": [
+        "flip_flop"
+      ],
+      "audience_intent": [
+        "women"
+      ],
+      "function_intent": [
+        "arch_support"
+      ],
+      "capability_intent": [
+        "arch_support"
+      ],
+      "event_intent": [],
+      "location_intent": [],
+      "body_need_intent": [],
+      "time_intent": [],
+      "substitute_intent": [],
+      "complement_intent": [],
+      "latent_task": "用户想找具有足弓支撑功能的女士人字拖，用于日常穿着时提供足部舒适。",
+      "intent_stage": "high_intent",
+      "evidence_type": [
+        "explicit",
+        "page_validated"
+      ],
+      "confidence_level": "high",
+      "intent_cluster": "womens_arch_support_flip_flops",
+      "routing_action": "cluster_route",
+      "field_evidence": {
+        "product_type": [
+          {
+            "value": "flip_flop",
+            "evidence_type": "explicit",
+            "source_span": "flip flops",
+            "fact_ids": [],
+            "rationale": ""
+          },
+          {
+            "value": "flip_flop",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "style_flip_flop"
+            ],
+            "rationale": "该槽位与商品基准中的明示页面事实一致。"
+          }
+        ],
+        "audience_intent": [
+          {
+            "value": "women",
+            "evidence_type": "explicit",
+            "source_span": "women",
+            "fact_ids": [],
+            "rationale": ""
+          },
+          {
+            "value": "women",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "title_womens_flip_flop"
+            ],
+            "rationale": "该槽位与商品基准中的明示页面事实一致。"
+          }
+        ],
+        "capability_intent": [
+          {
+            "value": "arch_support",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "arch_support"
+            ],
+            "rationale": "产品具有足弓支撑功能"
+          }
+        ],
+        "primary_domain": [
+          {
+            "value": "clothing_shoes_jewelry",
+            "evidence_type": "inferred",
+            "source_span": "",
+            "fact_ids": [],
+            "rationale": "该值由搜索词整体语义推断，未作为页面明示属性。"
+          }
+        ]
+      },
+      "ambiguity_flags": [],
+      "asin_fit": "match",
+      "asin_fit_evidence": [
+        "title_womens_flip_flop",
+        "arch_support"
+      ],
+      "review_status": "accepted",
+      "schema_version": "1.0.0",
+      "prompt_version": "1.1.0",
+      "model_name": "deepseek/deepseek-v4-pro",
+      "run_id": "aj2-y90-20260714T234810-0bea2f52"
+    },
+    {
+      "source_term": "black plastic flipflops",
+      "normalized_term": "black plastic flipflops",
+      "term_id": "3d56b4a0a7a6c170",
+      "query_kind": "keyword",
+      "language": "en",
+      "primary_domain": "clothing_shoes_jewelry",
+      "secondary_domain": [],
+      "product_type": [
+        "flip_flop"
+      ],
+      "audience_intent": [],
+      "function_intent": [],
+      "capability_intent": [],
+      "event_intent": [],
+      "location_intent": [],
+      "body_need_intent": [],
+      "time_intent": [],
+      "substitute_intent": [],
+      "complement_intent": [],
+      "latent_task": "用户寻找黑色塑料材质的人字拖，日常穿着使用。",
+      "intent_stage": "consideration",
+      "evidence_type": [
+        "explicit",
+        "page_validated"
+      ],
+      "confidence_level": "high",
+      "intent_cluster": "black_flip_flops",
+      "routing_action": "cluster_route",
+      "field_evidence": {
+        "product_type": [
+          {
+            "value": "flip_flop",
+            "evidence_type": "explicit",
+            "source_span": "flipflops",
+            "fact_ids": [],
+            "rationale": ""
+          },
+          {
+            "value": "flip_flop",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "style_flip_flop"
+            ],
+            "rationale": "该槽位与商品基准中的明示页面事实一致。"
+          },
+          {
+            "value": "flip_flop",
+            "evidence_type": "inferred",
+            "source_span": "",
+            "fact_ids": [],
+            "rationale": "该能力由搜索词表达的任务或问题推断；页面事实仅用于验证商品承接。"
+          }
+        ],
+        "color": [
+          {
+            "value": "black",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "colors_visible"
+            ],
+            "rationale": "该颜色在商品页面可见颜色选择中得到明确支持。"
+          }
+        ],
+        "material": [
+          {
+            "value": "plastic",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "material_eva"
+            ],
+            "rationale": "EVA属于塑胶类高分子材料"
+          }
+        ],
+        "primary_domain": [
+          {
+            "value": "clothing_shoes_jewelry",
+            "evidence_type": "inferred",
+            "source_span": "",
+            "fact_ids": [],
+            "rationale": "该值由搜索词整体语义推断，未作为页面明示属性。"
+          }
+        ]
+      },
+      "ambiguity_flags": [],
+      "asin_fit": "match",
+      "asin_fit_evidence": [
+        "style_flip_flop",
+        "colors_visible",
+        "material_eva"
+      ],
+      "review_status": "accepted",
+      "schema_version": "1.0.0",
+      "prompt_version": "1.1.0",
+      "model_name": "deepseek/deepseek-v4-pro",
+      "run_id": "aj2-y90-20260714T234810-0bea2f52"
+    },
+    {
+      "source_term": "black flip flops for women arch support",
+      "normalized_term": "black flip flops for women arch support",
+      "term_id": "6c3d31f490705f02",
+      "query_kind": "keyword",
+      "language": "en",
+      "primary_domain": "clothing_shoes_jewelry",
+      "secondary_domain": [],
+      "product_type": [
+        "flip_flop"
+      ],
+      "audience_intent": [
+        "women"
+      ],
+      "function_intent": [
+        "arch_support"
+      ],
+      "capability_intent": [
+        "arch_support"
+      ],
+      "event_intent": [],
+      "location_intent": [],
+      "body_need_intent": [],
+      "time_intent": [],
+      "substitute_intent": [],
+      "complement_intent": [],
+      "latent_task": "用户想购买黑色且带足弓支撑的女士人字拖，满足日常舒适的穿着需求。",
+      "intent_stage": "high_intent",
+      "evidence_type": [
+        "explicit",
+        "page_validated"
+      ],
+      "confidence_level": "high",
+      "intent_cluster": "womens_black_arch_support_flip_flops",
+      "routing_action": "cluster_route",
+      "field_evidence": {
+        "product_type": [
+          {
+            "value": "flip_flop",
+            "evidence_type": "explicit",
+            "source_span": "flip flops",
+            "fact_ids": [],
+            "rationale": ""
+          },
+          {
+            "value": "flip_flop",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "style_flip_flop"
+            ],
+            "rationale": "该槽位与商品基准中的明示页面事实一致。"
+          }
+        ],
+        "audience_intent": [
+          {
+            "value": "women",
+            "evidence_type": "explicit",
+            "source_span": "women",
+            "fact_ids": [],
+            "rationale": ""
+          },
+          {
+            "value": "women",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "title_womens_flip_flop"
+            ],
+            "rationale": "该槽位与商品基准中的明示页面事实一致。"
+          }
+        ],
+        "capability_intent": [
+          {
+            "value": "arch_support",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "arch_support"
+            ],
+            "rationale": "产品具有足弓支撑"
+          }
+        ],
+        "color": [
+          {
+            "value": "black",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "colors_visible"
+            ],
+            "rationale": "该颜色在商品页面可见颜色选择中得到明确支持。"
+          }
+        ],
+        "primary_domain": [
+          {
+            "value": "clothing_shoes_jewelry",
+            "evidence_type": "inferred",
+            "source_span": "",
+            "fact_ids": [],
+            "rationale": "该值由搜索词整体语义推断，未作为页面明示属性。"
+          }
+        ]
+      },
+      "ambiguity_flags": [],
+      "asin_fit": "match",
+      "asin_fit_evidence": [
+        "title_womens_flip_flop",
+        "arch_support",
+        "colors_visible"
+      ],
+      "review_status": "accepted",
+      "schema_version": "1.0.0",
+      "prompt_version": "1.1.0",
+      "model_name": "deepseek/deepseek-v4-pro",
+      "run_id": "aj2-y90-20260714T234810-0bea2f52"
+    },
+    {
+      "source_term": "best water flip flops women comfort brown",
+      "normalized_term": "best water flip flops women comfort brown",
+      "term_id": "b9001cd58e63e121",
+      "query_kind": "keyword",
+      "language": "en",
+      "primary_domain": "clothing_shoes_jewelry",
+      "secondary_domain": [],
+      "product_type": [
+        "flip_flop"
+      ],
+      "audience_intent": [
+        "women"
+      ],
+      "function_intent": [
+        "comfort"
+      ],
+      "capability_intent": [
+        "water_resistant"
+      ],
+      "event_intent": [],
+      "location_intent": [],
+      "body_need_intent": [],
+      "time_intent": [],
+      "substitute_intent": [],
+      "complement_intent": [],
+      "latent_task": "用户寻找棕色舒适且适合涉水穿着的女士人字拖，并希望在多款中比较选择最优产品。",
+      "intent_stage": "exploration",
+      "evidence_type": [
+        "explicit",
+        "inferred"
+      ],
+      "confidence_level": "medium",
+      "intent_cluster": "womens_water_comfort_flip_flops",
+      "routing_action": "listing_gap_review",
+      "field_evidence": {
+        "product_type": [
+          {
+            "value": "flip_flop",
+            "evidence_type": "explicit",
+            "source_span": "flip flops",
+            "fact_ids": [],
+            "rationale": ""
+          },
+          {
+            "value": "flip_flop",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "style_flip_flop"
+            ],
+            "rationale": "该槽位与商品基准中的明示页面事实一致。"
+          }
+        ],
+        "audience_intent": [
+          {
+            "value": "women",
+            "evidence_type": "explicit",
+            "source_span": "women",
+            "fact_ids": [],
+            "rationale": ""
+          },
+          {
+            "value": "women",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "title_womens_flip_flop"
+            ],
+            "rationale": "该槽位与商品基准中的明示页面事实一致。"
+          }
+        ],
+        "function_intent": [
+          {
+            "value": "comfort",
+            "evidence_type": "explicit",
+            "source_span": "comfort",
+            "fact_ids": [],
+            "rationale": ""
+          },
+          {
+            "value": "comfort",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "arch_support",
+              "padded_cushioning"
+            ],
+            "rationale": "该槽位与商品基准中的明示页面事实一致。"
+          }
+        ],
+        "capability_intent": [
+          {
+            "value": "water_resistant",
+            "evidence_type": "explicit",
+            "source_span": "water",
+            "fact_ids": [],
+            "rationale": ""
+          }
+        ],
+        "color": [
+          {
+            "value": "brown",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "colors_visible"
+            ],
+            "rationale": "该颜色在商品页面可见颜色选择中得到明确支持。"
+          }
+        ],
+        "primary_domain": [
+          {
+            "value": "clothing_shoes_jewelry",
+            "evidence_type": "inferred",
+            "source_span": "",
+            "fact_ids": [],
+            "rationale": "该值由搜索词整体语义推断，未作为页面明示属性。"
+          }
+        ]
+      },
+      "ambiguity_flags": [
+        "water_capability_unverified"
+      ],
+      "asin_fit": "partial_match",
+      "asin_fit_evidence": [
+        "title_womens_flip_flop",
+        "arch_support",
+        "padded_cushioning",
+        "colors_visible"
+      ],
+      "review_status": "accepted",
+      "schema_version": "1.0.0",
+      "prompt_version": "1.1.0",
+      "model_name": "deepseek/deepseek-v4-pro",
+      "run_id": "aj2-y90-20260714T234810-0bea2f52"
+    },
+    {
+      "source_term": "best walking flip flops for travel",
+      "normalized_term": "best walking flip flops for travel",
+      "term_id": "7f8f24f01de71652",
+      "query_kind": "keyword",
+      "language": "en",
+      "primary_domain": "clothing_shoes_jewelry",
+      "secondary_domain": [
+        "sports_outdoors"
+      ],
+      "product_type": [
+        "flip_flop"
+      ],
+      "audience_intent": [],
+      "function_intent": [
+        "walking_comfort"
+      ],
+      "capability_intent": [],
+      "event_intent": [
+        "walking",
+        "travel"
+      ],
+      "location_intent": [],
+      "body_need_intent": [],
+      "time_intent": [],
+      "substitute_intent": [],
+      "complement_intent": [],
+      "latent_task": "用户在比较适合旅行中长时间行走的优质人字拖，注重全天舒适与支撑性。",
+      "intent_stage": "exploration",
+      "evidence_type": [
+        "explicit",
+        "inferred"
+      ],
+      "confidence_level": "medium",
+      "intent_cluster": "walking_travel_flip_flops",
+      "routing_action": "performance_observation",
+      "field_evidence": {
+        "product_type": [
+          {
+            "value": "flip_flop",
+            "evidence_type": "explicit",
+            "source_span": "flip flops",
+            "fact_ids": [],
+            "rationale": ""
+          },
+          {
+            "value": "flip_flop",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "style_flip_flop"
+            ],
+            "rationale": "该槽位与商品基准中的明示页面事实一致。"
+          }
+        ],
+        "event_intent": [
+          {
+            "value": "walking",
+            "evidence_type": "explicit",
+            "source_span": "walking",
+            "fact_ids": [],
+            "rationale": ""
+          },
+          {
+            "value": "travel",
+            "evidence_type": "explicit",
+            "source_span": "travel",
+            "fact_ids": [],
+            "rationale": ""
+          }
+        ],
+        "function_intent": [
+          {
+            "value": "walking_comfort",
+            "evidence_type": "inferred",
+            "source_span": "walking",
+            "fact_ids": [],
+            "rationale": "行走需要舒适支撑功能"
+          }
+        ],
+        "primary_domain": [
+          {
+            "value": "clothing_shoes_jewelry",
+            "evidence_type": "inferred",
+            "source_span": "",
+            "fact_ids": [],
+            "rationale": "该值由搜索词整体语义推断，未作为页面明示属性。"
+          }
+        ],
+        "secondary_domain": [
+          {
+            "value": "sports_outdoors",
+            "evidence_type": "inferred",
+            "source_span": "",
+            "fact_ids": [],
+            "rationale": "该值由搜索词整体语义推断，未作为页面明示属性。"
+          }
+        ]
+      },
+      "ambiguity_flags": [],
+      "asin_fit": "match",
+      "asin_fit_evidence": [
+        "style_flip_flop",
+        "arch_support",
+        "padded_cushioning",
+        "lightweight_breathable",
+        "slip_resistant_grip",
+        "style_outdoor"
+      ],
+      "review_status": "accepted",
+      "schema_version": "1.0.0",
+      "prompt_version": "1.1.0",
+      "model_name": "deepseek/deepseek-v4-pro",
+      "run_id": "aj2-y90-20260714T234810-0bea2f52"
+    },
+    {
+      "source_term": "black flip flops for women with arch",
+      "normalized_term": "black flip flops for women with arch",
+      "term_id": "5cfa7b195acec9cd",
+      "query_kind": "keyword",
+      "language": "en",
+      "primary_domain": "clothing_shoes_jewelry",
+      "secondary_domain": [],
+      "product_type": [
+        "flip_flop"
+      ],
+      "audience_intent": [
+        "women"
+      ],
+      "function_intent": [
+        "arch_support"
+      ],
+      "capability_intent": [
+        "arch_support"
+      ],
+      "event_intent": [],
+      "location_intent": [],
+      "body_need_intent": [],
+      "time_intent": [],
+      "substitute_intent": [],
+      "complement_intent": [],
+      "latent_task": "用户想购买黑色且带足弓设计的女士人字拖，满足日常舒适穿着需求。",
+      "intent_stage": "high_intent",
+      "evidence_type": [
+        "explicit",
+        "page_validated"
+      ],
+      "confidence_level": "high",
+      "intent_cluster": "womens_black_arch_flip_flops",
+      "routing_action": "cluster_route",
+      "field_evidence": {
+        "product_type": [
+          {
+            "value": "flip_flop",
+            "evidence_type": "explicit",
+            "source_span": "flip flops",
+            "fact_ids": [],
+            "rationale": ""
+          },
+          {
+            "value": "flip_flop",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "style_flip_flop"
+            ],
+            "rationale": "该槽位与商品基准中的明示页面事实一致。"
+          }
+        ],
+        "audience_intent": [
+          {
+            "value": "women",
+            "evidence_type": "explicit",
+            "source_span": "women",
+            "fact_ids": [],
+            "rationale": ""
+          },
+          {
+            "value": "women",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "title_womens_flip_flop"
+            ],
+            "rationale": "该槽位与商品基准中的明示页面事实一致。"
+          }
+        ],
+        "capability_intent": [
+          {
+            "value": "arch_support",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "arch_support"
+            ],
+            "rationale": "产品具备足弓支撑功能"
+          },
+          {
+            "value": "arch_support",
+            "evidence_type": "inferred",
+            "source_span": "",
+            "fact_ids": [],
+            "rationale": "该能力由搜索词表达的任务或问题推断；页面事实仅用于验证商品承接。"
+          }
+        ],
+        "color": [
+          {
+            "value": "black",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "colors_visible"
+            ],
+            "rationale": "该颜色在商品页面可见颜色选择中得到明确支持。"
+          }
+        ],
+        "primary_domain": [
+          {
+            "value": "clothing_shoes_jewelry",
+            "evidence_type": "inferred",
+            "source_span": "",
+            "fact_ids": [],
+            "rationale": "该值由搜索词整体语义推断，未作为页面明示属性。"
+          }
+        ]
+      },
+      "ambiguity_flags": [],
+      "asin_fit": "match",
+      "asin_fit_evidence": [
+        "title_womens_flip_flop",
+        "arch_support",
+        "colors_visible"
+      ],
+      "review_status": "accepted",
+      "schema_version": "1.0.0",
+      "prompt_version": "1.1.0",
+      "model_name": "deepseek/deepseek-v4-pro",
+      "run_id": "aj2-y90-20260714T234810-0bea2f52"
+    },
+    {
+      "source_term": "flip flops for women size 6",
+      "normalized_term": "flip flops for women size 6",
+      "term_id": "533f39380100dbaf",
+      "query_kind": "keyword",
+      "language": "en",
+      "primary_domain": "clothing_shoes_jewelry",
+      "secondary_domain": [],
+      "product_type": [
+        "flip_flop"
+      ],
+      "audience_intent": [
+        "women"
+      ],
+      "function_intent": [],
+      "capability_intent": [],
+      "event_intent": [],
+      "location_intent": [],
+      "body_need_intent": [],
+      "time_intent": [],
+      "substitute_intent": [],
+      "complement_intent": [],
+      "latent_task": "用户想购买6码的女士人字拖，已明确尺寸需求处于购买决策阶段。",
+      "intent_stage": "high_intent",
+      "evidence_type": [
+        "explicit",
+        "page_validated"
+      ],
+      "confidence_level": "high",
+      "intent_cluster": "womens_size6_flip_flops",
+      "routing_action": "cluster_route",
+      "field_evidence": {
+        "product_type": [
+          {
+            "value": "flip_flop",
+            "evidence_type": "explicit",
+            "source_span": "flip flops",
+            "fact_ids": [],
+            "rationale": ""
+          },
+          {
+            "value": "flip_flop",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "style_flip_flop"
+            ],
+            "rationale": "该槽位与商品基准中的明示页面事实一致。"
+          }
+        ],
+        "audience_intent": [
+          {
+            "value": "women",
+            "evidence_type": "explicit",
+            "source_span": "women",
+            "fact_ids": [],
+            "rationale": ""
+          },
+          {
+            "value": "women",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "title_womens_flip_flop"
+            ],
+            "rationale": "该槽位与商品基准中的明示页面事实一致。"
+          }
+        ],
+        "size": [
+          {
+            "value": "6",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "sizes_6_11"
+            ],
+            "rationale": "产品尺码涵盖6码"
+          }
+        ],
+        "primary_domain": [
+          {
+            "value": "clothing_shoes_jewelry",
+            "evidence_type": "inferred",
+            "source_span": "",
+            "fact_ids": [],
+            "rationale": "该值由搜索词整体语义推断，未作为页面明示属性。"
+          }
+        ]
+      },
+      "ambiguity_flags": [],
+      "asin_fit": "match",
+      "asin_fit_evidence": [
+        "title_womens_flip_flop",
+        "sizes_6_11"
+      ],
+      "review_status": "accepted",
+      "schema_version": "1.0.0",
+      "prompt_version": "1.1.0",
+      "model_name": "deepseek/deepseek-v4-pro",
+      "run_id": "aj2-y90-20260714T234810-0bea2f52"
+    },
+    {
+      "source_term": "shower thongs for women",
+      "normalized_term": "shower thongs for women",
+      "term_id": "c12218d5d418058f",
+      "query_kind": "keyword",
+      "language": "en",
+      "primary_domain": "clothing_shoes_jewelry",
+      "secondary_domain": [],
+      "product_type": [
+        "flip_flop"
+      ],
+      "audience_intent": [
+        "women"
+      ],
+      "function_intent": [],
+      "capability_intent": [
+        "water_resistant"
+      ],
+      "event_intent": [],
+      "location_intent": [
+        "shower"
+      ],
+      "body_need_intent": [],
+      "time_intent": [],
+      "substitute_intent": [],
+      "complement_intent": [],
+      "latent_task": "用户寻找适合淋浴穿着的女士夹趾拖鞋，需具备防滑和耐水性。",
+      "intent_stage": "consideration",
+      "evidence_type": [
+        "explicit",
+        "inferred"
+      ],
+      "confidence_level": "medium",
+      "intent_cluster": "womens_shower_flip_flops",
+      "routing_action": "listing_gap_review",
+      "field_evidence": {
+        "product_type": [
+          {
+            "value": "flip_flop",
+            "evidence_type": "explicit",
+            "source_span": "thongs",
+            "fact_ids": [],
+            "rationale": ""
+          },
+          {
+            "value": "flip_flop",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "style_flip_flop"
+            ],
+            "rationale": "该槽位与商品基准中的明示页面事实一致。"
+          },
+          {
+            "value": "flip_flop",
+            "evidence_type": "inferred",
+            "source_span": "",
+            "fact_ids": [],
+            "rationale": "该能力由搜索词表达的任务或问题推断；页面事实仅用于验证商品承接。"
+          }
+        ],
+        "audience_intent": [
+          {
+            "value": "women",
+            "evidence_type": "explicit",
+            "source_span": "women",
+            "fact_ids": [],
+            "rationale": ""
+          },
+          {
+            "value": "women",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "title_womens_flip_flop"
+            ],
+            "rationale": "该槽位与商品基准中的明示页面事实一致。"
+          }
+        ],
+        "location_intent": [
+          {
+            "value": "shower",
+            "evidence_type": "explicit",
+            "source_span": "shower",
+            "fact_ids": [],
+            "rationale": ""
+          }
+        ],
+        "capability_intent": [
+          {
+            "value": "water_resistant",
+            "evidence_type": "inferred",
+            "source_span": "shower",
+            "fact_ids": [],
+            "rationale": "淋浴使用推测需要耐水功能"
+          }
+        ],
+        "primary_domain": [
+          {
+            "value": "clothing_shoes_jewelry",
+            "evidence_type": "inferred",
+            "source_span": "",
+            "fact_ids": [],
+            "rationale": "该值由搜索词整体语义推断，未作为页面明示属性。"
+          }
+        ]
+      },
+      "ambiguity_flags": [
+        "shower_waterproof_unverified"
+      ],
+      "asin_fit": "partial_match",
+      "asin_fit_evidence": [
+        "title_womens_flip_flop",
+        "style_thong",
+        "easy_clean",
+        "slip_resistant_grip"
+      ],
+      "review_status": "accepted",
+      "schema_version": "1.0.0",
+      "prompt_version": "1.1.0",
+      "model_name": "deepseek/deepseek-v4-pro",
+      "run_id": "aj2-y90-20260714T234810-0bea2f52"
+    },
+    {
+      "source_term": "sandal for plantar fasciitis women",
+      "normalized_term": "sandal for plantar fasciitis women",
+      "term_id": "9a3f583735ff7976",
+      "query_kind": "keyword",
+      "language": "en",
+      "primary_domain": "clothing_shoes_jewelry",
+      "secondary_domain": [],
+      "product_type": [
+        "sandal"
+      ],
+      "audience_intent": [
+        "women"
+      ],
+      "function_intent": [
+        "pain_relief",
+        "foot_support"
+      ],
+      "capability_intent": [
+        "arch_support"
+      ],
+      "event_intent": [],
+      "location_intent": [],
+      "body_need_intent": [
+        "plantar_fasciitis"
+      ],
+      "time_intent": [],
+      "substitute_intent": [],
+      "complement_intent": [],
+      "latent_task": "患有足底筋膜炎的女性用户寻找具有支撑功能的凉鞋以缓解足部疼痛。",
+      "intent_stage": "consideration",
+      "evidence_type": [
+        "explicit",
+        "inferred"
+      ],
+      "confidence_level": "medium",
+      "intent_cluster": "womens_plantar_fasciitis_sandals",
+      "routing_action": "listing_gap_review",
+      "field_evidence": {
+        "product_type": [
+          {
+            "value": "sandal",
+            "evidence_type": "explicit",
+            "source_span": "sandal",
+            "fact_ids": [],
+            "rationale": ""
+          }
+        ],
+        "audience_intent": [
+          {
+            "value": "women",
+            "evidence_type": "explicit",
+            "source_span": "women",
+            "fact_ids": [],
+            "rationale": ""
+          },
+          {
+            "value": "women",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "title_womens_flip_flop"
+            ],
+            "rationale": "该槽位与商品基准中的明示页面事实一致。"
+          }
+        ],
+        "body_need_intent": [
+          {
+            "value": "plantar_fasciitis",
+            "evidence_type": "explicit",
+            "source_span": "plantar fasciitis",
+            "fact_ids": [],
+            "rationale": ""
+          }
+        ],
+        "function_intent": [
+          {
+            "value": "pain_relief",
+            "evidence_type": "inferred",
+            "source_span": "plantar fasciitis",
+            "fact_ids": [],
+            "rationale": "足底筋膜炎暗示疼痛缓解需求"
+          },
+          {
+            "value": "foot_support",
+            "evidence_type": "inferred",
+            "source_span": "plantar fasciitis",
+            "fact_ids": [],
+            "rationale": "足底筋膜炎需要足部支撑功能"
+          },
+          {
+            "value": "foot_support",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "arch_support"
+            ],
+            "rationale": "该槽位与商品基准中的明示页面事实一致。"
+          }
+        ],
+        "capability_intent": [
+          {
+            "value": "arch_support",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "arch_support"
+            ],
+            "rationale": "足弓支撑对足底筋膜炎有帮助"
+          },
+          {
+            "value": "arch_support",
+            "evidence_type": "inferred",
+            "source_span": "",
+            "fact_ids": [],
+            "rationale": "该能力由搜索词表达的任务或问题推断；页面事实仅用于验证商品承接。"
+          }
+        ],
+        "primary_domain": [
+          {
+            "value": "clothing_shoes_jewelry",
+            "evidence_type": "inferred",
+            "source_span": "",
+            "fact_ids": [],
+            "rationale": "该值由搜索词整体语义推断，未作为页面明示属性。"
+          }
+        ]
+      },
+      "ambiguity_flags": [
+        "plantar_fasciitis_treatment_unverified"
+      ],
+      "asin_fit": "partial_match",
+      "asin_fit_evidence": [
+        "title_womens_flip_flop",
+        "arch_support",
+        "padded_cushioning"
+      ],
+      "review_status": "accepted",
+      "schema_version": "1.0.0",
+      "prompt_version": "1.1.0",
+      "model_name": "deepseek/deepseek-v4-pro",
+      "run_id": "aj2-y90-20260714T234810-0bea2f52"
+    },
+    {
+      "source_term": "flip foos women size 7",
+      "normalized_term": "flip foos women size 7",
+      "term_id": "5b74ad23786964a2",
+      "query_kind": "keyword",
+      "language": "en",
+      "primary_domain": "clothing_shoes_jewelry",
+      "secondary_domain": [],
+      "product_type": [
+        "flip_flop"
+      ],
+      "audience_intent": [
+        "women"
+      ],
+      "function_intent": [],
+      "capability_intent": [],
+      "event_intent": [],
+      "location_intent": [],
+      "body_need_intent": [],
+      "time_intent": [],
+      "substitute_intent": [],
+      "complement_intent": [],
+      "latent_task": "用户想购买7码女士人字拖，搜索词含拼写错误flip foos实为flip flops。",
+      "intent_stage": "high_intent",
+      "evidence_type": [
+        "explicit",
+        "page_validated"
+      ],
+      "confidence_level": "high",
+      "intent_cluster": "womens_size7_flip_flops",
+      "routing_action": "cluster_route",
+      "field_evidence": {
+        "product_type": [
+          {
+            "value": "flip_flop",
+            "evidence_type": "explicit",
+            "source_span": "flip foos",
+            "fact_ids": [],
+            "rationale": ""
+          },
+          {
+            "value": "flip_flop",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "style_flip_flop"
+            ],
+            "rationale": "该槽位与商品基准中的明示页面事实一致。"
+          },
+          {
+            "value": "flip_flop",
+            "evidence_type": "inferred",
+            "source_span": "",
+            "fact_ids": [],
+            "rationale": "该能力由搜索词表达的任务或问题推断；页面事实仅用于验证商品承接。"
+          }
+        ],
+        "audience_intent": [
+          {
+            "value": "women",
+            "evidence_type": "explicit",
+            "source_span": "women",
+            "fact_ids": [],
+            "rationale": ""
+          },
+          {
+            "value": "women",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "title_womens_flip_flop"
+            ],
+            "rationale": "该槽位与商品基准中的明示页面事实一致。"
+          }
+        ],
+        "size": [
+          {
+            "value": "7",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "sizes_6_11"
+            ],
+            "rationale": "产品尺码涵盖7码"
+          }
+        ],
+        "primary_domain": [
+          {
+            "value": "clothing_shoes_jewelry",
+            "evidence_type": "inferred",
+            "source_span": "",
+            "fact_ids": [],
+            "rationale": "该值由搜索词整体语义推断，未作为页面明示属性。"
+          }
+        ]
+      },
+      "ambiguity_flags": [
+        "typo_flip_foos"
+      ],
+      "asin_fit": "match",
+      "asin_fit_evidence": [
+        "title_womens_flip_flop",
+        "sizes_6_11"
+      ],
+      "review_status": "accepted",
+      "schema_version": "1.0.0",
+      "prompt_version": "1.1.0",
+      "model_name": "deepseek/deepseek-v4-pro",
+      "run_id": "aj2-y90-20260714T234810-0bea2f52"
+    },
+    {
+      "source_term": "white waterproof flip flops women",
+      "normalized_term": "white waterproof flip flops women",
+      "term_id": "e928fe62c4b2a519",
+      "query_kind": "keyword",
+      "language": "en",
+      "primary_domain": "clothing_shoes_jewelry",
+      "secondary_domain": [],
+      "product_type": [
+        "flip_flop"
+      ],
+      "audience_intent": [
+        "women"
+      ],
+      "function_intent": [],
+      "capability_intent": [
+        "waterproof"
+      ],
+      "event_intent": [],
+      "location_intent": [],
+      "body_need_intent": [],
+      "time_intent": [],
+      "substitute_intent": [],
+      "complement_intent": [],
+      "latent_task": "用户寻找白色防水女士人字拖，但产品页面未声称防水功能存在功能缺口。",
+      "intent_stage": "high_intent",
+      "evidence_type": [
+        "explicit",
+        "inferred"
+      ],
+      "confidence_level": "medium",
+      "intent_cluster": "womens_white_waterproof_flip_flops",
+      "routing_action": "listing_gap_review",
+      "field_evidence": {
+        "product_type": [
+          {
+            "value": "flip_flop",
+            "evidence_type": "explicit",
+            "source_span": "flip flops",
+            "fact_ids": [],
+            "rationale": ""
+          },
+          {
+            "value": "flip_flop",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "style_flip_flop"
+            ],
+            "rationale": "该槽位与商品基准中的明示页面事实一致。"
+          }
+        ],
+        "audience_intent": [
+          {
+            "value": "women",
+            "evidence_type": "explicit",
+            "source_span": "women",
+            "fact_ids": [],
+            "rationale": ""
+          },
+          {
+            "value": "women",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "title_womens_flip_flop"
+            ],
+            "rationale": "该槽位与商品基准中的明示页面事实一致。"
+          }
+        ],
+        "capability_intent": [
+          {
+            "value": "waterproof",
+            "evidence_type": "explicit",
+            "source_span": "waterproof",
+            "fact_ids": [],
+            "rationale": ""
+          }
+        ],
+        "color": [
+          {
+            "value": "white",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "colors_visible"
+            ],
+            "rationale": "该颜色在商品页面可见颜色选择中得到明确支持。"
+          }
+        ],
+        "primary_domain": [
+          {
+            "value": "clothing_shoes_jewelry",
+            "evidence_type": "inferred",
+            "source_span": "",
+            "fact_ids": [],
+            "rationale": "该值由搜索词整体语义推断，未作为页面明示属性。"
+          }
+        ]
+      },
+      "ambiguity_flags": [
+        "waterproof_capability_unverified"
+      ],
+      "asin_fit": "partial_match",
+      "asin_fit_evidence": [
+        "title_womens_flip_flop",
+        "colors_visible"
+      ],
+      "review_status": "accepted",
+      "schema_version": "1.0.0",
+      "prompt_version": "1.1.0",
+      "model_name": "deepseek/deepseek-v4-pro",
+      "run_id": "aj2-y90-20260714T234810-0bea2f52"
+    },
+    {
+      "source_term": "medium blue flip flops",
+      "normalized_term": "medium blue flip flops",
+      "term_id": "2e1158a2c5ead07f",
+      "query_kind": "keyword",
+      "language": "en",
+      "primary_domain": "clothing_shoes_jewelry",
+      "secondary_domain": [],
+      "product_type": [
+        "flip_flop"
+      ],
+      "audience_intent": [],
+      "function_intent": [],
+      "capability_intent": [],
+      "event_intent": [],
+      "location_intent": [],
+      "body_need_intent": [],
+      "time_intent": [],
+      "substitute_intent": [],
+      "complement_intent": [],
+      "latent_task": "用户寻找中蓝色人字拖，当前产品仅提供浅蓝色而非中蓝色。",
+      "intent_stage": "high_intent",
+      "evidence_type": [
+        "explicit",
+        "page_validated"
+      ],
+      "confidence_level": "medium",
+      "intent_cluster": "blue_flip_flops",
+      "routing_action": "listing_gap_review",
+      "field_evidence": {
+        "product_type": [
+          {
+            "value": "flip_flop",
+            "evidence_type": "explicit",
+            "source_span": "flip flops",
+            "fact_ids": [],
+            "rationale": ""
+          },
+          {
+            "value": "flip_flop",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "style_flip_flop"
+            ],
+            "rationale": "该槽位与商品基准中的明示页面事实一致。"
+          }
+        ],
+        "color": [
+          {
+            "value": "medium_blue",
+            "evidence_type": "explicit",
+            "source_span": "medium blue",
+            "fact_ids": [],
+            "rationale": ""
+          }
+        ],
+        "primary_domain": [
+          {
+            "value": "clothing_shoes_jewelry",
+            "evidence_type": "inferred",
+            "source_span": "",
+            "fact_ids": [],
+            "rationale": "该值由搜索词整体语义推断，未作为页面明示属性。"
+          }
+        ]
+      },
+      "ambiguity_flags": [
+        "color_shade_mismatch"
+      ],
+      "asin_fit": "partial_match",
+      "asin_fit_evidence": [
+        "style_flip_flop",
+        "colors_visible"
+      ],
+      "review_status": "accepted",
+      "schema_version": "1.0.0",
+      "prompt_version": "1.1.0",
+      "model_name": "deepseek/deepseek-v4-pro",
+      "run_id": "aj2-y90-20260714T234810-0bea2f52"
+    },
+    {
+      "source_term": "arch support sandals white",
+      "normalized_term": "arch support sandals white",
+      "term_id": "92ceed34e2a91a7b",
+      "query_kind": "keyword",
+      "language": "en",
+      "primary_domain": "clothing_shoes_jewelry",
+      "secondary_domain": [],
+      "product_type": [
+        "sandal"
+      ],
+      "audience_intent": [],
+      "function_intent": [
+        "arch_support"
+      ],
+      "capability_intent": [
+        "arch_support"
+      ],
+      "event_intent": [],
+      "location_intent": [],
+      "body_need_intent": [],
+      "time_intent": [],
+      "substitute_intent": [],
+      "complement_intent": [],
+      "latent_task": "用户寻找白色且具有足弓支撑功能的凉鞋，注重功能性与美观的结合。",
+      "intent_stage": "consideration",
+      "evidence_type": [
+        "explicit",
+        "page_validated"
+      ],
+      "confidence_level": "high",
+      "intent_cluster": "white_arch_support_sandals",
+      "routing_action": "cluster_route",
+      "field_evidence": {
+        "product_type": [
+          {
+            "value": "sandal",
+            "evidence_type": "explicit",
+            "source_span": "sandals",
+            "fact_ids": [],
+            "rationale": ""
+          }
+        ],
+        "capability_intent": [
+          {
+            "value": "arch_support",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "arch_support"
+            ],
+            "rationale": "产品具备足弓支撑功能"
+          }
+        ],
+        "color": [
+          {
+            "value": "white",
+            "evidence_type": "page_validated",
+            "source_span": "",
+            "fact_ids": [
+              "colors_visible"
+            ],
+            "rationale": "该颜色在商品页面可见颜色选择中得到明确支持。"
+          }
+        ],
+        "primary_domain": [
+          {
+            "value": "clothing_shoes_jewelry",
+            "evidence_type": "inferred",
+            "source_span": "",
+            "fact_ids": [],
+            "rationale": "该值由搜索词整体语义推断，未作为页面明示属性。"
+          }
+        ]
+      },
+      "ambiguity_flags": [],
+      "asin_fit": "match",
+      "asin_fit_evidence": [
+        "title_womens_flip_flop",
+        "arch_support",
+        "colors_visible"
+      ],
+      "review_status": "accepted",
+      "schema_version": "1.0.0",
+      "prompt_version": "1.1.0",
+      "model_name": "deepseek/deepseek-v4-pro",
+      "run_id": "aj2-y90-20260714T234810-0bea2f52"
+    }
+  ]
+}

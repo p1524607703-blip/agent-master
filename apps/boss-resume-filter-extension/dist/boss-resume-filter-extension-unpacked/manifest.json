@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Boss Resume Filter",
+  "description": "在 Boss 直聘页面上按岗位相关条件辅助筛查当前可见简历。",
+  "version": "0.1.0",
+  "action": {
+    "default_title": "Boss Resume Filter",
+    "default_popup": "popup.html"
+  },
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://*.zhipin.com/*",
+    "https://*.bosszhipin.com/*"
+  ],
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "minimum_chrome_version": "116"
+}

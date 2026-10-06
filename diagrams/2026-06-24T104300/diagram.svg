@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="760" viewBox="0 0 1280 760">
+  <rect x="0" y="0" width="1280" height="760" fill="#F8FAFC"/>
+  <rect x="32" y="28" width="1216" height="704" rx="28" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="2"/>
+
+  <text x="64" y="78" font-family="Arial Unicode MS, Noto Sans SC, sans-serif" font-size="32" font-weight="700" fill="#172033">STV 人群洞察与承接闭环</text>
+  <text x="64" y="116" font-family="Arial Unicode MS, Noto Sans SC, sans-serif" font-size="18" fill="#64748B">用历史广告行为生成标签假设 → 用 STV 放大触达 → 用 SD/SBV/SP 承接 → 再回流洞察验证标签质量</text>
+
+  <rect x="58" y="154" width="250" height="156" rx="18" fill="#E8F1FF" stroke="#2F6BFF" stroke-width="3"/>
+  <circle cx="86" cy="184" r="15" fill="#2F6BFF"/>
+  <text x="86" y="190" text-anchor="middle" font-family="Arial Unicode MS, Noto Sans SC, sans-serif" font-size="17" font-weight="700" fill="#FFFFFF">1</text>
+  <text x="112" y="190" font-family="Arial Unicode MS, Noto Sans SC, sans-serif" font-size="20" font-weight="700" fill="#102A43">已有广告人群</text>
+  <text x="82" y="225" font-family="Arial Unicode MS, Noto Sans SC, sans-serif" font-size="16" fill="#102A43">
+    <tspan x="82" dy="0">SP 点击 / SP 购买</tspan>
+    <tspan x="82" dy="26">SBV 互动 / SD 点击</tspan>
+    <tspan x="82" dy="26">PDP 浏览 / 加购未购</tspan>
+  </text>
+
+  <rect x="350" y="154" width="250" height="156" rx="18" fill="#FFF7E6" stroke="#F59E0B" stroke-width="3"/>
+  <circle cx="378" cy="184" r="15" fill="#F59E0B"/>
+  <text x="378" y="190" text-anchor="middle" font-family="Arial Unicode MS, Noto Sans SC, sans-serif" font-size="17" font-weight="700" fill="#FFFFFF">2</text>
+  <text x="404" y="190" font-family="Arial Unicode MS, Noto Sans SC, sans-serif" font-size="20" font-weight="700" fill="#3B2600">做受众洞察</text>
+  <text x="374" y="228" font-family="Arial Unicode MS, Noto Sans SC, sans-serif" font-size="16" fill="#3B2600">
+    <tspan x="374" dy="0">看 In-market 市场内</tspan>
+    <tspan x="374" dy="28">看 Lifestyle 生活方式</tspan>
+    <tspan x="374" dy="28">找出可放大的兴趣标签</tspan>
+  </text>
+
+  <rect x="642" y="154" width="250" height="156" rx="18" fill="#FFF7E6" stroke="#F59E0B" stroke-width="3"/>
+  <circle cx="670" cy="184" r="15" fill="#F59E0B"/>
+  <text x="670" y="190" text-anchor="middle" font-family="Arial Unicode MS, Noto Sans SC, sans-serif" font-size="17" font-weight="700" fill="#FFFFFF">3</text>
+  <text x="696" y="190" font-family="Arial Unicode MS, Noto Sans SC, sans-serif" font-size="20" font-weight="700" fill="#3B2600">筛选有效标签</text>
+  <text x="666" y="228" font-family="Arial Unicode MS, Noto Sans SC, sans-serif" font-size="16" fill="#3B2600">
+    <tspan x="666" dy="0">高指数</tspan>
+    <tspan x="666" dy="28">高相关</tspan>
+    <tspan x="666" dy="28">有转化潜力</tspan>
+  </text>
+
+  <rect x="934" y="154" width="250" height="156" rx="18" fill="#FCE7F3" stroke="#DB2777" stroke-width="3"/>
+  <circle cx="962" cy="184" r="15" fill="#DB2777"/>
+  <text x="962" y="190" text-anchor="middle" font-family="Arial Unicode MS, Noto Sans SC, sans-serif" font-size="17" font-weight="700" fill="#FFFFFF">4</text>
+  <text x="988" y="190" font-family="Arial Unicode MS, Noto Sans SC, sans-serif" font-size="20" font-weight="700" fill="#4A102A">用于 STV 定向</text>
+  <text x="958" y="228" font-family="Arial Unicode MS, Noto Sans SC, sans-serif" font-size="16" fill="#4A102A">
+    <tspan x="958" dy="0">把有效标签放进</tspan>
+    <tspan x="958" dy="28">STV 手动受众</tspan>
+    <tspan x="958" dy="28">做上层种草触达</tspan>
+  </text>
+
+  <rect x="934" y="444" width="250" height="166" rx="18" fill="#FCE7F3" stroke="#DB2777" stroke-width="3"/>
+  <circle cx="962" cy="474" r="15" fill="#DB2777"/>
+  <text x="962" y="480" text-anchor="middle" font-family="Arial Unicode MS, Noto Sans SC, sans-serif" font-size="17" font-weight="700" fill="#FFFFFF">5</text>
+  <text x="988" y="480" font-family="Arial Unicode MS, Noto Sans SC, sans-serif" font-size="20" font-weight="700" fill="#4A102A">新互动人群</text>
+  <text x="958" y="518" font-family="Arial Unicode MS, Noto Sans SC, sans-serif" font-size="16" fill="#4A102A">
+    <tspan x="958" dy="0">曝光 / 高观看 / 完播</tspan>
+    <tspan x="958" dy="28">后续点击</tspan>
+    <tspan x="958" dy="28">后续购买</tspan>
+  </text>
+
+  <rect x="642" y="444" width="250" height="166" rx="18" fill="#F1F5F9" stroke="#475569" stroke-width="3"/>
+  <circle cx="670" cy="474" r="15" fill="#475569"/>
+  <text x="670" y="480" text-anchor="middle" font-family="Arial Unicode MS, Noto Sans SC, sans-serif" font-size="17" font-weight="700" fill="#FFFFFF">6</text>
+  <text x="696" y="480" font-family="Arial Unicode MS, Noto Sans SC, sans-serif" font-size="20" font-weight="700" fill="#172033">SD/SBV/SP 承接</text>
+  <text x="666" y="518" font-family="Arial Unicode MS, Noto Sans SC, sans-serif" font-size="16" fill="#172033">
+    <tspan x="666" dy="0">SD 再营销唤醒</tspan>
+    <tspan x="666" dy="28">SBV 视频继续截流</tspan>
+    <tspan x="666" dy="28">SP 搜索收割购买意图</tspan>
+  </text>
+
+  <rect x="350" y="444" width="250" height="166" rx="18" fill="#EAF8EF" stroke="#16A34A" stroke-width="3"/>
+  <circle cx="378" cy="474" r="15" fill="#16A34A"/>
+  <text x="378" y="480" text-anchor="middle" font-family="Arial Unicode MS, Noto Sans SC, sans-serif" font-size="17" font-weight="700" fill="#FFFFFF">7</text>
+  <text x="404" y="480" font-family="Arial Unicode MS, Noto Sans SC, sans-serif" font-size="20" font-weight="700" fill="#073B1A">再回到洞察</text>
+  <text x="374" y="518" font-family="Arial Unicode MS, Noto Sans SC, sans-serif" font-size="16" fill="#073B1A">
+    <tspan x="374" dy="0">看哪些 STV 标签</tspan>
+    <tspan x="374" dy="28">带来点击 / PDP / 加购</tspan>
+    <tspan x="374" dy="28">以及最终购买</tspan>
+  </text>
+
+  <path d="M308 232 L350 232" fill="none" stroke="#94A3B8" stroke-width="4"/>
+  <polygon points="350,232 336,224 336,240" fill="#94A3B8"/>
+  <path d="M600 232 L642 232" fill="none" stroke="#94A3B8" stroke-width="4"/>
+  <polygon points="642,232 628,224 628,240" fill="#94A3B8"/>
+  <path d="M892 232 L934 232" fill="none" stroke="#94A3B8" stroke-width="4"/>
+  <polygon points="934,232 920,224 920,240" fill="#94A3B8"/>
+
+  <path d="M1059 310 L1059 444" fill="none" stroke="#94A3B8" stroke-width="4"/>
+  <polygon points="1059,444 1051,430 1067,430" fill="#94A3B8"/>
+
+  <path d="M934 527 L892 527" fill="none" stroke="#94A3B8" stroke-width="4"/>
+  <polygon points="892,527 906,519 906,535" fill="#94A3B8"/>
+  <path d="M642 527 L600 527" fill="none" stroke="#94A3B8" stroke-width="4"/>
+  <polygon points="600,527 614,519 614,535" fill="#94A3B8"/>
+
+  <path d="M475 444 C475 382 475 354 475 310" fill="none" stroke="#16A34A" stroke-width="3" stroke-dasharray="8 8"/>
+  <polygon points="475,310 467,324 483,324" fill="#16A34A"/>
+  <rect x="506" y="350" width="260" height="42" rx="12" fill="#ECFDF5" stroke="#BBF7D0" stroke-width="1"/>
+  <text x="526" y="377" font-family="Arial Unicode MS, Noto Sans SC, sans-serif" font-size="15" fill="#166534">回流优化标签、预算与窗口</text>
+
+  <rect x="64" y="646" width="1120" height="50" rx="14" fill="#F8FAFC" stroke="#E2E8F0"/>
+  <text x="88" y="678" font-family="Arial Unicode MS, Noto Sans SC, sans-serif" font-size="17" fill="#475569">使用方式：先用已有 SP/SBV/SD/PDP 行为做人群洞察，筛出标签后投 STV；再用承接广告收割，并用 AMC/洞察反证哪些标签真的有效。</text>
+</svg>

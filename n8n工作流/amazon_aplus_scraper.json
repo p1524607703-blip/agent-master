@@ -1,0 +1,178 @@
+{
+  "name": "Amazon A+ 爬取回填工作流",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "amazon-aplus-scrape",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "node-webhook",
+      "name": "Webhook触发",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        200,
+        300
+      ],
+      "webhookId": "amazon-aplus-scrape"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. 调用 Python 爬虫抓取 Amazon 页面\nconst { execSync } = require('child_process');\nconst body = $input.first().json.body;\nconst url = body.url;\n\nif (!url) {\n  throw new Error('缺少 url 参数');\n}\n\nlet result;\ntry {\n  const cmd = `python3 /Users/panjinlong/Documents/agent-master/02-AI工程/amazon-scraper/amazon_scraper.py \"${url.replace(/\"/g, '\\\\\"')}\"`;\n  const stdout = execSync(cmd, { timeout: 45000, encoding: 'utf8' });\n  result = JSON.parse(stdout.trim());\n} catch (e) {\n  throw new Error('爬取失败: ' + e.message.substring(0, 200));\n}\n\nif (result.error) {\n  throw new Error('爬虫返回错误: ' + result.error);\n}\n\n// 格式化 bullets\nconst bulletsText = (result.bullets || []).map((b, i) => `${i+1}. ${b}`).join('\\n');\n\nreturn [{\n  json: {\n    // 从 webhook body 读取记录定位信息\n    app_token: body.app_token,\n    table_id: body.table_id,\n    record_id: body.record_id,\n    sku_table_id: body.sku_table_id || 'tblEOeeD4HARuHuI',\n    // 爬取结果\n    asin: result.asin || '',\n    title: result.title || '',\n    brand: result.brand || '',\n    bullets_text: bulletsText,\n    variants: result.variants || [],\n    size_chart: result.size_chart || '',\n    source_url: url\n  }\n}];"
+      },
+      "id": "node-scrape",
+      "name": "爬取Amazon数据",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 2. 获取 Feishu tenant_access_token\nconst https = require('https');\n\nconst APP_ID = 'cli_a9460d39a5395bdd';\nconst APP_SECRET = 'VL57clXcR2kFndvW4Pcj86A3hE6EOSiQ';\n\nconst tokenData = await new Promise((resolve, reject) => {\n  const body = JSON.stringify({ app_id: APP_ID, app_secret: APP_SECRET });\n  const req = https.request({\n    hostname: 'open.feishu.cn',\n    path: '/open-apis/auth/v3/tenant_access_token/internal',\n    method: 'POST',\n    headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) }\n  }, (res) => {\n    let data = '';\n    res.on('data', chunk => data += chunk);\n    res.on('end', () => resolve(JSON.parse(data)));\n  });\n  req.on('error', reject);\n  req.write(body);\n  req.end();\n});\n\nif (tokenData.code !== 0) {\n  throw new Error('获取飞书Token失败: ' + JSON.stringify(tokenData));\n}\n\nconst prev = $input.first().json;\nreturn [{ json: { ...prev, feishu_token: tokenData.tenant_access_token } }];"
+      },
+      "id": "node-token",
+      "name": "获取飞书Token",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        680,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 3. 更新 ASIN 主表记录（回填爬取数据）\nconst https = require('https');\nconst d = $input.first().json;\n\nconst fields = {\n  'ASIN': d.asin,\n  '产品名称': d.title,\n  '现有标题': d.title,\n  'Bullet原版(1-5)': d.bullets_text,\n  '任务状态': '文案生成中'\n};\n\nif (d.size_chart) fields['尺码数据'] = d.size_chart;\n\nconst payload = JSON.stringify({ fields });\nconst token = d.feishu_token;\nconst url = `/open-apis/bitable/v1/apps/${d.app_token}/tables/${d.table_id}/records/${d.record_id}`;\n\nconst resp = await new Promise((resolve, reject) => {\n  const req = https.request({\n    hostname: 'open.feishu.cn',\n    path: url,\n    method: 'PUT',\n    headers: {\n      'Content-Type': 'application/json',\n      'Authorization': `Bearer ${token}`,\n      'Content-Length': Buffer.byteLength(payload)\n    }\n  }, (res) => {\n    let data = '';\n    res.on('data', chunk => data += chunk);\n    res.on('end', () => resolve(JSON.parse(data)));\n  });\n  req.on('error', reject);\n  req.write(payload);\n  req.end();\n});\n\nif (resp.code !== 0) {\n  throw new Error('回填主表失败: ' + JSON.stringify(resp).substring(0, 200));\n}\n\nreturn [{ json: { ...d, main_table_updated: true } }];"
+      },
+      "id": "node-update-main",
+      "name": "回填ASIN主表",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        920,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 4. 在 SKU 变体表批量创建变体记录\nconst https = require('https');\nconst d = $input.first().json;\n\nconst variants = d.variants || [];\nif (variants.length === 0) {\n  return [{ json: { ...d, skus_created: 0 } }];\n}\n\nconst token = d.feishu_token;\nconst asin = d.asin;\nconst skuTable = d.sku_table_id;\nconst appToken = d.app_token;\n\n// Build batch records\nconst records = variants.slice(0, 20).map(v => ({\n  fields: {\n    'SKU ID': `${asin}-${v}`,\n    '变体名称': v\n  }\n}));\n\n// Batch create via Feishu API\nconst batchUrl = `/open-apis/bitable/v1/apps/${appToken}/tables/${skuTable}/records/batch_create`;\nconst payload = JSON.stringify({ records });\n\nconst resp = await new Promise((resolve, reject) => {\n  const req = https.request({\n    hostname: 'open.feishu.cn',\n    path: batchUrl,\n    method: 'POST',\n    headers: {\n      'Content-Type': 'application/json',\n      'Authorization': `Bearer ${token}`,\n      'Content-Length': Buffer.byteLength(payload)\n    }\n  }, (res) => {\n    let data = '';\n    res.on('data', chunk => data += chunk);\n    res.on('end', () => resolve(JSON.parse(data)));\n  });\n  req.on('error', reject);\n  req.write(payload);\n  req.end();\n});\n\nconst skusCreated = resp.data?.records?.length || 0;\nreturn [{ json: { ...d, skus_created: skusCreated, sku_resp_code: resp.code } }];"
+      },
+      "id": "node-create-skus",
+      "name": "批量创建SKU记录",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1160,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 5. 更新主表状态为「待审核」\nconst https = require('https');\nconst d = $input.first().json;\n\nconst payload = JSON.stringify({ fields: { '任务状态': '待审核' } });\nconst token = d.feishu_token;\nconst url = `/open-apis/bitable/v1/apps/${d.app_token}/tables/${d.table_id}/records/${d.record_id}`;\n\nawait new Promise((resolve, reject) => {\n  const req = https.request({\n    hostname: 'open.feishu.cn',\n    path: url,\n    method: 'PUT',\n    headers: {\n      'Content-Type': 'application/json',\n      'Authorization': `Bearer ${token}`,\n      'Content-Length': Buffer.byteLength(payload)\n    }\n  }, (res) => {\n    let data = '';\n    res.on('data', chunk => data += chunk);\n    res.on('end', () => resolve(JSON.parse(data)));\n  });\n  req.on('error', reject);\n  req.write(payload);\n  req.end();\n});\n\nreturn [{ json: { ...d, status_updated: true } }];"
+      },
+      "id": "node-status",
+      "name": "状态→待审核",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1400,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true, asin: $json.asin, title: $json.title, variants_count: $json.variants.length, skus_created: $json.skus_created }) }}"
+      },
+      "id": "node-respond",
+      "name": "返回成功响应",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1640,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook触发": {
+      "main": [
+        [
+          {
+            "node": "爬取Amazon数据",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "爬取Amazon数据": {
+      "main": [
+        [
+          {
+            "node": "获取飞书Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "获取飞书Token": {
+      "main": [
+        [
+          {
+            "node": "回填ASIN主表",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "回填ASIN主表": {
+      "main": [
+        [
+          {
+            "node": "批量创建SKU记录",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "批量创建SKU记录": {
+      "main": [
+        [
+          {
+            "node": "状态→待审核",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "状态→待审核": {
+      "main": [
+        [
+          {
+            "node": "返回成功响应",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "versionId": "2"
+}

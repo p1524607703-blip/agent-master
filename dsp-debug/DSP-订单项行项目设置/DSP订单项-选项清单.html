@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>亚马逊 DSP · 订单项表单 选项清单</title>
+<style>
+  :root{
+    --bg:#ffffff; --bg2:#f7f7f5; --bg3:#f0efec;
+    --tx:#1f1f1d; --tx2:#5c5c58; --tx3:#8a8a84;
+    --bd:#e2e1dc;
+    --accent:#185fa5; --accent-bg:#e6f1fb;
+    --warn:#993c1d; --warn-bg:#faece7;
+    --ok:#27500a; --ok-bg:#eaf3de;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--tx);
+    font:14px/1.65 -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",Arial,sans-serif;}
+  .wrap{max-width:1180px;margin:0 auto;padding:40px 28px 72px}
+  h1{font-size:24px;font-weight:600;margin:0 0 8px}
+  h2{font-size:17px;font-weight:600;margin:42px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--bd)}
+  .meta{color:var(--tx2);font-size:13px;line-height:1.9}
+  .meta code,.k{background:var(--bg3);padding:1px 6px;border-radius:4px;font-size:12px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  .note{margin:16px 0 0;padding:12px 16px;background:var(--accent-bg);border-left:3px solid var(--accent);
+    border-radius:0 6px 6px 0;font-size:13px;color:#0c447c}
+  .note.warn{background:var(--warn-bg);border-left-color:var(--warn);color:#712b13}
+  .note.ok{background:var(--ok-bg);border-left-color:var(--ok);color:var(--ok)}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px}
+  th,td{border:1px solid var(--bd);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--bg2);font-weight:600;color:var(--tx2);white-space:nowrap;font-size:12.5px}
+  tbody tr:nth-child(even) td{background:#fcfcfb}
+  td.c{text-align:center;white-space:nowrap;color:var(--tx2)}
+  .chip{display:inline-block;background:var(--bg3);border-radius:4px;padding:1px 7px;margin:2px 4px 2px 0;font-size:12.5px;white-space:nowrap}
+  .chip.hi{background:var(--accent-bg);color:#0c447c;font-weight:500}
+  .chip.cur{background:var(--ok-bg);color:var(--ok);font-weight:500}
+  footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--bd);color:var(--tx3);font-size:12.5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>亚马逊 DSP · 订单项（Line Item）表单 — 选项清单</h1>
+<div class="meta">
+  订单：<code>DSP_W2030_获客P+_TEST</code>（<code>579235681160185293</code>）｜订单项：<strong>Customer Acquisition - Display</strong>（<code>577219195413795805</code>）<br>
+  账户：洁博利美站 / JOOMRA DIRECT｜实体 <code>ENTITY150ACVBTS0BKE</code><br>
+  路径：<code>/dsp/ENTITY150ACVBTS0BKE/line-items/577219195413795805/edit</code>
+</div>
+
+<div class="note ok">
+  提取方式：紫鸟 CDP 直连（<code>127.0.0.1:22011</code>）→ 控件清点 + 逐个打开「更改」面板取内容，再用<strong>面板自身的「取消」</strong>关闭。
+  全程<strong>未点保存</strong>，所有打开过的面板均已干净关闭（逐项校验残留 = 0）。
+</div>
+
+<h2>一、基础信息</h2>
+<table>
+  <thead><tr><th style="width:34px">#</th><th style="width:170px">字段</th><th style="width:150px">控件</th><th style="width:60px">必填</th><th>当前值 / 可选值</th><th style="width:190px">备注</th></tr></thead>
+  <tbody>
+    <tr><td class="c">1</td><td><strong>名称</strong></td><td>文本框</td><td class="c">必填</td><td><code>Customer Acquisition - Display</code></td><td>—</td></tr>
+    <tr><td class="c">2</td><td><strong>订单项编号</strong></td><td>只读</td><td class="c">—</td><td><code>577219195413795805</code></td><td>顶部状态条</td></tr>
+    <tr><td class="c">3</td><td><strong>订单项类型</strong></td><td>只读</td><td class="c">—</td><td>展示</td><td>继承自订单，本页不可改</td></tr>
+    <tr><td class="c">4</td><td><strong>外部 ID 或采购订单</strong></td><td>文本框</td><td class="c">可选</td><td>—</td><td>折叠在「显示可选设置」</td></tr>
+    <tr><td class="c">5</td><td><strong>备注</strong></td><td>多行文本</td><td class="c">可选</td><td>—</td><td>折叠在「显示可选设置」</td></tr>
+    <tr><td class="c">6</td><td><strong>显示可选设置</strong></td><td>展开按钮</td><td class="c">—</td><td>展开 / 折叠（<code>aria-expanded</code>）</td><td><code>section.ad_group.optional_settings.expand</code></td></tr>
+  </tbody>
+</table>
+<div class="meta">页面操作：<code>查看订单项设置</code>、<code>Line item actions ▾</code>、<code>删除订单项</code>、<code>保存</code>、<code>取消</code>　｜　左侧导航：创意素材 / 库存报告 / 订单项设置 / 历史</div>
+
+<h2>二、媒体</h2>
+<table>
+  <thead><tr><th style="width:150px">字段</th><th style="width:150px">控件</th><th style="width:230px">可选值</th><th>面板内实际选项</th></tr></thead>
+  <tbody>
+    <tr><td><strong>类型</strong></td><td>只读</td><td>展示</td><td>继承自订单，本页不可改</td></tr>
+    <tr><td><strong>设备</strong></td><td>多选 + 更改</td><td><span class="chip cur">电脑端</span><span class="chip cur">移动端</span></td><td>面板 = <strong>移动操作系统</strong>：<span class="chip">iOS</span><span class="chip">Android</span></td></tr>
+    <tr><td><strong>移动环境</strong></td><td>多选 + 更改</td><td><span class="chip cur">网页</span><span class="chip cur">应用程序</span></td><td>面板 = <strong>应用设备类型</strong>：<span class="chip">iPhone</span><span class="chip">iPad</span><span class="chip">Android</span><span class="chip">Kindle Fire</span><span class="chip">Kindle Fire HD</span></td></tr>
+    <tr><td><strong>移动应用</strong></td><td>更改</td><td>—</td><td>打开为<strong>应用搜索表格</strong>（本次未加载出结果，需人工展开确认）</td></tr>
+  </tbody>
+</table>
+<div class="meta">绿色 = 当前已选</div>
+
+<h2>三、产品和服务</h2>
+<table>
+  <thead><tr><th style="width:150px">字段</th><th style="width:260px">控件</th><th>当前已选</th></tr></thead>
+  <tbody>
+    <tr><td><strong>类别</strong></td><td>「更改」<code>button.product_categories_card_change.edit</code></td>
+      <td><code>Interests</code>（10 项）、Antiques、Arts &amp; Crafts、Astrology &amp;Horoscope、Collectibles &amp; Sports …</td></tr>
+  </tbody>
+</table>
+<p style="color:var(--tx2);font-size:13px;margin:6px 0 4px"><strong>类别面板 = 23 个顶层类别</strong>（面板标题「选择您要推广的商品和服务类别」，含 Search）：</p>
+<div style="margin:8px 0">
+<span class="chip">Automotive</span><span class="chip">Beauty &amp; Fashion</span><span class="chip">Business</span><span class="chip">Consumer Electronics</span><span class="chip">Dating</span><span class="chip">Education</span><span class="chip">Entertainment</span><span class="chip">Family</span><span class="chip">Finance, Commercial</span><span class="chip">Finance, Personal</span><span class="chip">Food &amp; Dining</span><span class="chip">Government</span><span class="chip">Health</span><span class="chip">Holiday, Events</span><span class="chip">Home &amp; Garden</span><span class="chip hi">Interests（当前 10 项选中）</span><span class="chip">Jobs</span><span class="chip">Media</span><span class="chip">Military</span><span class="chip">Other</span><span class="chip">Pets</span><span class="chip">Public Services</span><span class="chip">Public Utilities</span><span class="chip">Real Estate</span><span class="chip">Sensitive</span><span class="chip">Shopping</span><span class="chip">Society</span><span class="chip">Sports</span><span class="chip">Tech B2B</span><span class="chip">Telecom</span><span class="chip">Travel</span>
+</div>
+
+<h2>四、库存</h2>
+<table>
+  <thead><tr><th style="width:170px">字段</th><th style="width:150px">控件</th><th>可选值 / 内容</th></tr></thead>
+  <tbody>
+    <tr><td><strong>出版商范围</strong></td><td>单选</td><td><span class="chip">所有出版商</span> <span class="chip">手动选择出版商</span>（<code>inventory-selection-auto</code> / <code>-manual</code>）</td></tr>
+    <tr><td><strong>交易（Deals）</strong></td><td>「更改」</td>
+      <td>筛选：交易类型 <code>所有交易类型</code>、状态 <code>进行中 或 即将运行</code><br>
+      表格列：<code>交易</code> / <code>交易类型</code> / <code>状态</code> / <code>总可用量</code> / <code>符合条件的可用量</code> / <code>符合条件的百分比</code> / <code>添加</code><br>
+      底部：<code>0 / 已选择 100 项促销</code>、<code>删除所有</code>、<code>保存更改</code>、<code>完成</code><br>
+      样例：<span class="chip">3PS_Index_PT_Display_RON</span><span class="chip">2026 | Q4 | Nivea</span><span class="chip">3PX_Magnite_BlackFridayCyberMonday_*</span></td></tr>
+    <tr><td><strong>供应包</strong></td><td>「更改」</td>
+      <td>表格列：<code>库存组</code> / <code>创建时间</code> / <code>添加</code>；可选库存组：<br>
+      <span class="chip">Display - Spanish Language</span><span class="chip">Minority Owned Publishers Display</span><span class="chip">Display - Entertainment (no News)</span><span class="chip">High CTR Display</span><span class="chip">Display - 70%+ Viewability</span><span class="chip">Display RON</span><span class="chip">NA Comscore 100 Display</span><span class="chip">NA Comscore 200 Display</span><span class="chip">Display - Low Floor Supply</span><span class="chip">Display Holiday Content</span><span class="chip">Native RON</span><span class="chip">Sustainability/Carbon Neutral - Display</span></td></tr>
+  </tbody>
+</table>
+
+<h2>五、定向策略</h2>
+<table>
+  <thead><tr><th style="width:150px">字段</th><th style="width:150px">控件</th><th>当前 / 面板内容</th></tr></thead>
+  <tbody>
+    <tr><td><strong>域名</strong></td><td>「更改」</td><td><code>所有域名</code></td></tr>
+    <tr><td><strong>地域（位置）</strong></td><td>「更改」</td>
+      <td>已定向投放 <strong>1 个位置</strong>、已排除 <strong>0 个位置</strong>；面板含
+        <span class="chip">添加位置</span><span class="chip">添加位置分组</span><span class="chip">地理洞察和激活 (GIA)</span><span class="chip">半径</span>，
+        支持按 <code>城市 / 州省 / 国家地区 / DMA® / 邮政编码</code> 搜索；提示「已使用多个位置，包括实时位置和住所位置」</td></tr>
+    <tr><td><strong>受众</strong></td><td>「更改」</td>
+      <td>共 <strong>346 条</strong>（每页 50）。类别：<span class="chip">Device</span><span class="chip">Device Model</span><span class="chip">Device Type</span><span class="chip">Experimental Models</span><br>
+      <strong>受众费用</strong>分 <span class="chip">亚马逊受众</span><span class="chip">第三方受众</span>；<code>Include</code> / <code>Exclude</code>；
+      <code>广告主受众人群</code>（无需额外付费，用作指导优化的信号）；当前 <code>未添加任何受众</code></td></tr>
+    <tr><td><strong>预竞价</strong><br><span style="color:var(--tx3);font-size:12px">Third-party pre-bid</span></td><td>「更改」</td>
+      <td>7 家厂商，均 <code>$0.00 CPM</code>、<code>未选择任何投放</code>：
+      <span class="chip">DoubleVerify</span><span class="chip">Integral Ad Science</span><span class="chip">Pixalate</span><span class="chip">Peer39</span><span class="chip">Scope3</span><span class="chip">Comscore</span><span class="chip">Adelaide</span><br>另有 <code>不符合条件的广告库存</code>、<code>总费用: $0.00 CPM</code></td></tr>
+    <tr><td><strong>排除以往的买家</strong></td><td>勾选</td><td>当前 <strong>已勾选</strong></td></tr>
+    <tr><td><strong>移动定向</strong></td><td>「更改」/「删除」</td><td>三张独立卡片：移动应用定向 / 移动 OS 定向 / 移动 App 设备类型定向（共用 <code>…_button_trigger</code>）</td></tr>
+  </tbody>
+</table>
+
+<h2>六、投放</h2>
+<table>
+  <thead><tr><th style="width:34px">#</th><th style="width:190px">字段</th><th style="width:120px">控件</th><th>可选值</th><th style="width:170px">当前值</th></tr></thead>
+  <tbody>
+    <tr><td class="c">1</td><td><strong>开始时间</strong></td><td>日期时间</td><td>—</td><td><code>Sep 28, 2026 10:28 PM</code></td></tr>
+    <tr><td class="c">2</td><td><strong>结束时间</strong></td><td>日期时间</td><td>—</td><td><code>Oct 28, 2026 11:59 PM</code></td></tr>
+    <tr><td class="c">3</td><td><strong>预算分配</strong></td><td>单选</td><td><span class="chip">自动预算分配</span><span class="chip">手动管理预算</span></td><td>—</td></tr>
+    <tr><td class="c">4</td><td><strong>设置每日或每月支出限额</strong></td><td>勾选</td><td>勾选后展开额度输入（周期：每日 / 每月）</td><td>未勾选</td></tr>
+    <tr><td class="c">5</td><td><strong>设定每日最低支出</strong></td><td>勾选</td><td>—</td><td>未勾选</td></tr>
+    <tr><td class="c">6</td><td><strong>投放节奏</strong></td><td>单选</td><td><span class="chip">均匀</span><span class="chip">提前</span><span class="chip">尽快</span></td><td>—</td></tr>
+    <tr><td class="c">7</td><td><strong>频率</strong></td><td>勾选 + 数值</td><td>限制顾客可以看到此广告的次数：展示次数不得超过 <strong>2</strong> 次 / 每 <strong>1</strong> <code>用户</code> / 天；可「添加其他频率上限」</td><td><strong>已勾选</strong></td></tr>
+  </tbody>
+</table>
+
+<h2>七、竞价</h2>
+<table>
+  <thead><tr><th style="width:170px">字段</th><th style="width:130px">控件</th><th>可选值</th><th style="width:180px">当前</th></tr></thead>
+  <tbody>
+    <tr><td><strong>竞价调整</strong></td><td>「更改」</td><td>Optional｜<code>无竞价调整</code></td><td>无竞价调整</td></tr>
+    <tr><td><strong>优先级调整</strong></td><td>「更改」</td><td><code>没有优先级调整</code></td><td>没有优先级调整</td></tr>
+    <tr><td><strong>竞价策略继承</strong></td><td>单选</td><td><code>使用订单内优先级 – 优先用完全部预算，同时最大限度地提升绩效（建议）</code> ／ <code>使用自定义</code></td><td style="color:var(--warn)">⚠️ 两项均 <strong>禁用</strong>（灰色不可改）</td></tr>
+    <tr><td><strong>最高出价</strong></td><td>单选</td><td><span class="chip">自动优化</span><span class="chip">手动设置</span></td><td>—</td></tr>
+  </tbody>
+</table>
+
+<h2>八、右侧「预测」面板</h2>
+<table>
+  <thead><tr><th style="width:220px">项</th><th>值</th></tr></thead>
+  <tbody>
+    <tr><td>订单指标</td><td>下拉（默认）</td></tr>
+    <tr><td>日期范围</td><td><code>Sep 28, 2026</code> 到 <code>Oct 28, 2026</code></td></tr>
+    <tr><td>已确认订单预算</td><td><code>US$20.00</code></td></tr>
+    <tr><td>投放节奏</td><td><code>高</code></td></tr>
+    <tr><td>可用支出总额</td><td><code>US$120.6万 · 144.7万</code></td></tr>
+  </tbody>
+</table>
+
+<h2>九、动态联动 / 依赖关系</h2>
+<table>
+  <thead><tr><th style="width:280px">触发</th><th>结果</th></tr></thead>
+  <tbody>
+    <tr><td>勾选「设置每日或每月支出限额」</td><td>展开额度输入行（周期：每日 / 每月）</td></tr>
+    <tr><td>勾选「设定每日最低支出」</td><td>展开每日最低支出输入</td></tr>
+    <tr><td>勾选「限制顾客可以看到此广告的次数」</td><td>展开「次数 / 每 N / 用户 / 天」一套输入；可再加一条</td></tr>
+    <tr><td>选「手动选择出版商」</td><td>才需要（并解锁）交易 / 供应包 / 出版商清单</td></tr>
+    <tr><td>设备勾「移动端」</td><td>才需要选移动操作系统（iOS / Android）</td></tr>
+    <tr><td>移动环境勾「应用程序」</td><td>才需要选应用设备类型（iPhone / iPad / Android / Kindle Fire / Kindle Fire HD）</td></tr>
+    <tr><td>「显示可选设置」</td><td>展开：外部 ID 或采购订单 / 备注</td></tr>
+  </tbody>
+</table>
+
+<div class="note warn">
+  ⚠️ 与「订单设置」页不同：订单项页的 <strong>类型不可改</strong>（继承订单）、<strong>竞价策略继承在本页被禁用</strong>。
+</div>
+
+<h2>十、待人工确认（程序化未拿到）</h2>
+<table>
+  <thead><tr><th style="width:34px">#</th><th style="width:190px">项</th><th>原因</th></tr></thead>
+  <tbody>
+    <tr><td class="c">1</td><td>移动应用面板</td><td>应用搜索表格未加载出结果（需滚动 / 等更久）</td></tr>
+    <tr><td class="c">2</td><td>类别 2–3 级子类</td><td>顶层 23 个已拿到，子类是懒加载树</td></tr>
+    <tr><td class="c">3</td><td>受众 346 条完整清单</td><td>已拿到结构与分类，未逐条导出</td></tr>
+    <tr><td class="c">4</td><td>交易完整促销列表</td><td>分页；已拿到列结构与样例</td></tr>
+  </tbody>
+</table>
+
+<h2>十一、控件定位表</h2>
+<table>
+  <thead><tr><th style="width:250px">字段</th><th>标识</th></tr></thead>
+  <tbody>
+    <tr><td>名称 / 外部 ID / 备注</td><td><code>#d16g-rodeo-line-item--general-section-name</code> / <code>…-external-id</code> / <code>…-comments</code></td></tr>
+    <tr><td>可选设置展开</td><td><code>[data-takt-id="section.ad_group.optional_settings.expand"]</code></td></tr>
+    <tr><td>设备 / 移动环境 / 移动应用</td><td><code>dspcreate_lineitem_mobile_os_list_targeting_button_trigger</code> / <code>…mobile_app_device_type_targeting…</code> / <code>…mobile_app_targeting…</code></td></tr>
+    <tr><td>类别 / 交易 / 供应包</td><td><code>button.product_categories_card_change.edit</code> / <code>button.deals_card_change.edit</code> / <code>button.supply_packages_card_change.edit</code></td></tr>
+    <tr><td>地域 / 受众 / 预竞价</td><td><code>tenrec_lineitem_geo_targeting_button_trigger</code> / <code>adsppricing_lineitem_audience_targeting_card_section_view_button_trigger</code> / <code>SQ_LINEITEM_PREBID_TARGETING_button_trigger</code></td></tr>
+    <tr><td>预算 / 节奏 / 频率 / 竞价</td><td><code>d16g-rodeo-line-item--budget-*</code> / <code>…pacing.delivery_profile.select</code> / <code>…frequency-cap-checkbox</code> / <code>…bidding-section-max-bid-options-*</code></td></tr>
+    <tr><td>保存 / 取消（页面级）</td><td><code>dspcreate_lineitem_save_cancel_button_trigger</code> — <strong style="color:var(--warn)">不要点</strong></td></tr>
+  </tbody>
+</table>
+
+<footer>
+  生成于 2026-09-28 23:4x EDT ｜ 原始快照：<code>dsp-lineitem-raw.json</code>　配套：<code>DSP订单设置-选项清单.html</code>（订单级设置）<br>
+  说明：除「移动应用」「类别子类」「受众明细」「交易明细分页」外，其余字段均由 DOM 逐一读取。
+</footer>
+
+</div>
+</body>
+</html>

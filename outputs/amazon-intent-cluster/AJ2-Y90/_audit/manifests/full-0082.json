@@ -1,0 +1,210 @@
+{
+  "run_id": "aj2-y90-20260714T234810-0bea2f52",
+  "schema_version": "1.0.0",
+  "prompt_version": "1.1.0",
+  "batch_id": "full-0082",
+  "model_name": "deepseek/deepseek-v4-pro",
+  "product_baseline": {
+    "product_asin": "B0GKDNPHJM",
+    "brand": "joomra",
+    "page_evidence_policy": "Only the fact IDs below may be cited as page_validated evidence. Alexa summaries, real-time price/delivery/inventory, review percentages, frequent-return notices, and medical-treatment claims are excluded.",
+    "facts": [
+      {
+        "id": "title_womens_flip_flop",
+        "claim": "The page title identifies a women's arch-support flip flop / thong sandal."
+      },
+      {
+        "id": "material_eva",
+        "claim": "Outer material is Ethylene Vinyl Acetate (EVA)."
+      },
+      {
+        "id": "closure_slip_on",
+        "claim": "Closure type is Slip On."
+      },
+      {
+        "id": "lightweight_breathable",
+        "claim": "The page states super lightweight and breathable."
+      },
+      {
+        "id": "soft_toe_post",
+        "claim": "The page states an upgraded soft toe post."
+      },
+      {
+        "id": "arch_support",
+        "claim": "The page states ergonomic arch support and proper alignment for all-day comfort."
+      },
+      {
+        "id": "padded_cushioning",
+        "claim": "Special features include Padded."
+      },
+      {
+        "id": "easy_clean",
+        "claim": "Seamless EVA construction is stated as easy to clean."
+      },
+      {
+        "id": "slip_resistant_grip",
+        "claim": "A deep textured lattice outsole is stated to provide grip and slip-resistant steps."
+      },
+      {
+        "id": "style_flip_flop",
+        "claim": "Sandal type is Flip Flop."
+      },
+      {
+        "id": "style_flat",
+        "claim": "Heel type is Flat."
+      },
+      {
+        "id": "style_outdoor",
+        "claim": "Lifestyle is outdoor."
+      },
+      {
+        "id": "style_open_toe",
+        "claim": "Toe style is Open Toe."
+      },
+      {
+        "id": "style_thong",
+        "claim": "Strap type is Thong."
+      },
+      {
+        "id": "sizes_6_11",
+        "claim": "The visible size selector includes US sizes 6 through 11."
+      },
+      {
+        "id": "colors_visible",
+        "claim": "The visible color selectors include black, pink/mauve, brown, dark gray, light blue, and white."
+      }
+    ],
+    "excluded_claims": [
+      "treats_or_cures_plantar_fasciitis",
+      "waterproof_or_quick_dry",
+      "review_sentiment_percentages",
+      "continuous_hours_without_discomfort",
+      "real_time_price",
+      "delivery_speed",
+      "inventory",
+      "frequent_return_notice"
+    ]
+  },
+  "terms": [
+    {
+      "term_id": "4297ffec4ab0b11f",
+      "source_term": "black flip flops foam",
+      "normalized_term": "black flip flops foam",
+      "language": "en"
+    },
+    {
+      "term_id": "c5c74477cdc6645d",
+      "source_term": "black flip flops for water women",
+      "normalized_term": "black flip flops for water women",
+      "language": "en"
+    },
+    {
+      "term_id": "1a2eccd4bb2c14b8",
+      "source_term": "arch flip flops women",
+      "normalized_term": "arch flip flops women",
+      "language": "en"
+    },
+    {
+      "term_id": "e83e1ed3d7f4557f",
+      "source_term": "size 7 white flip flops",
+      "normalized_term": "size 7 white flip flops",
+      "language": "en"
+    },
+    {
+      "term_id": "c01a41cc12dfbf66",
+      "source_term": "rubber triangle thong sandals",
+      "normalized_term": "rubber triangle thong sandals",
+      "language": "en"
+    },
+    {
+      "term_id": "be4dbc4880ac617e",
+      "source_term": "shower flip flops for women shower no slip insole footbed rubber",
+      "normalized_term": "shower flip flops for women shower no slip insole footbed rubber",
+      "language": "en"
+    },
+    {
+      "term_id": "cd94186ae0f2aa68",
+      "source_term": "women's yoga mat thong sandals white size 9 n",
+      "normalized_term": "women's yoga mat thong sandals white size 9 n",
+      "language": "en"
+    },
+    {
+      "term_id": "e3e1ee2973738a3b",
+      "source_term": "waterproof orthopedic flip flops",
+      "normalized_term": "waterproof orthopedic flip flops",
+      "language": "en"
+    },
+    {
+      "term_id": "6fcd4982d84c2d60",
+      "source_term": "size 11 womens flip flops",
+      "normalized_term": "size 11 womens flip flops",
+      "language": "en"
+    },
+    {
+      "term_id": "cdff313f324ee4a5",
+      "source_term": "strong flip flops for women",
+      "normalized_term": "strong flip flops for women",
+      "language": "en"
+    },
+    {
+      "term_id": "59fa283ded788321",
+      "source_term": "women's white flip flops",
+      "normalized_term": "women's white flip flops",
+      "language": "en"
+    },
+    {
+      "term_id": "edb571ec08eed7e7",
+      "source_term": "womens flip flop",
+      "normalized_term": "womens flip flop",
+      "language": "en"
+    },
+    {
+      "term_id": "29457cdde71836c2",
+      "source_term": "archies white flip flops",
+      "normalized_term": "archies white flip flops",
+      "language": "en"
+    },
+    {
+      "term_id": "b2b65bb4d5e13c1f",
+      "source_term": "rubber womens flip flops",
+      "normalized_term": "rubber womens flip flops",
+      "language": "en"
+    },
+    {
+      "term_id": "f60fd294f59ea5a3",
+      "source_term": "waterproof flip flops for women",
+      "normalized_term": "waterproof flip flops for women",
+      "language": "en"
+    },
+    {
+      "term_id": "b7689134cb053c1d",
+      "source_term": "cushionaire flip flops women",
+      "normalized_term": "cushionaire flip flops women",
+      "language": "en"
+    },
+    {
+      "term_id": "5716123b178d26cc",
+      "source_term": "comfy flip flops cheap",
+      "normalized_term": "comfy flip flops cheap",
+      "language": "en"
+    },
+    {
+      "term_id": "a68ffcf96b0a6b53",
+      "source_term": "women's beige flip flops",
+      "normalized_term": "women's beige flip flops",
+      "language": "en"
+    },
+    {
+      "term_id": "0243c7b86d3a10ea",
+      "source_term": "archies flip flops arch support womens",
+      "normalized_term": "archies flip flops arch support womens",
+      "language": "en"
+    },
+    {
+      "term_id": "6305c1814053dab3",
+      "source_term": "black flip flips women",
+      "normalized_term": "black flip flips women",
+      "language": "en"
+    }
+  ]
+}

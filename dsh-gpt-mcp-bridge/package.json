@@ -1,0 +1,33 @@
+{
+  "name": "@panjinlong/dsh-gpt-mcp-bridge",
+  "version": "0.5.3",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src",
+    "scripts",
+    "cordis.patch.yml",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "native-smoke": "node scripts/external-acceptance.mjs",
+    "smoke": "node scripts/smoke.mjs",
+    "integration": "node scripts/integration.mjs",
+    "relay": "node scripts/stdio-relay.mjs",
+    "relay-smoke": "node scripts/relay-smoke.mjs"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^4.4.3"
+  }
+}

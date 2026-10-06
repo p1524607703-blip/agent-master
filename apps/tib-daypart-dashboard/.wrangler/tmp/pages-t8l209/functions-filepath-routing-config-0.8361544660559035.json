@@ -1,0 +1,13 @@
+{
+  "routes": [
+    {
+      "routePath": "/api/hermes/:path*",
+      "mountPath": "/api/hermes",
+      "method": "",
+      "module": [
+        "api/hermes/[[path]].ts:onRequest"
+      ]
+    }
+  ],
+  "baseURL": "/"
+}

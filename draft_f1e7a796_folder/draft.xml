@@ -1,0 +1,260 @@
+<title>亚马逊广告数据可视化系统 PRD V1（大纲）</title>
+
+<p>本文件为产品需求文档（PRD）的<strong>完整大纲</strong>，用于指导 V1 从需求到上线的共识与排期。大纲以「可视化为主轴、Agent/SOP 为后续延伸」为定位，修正了宏观架构文档中「重 Agent、轻可视化」的偏差，并补齐了数据源、指标字典、多站点/币种、数据成熟度等缺失项。各节标题下的要点为<strong>该节应当包含的内容</strong>，正式 PRD 阶段需逐项填充为可验收的需求描述。</p>
+
+<callout emoji="📌" background-color="light-blue"><p>使用说明：本大纲中带「〈待确认〉」的条目为需在需求评审（G1/G2）前由产品/数据/业务敲定的开放项，不得遗留为脚注。</p></callout>
+
+<h1 seq="auto">文档信息</h1>
+
+<table>
+<thead><tr><th><p>字段</p></th><th><p>内容</p></th></tr></thead>
+<tbody>
+<tr><td><p>文档名称</p></td><td><p>亚马逊广告数据可视化系统 PRD V1（大纲）</p></td></tr>
+<tr><td><p>版本</p></td><td><p>V1.0-draft</p></td></tr>
+<tr><td><p>状态</p></td><td><p>大纲评审中</p></td></tr>
+<tr><td><p>作者 / 日期</p></td><td><p>〈待填写〉</p></td></tr>
+<tr><td><p>关联文档</p></td><td><p>《宏观架构与开发流程》《RBAC 与数据范围矩阵》《领域模型与指标字典》《核心业务流程与状态机》《API 与 MCP 规范》</p></td></tr>
+</tbody></table>
+
+<h1 seq="auto">背景与用户问题</h1>
+
+<p>本节回答「为谁、解决什么」。需从真实业务场景出发，禁止把内部预设功能冒充用户需要。</p>
+
+<h2 seq="auto">业务背景</h2>
+<ul>
+<li>企业同时在多个亚马逊站点（如 US/UK/DE/JP）投放 Sponsored Products / Brands / Display 广告，账户与 ASIN 数量大。</li>
+<li>当前数据分散在卖家中心报表、广告后台导出、人工表格中，跨账户/跨站点对比依赖手工拼表。</li>
+</ul>
+
+<h2 seq="auto">核心痛点（需附证据）</h2>
+<ul>
+<li>数据口径不一致：不同人对 ACOS/ROAS 的归因窗口（1/7/14 天）理解不同，结论互相打架。〈待补充访谈/调研证据〉</li>
+<li>跨站点/跨账户无法统一视图，老板与运营各看各的。</li>
+<li>归因未成熟的数据被当成最终结果，导致误判。</li>
+<li>优化动作无依据、无复盘，经验无法沉淀。</li>
+</ul>
+
+<h2 seq="auto">目标用户与任务情境</h2>
+<table>
+<thead><tr><th><p>角色</p></th><th><p>典型任务</p></th><th><p>核心诉求</p></th></tr></thead>
+<tbody>
+<tr><td><p>品牌主 / 老板</p></td><td><p>看整体 ROI、跨站点健康度</p></td><td><p>一屏看清，异常主动提醒</p></td></tr>
+<tr><td><p>代运营经理</p></td><td><p>管数十个账号、分配排查</p></td><td><p>多账户聚合、按人/品牌下钻</p></td></tr>
+<tr><td><p>优化师（Operator）</p></td><td><p>抠关键词/投放位 ACOS</p></td><td><p>词/ASIN/位置级下钻与分析</p></td></tr>
+<tr><td><p>数据分析师</p></td><td><p>专题研究、SOP 设计</p></td><td><p>自助取数、口径透明、可溯源</p></td></tr>
+</tbody>
+</table>
+
+<h1 seq="auto">产品目标与成功指标</h1>
+
+<p>目标须连接可观测结果，指标标注口径、来源与时间窗；未知目标值用〈目标值待确认〉并指定 owner。</p>
+
+<table>
+<thead><tr><th><p>目标</p></th><th><p>可观测指标</p></th><th><p>口径 / 时间窗</p></th><th><p>目标值</p></th></tr></thead>
+<tbody>
+<tr><td><p>统一可信的数据视图</p></td><td><p>跨站点日报可一键生成</p></td><td><p>每日 / T+1</p></td><td><p>〈待确认〉</p></td></tr>
+<tr><td><p>降低人工拼表工时</p></td><td><p>周报制作平均耗时</p></td><td><p>周维度</p></td><td><p>〈待确认，基线待采集〉</p></td></tr>
+<tr><td><p>归因口径一致</p></td><td><p>看板全量标注归因窗口</p></td><td><p>100% 覆盖</p></td><td><p>100%</p></td></tr>
+<tr><td><p>异常可发现</p></td><td><p>异常告警触达率</p></td><td><p>日维度</p></td><td><p>〈待确认〉</p></td></tr>
+</tbody>
+</table>
+
+<h1 seq="auto">范围</h1>
+
+<h2 seq="auto">V1 范围内（In Scope）</h2>
+<ul>
+<li>多账户 / 多站点广告数据的统一接入、清洗与存储。</li>
+<li>核心指标体系（见第 6 节）与跨站点汇总（FX 归一化）。</li>
+<li>可视化看板：经营概览、Campaign 视图、Product(ASIN) 视图。</li>
+<li>首批专题分析：CPO、TIB、分时、Placement。</li>
+<li>异常告警与基础下钻（关键词 / ASIN / 投放位置）。</li>
+<li>RBAC 与数据范围权限、全链路审计（查询/分析）。</li>
+<li>报告导出（PDF/Excel）。</li>
+</ul>
+
+<h2 seq="auto">V1 范围外（Out of Scope）</h2>
+<ul>
+<li>Agent 自动执行广告改动、审批闭环（推迟至 M5/M6）。</li>
+<li>MCP / ChatGPT / Codex 自然语言入口（后续延伸）。</li>
+<li>SOP 机器可执行引擎（V1 仅文档化 SOP + 看板）。</li>
+<li>多广告平台（如 Walmart、独立站）一次性覆盖。</li>
+<li>复杂预测 / 归因建模。</li>
+<li>超大规模实时数仓（ClickHouse 等按需后评估）。</li>
+</ul>
+
+<h1 seq="auto">核心概念与术语（指标字典雏形）</h1>
+
+<p>本节是可视化系统的地基，必须 V1 钉死。正式 PRD 阶段扩展为独立《指标字典》。</p>
+
+<h2 seq="auto">核心指标定义</h2>
+<table>
+<thead><tr><th><p>指标</p></th><th><p>公式</p></th><th><p>是否依赖归因窗口</p></th><th><p>说明</p></th></tr></thead>
+<tbody>
+<tr><td><p>Impressions / Clicks</p></td><td><p>—</p></td><td><p>否</p></td><td><p>原始计数</p></td></tr>
+<tr><td><p>CTR</p></td><td><p>Clicks / Impressions</p></td><td><p>否</p></td><td><p>点击率</p></td></tr>
+<tr><td><p>Spend</p></td><td><p>—</p></td><td><p>否</p></td><td><p>广告花费</p></td></tr>
+<tr><td><p>CPC</p></td><td><p>Spend / Clicks</p></td><td><p>否</p></td><td><p>单次点击成本</p></td></tr>
+<tr><td><p>Orders / Sales</p></td><td><p>—</p></td><td><p>是</p></td><td><p>归因窗口内订单/销售额</p></td></tr>
+<tr><td><p>CVR</p></td><td><p>Orders / Clicks</p></td><td><p>是</p></td><td><p>转化率</p></td></tr>
+<tr><td><p>ACOS</p></td><td><p>Spend / Sales</p></td><td><p>是</p></td><td><p>广告花费占广告销售额比</p></td></tr>
+<tr><td><p>ROAS</p></td><td><p>Sales / Spend</p></td><td><p>是</p></td><td><p>广告投资回报</p></td></tr>
+<tr><td><p>TACOS</p></td><td><p>Ad Spend / Total Sales（含自然单）</p></td><td><p>是</p></td><td><p>广告占整体生意比</p></td></tr>
+<tr><td><p>Impression Share</p></td><td><p>自身曝光 / 可竞争曝光</p></td><td><p>否</p></td><td><p>曝光份额</p></td></tr>
+</tbody>
+</table>
+
+<h2 seq="auto">归因窗口与数据成熟度</h2>
+<ul>
+<li><strong>归因窗口类型</strong>：1-day click、7-day click、14-day click、1-day view（SB/SD 支持 view）。所有含转化类指标必须标注窗口。</li>
+<li><strong>成熟度规则</strong>：某日期 D 在窗口 W 下的指标「成熟」当且仅当 D + W ≤ 当前日期。看板须明确展示数据截止时间与成熟度状态，未成熟数据不得呈现为最终结果。</li>
+<li>默认展示窗口：〈待业务确认，建议 7-day click 为默认〉。</li>
+</ul>
+
+<h1 seq="auto">功能需求</h1>
+
+<p>按模块列出。关键需求写成「角色 + 触发/前置 + 可观测结果 + 异常/边界」。可视化相关需求为 V1 重点。</p>
+
+<h2 seq="auto">数据接入与管理</h2>
+<ul>
+<li>支持 Amazon Ads API（OAuth）拉取 SP/SB/SD 报表，并支持卖家中心报表文件导入兜底。〈触发：定时调度 / 手动上传 → 系统登记批次并留存原始文件〉</li>
+<li>批次登记与溯源：每个导入批次记录来源、时间、范围、状态，可回溯到具体指标。</li>
+<li>数据质量校验：格式、粒度、完整性、映射缺失检查，异常批次告警并隔离。</li>
+<li>历史回填：新账户接入时一次性回填 Amazon API 仅保留的约 60–90 天以外历史（通过批量/UI 导出导入）。〈待确认回填来源与上限〉</li>
+</ul>
+
+<h2 seq="auto">指标与数据字典</h2>
+<ul>
+<li>系统内置第 6 节指标，每个指标携带：公式、归因窗口、来源批次、指标版本、成熟度。</li>
+<li>跨站点汇总时按 FX 汇率归一化到基准币种（汇率来源与更新频率〈待确认〉）。</li>
+</ul>
+
+<h2 seq="auto">可视化看板（V1 主轴）</h2>
+<ul>
+<li>经营概览 Dashboard：跨站点/账户核心指标卡（Spend、Sales、ACOS、ROAS、TACOS）、趋势线、异常标记。</li>
+<li>Campaign 视图：按 Campaign→Ad Group→Keyword 层级下钻，支持筛选站点/账户/时间/归因窗口。</li>
+<li>Product(ASIN) 视图：以产品为经营主线，跨账户/跨广告类型聚合 ASIN 表现（呼应架构原则 3.1）。</li>
+<li>专题分析：CPO（单订单成本）、TIB（〈待业务定义〉）、分时表现、Placement（投放位置）表现。</li>
+<li>图表类型与下钻路径清单：〈在交互原型阶段细化，须明确每张图的解答问题〉。</li>
+</ul>
+
+<h2 seq="auto">告警与异常</h2>
+<ul>
+<li>基于阈值/同环比的规则告警（如 ACOS 突增、花费异常、曝光份额骤降），触达至负责人。</li>
+<li>告警须携带数据范围、时间与成熟度，避免基于未成熟数据误报。</li>
+</ul>
+
+<h2 seq="auto">权限与组织</h2>
+<ul>
+<li>RBAC 四维度：角色 × 数据范围 × 动作权限 × 风险策略（详见第 10 节）。</li>
+<li>数据范围按 公司/站点/广告账户/品牌/产品线/产品/负责人 组合授权；组织部门仅作默认来源，不等同权限。</li>
+<li>全链路审计：所有查询/分析/导出记录操作人、数据范围、时间、来源。</li>
+</ul>
+
+<h2 seq="auto">报告导出</h2>
+<ul>
+<li>看板/专题可导出 PDF 与 Excel，导出内容沿用当前筛选与归因窗口标注。</li>
+</ul>
+
+<h1 seq="auto">数据需求</h1>
+
+<h2 seq="auto">数据源与报表类型</h2>
+<table>
+<thead><tr><th><p>广告类型</p></th><th><p>核心报表（Report Type）</p></th><th><p>关键维度</p></th></tr></thead>
+<tbody>
+<tr><td><p>Sponsored Products</p></td><td><p>campaign / adGroup / keyword / searchTerm / product / placement / purchase</p></td><td><p>campaignId, adGroupId, keywordId, query, asin</p></td></tr>
+<tr><td><p>Sponsored Brands</p></td><td><p>campaign / adGroup / keyword / searchTerm / product / placement / video</p></td><td><p>campaignId, keywordId, asin</p></td></tr>
+<tr><td><p>Sponsored Display</p></td><td><p>campaign / adGroup / product / placement</p></td><td><p>campaignId, asin, placement</p></td></tr>
+<tr><td><p>Attribution</p></td><td><p>归因报表（sales/orders by attribution type）</p></td><td><p>lineItemId, creative, publisher</p></td></tr>
+<tr><td><p>Business Report</p></td><td><p>商品会话/订单（含自然流量）</p></td><td><p>asin, date</p></td></tr>
+</tbody>
+</table>
+
+<h2 seq="auto">实体与粒度</h2>
+<ul>
+<li>事实表粒度：日期 × 账户 × 站点 × 广告类型 × 广告结构层级（campaign/adgroup/keyword/asin/placement）。</li>
+<li>主数据：账户、产品(ASIN)、人员、组织及它们之间的映射关系（正式建模，禁止按名称临时猜测）。</li>
+<li>分区与时区：每日分区以站点本地时区或统一 UTC 归日，〈待确认〉。</li>
+</ul>
+
+<h2 seq="auto">多站点 / 币种 / 时区</h2>
+<ul>
+<li>各站点有自己的结算币种，跨站点汇总需 FX 归一化（基准币种、汇率来源、更新频率〈待确认〉）。</li>
+<li>时区影响「按日」归因与趋势对齐，须统一定义。</li>
+</ul>
+
+<h2 seq="auto">数据时效 SLA</h2>
+<table>
+<thead><tr><th><p>项目</p></th><th><p>要求</p></th><th><p>备注</p></th></tr></thead>
+<tbody>
+<tr><td><p>接入频率</p></td><td><p>〈待确认：建议每日 T+1〉</p></td><td><p>受 Amazon 报表延迟约束</p></td></tr>
+<tr><td><p>看板时延</p></td><td><p>常用看板首屏 &lt; 〈待确认〉秒</p></td><td><p>依赖查询引擎选型</p></td></tr>
+<tr><td><p>成熟度标注</p></td><td><p>100% 指标展示成熟度</p></td><td><p>强制</p></td></tr>
+</tbody>
+</table>
+
+<h1 seq="auto">关键用户流程</h1>
+<ul>
+<li>身份与授权：组织登录 → 识别身份 → 加载角色与数据范围 → 计算会话有效权限 → 进入工作台。</li>
+<li>看数流程：选站点/账户 → 选时间范围与归因窗口 → 选视图（概览/Campaign/Product）→ 下钻 → 导出。</li>
+<li>数据处理流程：原始接入 → 批次登记 → 校验 → 主数据关联 → 事实入库与指标计算 → 成熟度/质量检查 → 发布到看板。</li>
+<li>异常流程：必须表达数据未成熟、映射缺失、权限不足、接口失败、部分执行等分支（不仅画成功路径）。</li>
+</ul>
+
+<h1 seq="auto">权限模型（RBAC 概要）</h1>
+<p>详细矩阵见独立《RBAC 与数据范围矩阵》。本节给出概要。</p>
+<table>
+<thead><tr><th><p>维度</p></th><th><p>内容</p></th></tr></thead>
+<tbody>
+<tr><td><p>角色层</p></td><td><p>Super Admin / Data Admin / Ads Manager / Analyst / Operator / Viewer（Agent 为独立服务身份，不列入人类角色表）</p></td></tr>
+<tr><td><p>数据范围层</p></td><td><p>公司 / 站点 / 广告账户 / 品牌 / 产品线 / 产品 / 负责人 组合授权</p></td></tr>
+<tr><td><p>动作权限层</p></td><td><p>查询 / 分析 / 建议 / 改映射 / 审批 / 执行 独立拆分；看数 ≠ 能改广告</p></td></tr>
+<tr><td><p>风险策略层</p></td><td><p>高风险动作（V1 外）需审批路由；V1 仅查询/分析/导出</p></td></tr>
+</tbody>
+</table>
+
+<h1 seq="auto">非功能需求</h1>
+<table>
+<thead><tr><th><p>类别</p></th><th><p>要求</p></th></tr></thead>
+<tbody>
+<tr><td><p>性能</p></td><td><p>常用看板首屏时延〈待确认〉；大数据范围查询需分页/异步</p></td></tr>
+<tr><td><p>安全</p></td><td><p>Amazon OAuth 凭证加密存储、按账户隔离；Agent 服务身份独立且最小权限</p></td></tr>
+<tr><td><p>可用性与可观测</p></td><td><p>调度失败告警、数据质量看板、操作审计可追溯</p></td></tr>
+<tr><td><p>合规</p></td><td><p>广告账户数据访问遵循最小权限与审计要求〈按实际风险纳入〉</p></td></tr>
+</tbody>
+</table>
+
+<h1 seq="auto">验收标准</h1>
+<ul>
+<li>数据对账：系统指标与 Amazon 后台在指定窗口下偏差 &lt; 〈待确认，建议 1%〉。</li>
+<li>权限边界：越权访问在 UI 与 API 两层均被拒绝（页面、API、导出均覆盖）。</li>
+<li>成熟度：未成熟数据不得作为最终结果展示，且有明确标识。</li>
+<li>核心工作流：概览 / Campaign / Product 三视图 + 首批专题分析可端到端走通。</li>
+<li>多站点：跨站点汇总币种归一化结果正确。</li>
+</ul>
+
+<h1 seq="auto">里程碑与依赖</h1>
+<ul>
+<li>M0 设计基线：PRD、思维导图、领域模型、RBAC、关键流程、API V1 评审通过。</li>
+<li>M1 身份与主数据：组织登录、账户/产品/负责人映射、数据导入、Raw/Core/Fact 基础。</li>
+<li>M2 经营分析工作台：Campaign Explorer、Product Explorer、CPO/TIB/分时/Placement 首批分析。</li>
+<li>M3+ 与 Agent/SOP/自动执行（见宏观架构，V1 验收不含）。</li>
+<li>依赖：Amazon Ads API 权限开通、OAuth 凭证、FX 汇率源、组织身份源（钉钉/飞书〈待确认〉）。</li>
+</ul>
+
+<h1 seq="auto">风险与开放问题</h1>
+<table>
+<thead><tr><th><p>类型</p></th><th><p>问题</p></th><th><p>Owner / 时点</p></th></tr></thead>
+<tbody>
+<tr><td><p>范围</p></td><td><p>身份源用钉钉还是飞书？〈影响 5.1 整条流程〉</p></td><td><p>产品 / G1 前</p></td></tr>
+<tr><td><p>数据</p></td><td><p>归因窗口默认值、FX 汇率源与更新频率未定</p></td><td><p>数据 / G2 前</p></td></tr>
+<tr><td><p>技术</p></td><td><p>查询引擎选型（Postgres vs ClickHouse）影响时延 SLA</p></td><td><p>研发 / M0</p></td></tr>
+<tr><td><p>业务</p></td><td><p>TIB 等业务专属指标定义需业务方确认</p></td><td><p>业务 / G1 前</p></td></tr>
+<tr><td><p>Build/Buy</p></td><td><p>自建 vs 第三方工具（Helium 10/Perpetua 等）未做决策</p></td><td><p>负责人 / 立项</p></td></tr>
+</tbody>
+</table>
+
+<h1 seq="auto">关联文档</h1>
+<ul>
+<li>《企业广告数据与 Agent 操作系统｜宏观框架与开发流程》（已有飞书文档）——本 PRD 沿用其分层架构、RBAC 四维度、数据成熟度与评审关口，但将可视化前置、Agent 后置。</li>
+<li>待产出：《业务思维导图与 Sitemap》《RBAC 与数据范围矩阵》《领域模型/PostgreSQL Schema/指标字典 V1》《核心业务流程与状态机》《Application API 与 MCP 规范 V1》。</li>
+</ul>

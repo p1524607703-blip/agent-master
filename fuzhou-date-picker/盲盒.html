@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>福州去哪抽签机</title>
+<style>
+  :root{
+    --green:#1b7f5c;
+    --green-soft:#e6f4ee;
+    --orange:#e8552d;
+    --ink:#1f2a24;
+    --ink-2:#5d6b64;
+    --line:#e3eae6;
+    --card:#ffffff;
+    --gold:#c9962f;
+    --shadow:0 10px 30px rgba(27,127,92,.10), 0 2px 8px rgba(0,0,0,.04);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(1200px 600px at 10% -10%, #e9f6f0 0%, rgba(233,246,240,0) 60%),
+      radial-gradient(900px 500px at 100% 0%, #eaf0ff 0%, rgba(234,240,255,0) 55%),
+      #f7faf8;
+    min-height:100vh;
+    padding:24px 16px 60px;
+  }
+  .wrap{max-width:680px;margin:0 auto}
+  header{text-align:center;margin-bottom:20px}
+  .badge{
+    display:inline-block;font-size:12px;letter-spacing:.12em;color:var(--green);
+    background:var(--green-soft);border:1px solid #cfe8dc;padding:5px 12px;border-radius:999px;
+  }
+  h1{font-size:27px;margin:12px 0 6px;letter-spacing:.02em}
+  h1 span{color:var(--orange)}
+  .sub{color:var(--ink-2);font-size:13.5px;margin:0}
+
+  .card{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:18px;margin-bottom:16px;border:1px solid var(--line)}
+
+  .machine{text-align:center;padding:30px 18px 26px;background:linear-gradient(180deg,#ffffff 0%,#fbfefc 100%)}
+  .slot{
+    min-height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+  }
+  .slot-area{font-size:13px;color:var(--ink-2);letter-spacing:.08em}
+  .slot-name{
+    font-size:32px;font-weight:800;line-height:1.25;letter-spacing:.02em;
+    background:linear-gradient(90deg,#12805a,#3aa17c 60%,#e8552d);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .slot-name.idle{background:none;color:#c9d4ce;-webkit-text-fill-color:#c9d4ce}
+  .slot-desc{font-size:13.5px;color:var(--ink-2);max-width:520px;line-height:1.7}
+  .meta-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:4px}
+  .tag{font-size:11.5px;padding:4px 10px;border-radius:999px;background:#f2f6f4;color:var(--ink-2)}
+  .tag.rar-SSR{background:#fdf3dc;color:#9a6f12;border:1px solid #f0dcaa}
+  .tag.rar-SR{background:#f1edfd;color:#5b3fb3;border:1px solid #ded4fa}
+  .tag.rar-R{background:#eef3f8;color:#4a6070;border:1px solid #dbe6ee}
+
+  .draw-btn{
+    margin-top:18px;border:none;cursor:pointer;
+    background:linear-gradient(135deg,#1b7f5c,#29a37a);
+    color:#fff;font-size:17px;font-weight:700;letter-spacing:.06em;
+    padding:14px 40px;border-radius:999px;box-shadow:0 8px 22px rgba(27,127,92,.28);
+    transition:transform .12s ease, box-shadow .2s ease;
+  }
+  .draw-btn:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(27,127,92,.34)}
+  .draw-btn:active{transform:translateY(1px) scale(.98)}
+  .draw-btn[disabled]{opacity:.55;pointer-events:none}
+  .ghost-btn{
+    background:#fff;border:1px solid var(--line);color:var(--ink-2);
+    padding:10px 20px;border-radius:999px;font-size:13.5px;cursor:pointer;transition:.15s
+  }
+  .ghost-btn:hover{border-color:var(--green);color:var(--green)}
+  .btn-row{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+
+  .main-row{display:flex;gap:12px;justify-content:center;align-items:center;margin-top:18px;flex-wrap:wrap}
+  .main-row .draw-btn{margin-top:0}
+  /* 逃跑中的主按钮是 fixed;z-index:160，这里必须更高，保证「就这个了」永远点得到 */
+  .settle-btn{position:relative;z-index:200;border-color:var(--orange);color:var(--orange)}
+  .settle-btn:hover{border-color:var(--orange);background:var(--orange);color:#fff}
+  .settle-btn[disabled]{opacity:1;border-color:var(--green);color:var(--green);cursor:default}
+
+  .toast{
+    position:fixed;left:50%;bottom:34px;transform:translateX(-50%) translateY(14px);
+    background:rgba(31,42,36,.92);color:#fff;font-size:13px;padding:9px 16px;border-radius:999px;
+    opacity:0;transition:.25s;z-index:200;pointer-events:none
+  }
+  .toast.show{opacity:1;transform:translateX(-50%)}
+  footer{text-align:center;color:#a9b5af;font-size:12px;margin-top:26px;line-height:1.8}
+  @media (max-width:520px){
+    h1{font-size:23px}
+    .slot-name{font-size:27px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="badge">FUZHOU · 去哪抽签</div>
+    <h1>福州去哪<span>抽签机</span></h1>
+    <p class="sub">按一下，命运自会给你答案。</p>
+  </header>
+
+  <div class="card machine">
+    <div class="slot">
+      <div class="slot-area" id="slotArea">机 器 待 机 中</div>
+      <div class="slot-name idle" id="slotName">按下面的按钮</div>
+      <div class="slot-desc" id="slotDesc">准备好了吗？天意正在排队。</div>
+      <div class="meta-row" id="slotMeta"></div>
+    </div>
+    <div class="main-row">
+      <button class="draw-btn" id="drawBtn">🎲 帮我抽一个</button>
+      <button class="ghost-btn settle-btn" id="settleBtn" style="display:none">就这个了</button>
+    </div>
+    <div class="btn-row">
+      <button class="ghost-btn" id="copyBtn">复制文案</button>
+    </div>
+  </div>
+
+  <footer>
+    福州 · 三坊七巷<br>
+    别问为什么是这里，抽签决定的，天命不可违。
+  </footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ 景点池（滚动动画用，最终永远停在 三坊七巷） ============ */
+const SPOTS = [
+  ["三坊七巷","鼓楼","古厝巷弄","明清坊巷格局还在，小黄楼、水榭戏台、朗官巷转角，随手一拍都是人像主战场","SSR"],
+  ["乌山・乌塔","鼓楼","城市爬山","福州城中山，两百多处摩崖石刻，爬十分钟就有「我在登山」的成就感","R"],
+  ["于山・白塔","鼓楼","古塔禅意","定光寺白塔＋戚公祠，半山腰看老城屋顶，树荫管够","R"],
+  ["西湖公园","鼓楼","湖景","福州最老的公园，柳堤＋画舫，老福州谈恋爱第一站","R"],
+  ["左海公园","鼓楼","湖景","摩天轮、湖边步道，傍晚遛弯气氛组第一名","R"],
+  ["福建博物院","鼓楼","文艺","闽越古国与船政文物，免费，冷气足，雨天方案的天花板","SR"],
+  ["镇海楼・屏山公园","鼓楼","城景","屏山顶俯瞰全城，日落加夜景一次打包","SR"],
+  ["福州文庙","鼓楼","古厝","棂星门＋大成殿，红墙黄瓦，汉服／人像出片率高","R"],
+  ["开元寺・芝山","鼓楼","禅意","福州现存最古佛寺，藏着唐代经幢，安静得像开了静音模式","SR"],
+  ["温泉公园","鼓楼","城市绿肺","市中心泡汤圈的核心地段，早上有广场舞江湖可以围观","R"],
+  ["上下杭・三捷河","台江","古厝街区","老商行门面＋沿河灯笼，晚上比白天好看三倍","SSR"],
+  ["闽江之心・青年会","台江","夜景","1912 年红砖楼，江边看光影秀，坐着吹风说废话的物理外挂","SR"],
+  ["闽江夜游","台江","夜景","台江码头登船，解放大桥灯光秀从水上看，气氛直给","SR"],
+  ["南公园","台江","园林","琉球馆遗存＋假山回廊，夏天躲太阳的老派聪明做法","R"],
+  ["中洲岛","台江","江景","解放大桥正中间的小岛，欧式城堡建筑，拍照像出国（假的）","R"],
+  ["老药洲街区","台江","老城烟火","榕树下锅边糊、拌面扁肉、虾酥，胃比嘴先表态的地方","SR"],
+  ["鼓山・涌泉寺","晋安","山野禅寺","两千米石阶＋十八景＋千年古刹，爬完吃的都理直气壮","SSR"],
+  ["鼓岭","晋安","避暑山居","老别墅、柳杉王公园、环山公路兜风，海拔自带空调","SSR"],
+  ["福州国家森林公园","晋安","森林","千年古榕＋竹林鸟语，负氧离子按斤吸，通体舒畅","SR"],
+  ["金鸡山公园","晋安","城景","览城栈道俯瞰全城，夜景版更值得","SR"],
+  ["寿山・寿山石古矿洞","晋安","人文","田黄石的老家，洞里常年凉快，奇石博物馆在边上","SR"],
+  ["宦溪・弥高村","晋安","山野村落","高山村云海＋杨梅季，弯道多但风景认","R"],
+  ["闽越水镇","闽侯","度假区","闽越王城大场景＋夜景＋演出，拍照党快乐老家","SSR"],
+  ["旗山・万佛寺","闽侯","山野禅寺","单体巨殿＋山门气势，香火和风景一起管够","SR"],
+  ["十八重溪","闽侯","溪谷","溯溪玩水、河谷巨石，夏天的续命点，务必穿防滑鞋","SR"],
+  ["昙石山遗址博物馆","闽侯","史前文化","五千年前闽越先民的村落现场，冷知识密度极高","R"],
+  ["三叠井森林公园","闽侯","森林","三级瀑布＋林荫栈道，坡度友好，适合边走边聊","R"],
+  ["雪峰崇圣禅寺","闽侯","古刹","深山里的唐代禅宗祖庭，古树参天，安静得失真","SR"],
+  ["白沙湾生态农庄","闽侯","田园","采摘＋烧烤＋亲子设施，带娃友好度拉满","R"],
+  ["烟台山","仓山","文艺街区","领事馆老洋房＋爱国路 2 号，咖啡密度是市区天花板","SSR"],
+  ["泛船浦天主教堂","仓山","建筑","哥特式白教堂，钟楼准点敲，声音比滤镜好使","SR"],
+  ["华南女子文理学院旧址","仓山","文艺","红砖拱廊＋老操场，校园氛围感自带年代滤镜","SR"],
+  ["福建师大仓山老校区","仓山","文艺","长安山下梧桐路＋老礼堂，走一圈像回到 1998","R"],
+  ["花海公园","仓山","花田","江边大片季节性花海，随手一拍就是壁纸，但要看季节对不对","R"],
+  ["乌龙江湿地公园","仓山","江景","芦苇荡、观鸟、江上落日，适合慢到不合理的散步","R"],
+  ["飞凤山奥体公园","仓山","城市绿肺","缓坡登顶就能俯瞰城南，夜景版本更值票价，晚风很贵","R"],
+  ["螺洲古镇","仓山","古村","老榕＋奎光阁＋状元府，人少到可以听见自己的脚步","SR"],
+  ["阳岐・严复故居","仓山","古村","乌龙江边的古村落，出片，且不像景点像生活","SR"]
+];
+
+/* 唯一真命天子 */
+const TARGET = SPOTS.find(s => s[0] === "三坊七巷");
+const $ = id => document.getElementById(id);
+let rolling = false;
+let hasDrawn = false;
+let drawCount = 0;        // 成功抽取次数
+let fixedMode = false;    // 第 2 次抽取之后：按钮固定不再躲，只继续改文案
+let fixedTap = 0;         // 固定模式下的点击次数
+let current = null;
+
+function toast(msg){
+  const t = $("toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove("show"), 2200);
+}
+
+function draw(){
+  if(rolling) return;
+  rolling = true;
+  escapeCount = 0;
+  const db = $("drawBtn");
+  db.disabled = true;
+  db.style.cssText = "";          // 清掉逃跑时的定位
+  if(!fixedMode) db.textContent = "🎲 抽签中…";   // 固定模式保留点击时设的文案
+  $("settleBtn").style.display = "none";
+  $("slotMeta").innerHTML = "";
+  const nm = $("slotName"), ar = $("slotArea");
+  nm.classList.add("idle");
+  let ticks = 0;
+  const total = 20 + Math.floor(Math.random()*6);
+  const timer = setInterval(()=>{
+    const r = SPOTS[Math.floor(Math.random()*SPOTS.length)];
+    nm.textContent = r[0];
+    ar.textContent = r[1] + " · " + r[2];
+    ticks++;
+    if(ticks >= total){
+      clearInterval(timer);
+      rolling = false;
+      const b2 = $("drawBtn");
+      b2.disabled = false;
+      hasDrawn = true;
+      drawCount++;
+      if(drawCount === 2){ fixedMode = true; b2.textContent = "别点了"; }   // 第 2 次抽完 → 按钮认命
+      else if(drawCount < 2){ b2.textContent = "🎲 再抽一个"; }
+      const sb = $("settleBtn");
+      sb.style.display = ""; sb.disabled = false; sb.textContent = "就这个了"; sb.classList.remove("on");
+      showResult(TARGET);
+    }
+  }, 55);
+}
+
+function showResult(s){
+  current = s;
+  const nm = $("slotName"); nm.classList.remove("idle"); nm.textContent = s[0];
+  $("slotArea").textContent = s[1] + " · " + s[2];
+  $("slotDesc").textContent = s[3];
+  $("slotMeta").innerHTML =
+    `<span class="tag rar-${s[4]}">${s[4]==="SSR"?"✨ 稀有 SSR":s[4]==="SR"?"💜 SR":"🔹 R"}</span>` +
+    `<span class="tag">${s[1]}</span><span class="tag">${s[2]}</span>`;
+}
+
+function copyText(){
+  if(!current) return;
+  const t = `这个周末，去【${current[0]}】？（热门打卡地）\n${current[3]}\n（${current[1]}·${current[2]}）\n别问为什么是这里，抽签决定的，天命不可违。`;
+  const done = ()=>toast("文案已复制 🎉");
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(t).then(done).catch(()=>fallbackCopy(t, done));
+  } else fallbackCopy(t, done);
+}
+function fallbackCopy(t, done){
+  const ta = document.createElement("textarea");
+  ta.value = t; ta.style.position="fixed"; ta.style.opacity="0";
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand("copy"); done(); }catch(e){ toast("复制失败，手动抄：" + t); }
+  document.body.removeChild(ta);
+}
+
+/* ---------- 抽过之后，「再抽一个」会躲（等她点「就这个了」） ---------- */
+const ESCAPE_TEXTS = [
+  "要不要再考虑考虑？",
+  "三坊七巷的颜值，福州第二没人敢认第一。",
+  "那里的黄昏，随手一拍就是朋友圈九宫格冠军。",
+  "逛小店、喝咖啡、看老房子，一天都不重样。",
+  "不去三坊七巷，等于没来过福州。"
+];
+const GIVEUP = 6;
+let escapeCount = 0, lastFlee = 0;
+const drawBtn = $("drawBtn");
+const settleBtn = $("settleBtn");
+
+function flee(){
+  /* 注意：这里绝不能 preventDefault()，否则 pointerdown 上的 preventDefault
+     会把后续的 click 一起吞掉，导致「好吧，那你继续」点了没反应。 */
+  if(escapeCount >= GIVEUP) return;          // 已认输，不再躲
+  const now = Date.now();
+  if(now - lastFlee < 180) return;
+  lastFlee = now;
+  escapeCount++;
+
+  /* 躲够了，认输：回原位、可点，点了还是再抽三坊七巷 */
+  if(escapeCount >= GIVEUP){
+    drawBtn.style.position = ""; drawBtn.style.left = ""; drawBtn.style.top = ""; drawBtn.style.transform = "";
+    drawBtn.textContent = "好吧，那你继续";
+    return;
+  }
+
+  const w = innerWidth, h = innerHeight;
+  const bw = drawBtn.offsetWidth || 160, bh = drawBtn.offsetHeight || 48;
+  drawBtn.style.position = "fixed";
+  drawBtn.style.zIndex = "160";
+  drawBtn.style.left = (Math.random()*Math.max(10, w-bw-20)+10) + "px";
+  drawBtn.style.top  = (Math.random()*Math.max(10, h-bh-20)+10) + "px";
+  drawBtn.style.transform = `rotate(${(Math.random()*24-12).toFixed(1)}deg)`;
+  drawBtn.textContent = ESCAPE_TEXTS[Math.min(escapeCount - 1, ESCAPE_TEXTS.length - 1)];
+}
+
+drawBtn.addEventListener("mouseenter", e=>{ if(hasDrawn && !rolling && !fixedMode) flee(); });
+drawBtn.addEventListener("mousemove",  e=>{ if(hasDrawn && !rolling && !fixedMode) flee(); });
+drawBtn.addEventListener("pointerdown",e=>{ if(hasDrawn && !rolling && !fixedMode) flee(); });
+drawBtn.addEventListener("touchstart", e=>{ if(hasDrawn && !rolling && !fixedMode) flee(); }, {passive:false});
+
+/* 第 1 次点=正常抽；之后会躲（认输才点得到）；
+   第 2 次抽完起进入固定模式：不再躲，只是每次点击换一句文案。 */
+drawBtn.onclick = e=>{
+  if(rolling) return;
+
+  /* 固定模式：文案继续变，同时也继续抽（反正还是三坊七巷） */
+  if(fixedMode){
+    fixedTap++;
+    drawBtn.textContent = (fixedTap === 1) ? "就这个吧" : ("+" + (fixedTap - 1));
+    draw();
+    return;
+  }
+
+  if(!hasDrawn){ draw(); return; }
+  if(escapeCount >= GIVEUP) draw(); else flee();
+};
+
+/* 「就这个了」= 唯一能稳稳点到的按钮 */
+settleBtn.onclick = ()=>{
+  if(settleBtn.disabled) return;
+  settleBtn.disabled = true;
+  settleBtn.textContent = "✅ 就这个了";
+  /* 关键：主按钮可能正飞在半空中，先把它拉回原位再锁定，
+     否则会留下一个固定position/fixed、文案还是彩虹屁的“僵尸按钮”。 */
+  drawBtn.disabled = true;
+  drawBtn.style.cssText = "";
+  drawBtn.textContent = "就三坊七巷";
+  toast("就这么定了 · " + (current ? current[0] : "三坊七巷"));
+};
+$("copyBtn").onclick = copyText;
+</script>
+</body>
+</html>

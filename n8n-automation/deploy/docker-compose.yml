@@ -1,0 +1,17 @@
+services:
+  n8n:
+    image: n8nio/n8n
+    container_name: n8n
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_SECURE_COOKIE=false
+      - N8N_DEFAULT_LOCALE=zh-CN
+      - GENERIC_TIMEZONE=Asia/Shanghai
+      - NODE_FUNCTION_ALLOW_BUILTIN=https,child_process,http,url,querystring
+      - N8N_ENCRYPTION_KEY=KUde6n3TS7AAbIRlolUYs2VrCiEMHl+w
+    volumes:
+      - /Users/panjinlong/Documents/agent-master/n8n-automation/n8n-data:/home/node/.n8n
+      - /Users/panjinlong/Documents/agent-master/n8n-automation/workflows:/workflows
+      - /Users/panjinlong/Documents/agent-master/n8n-automation/scripts:/scripts

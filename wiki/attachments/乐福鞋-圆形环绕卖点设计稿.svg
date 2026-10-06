@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1464 600" width="1464" height="600" font-family="'PingFang SC','Microsoft YaHei',Arial,sans-serif">
+
+  <!-- 背景 -->
+  <rect width="1464" height="600" fill="#FAF6F1"/>
+
+  <!-- ===== 左侧：产品图占位 ===== -->
+  <rect x="60" y="80" width="340" height="440" rx="20" fill="#F0E9DF" stroke="#D4BC9E" stroke-width="1.5"/>
+  <!-- 鞋子占位框 -->
+  <ellipse cx="230" cy="290" rx="130" ry="75" fill="#C4A882" opacity="0.25"/>
+  <text x="230" y="275" text-anchor="middle" fill="#9A7A58" font-size="15" font-weight="500">产品图</text>
+  <text x="230" y="298" text-anchor="middle" fill="#9A7A58" font-size="13">WHITIN Easy Breezy</text>
+  <text x="230" y="318" text-anchor="middle" fill="#B89A72" font-size="12">男式乐福鞋</text>
+
+  <!-- 评分 -->
+  <text x="230" y="380" text-anchor="middle" fill="#C4A882" font-size="22">★★★★★</text>
+  <text x="230" y="405" text-anchor="middle" fill="#888" font-size="13">4.3 分 · 1,889 条评价</text>
+
+  <!-- ===== 中央：扇形环绕图 ===== -->
+  <!-- 中心圆 -->
+  <circle cx="730" cy="300" r="90" fill="#C4A882"/>
+  <circle cx="730" cy="300" r="78" fill="#F5EFE6"/>
+  <text x="730" y="292" text-anchor="middle" fill="#7A5C3A" font-size="15" font-weight="700">WHITIN</text>
+  <text x="730" y="312" text-anchor="middle" fill="#9A7A58" font-size="12">Easy Breezy</text>
+
+  <!-- 扇形段 1：超轻鞋底（顶部，暖棕）-->
+  <path d="M730,300 L680,135 A165,165 0 0,1 780,135 Z" fill="#C4A882" opacity="0.85"/>
+  <path d="M730,300 L680,135 A165,165 0 0,1 780,135 Z" fill="none" stroke="#FAF6F1" stroke-width="2"/>
+
+  <!-- 扇形段 2：泡沫缓震（右上，浅金）-->
+  <path d="M730,300 L780,135 A165,165 0 0,1 895,300 Z" fill="#D4B896" opacity="0.85"/>
+  <path d="M730,300 L780,135 A165,165 0 0,1 895,300 Z" fill="none" stroke="#FAF6F1" stroke-width="2"/>
+
+  <!-- 扇形段 3：透气内衬（右下，米棕）-->
+  <path d="M730,300 L895,300 A165,165 0 0,1 780,465 Z" fill="#E8D5BC" opacity="0.85"/>
+  <path d="M730,300 L895,300 A165,165 0 0,1 780,465 Z" fill="none" stroke="#FAF6F1" stroke-width="2"/>
+
+  <!-- 扇形段 4：一脚蹬（底部，浅棕）-->
+  <path d="M730,300 L780,465 A165,165 0 0,1 680,465 Z" fill="#C4A882" opacity="0.7"/>
+  <path d="M730,300 L780,465 A165,165 0 0,1 680,465 Z" fill="none" stroke="#FAF6F1" stroke-width="2"/>
+
+  <!-- 扇形段 5：防滑耐磨（左下，深棕）-->
+  <path d="M730,300 L680,465 A165,165 0 0,1 565,300 Z" fill="#B08060" opacity="0.85"/>
+  <path d="M730,300 L680,465 A165,165 0 0,1 565,300 Z" fill="none" stroke="#FAF6F1" stroke-width="2"/>
+
+  <!-- 扇形段 6：贴合足弓（左上，暖金）-->
+  <path d="M730,300 L565,300 A165,165 0 0,1 680,135 Z" fill="#D4B896" opacity="0.7"/>
+  <path d="M730,300 L565,300 A165,165 0 0,1 680,135 Z" fill="none" stroke="#FAF6F1" stroke-width="2"/>
+
+  <!-- 扇形图标文字（段内小标签）-->
+  <text x="730" y="186" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">超轻</text>
+  <text x="840" y="238" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">缓震</text>
+  <text x="840" y="378" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">透气</text>
+  <text x="730" y="435" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">套穿</text>
+  <text x="622" y="378" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">防滑</text>
+  <text x="622" y="238" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">足弓</text>
+
+  <!-- ===== 右侧：气泡卖点 ===== -->
+
+  <!-- 气泡 1：超轻鞋底 -->
+  <circle cx="1090" cy="105" r="52" fill="#C4A882"/>
+  <circle cx="1090" cy="105" r="46" fill="#fff" opacity="0.15"/>
+  <!-- 连接线 -->
+  <line x1="900" y1="185" x2="1050" y2="125" stroke="#C4A882" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.6"/>
+  <circle cx="900" cy="185" r="4" fill="#C4A882"/>
+  <text x="1090" y="98" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">超轻鞋底</text>
+  <text x="1090" y="116" text-anchor="middle" fill="#fff" font-size="10">运动鞋级弹性橡胶</text>
+
+  <!-- 气泡 2：泡沫缓震 -->
+  <circle cx="1250" cy="210" r="56" fill="#B08060"/>
+  <circle cx="1250" cy="210" r="49" fill="#fff" opacity="0.12"/>
+  <line x1="895" y1="280" x2="1205" y2="215" stroke="#B08060" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.6"/>
+  <circle cx="895" cy="280" r="4" fill="#B08060"/>
+  <text x="1250" y="202" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">泡沫缓震</text>
+  <text x="1250" y="220" text-anchor="middle" fill="#fff" font-size="10">可拆卸透气缓冲鞋垫</text>
+
+  <!-- 气泡 3：一脚蹬 -->
+  <circle cx="1310" cy="380" r="52" fill="#9A7A58"/>
+  <circle cx="1310" cy="380" r="46" fill="#fff" opacity="0.12"/>
+  <line x1="893" y1="360" x2="1265" y2="375" stroke="#9A7A58" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.6"/>
+  <circle cx="893" cy="360" r="4" fill="#9A7A58"/>
+  <text x="1310" y="372" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">一脚蹬</text>
+  <text x="1310" y="390" text-anchor="middle" fill="#fff" font-size="10">3秒穿脱，弹力系带</text>
+
+  <!-- 气泡 4：防滑耐磨 -->
+  <circle cx="1160" cy="500" r="50" fill="#C4A882"/>
+  <circle cx="1160" cy="500" r="44" fill="#fff" opacity="0.12"/>
+  <line x1="840" y1="430" x2="1120" y2="490" stroke="#C4A882" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.6"/>
+  <circle cx="840" cy="430" r="4" fill="#C4A882"/>
+  <text x="1160" y="492" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">防滑耐磨</text>
+  <text x="1160" y="510" text-anchor="middle" fill="#fff" font-size="10">Wave纹路鞋底</text>
+
+  <!-- 气泡 5：贴合足弓（左上气泡） -->
+  <circle cx="960" cy="80" r="48" fill="#D4B896"/>
+  <circle cx="960" cy="80" r="42" fill="#fff" opacity="0.15"/>
+  <line x1="730" y1="136" x2="922" y2="96" stroke="#D4B896" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.6"/>
+  <circle cx="730" cy="136" r="4" fill="#D4B896"/>
+  <text x="960" y="73" text-anchor="middle" fill="#7A5C3A" font-size="13" font-weight="700">贴合足弓</text>
+  <text x="960" y="91" text-anchor="middle" fill="#7A5C3A" font-size="10">人体工学弧度设计</text>
+
+  <!-- ===== 标题区 ===== -->
+  <text x="730" y="40" text-anchor="middle" fill="#7A5C3A" font-size="22" font-weight="700" letter-spacing="2">轻若无物，全天自在</text>
+  <text x="730" y="62" text-anchor="middle" fill="#B08060" font-size="13">5 大科技，让每一步都充满魅力</text>
+
+</svg>

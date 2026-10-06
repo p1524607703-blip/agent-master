@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "identity": "user",
+  "documents": [
+    {
+      "key": "development",
+      "title": "Alexa 商品推荐诊断插件｜开发文档",
+      "source": "docs/DEVELOPMENT.md",
+      "includes": [
+        {
+          "source": "CHANGELOG.md",
+          "heading": "附录 A：版本变更"
+        },
+        {
+          "source": "docs/DEVELOPMENT_LOG.md",
+          "heading": "附录 B：开发日志"
+        },
+        {
+          "source": "docs/RELEASE_PROCESS.md",
+          "heading": "附录 C：发布与同步流程"
+        }
+      ],
+      "documentId": "WSVfdI5iooArKvxhbpDcRJL9nhb",
+      "url": "https://my.feishu.cn/docx/WSVfdI5iooArKvxhbpDcRJL9nhb"
+    },
+    {
+      "key": "user-guide",
+      "title": "Alexa 商品推荐诊断插件｜使用手册",
+      "source": "docs/USER_GUIDE.md",
+      "documentId": "Z8hNd4efYo0nuOx3FC0cQ8E7nvf",
+      "url": "https://my.feishu.cn/docx/Z8hNd4efYo0nuOx3FC0cQ8E7nvf"
+    }
+  ]
+}

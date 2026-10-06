@@ -1,0 +1,8 @@
+interface:
+  display_name: "Amazon 搜索词意图簇"
+  short_description: "把亚马逊搜索词标注为可审计的十八字段意图标签与商品匹配结论"
+  brand_color: "#146C94"
+  default_prompt: "Use $amazon-search-intent to tag Amazon search terms into auditable intent clusters."
+policy:
+  allow_implicit_invocation: true
+

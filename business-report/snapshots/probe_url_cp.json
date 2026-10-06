@@ -1,0 +1,237 @@
+{
+  "status": "OK",
+  "data": {
+    "url": "https://sellercentral.amazon.com/gp/site-metrics/report.html#/report?id=102:DetailSalesTrafficByParentItem&fromDate=2026-09-06&toDate=2026-09-06&columns=0%2F2%2F7%2F8%2F9%2F10%2F11%2F12%2F29%2F30%2F31%2F32%2F33%2F34%2F35%2F36",
+    "title": "Business Reports",
+    "customTags": {
+      "navigation-favorites-button": 1,
+      "kat-box": 4,
+      "kat-icon": 36,
+      "kat-label": 5,
+      "kat-link": 54,
+      "kat-alert": 2,
+      "safr-maas-notification-button": 1,
+      "kat-dropdown": 2,
+      "kat-date-picker": 2,
+      "kat-button": 5,
+      "kat-input": 1,
+      "kat-checkbox": 28,
+      "kat-popover": 16,
+      "kat-divider": 17,
+      "pps-side-panel": 2,
+      "safr-maas-panel": 1,
+      "kat-toast-group": 1,
+      "kat-panel-wrapper": 1,
+      "kat-panel": 1,
+      "kat-tabs": 1,
+      "kat-tab": 2,
+      "alerts-view": 1,
+      "alerts-manage": 1
+    },
+    "dateish": [
+      {
+        "tag": "div",
+        "cls": "",
+        "id": "ngstrim-locale-picker",
+        "label": "",
+        "value": "",
+        "text": "中文(简体) ▸ Deutsch English Español Français हिंदी Italiano 日本語 한국어 Português தமிழ் ไทย Tiếng Việt 中文(繁體)"
+      },
+      {
+        "tag": "kat-date-picker",
+        "cls": "css-jfggi0",
+        "id": "",
+        "label": "",
+        "value": "2026/09/06",
+        "text": ""
+      },
+      {
+        "tag": "kat-date-picker",
+        "cls": "css-jfggi0",
+        "id": "",
+        "label": "",
+        "value": "2026/09/07",
+        "text": ""
+      }
+    ],
+    "buttons": [
+      {
+        "tag": "button",
+        "text": "商品",
+        "cls": "ngstrim-nav-menu-l1",
+        "id": ""
+      },
+      {
+        "tag": "button",
+        "text": "供应链",
+        "cls": "ngstrim-nav-menu-l1",
+        "id": ""
+      },
+      {
+        "tag": "button",
+        "text": "订单",
+        "cls": "ngstrim-nav-menu-l1",
+        "id": ""
+      },
+      {
+        "tag": "button",
+        "text": "营销推广",
+        "cls": "ngstrim-nav-menu-l1",
+        "id": ""
+      },
+      {
+        "tag": "button",
+        "text": "财务人员",
+        "cls": "ngstrim-nav-menu-l1",
+        "id": ""
+      },
+      {
+        "tag": "button",
+        "text": "账户状况",
+        "cls": "ngstrim-nav-menu-l1",
+        "id": ""
+      },
+      {
+        "tag": "button",
+        "text": "计划和应用程序",
+        "cls": "ngstrim-nav-menu-l1",
+        "id": ""
+      },
+      {
+        "tag": "a",
+        "text": "卖家平台",
+        "cls": "ngstrim-nav-menu-sc-link-button",
+        "id": ""
+      },
+      {
+        "tag": "a",
+        "text": "账户状况 良好",
+        "cls": "ngstrim-account-health-link",
+        "id": ""
+      },
+      {
+        "tag": "button",
+        "text": "卖家助手",
+        "cls": "ngstrim-button ngstrim-button-nav",
+        "id": ""
+      },
+      {
+        "tag": "button",
+        "text": "✕",
+        "cls": "ngstrim-close-btn",
+        "id": ""
+      },
+      {
+        "tag": "button",
+        "text": "Cancel",
+        "cls": "ngstrim-button ngstrim-button-link",
+        "id": ""
+      },
+      {
+        "tag": "button",
+        "text": "Confirm",
+        "cls": "ngstrim-button ngstrim-button-primary",
+        "id": ""
+      },
+      {
+        "tag": "button",
+        "text": "✕",
+        "cls": "ngstrim-exit-survey-close-btn",
+        "id": ""
+      },
+      {
+        "tag": "button",
+        "text": "卖家平台",
+        "cls": "ngstrim-button ngstrim-button-link",
+        "id": ""
+      },
+      {
+        "tag": "button",
+        "text": "提交",
+        "cls": "ngstrim-button ngstrim-button-primary",
+        "id": ""
+      },
+      {
+        "tag": "button",
+        "text": "全部",
+        "cls": "ngs-action-center-dropdown-button ngs-action-center-dropdown-light ngs-action-ce",
+        "id": ""
+      },
+      {
+        "tag": "button",
+        "text": "创建卖家助手工作流程",
+        "cls": "ngs-action-center-agent-studio-button ngs-action-center-hidden",
+        "id": "ngs-action-center-agent-studio-button"
+      },
+      {
+        "tag": "button",
+        "text": "建议",
+        "cls": "ngs-action-center-recommendations-header ngs-action-center-actions-btn",
+        "id": "ngs-action-center-recommendations-header"
+      },
+      {
+        "tag": "button",
+        "text": "隐藏式",
+        "cls": "ngs-action-center-archive-header ngs-action-center-actions-btn",
+        "id": "ngs-action-center-archive-header"
+      },
+      {
+        "tag": "button",
+        "text": "查看更多",
+        "cls": "ngs-action-center-see-more-button ngs-action-center-hidden",
+        "id": "ngs-action-center-see-more-button"
+      },
+      {
+        "tag": "button",
+        "text": "询问卖家助手",
+        "cls": "ngs-action-center-sa-button",
+        "id": "ngs-action-center-sa-button"
+      },
+      {
+        "tag": "button",
+        "text": "访问画布",
+        "cls": "ngs-action-center-canvas-global-ingress-button ngs-action-center-hidden",
+        "id": "ngs-action-center-canvas-global-ingress-button"
+      },
+      {
+        "tag": "button",
+        "text": "我的业务怎么样？",
+        "cls": "ngs-action-center-canvas-start-button",
+        "id": ""
+      },
+      {
+        "tag": "button",
+        "text": "我的商品绩效如何？",
+        "cls": "ngs-action-center-canvas-start-button",
+        "id": ""
+      },
+      {
+        "tag": "button",
+        "text": "冗余库存一览",
+        "cls": "ngs-action-center-canvas-start-button ngs-action-center-hidden",
+        "id": "canvas-excess-inventory-summary-ingress"
+      },
+      {
+        "tag": "kat-button",
+        "text": "绩效提醒",
+        "cls": "",
+        "id": ""
+      },
+      {
+        "tag": "kat-button",
+        "text": "添加新提醒",
+        "cls": "",
+        "id": ""
+      }
+    ],
+    "grid": {
+      "roleGrid": 0,
+      "rows": 0,
+      "sampleRows": [],
+      "headerText": ""
+    },
+    "agRowCount": 0,
+    "agRowSample": [],
+    "bodyHead": "菜单\n我的业务\n商品\n工作区\n管理商品\n管理定价\n添加商品\n分析评论\n研究商品\n全球开店\n商品报告\n供应链\n工作区\n管理亚马逊库存\n管理海外购\n管理卖家自配送库存\n管理货件\nSend to Amazon\n管理渠道目的地\n供应链控制面板\n供应链报告\n订单\n工作区\n管理订单\n管理报价\n管理退货\n解决索赔\n订单报告\n营销推广\n工作区\n管理促销和特惠\n品牌分析\n广告控制台\nVine\n财务人员\n工作区\n管理付款\n管理税费\n利润分析\n财务报告\n账户状况\n管理账户状况\n计划和应用程序\n了解计划\n销售伙伴应用商店\n浏览服务\n站点地图\n卖家平台\nWHITIN\n美国\n账户状况\n良好\n卖家助手\n管理商品\n管理亚马逊库存\n管理订单\n管理货件\n批量上传商品\n亚马逊物流控制面板\n广告控制台\n反馈管理器\n管理付款\n优惠\n管理价格折扣\n绩效通知\n业务报告\n亚马逊物流库存报告\n商品报告\n管理账户状况\n品牌分析\nA+ 商品描述管理器\nVoice of the Customer\n优惠券\nVine\n管理促销和特惠\n管理视频\n管理试验\n管理卖家自配送退货\n添加商品\n买家之声\n管理品牌定制促销\n利润分析\n亚马逊智能卫星仓 (AWD)\n管理商城\n创作者连接\n定制分析\n管理亚马逊物流退货\n✕\n关闭报告菜单\n控制面板控制面板\n销售控制面板\n业务报告业务报告\n\n按日期\n\n销售和流量\n详情页面销售和流量\n卖家绩效\n\n按 ASIN\n\n详情页面销售和流量\n详情页面销售和流量（按父商品）\n详情页面销售和流量（按子商品）\n\n其他\n\n各月销售额和订单数量\n我们正在调查自 2026 年 7 月 22 日起推荐报价百分比指标突然下降的问题，该问题仅影响定制 ASIN。 问题解决后，我们会提供最新进展。\n业务报告 |详情页面销售和流量（按父商品）了解更多信息\n日期\n控制面板视图\nASIN 搜索（可选）\n可能尚未完全提供自 2026/9/7 以后的数据\n绩效提醒\n（父）ASIN\n标题\n会话数 - 总计\n会话 - 总计 - B2B\n转化率 - 移动应用 - B2B\n会话百分比 - 移动应用\n会话百分比 - 浏览器\n会话百分比 - 浏览器 - B2B\n已订购商品数量\n已订购商品数量 - B2B\n商品会话百分比\n商品会话百分比 - B2B\n已订购商品销售额\n已订购商品销售额 - B2B\n订单商品总数\n订单商品总数 - B2B\n站点地图 计划政策\n© 1999-2026，Amazon.com, Inc. 或其附属公司\n反馈"
+  }
+}

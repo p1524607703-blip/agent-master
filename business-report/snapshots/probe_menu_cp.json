@@ -1,0 +1,378 @@
+{
+  "status": "OK",
+  "data": {
+    "url": "https://sellercentral.amazon.com/gp/site-metrics/report.html#/dashboard",
+    "hits": [
+      {
+        "text": "详情页面销售和流量（按父商品）",
+        "chain": [
+          {
+            "tag": "div",
+            "cls": "css-1saypfi",
+            "id": "",
+            "role": "",
+            "href": "",
+            "data": "{}",
+            "childCount": 1
+          },
+          {
+            "tag": "kat-box",
+            "cls": "css-30zzyj",
+            "id": "",
+            "role": "",
+            "href": "",
+            "data": "{}",
+            "childCount": 14
+          },
+          {
+            "tag": "div",
+            "cls": "css-k008qs",
+            "id": "",
+            "role": "",
+            "href": "",
+            "data": "{}",
+            "childCount": 1
+          },
+          {
+            "tag": "div",
+            "cls": "css-k008qs",
+            "id": "",
+            "role": "",
+            "href": "",
+            "data": "{}",
+            "childCount": 3
+          },
+          {
+            "tag": "div",
+            "cls": "katal",
+            "id": "root",
+            "role": "",
+            "href": "",
+            "data": "{}",
+            "childCount": 1
+          },
+          {
+            "tag": "div",
+            "cls": "ngs-action-center-actions-pushed",
+            "id": "sc-content-container",
+            "role": "",
+            "href": "",
+            "data": "{}",
+            "childCount": 2
+          },
+          {
+            "tag": "div",
+            "cls": "",
+            "id": "a-page",
+            "role": "",
+            "href": "",
+            "data": "{}",
+            "childCount": 9
+          }
+        ]
+      },
+      {
+        "text": "详情页面销售和流量（按父商品）",
+        "chain": [
+          {
+            "tag": "kat-link",
+            "cls": "",
+            "id": "",
+            "role": "",
+            "href": "",
+            "data": "{}",
+            "childCount": 1
+          },
+          {
+            "tag": "div",
+            "cls": "css-1saypfi",
+            "id": "",
+            "role": "",
+            "href": "",
+            "data": "{}",
+            "childCount": 1
+          },
+          {
+            "tag": "kat-box",
+            "cls": "css-30zzyj",
+            "id": "",
+            "role": "",
+            "href": "",
+            "data": "{}",
+            "childCount": 14
+          },
+          {
+            "tag": "div",
+            "cls": "css-k008qs",
+            "id": "",
+            "role": "",
+            "href": "",
+            "data": "{}",
+            "childCount": 1
+          },
+          {
+            "tag": "div",
+            "cls": "css-k008qs",
+            "id": "",
+            "role": "",
+            "href": "",
+            "data": "{}",
+            "childCount": 3
+          },
+          {
+            "tag": "div",
+            "cls": "katal",
+            "id": "root",
+            "role": "",
+            "href": "",
+            "data": "{}",
+            "childCount": 1
+          },
+          {
+            "tag": "div",
+            "cls": "ngs-action-center-actions-pushed",
+            "id": "sc-content-container",
+            "role": "",
+            "href": "",
+            "data": "{}",
+            "childCount": 2
+          },
+          {
+            "tag": "div",
+            "cls": "",
+            "id": "a-page",
+            "role": "",
+            "href": "",
+            "data": "{}",
+            "childCount": 9
+          }
+        ]
+      },
+      {
+        "text": "详情页面销售和流量（按父商品）",
+        "chain": [
+          {
+            "tag": "a",
+            "cls": "",
+            "id": "",
+            "role": "",
+            "href": "#/report?id=102:DetailSalesTrafficByParentItem",
+            "data": "{}",
+            "childCount": 1
+          },
+          {
+            "tag": "kat-link",
+            "cls": "",
+            "id": "",
+            "role": "",
+            "href": "",
+            "data": "{}",
+            "childCount": 1
+          },
+          {
+            "tag": "div",
+            "cls": "css-1saypfi",
+            "id": "",
+            "role": "",
+            "href": "",
+            "data": "{}",
+            "childCount": 1
+          },
+          {
+            "tag": "kat-box",
+            "cls": "css-30zzyj",
+            "id": "",
+            "role": "",
+            "href": "",
+            "data": "{}",
+            "childCount": 14
+          },
+          {
+            "tag": "div",
+            "cls": "css-k008qs",
+            "id": "",
+            "role": "",
+            "href": "",
+            "data": "{}",
+            "childCount": 1
+          },
+          {
+            "tag": "div",
+            "cls": "css-k008qs",
+            "id": "",
+            "role": "",
+            "href": "",
+            "data": "{}",
+            "childCount": 3
+          },
+          {
+            "tag": "div",
+            "cls": "katal",
+            "id": "root",
+            "role": "",
+            "href": "",
+            "data": "{}",
+            "childCount": 1
+          },
+          {
+            "tag": "div",
+            "cls": "ngs-action-center-actions-pushed",
+            "id": "sc-content-container",
+            "role": "",
+            "href": "",
+            "data": "{}",
+            "childCount": 2
+          }
+        ]
+      },
+      {
+        "text": "详情页面销售和流量（按父商品）",
+        "chain": [
+          {
+            "tag": "span",
+            "cls": "",
+            "id": "",
+            "role": "",
+            "href": "",
+            "data": "{}",
+            "childCount": 0
+          },
+          {
+            "tag": "a",
+            "cls": "",
+            "id": "",
+            "role": "",
+            "href": "#/report?id=102:DetailSalesTrafficByParentItem",
+            "data": "{}",
+            "childCount": 1
+          },
+          {
+            "tag": "kat-link",
+            "cls": "",
+            "id": "",
+            "role": "",
+            "href": "",
+            "data": "{}",
+            "childCount": 1
+          },
+          {
+            "tag": "div",
+            "cls": "css-1saypfi",
+            "id": "",
+            "role": "",
+            "href": "",
+            "data": "{}",
+            "childCount": 1
+          },
+          {
+            "tag": "kat-box",
+            "cls": "css-30zzyj",
+            "id": "",
+            "role": "",
+            "href": "",
+            "data": "{}",
+            "childCount": 14
+          },
+          {
+            "tag": "div",
+            "cls": "css-k008qs",
+            "id": "",
+            "role": "",
+            "href": "",
+            "data": "{}",
+            "childCount": 1
+          },
+          {
+            "tag": "div",
+            "cls": "css-k008qs",
+            "id": "",
+            "role": "",
+            "href": "",
+            "data": "{}",
+            "childCount": 3
+          },
+          {
+            "tag": "div",
+            "cls": "katal",
+            "id": "root",
+            "role": "",
+            "href": "",
+            "data": "{}",
+            "childCount": 1
+          }
+        ]
+      }
+    ],
+    "reportHrefs": [
+      {
+        "text": "商品报告",
+        "href": "/listing/reports"
+      },
+      {
+        "text": "供应链报告",
+        "href": "/reportcentral/WelcomePage"
+      },
+      {
+        "text": "订单报告",
+        "href": "/order-reports-and-feeds/reports"
+      },
+      {
+        "text": "管理税费",
+        "href": "/managetaxes/global-transaction-reports"
+      },
+      {
+        "text": "财务报告",
+        "href": "/payments/reports-repository"
+      },
+      {
+        "text": "业务报告",
+        "href": "/gp/site-metrics/report.html#/dashboard"
+      },
+      {
+        "text": "亚马逊物流库存报告",
+        "href": "/reportcentral/WelcomePage"
+      },
+      {
+        "text": "商品报告",
+        "href": "/listing/reports"
+      },
+      {
+        "text": "销售和流量",
+        "href": "#/report?id=102:SalesTrafficTimeSeries"
+      },
+      {
+        "text": "详情页面销售和流量",
+        "href": "#/report?id=102:DetailSalesTrafficByTime"
+      },
+      {
+        "text": "卖家绩效",
+        "href": "#/report?id=102:SellerPerformanceForMerchants"
+      },
+      {
+        "text": "详情页面销售和流量",
+        "href": "#/report?id=102:DetailSalesTrafficBySKU"
+      },
+      {
+        "text": "详情页面销售和流量（按父商品）",
+        "href": "#/report?id=102:DetailSalesTrafficByParentItem"
+      },
+      {
+        "text": "详情页面销售和流量（按子商品）",
+        "href": "#/report?id=102:DetailSalesTrafficByChildItem"
+      },
+      {
+        "text": "各月销售额和订单数量",
+        "href": "#/report?id=SalesOrderByMonth"
+      }
+    ],
+    "menuItems": [
+      {
+        "text": "供应链控制面板",
+        "tag": "a",
+        "cls": "ngstrim-nav-menu-l2",
+        "href": "https://supplychain.amazon.com/scp/login?utm_source=ngs_persistence_link",
+        "onclick": ""
+      }
+    ]
+  }
+}

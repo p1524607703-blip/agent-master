@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>YT1 四条广告活动｜小时级流量分布 × ROAS</title>
+<style>
+:root {
+  --bg:#f5f7fb; --card:#fff; --text:#182230; --muted:#667085; --line:#e5e9f0;
+  --blue:#5b8def; --orange:#ef8354; --green:#4bb3a9; --shadow:0 10px 30px rgba(25,40,70,.07);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Arial,sans-serif;color:var(--text);line-height:1.55}
+.wrap{max-width:1180px;margin:auto;padding:42px 24px 80px}
+.hero{background:linear-gradient(135deg,#17233a,#27395c);color:#fff;padding:38px;border-radius:22px;box-shadow:var(--shadow)}
+.hero .eyebrow,.eyebrow{font-size:12px;letter-spacing:.12em;font-weight:700;opacity:.72}
+.hero h1{font-size:30px;line-height:1.22;margin:8px 0 12px}
+.hero p{margin:0;color:#d8e0ef;max-width:870px}
+.source-note{margin-top:20px;padding-top:18px;border-top:1px solid rgba(255,255,255,.14);font-size:13px;color:#c7d2e4}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:20px 0}
+.kpi-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow)}
+.kpi-name{font-size:13px;color:var(--muted);min-height:42px}
+.kpi-big{font-size:30px;font-weight:800;margin-top:8px}
+.kpi-big span{font-size:12px;color:var(--muted);font-weight:600}
+.kpi-meta{font-size:12px;color:var(--muted);margin-top:5px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px;margin:20px 0;box-shadow:var(--shadow)}
+.panel h2{margin:0 0 14px;font-size:20px}
+.table-wrap{overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:right;color:var(--muted);font-weight:700;background:#f8fafc;border-bottom:1px solid var(--line);padding:10px 9px;white-space:nowrap}
+td{text-align:right;border-bottom:1px solid #eef1f5;padding:10px 9px;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+.campaign-name{min-width:260px;font-weight:650}
+.findings{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.finding{padding:16px 17px;border-radius:14px;background:#f8fafc;border:1px solid var(--line);font-size:14px}
+.campaign-section{background:#fff;border:1px solid var(--line);border-radius:20px;padding:28px;margin:24px 0;box-shadow:var(--shadow)}
+.section-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start}
+.section-head h2{margin:4px 0 0;font-size:22px}
+.section-roas{text-align:right;color:var(--muted);font-size:12px}
+.section-roas strong{display:block;color:var(--text);font-size:30px}
+.metrics-row{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:20px 0}
+.metrics-row div{background:#f8fafc;border-radius:12px;padding:12px}
+.metrics-row span{display:block;font-size:11px;color:var(--muted)}
+.metrics-row strong{font-size:16px}
+.chart-card{margin-top:16px;border:1px solid var(--line);border-radius:16px;padding:18px}
+.chart-card.compact{margin-top:12px}
+.chart-title{font-weight:750;font-size:15px}
+.chart-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.chart-svg{width:100%;height:auto;display:block;margin-top:8px}
+.axis-text{font-size:10px;fill:#7b8798}
+.axis-title{font-size:10px;fill:#667085;font-weight:700}
+.legend{display:flex;gap:18px;justify-content:center;font-size:12px;color:var(--muted);margin-top:-2px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.bar-dot{background:var(--blue)}
+.line-dot{background:var(--orange);border-radius:50%!important}
+.analysis-box{margin-top:16px;padding:18px;border-radius:16px;background:#f8fafc;border:1px solid var(--line)}
+.analysis-box h3{font-size:15px;margin:0 0 8px}
+.analysis-box ul{margin:0;padding-left:20px}
+.analysis-box li{margin:5px 0;font-size:14px}
+.takeaway{margin-top:13px;padding:12px 14px;background:#fff;border-left:4px solid var(--blue);border-radius:8px;font-size:14px;font-weight:600}
+details{margin-top:14px}
+summary{cursor:pointer;color:#344054;font-weight:650;font-size:13px}
+.detail-table{margin-top:12px}
+.callout{padding:18px;border-radius:14px;background:#fff7ed;border:1px solid #fed7aa;color:#7c2d12;font-size:14px}
+.footer{text-align:center;color:var(--muted);font-size:12px;margin-top:28px}
+@media(max-width:900px){
+ .grid4{grid-template-columns:1fr 1fr}
+ .metrics-row{grid-template-columns:repeat(3,1fr)}
+ .findings{grid-template-columns:1fr}
+}
+@media(max-width:560px){
+ .wrap{padding:20px 12px 50px}
+ .hero{padding:24px}
+ .grid4{grid-template-columns:1fr}
+ .metrics-row{grid-template-columns:1fr 1fr}
+ .section-head{display:block}
+ .section-roas{text-align:left;margin-top:12px}
+}
+@media print{
+ body{background:#fff}
+ .wrap{max-width:none;padding:0}
+ .hero,.panel,.campaign-section,.kpi-card{box-shadow:none}
+ details{display:block}
+ details summary{display:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="eyebrow">AMAZON ADS · HOURLY BASELINE</div>
+    <h1>YT1 四条广告活动｜小时级流量分布 × ROAS</h1>
+    <p>分析窗口：2026-07-22 至 2026-08-02。四条活动均未做分时规则，因此本报告重点识别“自然流量拿量位置、花费集中位置与转化效率位置”是否一致。</p>
+    <div class="source-note">
+      数据源：小时级广告活动7.22-8.2(2).csv。ROAS 统一按小时汇总后的 销售额 ÷ 总成本 重算，而不是对行级 ROAS 做平均。<br/>
+      当前数据库插件连接异常，本报告使用资料库中已保存的原始小时级导出完成；因此本报告反映的是上述固定窗口，而不是数据库最新窗口。
+    </div>
+  </header>
+
+  <div class="grid4">
+    <div class="kpi-card">
+      <div class="kpi-name">YT1-WK101 手动-barefoot-精准大组</div>
+      <div class="kpi-big">3.35<span> ROAS</span></div>
+      <div class="kpi-meta">$1,391.45 花费 · $4,658.76 销售 · 7 个有效投放日</div>
+    </div>
+    
+    <div class="kpi-card">
+      <div class="kpi-name">YT1-WK101 手动-barefoot-广泛固定</div>
+      <div class="kpi-big">4.24<span> ROAS</span></div>
+      <div class="kpi-meta">$750.59 花费 · $3,181.70 销售 · 12 个有效投放日</div>
+    </div>
+    
+    <div class="kpi-card">
+      <div class="kpi-name">YT1-W702 手动-barefoot-广泛动态</div>
+      <div class="kpi-big">2.57<span> ROAS</span></div>
+      <div class="kpi-meta">$831.62 花费 · $2,133.70 销售 · 12 个有效投放日</div>
+    </div>
+    
+    <div class="kpi-card">
+      <div class="kpi-name">YT1-W702 手动-barefoot-精准固定</div>
+      <div class="kpi-big">2.30<span> ROAS</span></div>
+      <div class="kpi-meta">$681.04 花费 · $1,567.27 销售 · 9 个有效投放日</div>
+    </div>
+    </div>
+
+  <section class="panel">
+    <h2>一、四条活动概览</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>广告活动</th><th>有效投放日</th><th>展示</th><th>点击</th><th>CTR</th><th>花费</th><th>CPC</th><th>购买</th><th>CVR</th><th>销售额</th><th>ROAS</th>
+        </tr></thead>
+        <tbody>
+    <tr>
+      <td class="campaign-name">YT1-WK101 手动-barefoot-精准大组</td>
+      <td>7</td>
+      <td>174,063</td>
+      <td>1,043</td>
+      <td>0.60%</td>
+      <td>$1,391.45</td>
+      <td>$1.33</td>
+      <td>135</td>
+      <td>12.94%</td>
+      <td>$4,658.76</td>
+      <td><strong>3.35</strong></td>
+    </tr>
+    
+    <tr>
+      <td class="campaign-name">YT1-WK101 手动-barefoot-广泛固定</td>
+      <td>12</td>
+      <td>126,331</td>
+      <td>733</td>
+      <td>0.58%</td>
+      <td>$750.59</td>
+      <td>$1.02</td>
+      <td>94</td>
+      <td>12.82%</td>
+      <td>$3,181.70</td>
+      <td><strong>4.24</strong></td>
+    </tr>
+    
+    <tr>
+      <td class="campaign-name">YT1-W702 手动-barefoot-广泛动态</td>
+      <td>12</td>
+      <td>108,525</td>
+      <td>1,023</td>
+      <td>0.94%</td>
+      <td>$831.62</td>
+      <td>$0.81</td>
+      <td>67</td>
+      <td>6.55%</td>
+      <td>$2,133.70</td>
+      <td><strong>2.57</strong></td>
+    </tr>
+    
+    <tr>
+      <td class="campaign-name">YT1-W702 手动-barefoot-精准固定</td>
+      <td>9</td>
+      <td>101,071</td>
+      <td>1,042</td>
+      <td>1.03%</td>
+      <td>$681.04</td>
+      <td>$0.65</td>
+      <td>51</td>
+      <td>4.89%</td>
+      <td>$1,567.27</td>
+      <td><strong>2.30</strong></td>
+    </tr>
+    </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>二、跨活动结论</h2>
+    <div class="findings">
+      <div class="finding">WK101：广泛固定 ROAS 4.24 高于精准大组 3.35。两者 CVR 接近（12.8% vs 12.9%），主要差距来自 CPC（$1.02 vs $1.33）。</div><div class="finding">W702：广泛动态 ROAS 2.57 高于精准固定 2.30。虽然精准固定 CPC 更低，但广泛动态 CVR 更高（6.5% vs 4.9%）。</div><div class="finding">四条活动没有做过分时规则，因此当前小时分布可以视作“原始投放基线”；但基线同时受到预算、基础竞价、竞价策略和自然竞争强度影响，不能把所有小时差异都归因于消费者需求。</div><div class="finding">小时级 ROAS 的高点如果只对应极少花费，容易被单笔订单放大。报告中把“花费占比 ≥3% 且点击 ≥20”作为更稳妥的主要观察样本。</div>
+    </div>
+  </section>
+
+  <div class="callout">
+    <strong>读图原则：</strong> “流量高 + ROAS 高”才是优先保护/验证的时段；“ROAS 高但花费极少”只作为候选信号；“后半天没有流量”不能等同于“后半天效率差”。
+  </div>
+
+  
+    <section class="campaign-section">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">HOURLY BASELINE</div>
+          <h2>YT1-WK101 手动-barefoot-精准大组</h2>
+        </div>
+        <div class="section-roas"><span>整体 ROAS</span><strong>3.35</strong></div>
+      </div>
+      <div class="metrics-row">
+        <div><span>展示</span><strong>174,063</strong></div>
+        <div><span>点击</span><strong>1,043</strong></div>
+        <div><span>花费</span><strong>$1,391.45</strong></div>
+        <div><span>购买</span><strong>135</strong></div>
+        <div><span>销售额</span><strong>$4,658.76</strong></div>
+        <div><span>CVR</span><strong>12.94%</strong></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">花费占比 × ROAS</div>
+        <div class="chart-sub">柱：该小时占总花费比例　｜　线：该小时汇总 ROAS</div>
+        <svg viewBox="0 0 940 310" class="chart-svg" role="img"><line x1="48" y1="22.0" x2="892" y2="22.0" stroke="#e8edf3" stroke-width="1"/><text x="40" y="26.0" text-anchor="end" class="axis-text">11%</text><text x="900" y="26.0" text-anchor="start" class="axis-text">10</text><line x1="48" y1="81.0" x2="892" y2="81.0" stroke="#e8edf3" stroke-width="1"/><text x="40" y="85.0" text-anchor="end" class="axis-text">8%</text><text x="900" y="85.0" text-anchor="start" class="axis-text">8</text><line x1="48" y1="140.0" x2="892" y2="140.0" stroke="#e8edf3" stroke-width="1"/><text x="40" y="144.0" text-anchor="end" class="axis-text">6%</text><text x="900" y="144.0" text-anchor="start" class="axis-text">5</text><line x1="48" y1="199.0" x2="892" y2="199.0" stroke="#e8edf3" stroke-width="1"/><text x="40" y="203.0" text-anchor="end" class="axis-text">3%</text><text x="900" y="203.0" text-anchor="start" class="axis-text">2</text><line x1="48" y1="258.0" x2="892" y2="258.0" stroke="#e8edf3" stroke-width="1"/><text x="40" y="262.0" text-anchor="end" class="axis-text">0%</text><text x="900" y="262.0" text-anchor="start" class="axis-text">0</text><rect x="49.5" y="233.0" width="32.2" height="25.0" rx="2" fill="#5b8def" opacity="0.78"><title>00:00 花费占比 1.17%</title></rect><rect x="84.7" y="239.2" width="32.2" height="18.8" rx="2" fill="#5b8def" opacity="0.78"><title>01:00 花费占比 0.88%</title></rect><rect x="119.8" y="240.6" width="32.2" height="17.4" rx="2" fill="#5b8def" opacity="0.78"><title>02:00 花费占比 0.82%</title></rect><rect x="155.0" y="215.0" width="32.2" height="43.0" rx="2" fill="#5b8def" opacity="0.78"><title>03:00 花费占比 2.01%</title></rect><rect x="190.2" y="181.2" width="32.2" height="76.8" rx="2" fill="#5b8def" opacity="0.78"><title>04:00 花费占比 3.60%</title></rect><rect x="225.3" y="60.7" width="32.2" height="197.3" rx="2" fill="#5b8def" opacity="0.78"><title>05:00 花费占比 9.24%</title></rect><rect x="260.5" y="98.5" width="32.2" height="159.5" rx="2" fill="#5b8def" opacity="0.78"><title>06:00 花费占比 7.47%</title></rect><rect x="295.7" y="60.0" width="32.2" height="198.0" rx="2" fill="#5b8def" opacity="0.78"><title>07:00 花费占比 9.27%</title></rect><rect x="330.8" y="52.0" width="32.2" height="206.0" rx="2" fill="#5b8def" opacity="0.78"><title>08:00 花费占比 9.65%</title></rect><rect x="366.0" y="22.0" width="32.2" height="236.0" rx="2" fill="#5b8def" opacity="0.78"><title>09:00 花费占比 11.05%</title></rect><rect x="401.2" y="53.8" width="32.2" height="204.2" rx="2" fill="#5b8def" opacity="0.78"><title>10:00 花费占比 9.56%</title></rect><rect x="436.3" y="127.0" width="32.2" height="131.0" rx="2" fill="#5b8def" opacity="0.78"><title>11:00 花费占比 6.13%</title></rect><rect x="471.5" y="167.0" width="32.2" height="91.0" rx="2" fill="#5b8def" opacity="0.78"><title>12:00 花费占比 4.26%</title></rect><rect x="506.7" y="222.3" width="32.2" height="35.7" rx="2" fill="#5b8def" opacity="0.78"><title>13:00 花费占比 1.67%</title></rect><rect x="541.8" y="245.0" width="32.2" height="13.0" rx="2" fill="#5b8def" opacity="0.78"><title>14:00 花费占比 0.61%</title></rect><rect x="577.0" y="192.9" width="32.2" height="65.1" rx="2" fill="#5b8def" opacity="0.78"><title>15:00 花费占比 3.05%</title></rect><rect x="612.2" y="181.5" width="32.2" height="76.5" rx="2" fill="#5b8def" opacity="0.78"><title>16:00 花费占比 3.58%</title></rect><rect x="647.3" y="137.8" width="32.2" height="120.2" rx="2" fill="#5b8def" opacity="0.78"><title>17:00 花费占比 5.63%</title></rect><rect x="682.5" y="209.0" width="32.2" height="49.0" rx="2" fill="#5b8def" opacity="0.78"><title>18:00 花费占比 2.30%</title></rect><rect x="717.7" y="178.7" width="32.2" height="79.3" rx="2" fill="#5b8def" opacity="0.78"><title>19:00 花费占比 3.71%</title></rect><rect x="752.8" y="201.0" width="32.2" height="57.0" rx="2" fill="#5b8def" opacity="0.78"><title>20:00 花费占比 2.67%</title></rect><rect x="788.0" y="243.3" width="32.2" height="14.7" rx="2" fill="#5b8def" opacity="0.78"><title>21:00 花费占比 0.69%</title></rect><rect x="823.2" y="241.8" width="32.2" height="16.2" rx="2" fill="#5b8def" opacity="0.78"><title>22:00 花费占比 0.76%</title></rect><rect x="858.3" y="253.6" width="32.2" height="4.4" rx="2" fill="#5b8def" opacity="0.78"><title>23:00 花费占比 0.21%</title></rect><path d="M 65.6 207.2 L 100.8 258.0 L 135.9 258.0 L 171.1 172.1 L 206.2 153.3 L 241.4 132.4 L 276.6 233.6 L 311.8 219.6 L 346.9 207.1 L 382.1 132.0 L 417.2 179.0 L 452.4 178.9 L 487.6 188.3 L 522.8 186.7 L 557.9 258.0 L 593.1 199.4 L 628.2 171.7 L 663.4 151.4 L 698.6 63.6 L 733.8 152.8 L 768.9 210.3 L 804.1 258.0 L 839.2 258.0 L 874.4 258.0" fill="none" stroke="#ef8354" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="65.6" cy="207.2" r="3.2" fill="#ef8354"><title>00:00 ROAS 2.15</title></circle><circle cx="100.8" cy="258.0" r="3.2" fill="#ef8354"><title>01:00 ROAS 0.00</title></circle><circle cx="135.9" cy="258.0" r="3.2" fill="#ef8354"><title>02:00 ROAS 0.00</title></circle><circle cx="171.1" cy="172.1" r="3.2" fill="#ef8354"><title>03:00 ROAS 3.64</title></circle><circle cx="206.2" cy="153.3" r="3.2" fill="#ef8354"><title>04:00 ROAS 4.44</title></circle><circle cx="241.4" cy="132.4" r="3.2" fill="#ef8354"><title>05:00 ROAS 5.32</title></circle><circle cx="276.6" cy="233.6" r="3.2" fill="#ef8354"><title>06:00 ROAS 1.03</title></circle><circle cx="311.8" cy="219.6" r="3.2" fill="#ef8354"><title>07:00 ROAS 1.63</title></circle><circle cx="346.9" cy="207.1" r="3.2" fill="#ef8354"><title>08:00 ROAS 2.16</title></circle><circle cx="382.1" cy="132.0" r="3.2" fill="#ef8354"><title>09:00 ROAS 5.34</title></circle><circle cx="417.2" cy="179.0" r="3.2" fill="#ef8354"><title>10:00 ROAS 3.35</title></circle><circle cx="452.4" cy="178.9" r="3.2" fill="#ef8354"><title>11:00 ROAS 3.35</title></circle><circle cx="487.6" cy="188.3" r="3.2" fill="#ef8354"><title>12:00 ROAS 2.95</title></circle><circle cx="522.8" cy="186.7" r="3.2" fill="#ef8354"><title>13:00 ROAS 3.02</title></circle><circle cx="557.9" cy="258.0" r="3.2" fill="#ef8354"><title>14:00 ROAS 0.00</title></circle><circle cx="593.1" cy="199.4" r="3.2" fill="#ef8354"><title>15:00 ROAS 2.48</title></circle><circle cx="628.2" cy="171.7" r="3.2" fill="#ef8354"><title>16:00 ROAS 3.66</title></circle><circle cx="663.4" cy="151.4" r="3.2" fill="#ef8354"><title>17:00 ROAS 4.52</title></circle><circle cx="698.6" cy="63.6" r="3.2" fill="#ef8354"><title>18:00 ROAS 8.24</title></circle><circle cx="733.8" cy="152.8" r="3.2" fill="#ef8354"><title>19:00 ROAS 4.46</title></circle><circle cx="768.9" cy="210.3" r="3.2" fill="#ef8354"><title>20:00 ROAS 2.02</title></circle><circle cx="804.1" cy="258.0" r="3.2" fill="#ef8354"><title>21:00 ROAS 0.00</title></circle><circle cx="839.2" cy="258.0" r="3.2" fill="#ef8354"><title>22:00 ROAS 0.00</title></circle><circle cx="874.4" cy="258.0" r="3.2" fill="#ef8354"><title>23:00 ROAS 0.00</title></circle><text x="65.6" y="285" text-anchor="middle" class="axis-text">00</text><text x="135.9" y="285" text-anchor="middle" class="axis-text">02</text><text x="206.2" y="285" text-anchor="middle" class="axis-text">04</text><text x="276.6" y="285" text-anchor="middle" class="axis-text">06</text><text x="346.9" y="285" text-anchor="middle" class="axis-text">08</text><text x="417.2" y="285" text-anchor="middle" class="axis-text">10</text><text x="487.6" y="285" text-anchor="middle" class="axis-text">12</text><text x="557.9" y="285" text-anchor="middle" class="axis-text">14</text><text x="628.2" y="285" text-anchor="middle" class="axis-text">16</text><text x="698.6" y="285" text-anchor="middle" class="axis-text">18</text><text x="768.9" y="285" text-anchor="middle" class="axis-text">20</text><text x="839.2" y="285" text-anchor="middle" class="axis-text">22</text><text x="48" y="14" class="axis-title">花费占比</text><text x="892" y="14" text-anchor="end" class="axis-title">ROAS</text></svg>
+        <div class="legend"><span><i class="bar-dot"></i>花费占比</span><span><i class="line-dot"></i>ROAS</span></div>
+      </div>
+      <div class="chart-card compact">
+        <div class="chart-title">展示 / 点击 / 花费流量结构</div>
+        <div class="chart-sub">用于判断“拿到的流量”与“实际消耗”是否同步</div>
+        <svg viewBox="0 0 940 235" class="chart-svg"><line x1="48" y1="18.0" x2="915" y2="18.0" stroke="#edf1f5"/><text x="40" y="22.0" text-anchor="end" class="axis-text">12%</text><line x1="48" y1="74.3" x2="915" y2="74.3" stroke="#edf1f5"/><text x="40" y="78.3" text-anchor="end" class="axis-text">8%</text><line x1="48" y1="130.7" x2="915" y2="130.7" stroke="#edf1f5"/><text x="40" y="134.7" text-anchor="end" class="axis-text">4%</text><line x1="48" y1="187.0" x2="915" y2="187.0" stroke="#edf1f5"/><text x="40" y="191.0" text-anchor="end" class="axis-text">0%</text><path d="M 66.1 176.2 L 102.2 174.5 L 138.3 172.1 L 174.4 159.9 L 210.6 134.0 L 246.7 98.2 L 282.8 69.6 L 318.9 71.8 L 355.1 51.2 L 391.2 18.0 L 427.3 38.6 L 463.4 86.7 L 499.6 120.9 L 535.7 163.5 L 571.8 177.7 L 607.9 145.4 L 644.1 105.2 L 680.2 99.7 L 716.3 152.0 L 752.4 128.6 L 788.6 147.4 L 824.7 177.6 L 860.8 179.5 L 896.9 181.9" fill="none" stroke="#5b8def" stroke-width="2.2"/><path d="M 66.1 168.8 L 102.2 174.4 L 138.3 175.8 L 174.4 157.6 L 210.6 131.1 L 246.7 52.8 L 282.8 82.2 L 318.9 54.2 L 355.1 50.0 L 391.2 26.3 L 427.3 50.0 L 463.4 97.5 L 499.6 126.9 L 535.7 163.2 L 571.8 177.2 L 607.9 140.9 L 644.1 132.5 L 680.2 97.5 L 716.3 152.1 L 752.4 133.9 L 788.6 147.9 L 824.7 177.2 L 860.8 175.8 L 896.9 184.2" fill="none" stroke="#4bb3a9" stroke-width="2.2"/><path d="M 66.1 169.9 L 102.2 174.2 L 138.3 175.1 L 174.4 157.6 L 210.6 134.6 L 246.7 52.3 L 282.8 78.1 L 318.9 51.8 L 355.1 46.4 L 391.2 25.9 L 427.3 47.6 L 463.4 97.6 L 499.6 124.9 L 535.7 162.6 L 571.8 178.1 L 607.9 142.5 L 644.1 134.7 L 680.2 105.0 L 716.3 153.5 L 752.4 132.9 L 788.6 148.1 L 824.7 177.0 L 860.8 175.9 L 896.9 184.0" fill="none" stroke="#ef8354" stroke-width="2.2"/><text x="66.1" y="213" text-anchor="middle" class="axis-text">00</text><text x="138.3" y="213" text-anchor="middle" class="axis-text">02</text><text x="210.6" y="213" text-anchor="middle" class="axis-text">04</text><text x="282.8" y="213" text-anchor="middle" class="axis-text">06</text><text x="355.1" y="213" text-anchor="middle" class="axis-text">08</text><text x="427.3" y="213" text-anchor="middle" class="axis-text">10</text><text x="499.6" y="213" text-anchor="middle" class="axis-text">12</text><text x="571.8" y="213" text-anchor="middle" class="axis-text">14</text><text x="644.1" y="213" text-anchor="middle" class="axis-text">16</text><text x="716.3" y="213" text-anchor="middle" class="axis-text">18</text><text x="788.6" y="213" text-anchor="middle" class="axis-text">20</text><text x="860.8" y="213" text-anchor="middle" class="axis-text">22</text></svg>
+        <div class="legend"><span><i style="background:#5b8def"></i>展示占比</span><span><i style="background:#4bb3a9"></i>点击占比</span><span><i style="background:#ef8354"></i>花费占比</span></div>
+      </div>
+      <div class="analysis-box">
+        <h3>核心观察</h3>
+        <ul><li>花费最集中在 09:00（11.1%）、08:00（9.6%）、10:00（9.6%）。</li><li>12:00 之后仍承接 29.1% 的花费，全天覆盖相对完整。</li><li>在具备一定样本量的小时中，效率较好的时段为 09:00 ROAS 5.34、05:00 ROAS 5.32、17:00 ROAS 4.52。</li><li>需要重点观察的低效时段为 06:00 ROAS 1.03、07:00 ROAS 1.63、08:00 ROAS 2.16。</li></ul>
+        <div class="takeaway">流量集中在 05:00–11:00，但效率并不连续：05:00、09:00表现强，而 06:00–08:00明显偏弱；17:00–19:00效率更好但流量较少，存在潜在的资源错配信号。</div>
+      </div>
+      <details>
+        <summary>展开查看 24 小时明细</summary>
+        <div class="table-wrap">
+        <table class="detail-table">
+          <thead><tr><th>小时</th><th>展示</th><th>点击</th><th>花费</th><th>花费占比</th><th>购买</th><th>销售额</th><th>ROAS</th></tr></thead>
+          <tbody><tr><td>00:00</td><td>1,294</td><td>13</td><td>$16.32</td><td>1.17%</td><td>1</td><td>$35.14</td><td>2.15</td></tr><tr><td>01:00</td><td>1,487</td><td>9</td><td>$12.23</td><td>0.88%</td><td>0</td><td>$0.00</td><td>0.00</td></tr><tr><td>02:00</td><td>1,777</td><td>8</td><td>$11.35</td><td>0.82%</td><td>0</td><td>$0.00</td><td>0.00</td></tr><tr><td>03:00</td><td>3,233</td><td>21</td><td>$28.02</td><td>2.01%</td><td>4</td><td>$101.96</td><td>3.64</td></tr><tr><td>04:00</td><td>6,326</td><td>40</td><td>$50.03</td><td>3.60%</td><td>6</td><td>$221.94</td><td>4.44</td></tr><tr><td>05:00</td><td>10,605</td><td>96</td><td>$128.58</td><td>9.24%</td><td>21</td><td>$684.57</td><td>5.32</td></tr><tr><td>06:00</td><td>14,023</td><td>75</td><td>$103.92</td><td>7.47%</td><td>3</td><td>$107.26</td><td>1.03</td></tr><tr><td>07:00</td><td>13,755</td><td>95</td><td>$129.03</td><td>9.27%</td><td>6</td><td>$209.78</td><td>1.63</td></tr><tr><td>08:00</td><td>16,220</td><td>98</td><td>$134.24</td><td>9.65%</td><td>8</td><td>$289.51</td><td>2.16</td></tr><tr><td>09:00</td><td>20,178</td><td>115</td><td>$153.79</td><td>11.05%</td><td>24</td><td>$821.40</td><td>5.34</td></tr><tr><td>10:00</td><td>17,719</td><td>98</td><td>$133.09</td><td>9.56%</td><td>13</td><td>$445.37</td><td>3.35</td></tr><tr><td>11:00</td><td>11,970</td><td>64</td><td>$85.35</td><td>6.13%</td><td>8</td><td>$286.11</td><td>3.35</td></tr><tr><td>12:00</td><td>7,898</td><td>43</td><td>$59.30</td><td>4.26%</td><td>5</td><td>$175.23</td><td>2.95</td></tr><tr><td>13:00</td><td>2,807</td><td>17</td><td>$23.26</td><td>1.67%</td><td>2</td><td>$70.28</td><td>3.02</td></tr><tr><td>14:00</td><td>1,112</td><td>7</td><td>$8.47</td><td>0.61%</td><td>0</td><td>$0.00</td><td>0.00</td></tr><tr><td>15:00</td><td>4,971</td><td>33</td><td>$42.45</td><td>3.05%</td><td>3</td><td>$105.42</td><td>2.48</td></tr><tr><td>16:00</td><td>9,772</td><td>39</td><td>$49.88</td><td>3.58%</td><td>5</td><td>$182.40</td><td>3.66</td></tr><tr><td>17:00</td><td>10,420</td><td>64</td><td>$78.31</td><td>5.63%</td><td>10</td><td>$353.65</td><td>4.52</td></tr><tr><td>18:00</td><td>4,174</td><td>25</td><td>$31.96</td><td>2.30%</td><td>7</td><td>$263.23</td><td>8.24</td></tr><tr><td>19:00</td><td>6,968</td><td>38</td><td>$51.68</td><td>3.71%</td><td>7</td><td>$230.38</td><td>4.46</td></tr><tr><td>20:00</td><td>4,725</td><td>28</td><td>$37.17</td><td>2.67%</td><td>2</td><td>$75.13</td><td>2.02</td></tr><tr><td>21:00</td><td>1,122</td><td>7</td><td>$9.57</td><td>0.69%</td><td>0</td><td>$0.00</td><td>0.00</td></tr><tr><td>22:00</td><td>896</td><td>8</td><td>$10.56</td><td>0.76%</td><td>0</td><td>$0.00</td><td>0.00</td></tr><tr><td>23:00</td><td>611</td><td>2</td><td>$2.89</td><td>0.21%</td><td>0</td><td>$0.00</td><td>0.00</td></tr></tbody>
+        </table>
+        </div>
+      </details>
+    </section>
+    
+    <section class="campaign-section">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">HOURLY BASELINE</div>
+          <h2>YT1-WK101 手动-barefoot-广泛固定</h2>
+        </div>
+        <div class="section-roas"><span>整体 ROAS</span><strong>4.24</strong></div>
+      </div>
+      <div class="metrics-row">
+        <div><span>展示</span><strong>126,331</strong></div>
+        <div><span>点击</span><strong>733</strong></div>
+        <div><span>花费</span><strong>$750.59</strong></div>
+        <div><span>购买</span><strong>94</strong></div>
+        <div><span>销售额</span><strong>$3,181.70</strong></div>
+        <div><span>CVR</span><strong>12.82%</strong></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">花费占比 × ROAS</div>
+        <div class="chart-sub">柱：该小时占总花费比例　｜　线：该小时汇总 ROAS</div>
+        <svg viewBox="0 0 940 310" class="chart-svg" role="img"><line x1="48" y1="22.0" x2="892" y2="22.0" stroke="#e8edf3" stroke-width="1"/><text x="40" y="26.0" text-anchor="end" class="axis-text">11%</text><text x="900" y="26.0" text-anchor="start" class="axis-text">11</text><line x1="48" y1="81.0" x2="892" y2="81.0" stroke="#e8edf3" stroke-width="1"/><text x="40" y="85.0" text-anchor="end" class="axis-text">8%</text><text x="900" y="85.0" text-anchor="start" class="axis-text">8</text><line x1="48" y1="140.0" x2="892" y2="140.0" stroke="#e8edf3" stroke-width="1"/><text x="40" y="144.0" text-anchor="end" class="axis-text">5%</text><text x="900" y="144.0" text-anchor="start" class="axis-text">6</text><line x1="48" y1="199.0" x2="892" y2="199.0" stroke="#e8edf3" stroke-width="1"/><text x="40" y="203.0" text-anchor="end" class="axis-text">3%</text><text x="900" y="203.0" text-anchor="start" class="axis-text">3</text><line x1="48" y1="258.0" x2="892" y2="258.0" stroke="#e8edf3" stroke-width="1"/><text x="40" y="262.0" text-anchor="end" class="axis-text">0%</text><text x="900" y="262.0" text-anchor="start" class="axis-text">0</text><rect x="49.5" y="237.8" width="32.2" height="20.2" rx="2" fill="#5b8def" opacity="0.78"><title>00:00 花费占比 0.93%</title></rect><rect x="84.7" y="237.1" width="32.2" height="20.9" rx="2" fill="#5b8def" opacity="0.78"><title>01:00 花费占比 0.97%</title></rect><rect x="119.8" y="242.8" width="32.2" height="15.2" rx="2" fill="#5b8def" opacity="0.78"><title>02:00 花费占比 0.70%</title></rect><rect x="155.0" y="241.6" width="32.2" height="16.4" rx="2" fill="#5b8def" opacity="0.78"><title>03:00 花费占比 0.76%</title></rect><rect x="190.2" y="224.5" width="32.2" height="33.5" rx="2" fill="#5b8def" opacity="0.78"><title>04:00 花费占比 1.55%</title></rect><rect x="225.3" y="177.0" width="32.2" height="81.0" rx="2" fill="#5b8def" opacity="0.78"><title>05:00 花费占比 3.74%</title></rect><rect x="260.5" y="169.3" width="32.2" height="88.7" rx="2" fill="#5b8def" opacity="0.78"><title>06:00 花费占比 4.10%</title></rect><rect x="295.7" y="177.1" width="32.2" height="80.9" rx="2" fill="#5b8def" opacity="0.78"><title>07:00 花费占比 3.74%</title></rect><rect x="330.8" y="163.0" width="32.2" height="95.0" rx="2" fill="#5b8def" opacity="0.78"><title>08:00 花费占比 4.39%</title></rect><rect x="366.0" y="129.1" width="32.2" height="128.9" rx="2" fill="#5b8def" opacity="0.78"><title>09:00 花费占比 5.95%</title></rect><rect x="401.2" y="135.5" width="32.2" height="122.5" rx="2" fill="#5b8def" opacity="0.78"><title>10:00 花费占比 5.66%</title></rect><rect x="436.3" y="132.8" width="32.2" height="125.2" rx="2" fill="#5b8def" opacity="0.78"><title>11:00 花费占比 5.78%</title></rect><rect x="471.5" y="22.0" width="32.2" height="236.0" rx="2" fill="#5b8def" opacity="0.78"><title>12:00 花费占比 10.90%</title></rect><rect x="506.7" y="116.4" width="32.2" height="141.6" rx="2" fill="#5b8def" opacity="0.78"><title>13:00 花费占比 6.54%</title></rect><rect x="541.8" y="97.6" width="32.2" height="160.4" rx="2" fill="#5b8def" opacity="0.78"><title>14:00 花费占比 7.41%</title></rect><rect x="577.0" y="75.9" width="32.2" height="182.1" rx="2" fill="#5b8def" opacity="0.78"><title>15:00 花费占比 8.41%</title></rect><rect x="612.2" y="128.9" width="32.2" height="129.1" rx="2" fill="#5b8def" opacity="0.78"><title>16:00 花费占比 5.96%</title></rect><rect x="647.3" y="141.0" width="32.2" height="117.0" rx="2" fill="#5b8def" opacity="0.78"><title>17:00 花费占比 5.40%</title></rect><rect x="682.5" y="112.2" width="32.2" height="145.8" rx="2" fill="#5b8def" opacity="0.78"><title>18:00 花费占比 6.73%</title></rect><rect x="717.7" y="153.1" width="32.2" height="104.9" rx="2" fill="#5b8def" opacity="0.78"><title>19:00 花费占比 4.84%</title></rect><rect x="752.8" y="182.5" width="32.2" height="75.5" rx="2" fill="#5b8def" opacity="0.78"><title>20:00 花费占比 3.49%</title></rect><rect x="788.0" y="245.3" width="32.2" height="12.7" rx="2" fill="#5b8def" opacity="0.78"><title>21:00 花费占比 0.59%</title></rect><rect x="823.2" y="237.8" width="32.2" height="20.2" rx="2" fill="#5b8def" opacity="0.78"><title>22:00 花费占比 0.93%</title></rect><rect x="858.3" y="246.6" width="32.2" height="11.4" rx="2" fill="#5b8def" opacity="0.78"><title>23:00 花费占比 0.53%</title></rect><path d="M 65.6 258.0 L 100.8 47.5 L 135.9 258.0 L 171.1 118.0 L 206.2 76.8 L 241.4 201.3 L 276.6 195.0 L 311.8 156.2 L 346.9 69.9 L 382.1 258.0 L 417.2 131.4 L 452.4 132.8 L 487.6 158.4 L 522.8 132.1 L 557.9 181.2 L 593.1 147.3 L 628.2 154.3 L 663.4 182.1 L 698.6 195.5 L 733.8 234.4 L 768.9 184.0 L 804.1 258.0 L 839.2 89.0 L 874.4 258.0" fill="none" stroke="#ef8354" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="65.6" cy="258.0" r="3.2" fill="#ef8354"><title>00:00 ROAS 0.00</title></circle><circle cx="100.8" cy="47.5" r="3.2" fill="#ef8354"><title>01:00 ROAS 9.81</title></circle><circle cx="135.9" cy="258.0" r="3.2" fill="#ef8354"><title>02:00 ROAS 0.00</title></circle><circle cx="171.1" cy="118.0" r="3.2" fill="#ef8354"><title>03:00 ROAS 6.52</title></circle><circle cx="206.2" cy="76.8" r="3.2" fill="#ef8354"><title>04:00 ROAS 8.44</title></circle><circle cx="241.4" cy="201.3" r="3.2" fill="#ef8354"><title>05:00 ROAS 2.64</title></circle><circle cx="276.6" cy="195.0" r="3.2" fill="#ef8354"><title>06:00 ROAS 2.93</title></circle><circle cx="311.8" cy="156.2" r="3.2" fill="#ef8354"><title>07:00 ROAS 4.75</title></circle><circle cx="346.9" cy="69.9" r="3.2" fill="#ef8354"><title>08:00 ROAS 8.77</title></circle><circle cx="382.1" cy="258.0" r="3.2" fill="#ef8354"><title>09:00 ROAS 0.00</title></circle><circle cx="417.2" cy="131.4" r="3.2" fill="#ef8354"><title>10:00 ROAS 5.90</title></circle><circle cx="452.4" cy="132.8" r="3.2" fill="#ef8354"><title>11:00 ROAS 5.84</title></circle><circle cx="487.6" cy="158.4" r="3.2" fill="#ef8354"><title>12:00 ROAS 4.64</title></circle><circle cx="522.8" cy="132.1" r="3.2" fill="#ef8354"><title>13:00 ROAS 5.87</title></circle><circle cx="557.9" cy="181.2" r="3.2" fill="#ef8354"><title>14:00 ROAS 3.58</title></circle><circle cx="593.1" cy="147.3" r="3.2" fill="#ef8354"><title>15:00 ROAS 5.16</title></circle><circle cx="628.2" cy="154.3" r="3.2" fill="#ef8354"><title>16:00 ROAS 4.83</title></circle><circle cx="663.4" cy="182.1" r="3.2" fill="#ef8354"><title>17:00 ROAS 3.54</title></circle><circle cx="698.6" cy="195.5" r="3.2" fill="#ef8354"><title>18:00 ROAS 2.91</title></circle><circle cx="733.8" cy="234.4" r="3.2" fill="#ef8354"><title>19:00 ROAS 1.10</title></circle><circle cx="768.9" cy="184.0" r="3.2" fill="#ef8354"><title>20:00 ROAS 3.45</title></circle><circle cx="804.1" cy="258.0" r="3.2" fill="#ef8354"><title>21:00 ROAS 0.00</title></circle><circle cx="839.2" cy="89.0" r="3.2" fill="#ef8354"><title>22:00 ROAS 7.88</title></circle><circle cx="874.4" cy="258.0" r="3.2" fill="#ef8354"><title>23:00 ROAS 0.00</title></circle><text x="65.6" y="285" text-anchor="middle" class="axis-text">00</text><text x="135.9" y="285" text-anchor="middle" class="axis-text">02</text><text x="206.2" y="285" text-anchor="middle" class="axis-text">04</text><text x="276.6" y="285" text-anchor="middle" class="axis-text">06</text><text x="346.9" y="285" text-anchor="middle" class="axis-text">08</text><text x="417.2" y="285" text-anchor="middle" class="axis-text">10</text><text x="487.6" y="285" text-anchor="middle" class="axis-text">12</text><text x="557.9" y="285" text-anchor="middle" class="axis-text">14</text><text x="628.2" y="285" text-anchor="middle" class="axis-text">16</text><text x="698.6" y="285" text-anchor="middle" class="axis-text">18</text><text x="768.9" y="285" text-anchor="middle" class="axis-text">20</text><text x="839.2" y="285" text-anchor="middle" class="axis-text">22</text><text x="48" y="14" class="axis-title">花费占比</text><text x="892" y="14" text-anchor="end" class="axis-title">ROAS</text></svg>
+        <div class="legend"><span><i class="bar-dot"></i>花费占比</span><span><i class="line-dot"></i>ROAS</span></div>
+      </div>
+      <div class="chart-card compact">
+        <div class="chart-title">展示 / 点击 / 花费流量结构</div>
+        <div class="chart-sub">用于判断“拿到的流量”与“实际消耗”是否同步</div>
+        <svg viewBox="0 0 940 235" class="chart-svg"><line x1="48" y1="18.0" x2="915" y2="18.0" stroke="#edf1f5"/><text x="40" y="22.0" text-anchor="end" class="axis-text">11%</text><line x1="48" y1="74.3" x2="915" y2="74.3" stroke="#edf1f5"/><text x="40" y="78.3" text-anchor="end" class="axis-text">7%</text><line x1="48" y1="130.7" x2="915" y2="130.7" stroke="#edf1f5"/><text x="40" y="134.7" text-anchor="end" class="axis-text">4%</text><line x1="48" y1="187.0" x2="915" y2="187.0" stroke="#edf1f5"/><text x="40" y="191.0" text-anchor="end" class="axis-text">0%</text><path d="M 66.1 177.1 L 102.2 178.0 L 138.3 179.6 L 174.4 173.9 L 210.6 164.5 L 246.7 150.3 L 282.8 139.4 L 318.9 123.7 L 355.1 105.1 L 391.2 102.5 L 427.3 88.1 L 463.4 69.4 L 499.6 58.4 L 535.7 39.9 L 571.8 57.2 L 607.9 63.2 L 644.1 78.7 L 680.2 103.3 L 716.3 102.9 L 752.4 116.3 L 788.6 149.1 L 824.7 176.5 L 860.8 179.9 L 896.9 181.8" fill="none" stroke="#5b8def" stroke-width="2.2"/><path d="M 66.1 170.3 L 102.2 172.4 L 138.3 176.6 L 174.4 176.6 L 210.6 164.0 L 246.7 130.7 L 282.8 126.5 L 318.9 126.5 L 355.1 120.2 L 391.2 99.4 L 427.3 105.6 L 463.4 101.5 L 499.6 18.0 L 535.7 84.8 L 571.8 72.2 L 607.9 57.6 L 644.1 91.0 L 680.2 103.5 L 716.3 82.7 L 752.4 116.1 L 788.6 132.8 L 824.7 178.7 L 860.8 172.4 L 896.9 178.7" fill="none" stroke="#4bb3a9" stroke-width="2.2"/><path d="M 66.1 172.7 L 102.2 172.2 L 138.3 176.3 L 174.4 175.4 L 210.6 163.3 L 246.7 129.8 L 282.8 124.3 L 318.9 129.9 L 355.1 119.9 L 391.2 96.0 L 427.3 100.5 L 463.4 98.6 L 499.6 20.3 L 535.7 87.0 L 571.8 73.7 L 607.9 58.4 L 644.1 95.8 L 680.2 104.4 L 716.3 84.0 L 752.4 112.9 L 788.6 133.7 L 824.7 178.0 L 860.8 172.7 L 896.9 179.0" fill="none" stroke="#ef8354" stroke-width="2.2"/><text x="66.1" y="213" text-anchor="middle" class="axis-text">00</text><text x="138.3" y="213" text-anchor="middle" class="axis-text">02</text><text x="210.6" y="213" text-anchor="middle" class="axis-text">04</text><text x="282.8" y="213" text-anchor="middle" class="axis-text">06</text><text x="355.1" y="213" text-anchor="middle" class="axis-text">08</text><text x="427.3" y="213" text-anchor="middle" class="axis-text">10</text><text x="499.6" y="213" text-anchor="middle" class="axis-text">12</text><text x="571.8" y="213" text-anchor="middle" class="axis-text">14</text><text x="644.1" y="213" text-anchor="middle" class="axis-text">16</text><text x="716.3" y="213" text-anchor="middle" class="axis-text">18</text><text x="788.6" y="213" text-anchor="middle" class="axis-text">20</text><text x="860.8" y="213" text-anchor="middle" class="axis-text">22</text></svg>
+        <div class="legend"><span><i style="background:#5b8def"></i>展示占比</span><span><i style="background:#4bb3a9"></i>点击占比</span><span><i style="background:#ef8354"></i>花费占比</span></div>
+      </div>
+      <div class="analysis-box">
+        <h3>核心观察</h3>
+        <ul><li>花费最集中在 12:00（10.9%）、15:00（8.4%）、14:00（7.4%）。</li><li>12:00 之后仍承接 61.7% 的花费，全天覆盖相对完整。</li><li>在具备一定样本量的小时中，效率较好的时段为 08:00 ROAS 8.77、10:00 ROAS 5.90、13:00 ROAS 5.87。</li><li>需要重点观察的低效时段为 09:00 ROAS 0.00、19:00 ROAS 1.10、05:00 ROAS 2.64。</li></ul>
+        <div class="takeaway">四条里整体效率最好且小时覆盖最完整，ROAS 4.24。10:00–16:00 多数小时兼具可观花费与较好 ROAS，因此它最适合充当后续分时测试的“基线参照组”。</div>
+      </div>
+      <details>
+        <summary>展开查看 24 小时明细</summary>
+        <div class="table-wrap">
+        <table class="detail-table">
+          <thead><tr><th>小时</th><th>展示</th><th>点击</th><th>花费</th><th>花费占比</th><th>购买</th><th>销售额</th><th>ROAS</th></tr></thead>
+          <tbody><tr><td>00:00</td><td>816</td><td>8</td><td>$7.01</td><td>0.93%</td><td>0</td><td>$0.00</td><td>0.00</td></tr><tr><td>01:00</td><td>740</td><td>7</td><td>$7.25</td><td>0.97%</td><td>2</td><td>$71.13</td><td>9.81</td></tr><tr><td>02:00</td><td>609</td><td>5</td><td>$5.27</td><td>0.70%</td><td>0</td><td>$0.00</td><td>0.00</td></tr><tr><td>03:00</td><td>1,083</td><td>5</td><td>$5.67</td><td>0.76%</td><td>1</td><td>$36.99</td><td>6.52</td></tr><tr><td>04:00</td><td>1,861</td><td>11</td><td>$11.62</td><td>1.55%</td><td>3</td><td>$98.12</td><td>8.44</td></tr><tr><td>05:00</td><td>3,030</td><td>27</td><td>$28.07</td><td>3.74%</td><td>2</td><td>$74.13</td><td>2.64</td></tr><tr><td>06:00</td><td>3,935</td><td>29</td><td>$30.76</td><td>4.10%</td><td>3</td><td>$90.27</td><td>2.93</td></tr><tr><td>07:00</td><td>5,231</td><td>29</td><td>$28.04</td><td>3.74%</td><td>4</td><td>$133.11</td><td>4.75</td></tr><tr><td>08:00</td><td>6,763</td><td>32</td><td>$32.94</td><td>4.39%</td><td>8</td><td>$288.82</td><td>8.77</td></tr><tr><td>09:00</td><td>6,984</td><td>42</td><td>$44.68</td><td>5.95%</td><td>0</td><td>$0.00</td><td>0.00</td></tr><tr><td>10:00</td><td>8,172</td><td>39</td><td>$42.47</td><td>5.66%</td><td>8</td><td>$250.53</td><td>5.90</td></tr><tr><td>11:00</td><td>9,713</td><td>41</td><td>$43.40</td><td>5.78%</td><td>7</td><td>$253.36</td><td>5.84</td></tr><tr><td>12:00</td><td>10,627</td><td>81</td><td>$81.82</td><td>10.90%</td><td>11</td><td>$379.78</td><td>4.64</td></tr><tr><td>13:00</td><td>12,151</td><td>49</td><td>$49.09</td><td>6.54%</td><td>8</td><td>$288.05</td><td>5.87</td></tr><tr><td>14:00</td><td>10,725</td><td>55</td><td>$55.62</td><td>7.41%</td><td>6</td><td>$199.23</td><td>3.58</td></tr><tr><td>15:00</td><td>10,227</td><td>62</td><td>$63.14</td><td>8.41%</td><td>10</td><td>$325.75</td><td>5.16</td></tr><tr><td>16:00</td><td>8,949</td><td>46</td><td>$44.76</td><td>5.96%</td><td>6</td><td>$216.39</td><td>4.83</td></tr><tr><td>17:00</td><td>6,913</td><td>40</td><td>$40.55</td><td>5.40%</td><td>4</td><td>$143.41</td><td>3.54</td></tr><tr><td>18:00</td><td>6,951</td><td>50</td><td>$50.54</td><td>6.73%</td><td>4</td><td>$147.25</td><td>2.91</td></tr><tr><td>19:00</td><td>5,837</td><td>34</td><td>$36.36</td><td>4.84%</td><td>2</td><td>$39.98</td><td>1.10</td></tr><tr><td>20:00</td><td>3,134</td><td>26</td><td>$26.18</td><td>3.49%</td><td>3</td><td>$90.27</td><td>3.45</td></tr><tr><td>21:00</td><td>867</td><td>4</td><td>$4.40</td><td>0.59%</td><td>0</td><td>$0.00</td><td>0.00</td></tr><tr><td>22:00</td><td>587</td><td>7</td><td>$7.00</td><td>0.93%</td><td>2</td><td>$55.13</td><td>7.88</td></tr><tr><td>23:00</td><td>426</td><td>4</td><td>$3.95</td><td>0.53%</td><td>0</td><td>$0.00</td><td>0.00</td></tr></tbody>
+        </table>
+        </div>
+      </details>
+    </section>
+    
+    <section class="campaign-section">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">HOURLY BASELINE</div>
+          <h2>YT1-W702 手动-barefoot-广泛动态</h2>
+        </div>
+        <div class="section-roas"><span>整体 ROAS</span><strong>2.57</strong></div>
+      </div>
+      <div class="metrics-row">
+        <div><span>展示</span><strong>108,525</strong></div>
+        <div><span>点击</span><strong>1,023</strong></div>
+        <div><span>花费</span><strong>$831.62</strong></div>
+        <div><span>购买</span><strong>67</strong></div>
+        <div><span>销售额</span><strong>$2,133.70</strong></div>
+        <div><span>CVR</span><strong>6.55%</strong></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">花费占比 × ROAS</div>
+        <div class="chart-sub">柱：该小时占总花费比例　｜　线：该小时汇总 ROAS</div>
+        <svg viewBox="0 0 940 310" class="chart-svg" role="img"><line x1="48" y1="22.0" x2="892" y2="22.0" stroke="#e8edf3" stroke-width="1"/><text x="40" y="26.0" text-anchor="end" class="axis-text">20%</text><text x="900" y="26.0" text-anchor="start" class="axis-text">10</text><line x1="48" y1="81.0" x2="892" y2="81.0" stroke="#e8edf3" stroke-width="1"/><text x="40" y="85.0" text-anchor="end" class="axis-text">15%</text><text x="900" y="85.0" text-anchor="start" class="axis-text">8</text><line x1="48" y1="140.0" x2="892" y2="140.0" stroke="#e8edf3" stroke-width="1"/><text x="40" y="144.0" text-anchor="end" class="axis-text">10%</text><text x="900" y="144.0" text-anchor="start" class="axis-text">5</text><line x1="48" y1="199.0" x2="892" y2="199.0" stroke="#e8edf3" stroke-width="1"/><text x="40" y="203.0" text-anchor="end" class="axis-text">5%</text><text x="900" y="203.0" text-anchor="start" class="axis-text">2</text><line x1="48" y1="258.0" x2="892" y2="258.0" stroke="#e8edf3" stroke-width="1"/><text x="40" y="262.0" text-anchor="end" class="axis-text">0%</text><text x="900" y="262.0" text-anchor="start" class="axis-text">0</text><rect x="49.5" y="237.0" width="32.2" height="21.0" rx="2" fill="#5b8def" opacity="0.78"><title>00:00 花费占比 1.79%</title></rect><rect x="84.7" y="219.1" width="32.2" height="38.9" rx="2" fill="#5b8def" opacity="0.78"><title>01:00 花费占比 3.31%</title></rect><rect x="119.8" y="206.4" width="32.2" height="51.6" rx="2" fill="#5b8def" opacity="0.78"><title>02:00 花费占比 4.39%</title></rect><rect x="155.0" y="168.4" width="32.2" height="89.6" rx="2" fill="#5b8def" opacity="0.78"><title>03:00 花费占比 7.63%</title></rect><rect x="190.2" y="82.3" width="32.2" height="175.7" rx="2" fill="#5b8def" opacity="0.78"><title>04:00 花费占比 14.95%</title></rect><rect x="225.3" y="22.0" width="32.2" height="236.0" rx="2" fill="#5b8def" opacity="0.78"><title>05:00 花费占比 20.08%</title></rect><rect x="260.5" y="81.1" width="32.2" height="176.9" rx="2" fill="#5b8def" opacity="0.78"><title>06:00 花费占比 15.05%</title></rect><rect x="295.7" y="172.3" width="32.2" height="85.7" rx="2" fill="#5b8def" opacity="0.78"><title>07:00 花费占比 7.29%</title></rect><rect x="330.8" y="143.3" width="32.2" height="114.7" rx="2" fill="#5b8def" opacity="0.78"><title>08:00 花费占比 9.75%</title></rect><rect x="366.0" y="170.1" width="32.2" height="87.9" rx="2" fill="#5b8def" opacity="0.78"><title>09:00 花费占比 7.48%</title></rect><rect x="401.2" y="190.5" width="32.2" height="67.5" rx="2" fill="#5b8def" opacity="0.78"><title>10:00 花费占比 5.75%</title></rect><rect x="436.3" y="228.2" width="32.2" height="29.8" rx="2" fill="#5b8def" opacity="0.78"><title>11:00 花费占比 2.53%</title></rect><rect x="471.5" y="258.0" width="32.2" height="0.0" rx="2" fill="#5b8def" opacity="0.78"><title>12:00 花费占比 0.00%</title></rect><rect x="506.7" y="258.0" width="32.2" height="0.0" rx="2" fill="#5b8def" opacity="0.78"><title>13:00 花费占比 0.00%</title></rect><rect x="541.8" y="258.0" width="32.2" height="0.0" rx="2" fill="#5b8def" opacity="0.78"><title>14:00 花费占比 0.00%</title></rect><rect x="577.0" y="258.0" width="32.2" height="0.0" rx="2" fill="#5b8def" opacity="0.78"><title>15:00 花费占比 0.00%</title></rect><rect x="612.2" y="258.0" width="32.2" height="0.0" rx="2" fill="#5b8def" opacity="0.78"><title>16:00 花费占比 0.00%</title></rect><rect x="647.3" y="258.0" width="32.2" height="0.0" rx="2" fill="#5b8def" opacity="0.78"><title>17:00 花费占比 0.00%</title></rect><rect x="682.5" y="258.0" width="32.2" height="0.0" rx="2" fill="#5b8def" opacity="0.78"><title>18:00 花费占比 0.00%</title></rect><rect x="717.7" y="258.0" width="32.2" height="0.0" rx="2" fill="#5b8def" opacity="0.78"><title>19:00 花费占比 0.00%</title></rect><rect x="752.8" y="258.0" width="32.2" height="0.0" rx="2" fill="#5b8def" opacity="0.78"><title>20:00 花费占比 0.00%</title></rect><rect x="788.0" y="258.0" width="32.2" height="0.0" rx="2" fill="#5b8def" opacity="0.78"><title>21:00 花费占比 0.00%</title></rect><rect x="823.2" y="258.0" width="32.2" height="0.0" rx="2" fill="#5b8def" opacity="0.78"><title>22:00 花费占比 0.00%</title></rect><rect x="858.3" y="258.0" width="32.2" height="0.0" rx="2" fill="#5b8def" opacity="0.78"><title>23:00 花费占比 0.00%</title></rect><path d="M 65.6 226.3 L 100.8 181.0 L 135.9 258.0 L 171.1 176.6 L 206.2 221.8 L 241.4 206.5 L 276.6 181.9 L 311.8 234.6 L 346.9 223.1 L 382.1 58.0 L 417.2 204.2 L 452.4 224.4" fill="none" stroke="#ef8354" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="65.6" cy="226.3" r="3.2" fill="#ef8354"><title>00:00 ROAS 1.34</title></circle><circle cx="100.8" cy="181.0" r="3.2" fill="#ef8354"><title>01:00 ROAS 3.26</title></circle><circle cx="135.9" cy="258.0" r="3.2" fill="#ef8354"><title>02:00 ROAS 0.00</title></circle><circle cx="171.1" cy="176.6" r="3.2" fill="#ef8354"><title>03:00 ROAS 3.45</title></circle><circle cx="206.2" cy="221.8" r="3.2" fill="#ef8354"><title>04:00 ROAS 1.53</title></circle><circle cx="241.4" cy="206.5" r="3.2" fill="#ef8354"><title>05:00 ROAS 2.18</title></circle><circle cx="276.6" cy="181.9" r="3.2" fill="#ef8354"><title>06:00 ROAS 3.23</title></circle><circle cx="311.8" cy="234.6" r="3.2" fill="#ef8354"><title>07:00 ROAS 0.99</title></circle><circle cx="346.9" cy="223.1" r="3.2" fill="#ef8354"><title>08:00 ROAS 1.48</title></circle><circle cx="382.1" cy="58.0" r="3.2" fill="#ef8354"><title>09:00 ROAS 8.47</title></circle><circle cx="417.2" cy="204.2" r="3.2" fill="#ef8354"><title>10:00 ROAS 2.28</title></circle><circle cx="452.4" cy="224.4" r="3.2" fill="#ef8354"><title>11:00 ROAS 1.42</title></circle><text x="65.6" y="285" text-anchor="middle" class="axis-text">00</text><text x="135.9" y="285" text-anchor="middle" class="axis-text">02</text><text x="206.2" y="285" text-anchor="middle" class="axis-text">04</text><text x="276.6" y="285" text-anchor="middle" class="axis-text">06</text><text x="346.9" y="285" text-anchor="middle" class="axis-text">08</text><text x="417.2" y="285" text-anchor="middle" class="axis-text">10</text><text x="487.6" y="285" text-anchor="middle" class="axis-text">12</text><text x="557.9" y="285" text-anchor="middle" class="axis-text">14</text><text x="628.2" y="285" text-anchor="middle" class="axis-text">16</text><text x="698.6" y="285" text-anchor="middle" class="axis-text">18</text><text x="768.9" y="285" text-anchor="middle" class="axis-text">20</text><text x="839.2" y="285" text-anchor="middle" class="axis-text">22</text><text x="48" y="14" class="axis-title">花费占比</text><text x="892" y="14" text-anchor="end" class="axis-title">ROAS</text></svg>
+        <div class="legend"><span><i class="bar-dot"></i>花费占比</span><span><i class="line-dot"></i>ROAS</span></div>
+      </div>
+      <div class="chart-card compact">
+        <div class="chart-title">展示 / 点击 / 花费流量结构</div>
+        <div class="chart-sub">用于判断“拿到的流量”与“实际消耗”是否同步</div>
+        <svg viewBox="0 0 940 235" class="chart-svg"><line x1="48" y1="18.0" x2="915" y2="18.0" stroke="#edf1f5"/><text x="40" y="22.0" text-anchor="end" class="axis-text">20%</text><line x1="48" y1="74.3" x2="915" y2="74.3" stroke="#edf1f5"/><text x="40" y="78.3" text-anchor="end" class="axis-text">13%</text><line x1="48" y1="130.7" x2="915" y2="130.7" stroke="#edf1f5"/><text x="40" y="134.7" text-anchor="end" class="axis-text">7%</text><line x1="48" y1="187.0" x2="915" y2="187.0" stroke="#edf1f5"/><text x="40" y="191.0" text-anchor="end" class="axis-text">0%</text><path d="M 66.1 174.7 L 102.2 159.6 L 138.3 151.3 L 174.4 124.5 L 210.6 75.7 L 246.7 41.3 L 282.8 43.7 L 318.9 122.7 L 355.1 92.2 L 391.2 122.1 L 427.3 129.9 L 463.4 164.6 L 499.6 187.0 L 535.7 187.0 L 571.8 187.0 L 607.9 187.0 L 644.1 187.0 L 680.2 187.0 L 716.3 187.0 L 752.4 187.0 L 788.6 187.0 L 824.7 187.0 L 860.8 187.0 L 896.9 187.0" fill="none" stroke="#5b8def" stroke-width="2.2"/><path d="M 66.1 174.7 L 102.2 161.5 L 138.3 154.1 L 174.4 129.4 L 210.6 79.2 L 246.7 34.0 L 282.8 57.0 L 318.9 124.5 L 355.1 96.5 L 391.2 107.2 L 427.3 122.0 L 463.4 162.3 L 499.6 187.0 L 535.7 187.0 L 571.8 187.0 L 607.9 187.0 L 644.1 187.0 L 680.2 187.0 L 716.3 187.0 L 752.4 187.0 L 788.6 187.0 L 824.7 187.0 L 860.8 187.0 L 896.9 187.0" fill="none" stroke="#4bb3a9" stroke-width="2.2"/><path d="M 66.1 171.9 L 102.2 159.1 L 138.3 150.1 L 174.4 122.8 L 210.6 61.2 L 246.7 18.0 L 282.8 60.3 L 318.9 125.6 L 355.1 104.9 L 391.2 124.0 L 427.3 138.6 L 463.4 165.7 L 499.6 187.0 L 535.7 187.0 L 571.8 187.0 L 607.9 187.0 L 644.1 187.0 L 680.2 187.0 L 716.3 187.0 L 752.4 187.0 L 788.6 187.0 L 824.7 187.0 L 860.8 187.0 L 896.9 187.0" fill="none" stroke="#ef8354" stroke-width="2.2"/><text x="66.1" y="213" text-anchor="middle" class="axis-text">00</text><text x="138.3" y="213" text-anchor="middle" class="axis-text">02</text><text x="210.6" y="213" text-anchor="middle" class="axis-text">04</text><text x="282.8" y="213" text-anchor="middle" class="axis-text">06</text><text x="355.1" y="213" text-anchor="middle" class="axis-text">08</text><text x="427.3" y="213" text-anchor="middle" class="axis-text">10</text><text x="499.6" y="213" text-anchor="middle" class="axis-text">12</text><text x="571.8" y="213" text-anchor="middle" class="axis-text">14</text><text x="644.1" y="213" text-anchor="middle" class="axis-text">16</text><text x="716.3" y="213" text-anchor="middle" class="axis-text">18</text><text x="788.6" y="213" text-anchor="middle" class="axis-text">20</text><text x="860.8" y="213" text-anchor="middle" class="axis-text">22</text></svg>
+        <div class="legend"><span><i style="background:#5b8def"></i>展示占比</span><span><i style="background:#4bb3a9"></i>点击占比</span><span><i style="background:#ef8354"></i>花费占比</span></div>
+      </div>
+      <div class="analysis-box">
+        <h3>核心观察</h3>
+        <ul><li>花费最集中在 05:00（20.1%）、06:00（15.0%）、04:00（15.0%）。</li><li>12:00 之后几乎没有获得花费，属于明显的前半天流量耗尽/覆盖中断型分布。</li><li>在具备一定样本量的小时中，效率较好的时段为 09:00 ROAS 8.47、03:00 ROAS 3.45、01:00 ROAS 3.26。</li><li>需要重点观察的低效时段为 02:00 ROAS 0.00、07:00 ROAS 0.99、08:00 ROAS 1.48。</li></ul>
+        <div class="takeaway">这条是四条里“前置消耗”最强的一条。流量主要在凌晨至上午被拿走，后半天没有形成可比较样本，因此现在不能把下午/晚间直接判断为低效，只能判断为“没有拿到流量”。</div>
+      </div>
+      <details>
+        <summary>展开查看 24 小时明细</summary>
+        <div class="table-wrap">
+        <table class="detail-table">
+          <thead><tr><th>小时</th><th>展示</th><th>点击</th><th>花费</th><th>花费占比</th><th>购买</th><th>销售额</th><th>ROAS</th></tr></thead>
+          <tbody><tr><td>00:00</td><td>1,581</td><td>15</td><td>$14.88</td><td>1.79%</td><td>1</td><td>$19.99</td><td>1.34</td></tr><tr><td>01:00</td><td>3,529</td><td>31</td><td>$27.55</td><td>3.31%</td><td>3</td><td>$89.87</td><td>3.26</td></tr><tr><td>02:00</td><td>4,599</td><td>40</td><td>$36.48</td><td>4.39%</td><td>0</td><td>$0.00</td><td>0.00</td></tr><tr><td>03:00</td><td>8,064</td><td>70</td><td>$63.43</td><td>7.63%</td><td>8</td><td>$218.91</td><td>3.45</td></tr><tr><td>04:00</td><td>14,352</td><td>131</td><td>$124.34</td><td>14.95%</td><td>6</td><td>$190.69</td><td>1.53</td></tr><tr><td>05:00</td><td>18,783</td><td>186</td><td>$166.98</td><td>20.08%</td><td>13</td><td>$364.57</td><td>2.18</td></tr><tr><td>06:00</td><td>18,480</td><td>158</td><td>$125.14</td><td>15.05%</td><td>12</td><td>$403.77</td><td>3.23</td></tr><tr><td>07:00</td><td>8,288</td><td>76</td><td>$60.62</td><td>7.29%</td><td>2</td><td>$59.98</td><td>0.99</td></tr><tr><td>08:00</td><td>12,220</td><td>110</td><td>$81.12</td><td>9.75%</td><td>4</td><td>$119.86</td><td>1.48</td></tr><tr><td>09:00</td><td>8,372</td><td>97</td><td>$62.22</td><td>7.48%</td><td>14</td><td>$527.21</td><td>8.47</td></tr><tr><td>10:00</td><td>7,366</td><td>79</td><td>$47.79</td><td>5.75%</td><td>3</td><td>$108.86</td><td>2.28</td></tr><tr><td>11:00</td><td>2,891</td><td>30</td><td>$21.07</td><td>2.53%</td><td>1</td><td>$29.99</td><td>1.42</td></tr></tbody>
+        </table>
+        </div>
+      </details>
+    </section>
+    
+    <section class="campaign-section">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">HOURLY BASELINE</div>
+          <h2>YT1-W702 手动-barefoot-精准固定</h2>
+        </div>
+        <div class="section-roas"><span>整体 ROAS</span><strong>2.30</strong></div>
+      </div>
+      <div class="metrics-row">
+        <div><span>展示</span><strong>101,071</strong></div>
+        <div><span>点击</span><strong>1,042</strong></div>
+        <div><span>花费</span><strong>$681.04</strong></div>
+        <div><span>购买</span><strong>51</strong></div>
+        <div><span>销售额</span><strong>$1,567.27</strong></div>
+        <div><span>CVR</span><strong>4.89%</strong></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">花费占比 × ROAS</div>
+        <div class="chart-sub">柱：该小时占总花费比例　｜　线：该小时汇总 ROAS</div>
+        <svg viewBox="0 0 940 310" class="chart-svg" role="img"><line x1="48" y1="22.0" x2="892" y2="22.0" stroke="#e8edf3" stroke-width="1"/><text x="40" y="26.0" text-anchor="end" class="axis-text">15%</text><text x="900" y="26.0" text-anchor="start" class="axis-text">13</text><line x1="48" y1="81.0" x2="892" y2="81.0" stroke="#e8edf3" stroke-width="1"/><text x="40" y="85.0" text-anchor="end" class="axis-text">11%</text><text x="900" y="85.0" text-anchor="start" class="axis-text">10</text><line x1="48" y1="140.0" x2="892" y2="140.0" stroke="#e8edf3" stroke-width="1"/><text x="40" y="144.0" text-anchor="end" class="axis-text">7%</text><text x="900" y="144.0" text-anchor="start" class="axis-text">6</text><line x1="48" y1="199.0" x2="892" y2="199.0" stroke="#e8edf3" stroke-width="1"/><text x="40" y="203.0" text-anchor="end" class="axis-text">4%</text><text x="900" y="203.0" text-anchor="start" class="axis-text">3</text><line x1="48" y1="258.0" x2="892" y2="258.0" stroke="#e8edf3" stroke-width="1"/><text x="40" y="262.0" text-anchor="end" class="axis-text">0%</text><text x="900" y="262.0" text-anchor="start" class="axis-text">0</text><rect x="49.5" y="251.7" width="32.2" height="6.3" rx="2" fill="#5b8def" opacity="0.78"><title>00:00 花费占比 0.40%</title></rect><rect x="84.7" y="235.8" width="32.2" height="22.2" rx="2" fill="#5b8def" opacity="0.78"><title>01:00 花费占比 1.40%</title></rect><rect x="119.8" y="237.1" width="32.2" height="20.9" rx="2" fill="#5b8def" opacity="0.78"><title>02:00 花费占比 1.32%</title></rect><rect x="155.0" y="205.2" width="32.2" height="52.8" rx="2" fill="#5b8def" opacity="0.78"><title>03:00 花费占比 3.33%</title></rect><rect x="190.2" y="196.4" width="32.2" height="61.6" rx="2" fill="#5b8def" opacity="0.78"><title>04:00 花费占比 3.89%</title></rect><rect x="225.3" y="155.7" width="32.2" height="102.3" rx="2" fill="#5b8def" opacity="0.78"><title>05:00 花费占比 6.45%</title></rect><rect x="260.5" y="152.6" width="32.2" height="105.4" rx="2" fill="#5b8def" opacity="0.78"><title>06:00 花费占比 6.65%</title></rect><rect x="295.7" y="77.2" width="32.2" height="180.8" rx="2" fill="#5b8def" opacity="0.78"><title>07:00 花费占比 11.40%</title></rect><rect x="330.8" y="85.4" width="32.2" height="172.6" rx="2" fill="#5b8def" opacity="0.78"><title>08:00 花费占比 10.89%</title></rect><rect x="366.0" y="34.4" width="32.2" height="223.6" rx="2" fill="#5b8def" opacity="0.78"><title>09:00 花费占比 14.10%</title></rect><rect x="401.2" y="22.0" width="32.2" height="236.0" rx="2" fill="#5b8def" opacity="0.78"><title>10:00 花费占比 14.89%</title></rect><rect x="436.3" y="120.7" width="32.2" height="137.3" rx="2" fill="#5b8def" opacity="0.78"><title>11:00 花费占比 8.66%</title></rect><rect x="471.5" y="196.5" width="32.2" height="61.5" rx="2" fill="#5b8def" opacity="0.78"><title>12:00 花费占比 3.88%</title></rect><rect x="506.7" y="258.0" width="32.2" height="0.0" rx="2" fill="#5b8def" opacity="0.78"><title>13:00 花费占比 0.00%</title></rect><rect x="541.8" y="225.8" width="32.2" height="32.2" rx="2" fill="#5b8def" opacity="0.78"><title>14:00 花费占比 2.03%</title></rect><rect x="577.0" y="216.6" width="32.2" height="41.4" rx="2" fill="#5b8def" opacity="0.78"><title>15:00 花费占比 2.61%</title></rect><rect x="612.2" y="215.7" width="32.2" height="42.3" rx="2" fill="#5b8def" opacity="0.78"><title>16:00 花费占比 2.67%</title></rect><rect x="647.3" y="258.0" width="32.2" height="0.0" rx="2" fill="#5b8def" opacity="0.78"><title>17:00 花费占比 0.00%</title></rect><rect x="682.5" y="256.2" width="32.2" height="1.8" rx="2" fill="#5b8def" opacity="0.78"><title>18:00 花费占比 0.11%</title></rect><rect x="717.7" y="247.7" width="32.2" height="10.3" rx="2" fill="#5b8def" opacity="0.78"><title>19:00 花费占比 0.65%</title></rect><rect x="752.8" y="198.1" width="32.2" height="59.9" rx="2" fill="#5b8def" opacity="0.78"><title>20:00 花费占比 3.78%</title></rect><rect x="788.0" y="243.8" width="32.2" height="14.2" rx="2" fill="#5b8def" opacity="0.78"><title>21:00 花费占比 0.90%</title></rect><rect x="823.2" y="258.0" width="32.2" height="0.0" rx="2" fill="#5b8def" opacity="0.78"><title>22:00 花费占比 0.00%</title></rect><rect x="858.3" y="258.0" width="32.2" height="0.0" rx="2" fill="#5b8def" opacity="0.78"><title>23:00 花费占比 0.00%</title></rect><path d="M 65.6 258.0 L 100.8 182.0 L 135.9 258.0 L 171.1 242.0 L 206.2 258.0 L 241.4 227.9 L 276.6 209.6 L 311.8 213.7 L 346.9 203.0 L 382.1 241.0 L 417.2 220.4 L 452.4 205.7 L 487.6 223.7 L 557.9 258.0 L 593.1 43.7 L 628.2 258.0 L 698.6 258.0 L 733.8 134.8 L 768.9 159.3 L 804.1 258.0" fill="none" stroke="#ef8354" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="65.6" cy="258.0" r="3.2" fill="#ef8354"><title>00:00 ROAS 0.00</title></circle><circle cx="100.8" cy="182.0" r="3.2" fill="#ef8354"><title>01:00 ROAS 4.19</title></circle><circle cx="135.9" cy="258.0" r="3.2" fill="#ef8354"><title>02:00 ROAS 0.00</title></circle><circle cx="171.1" cy="242.0" r="3.2" fill="#ef8354"><title>03:00 ROAS 0.88</title></circle><circle cx="206.2" cy="258.0" r="3.2" fill="#ef8354"><title>04:00 ROAS 0.00</title></circle><circle cx="241.4" cy="227.9" r="3.2" fill="#ef8354"><title>05:00 ROAS 1.66</title></circle><circle cx="276.6" cy="209.6" r="3.2" fill="#ef8354"><title>06:00 ROAS 2.67</title></circle><circle cx="311.8" cy="213.7" r="3.2" fill="#ef8354"><title>07:00 ROAS 2.44</title></circle><circle cx="346.9" cy="203.0" r="3.2" fill="#ef8354"><title>08:00 ROAS 3.03</title></circle><circle cx="382.1" cy="241.0" r="3.2" fill="#ef8354"><title>09:00 ROAS 0.94</title></circle><circle cx="417.2" cy="220.4" r="3.2" fill="#ef8354"><title>10:00 ROAS 2.07</title></circle><circle cx="452.4" cy="205.7" r="3.2" fill="#ef8354"><title>11:00 ROAS 2.88</title></circle><circle cx="487.6" cy="223.7" r="3.2" fill="#ef8354"><title>12:00 ROAS 1.89</title></circle><circle cx="557.9" cy="258.0" r="3.2" fill="#ef8354"><title>14:00 ROAS 0.00</title></circle><circle cx="593.1" cy="43.7" r="3.2" fill="#ef8354"><title>15:00 ROAS 11.80</title></circle><circle cx="628.2" cy="258.0" r="3.2" fill="#ef8354"><title>16:00 ROAS 0.00</title></circle><circle cx="698.6" cy="258.0" r="3.2" fill="#ef8354"><title>18:00 ROAS 0.00</title></circle><circle cx="733.8" cy="134.8" r="3.2" fill="#ef8354"><title>19:00 ROAS 6.79</title></circle><circle cx="768.9" cy="159.3" r="3.2" fill="#ef8354"><title>20:00 ROAS 5.44</title></circle><circle cx="804.1" cy="258.0" r="3.2" fill="#ef8354"><title>21:00 ROAS 0.00</title></circle><text x="65.6" y="285" text-anchor="middle" class="axis-text">00</text><text x="135.9" y="285" text-anchor="middle" class="axis-text">02</text><text x="206.2" y="285" text-anchor="middle" class="axis-text">04</text><text x="276.6" y="285" text-anchor="middle" class="axis-text">06</text><text x="346.9" y="285" text-anchor="middle" class="axis-text">08</text><text x="417.2" y="285" text-anchor="middle" class="axis-text">10</text><text x="487.6" y="285" text-anchor="middle" class="axis-text">12</text><text x="557.9" y="285" text-anchor="middle" class="axis-text">14</text><text x="628.2" y="285" text-anchor="middle" class="axis-text">16</text><text x="698.6" y="285" text-anchor="middle" class="axis-text">18</text><text x="768.9" y="285" text-anchor="middle" class="axis-text">20</text><text x="839.2" y="285" text-anchor="middle" class="axis-text">22</text><text x="48" y="14" class="axis-title">花费占比</text><text x="892" y="14" text-anchor="end" class="axis-title">ROAS</text></svg>
+        <div class="legend"><span><i class="bar-dot"></i>花费占比</span><span><i class="line-dot"></i>ROAS</span></div>
+      </div>
+      <div class="chart-card compact">
+        <div class="chart-title">展示 / 点击 / 花费流量结构</div>
+        <div class="chart-sub">用于判断“拿到的流量”与“实际消耗”是否同步</div>
+        <svg viewBox="0 0 940 235" class="chart-svg"><line x1="48" y1="18.0" x2="915" y2="18.0" stroke="#edf1f5"/><text x="40" y="22.0" text-anchor="end" class="axis-text">17%</text><line x1="48" y1="74.3" x2="915" y2="74.3" stroke="#edf1f5"/><text x="40" y="78.3" text-anchor="end" class="axis-text">12%</text><line x1="48" y1="130.7" x2="915" y2="130.7" stroke="#edf1f5"/><text x="40" y="134.7" text-anchor="end" class="axis-text">6%</text><line x1="48" y1="187.0" x2="915" y2="187.0" stroke="#edf1f5"/><text x="40" y="191.0" text-anchor="end" class="axis-text">0%</text><path d="M 66.1 178.1 L 102.2 177.9 L 138.3 175.6 L 174.4 164.0 L 210.6 152.3 L 246.7 134.7 L 282.8 110.8 L 318.9 82.4 L 355.1 61.4 L 391.2 45.9 L 427.3 55.1 L 463.4 105.1 L 499.6 151.6 L 535.7 183.8 L 571.8 163.5 L 607.9 160.0 L 644.1 160.5 L 680.2 187.0 L 716.3 187.0 L 752.4 179.1 L 788.6 155.7 L 824.7 175.0 L 860.8 187.0 L 896.9 187.0" fill="none" stroke="#5b8def" stroke-width="2.2"/><path d="M 66.1 184.2 L 102.2 178.6 L 138.3 177.7 L 174.4 164.7 L 210.6 157.3 L 246.7 136.9 L 282.8 128.5 L 318.9 66.3 L 355.1 54.2 L 391.2 31.9 L 427.3 18.0 L 463.4 115.5 L 499.6 159.1 L 535.7 187.0 L 571.8 170.3 L 607.9 162.9 L 644.1 160.1 L 680.2 187.0 L 716.3 186.1 L 752.4 181.4 L 788.6 158.2 L 824.7 180.5 L 860.8 187.0 L 896.9 187.0" fill="none" stroke="#4bb3a9" stroke-width="2.2"/><path d="M 66.1 183.2 L 102.2 173.5 L 138.3 174.2 L 174.4 154.8 L 210.6 149.4 L 246.7 124.6 L 282.8 122.7 L 318.9 76.7 L 355.1 81.7 L 391.2 50.5 L 427.3 43.0 L 463.4 103.2 L 499.6 149.5 L 535.7 187.0 L 571.8 167.4 L 607.9 161.8 L 644.1 161.2 L 680.2 187.0 L 716.3 185.9 L 752.4 180.7 L 788.6 150.5 L 824.7 178.3 L 860.8 187.0 L 896.9 187.0" fill="none" stroke="#ef8354" stroke-width="2.2"/><text x="66.1" y="213" text-anchor="middle" class="axis-text">00</text><text x="138.3" y="213" text-anchor="middle" class="axis-text">02</text><text x="210.6" y="213" text-anchor="middle" class="axis-text">04</text><text x="282.8" y="213" text-anchor="middle" class="axis-text">06</text><text x="355.1" y="213" text-anchor="middle" class="axis-text">08</text><text x="427.3" y="213" text-anchor="middle" class="axis-text">10</text><text x="499.6" y="213" text-anchor="middle" class="axis-text">12</text><text x="571.8" y="213" text-anchor="middle" class="axis-text">14</text><text x="644.1" y="213" text-anchor="middle" class="axis-text">16</text><text x="716.3" y="213" text-anchor="middle" class="axis-text">18</text><text x="788.6" y="213" text-anchor="middle" class="axis-text">20</text><text x="860.8" y="213" text-anchor="middle" class="axis-text">22</text></svg>
+        <div class="legend"><span><i style="background:#5b8def"></i>展示占比</span><span><i style="background:#4bb3a9"></i>点击占比</span><span><i style="background:#ef8354"></i>花费占比</span></div>
+      </div>
+      <div class="analysis-box">
+        <h3>核心观察</h3>
+        <ul><li>花费最集中在 10:00（14.9%）、09:00（14.1%）、07:00（11.4%）。</li><li>12:00 之后仍承接 16.6% 的花费，全天覆盖相对完整。</li><li>在具备一定样本量的小时中，效率较好的时段为 20:00 ROAS 5.44、08:00 ROAS 3.03、11:00 ROAS 2.88。</li><li>需要重点观察的低效时段为 04:00 ROAS 0.00、03:00 ROAS 0.88、09:00 ROAS 0.94。</li></ul>
+        <div class="takeaway">流量比广泛动态更向 07:00–11:00 集中，但 15:00、19:00–20:00 出现了小体量高 ROAS 信号。由于样本占比较小，更适合先作为后续测试候选，而不是直接定为高效黄金时段。</div>
+      </div>
+      <details>
+        <summary>展开查看 24 小时明细</summary>
+        <div class="table-wrap">
+        <table class="detail-table">
+          <thead><tr><th>小时</th><th>展示</th><th>点击</th><th>花费</th><th>花费占比</th><th>购买</th><th>销售额</th><th>ROAS</th></tr></thead>
+          <tbody><tr><td>00:00</td><td>926</td><td>3</td><td>$2.70</td><td>0.40%</td><td>0</td><td>$0.00</td><td>0.00</td></tr><tr><td>01:00</td><td>955</td><td>9</td><td>$9.53</td><td>1.40%</td><td>1</td><td>$39.89</td><td>4.19</td></tr><tr><td>02:00</td><td>1,188</td><td>10</td><td>$8.99</td><td>1.32%</td><td>0</td><td>$0.00</td><td>0.00</td></tr><tr><td>03:00</td><td>2,400</td><td>24</td><td>$22.68</td><td>3.33%</td><td>1</td><td>$19.99</td><td>0.88</td></tr><tr><td>04:00</td><td>3,622</td><td>32</td><td>$26.47</td><td>3.89%</td><td>0</td><td>$0.00</td><td>0.00</td></tr><tr><td>05:00</td><td>5,462</td><td>54</td><td>$43.95</td><td>6.45%</td><td>2</td><td>$72.98</td><td>1.66</td></tr><tr><td>06:00</td><td>7,962</td><td>63</td><td>$45.26</td><td>6.65%</td><td>4</td><td>$120.76</td><td>2.67</td></tr><tr><td>07:00</td><td>10,926</td><td>130</td><td>$77.67</td><td>11.40%</td><td>7</td><td>$189.73</td><td>2.44</td></tr><tr><td>08:00</td><td>13,124</td><td>143</td><td>$74.15</td><td>10.89%</td><td>7</td><td>$224.73</td><td>3.03</td></tr><tr><td>09:00</td><td>14,740</td><td>167</td><td>$96.06</td><td>14.10%</td><td>3</td><td>$89.87</td><td>0.94</td></tr><tr><td>10:00</td><td>13,781</td><td>182</td><td>$101.38</td><td>14.89%</td><td>7</td><td>$209.83</td><td>2.07</td></tr><tr><td>11:00</td><td>8,558</td><td>77</td><td>$59.00</td><td>8.66%</td><td>5</td><td>$169.95</td><td>2.88</td></tr><tr><td>12:00</td><td>3,701</td><td>30</td><td>$26.42</td><td>3.88%</td><td>2</td><td>$49.98</td><td>1.89</td></tr><tr><td>13:00</td><td>337</td><td>0</td><td>$0.00</td><td>0.00%</td><td>0</td><td>$0.00</td><td>-</td></tr><tr><td>14:00</td><td>2,458</td><td>18</td><td>$13.82</td><td>2.03%</td><td>0</td><td>$0.00</td><td>0.00</td></tr><tr><td>15:00</td><td>2,820</td><td>26</td><td>$17.77</td><td>2.61%</td><td>7</td><td>$209.72</td><td>11.80</td></tr><tr><td>16:00</td><td>2,768</td><td>29</td><td>$18.16</td><td>2.67%</td><td>0</td><td>$0.00</td><td>0.00</td></tr><tr><td>18:00</td><td>0</td><td>1</td><td>$0.78</td><td>0.11%</td><td>0</td><td>$0.00</td><td>0.00</td></tr><tr><td>19:00</td><td>820</td><td>6</td><td>$4.42</td><td>0.65%</td><td>1</td><td>$29.99</td><td>6.79</td></tr><tr><td>20:00</td><td>3,274</td><td>31</td><td>$25.72</td><td>3.78%</td><td>4</td><td>$139.85</td><td>5.44</td></tr><tr><td>21:00</td><td>1,249</td><td>7</td><td>$6.11</td><td>0.90%</td><td>0</td><td>$0.00</td><td>0.00</td></tr></tbody>
+        </table>
+        </div>
+      </details>
+    </section>
+    
+
+  <section class="panel">
+    <h2>三、基于当前基线的优先级</h2>
+    <div class="findings">
+      <div class="finding"><strong>优先验证 1｜W702 广泛动态</strong><br/>最需要先解决的是“为什么流量只停留在前半天”。在没有下午/晚间样本前，不适合直接做大幅分时加价判断。</div>
+      <div class="finding"><strong>优先验证 2｜WK101 精准大组</strong><br/>05–11 点消耗较重，但 06–08 点效率明显弱于 05、09 点；17–19 点出现较高效率、较低流量，具备进一步验证价值。</div>
+      <div class="finding"><strong>参照组｜WK101 广泛固定</strong><br/>整体 ROAS 最高、覆盖更完整、10–16 点表现更连贯，适合作为“未做规则时的自然结构”参照。</div>
+      <div class="finding"><strong>谨慎看待｜W702 精准固定</strong><br/>15、19、20 点虽有高 ROAS，但占比小，先扩样本再定性，不建议仅凭峰值做大幅规则。</div>
+    </div>
+  </section>
+
+  <div class="footer">Generated from the saved hourly Amazon Ads export · 2026-07-22 → 2026-08-02</div>
+</div>
+</body>
+</html>

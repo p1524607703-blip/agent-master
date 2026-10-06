@@ -1,0 +1,527 @@
+﻿组ID,层级,英文,中文,父项
+4002,父,Automotive,汽车,
+4002,子,"Audio, Video & Gadgets",影音与数码小件,Automotive
+4002,子,Boats & Watercraft,船艇与水上载具,Automotive
+4002,子,"Buying, New",购车（新车）,Automotive
+4002,子,"Buying, Used",购车（二手车）,Automotive
+4002,子,Car Wash,洗车,Automotive
+4002,子,Collectors & Vintage,收藏与老爷车,Automotive
+4002,子,Compact,紧凑型车,Automotive
+4002,子,Convertibles,敞篷车,Automotive
+4002,子,Coupe,双门轿跑,Automotive
+4002,子,Dealers,经销商,Automotive
+4002,子,Electric,电动车,Automotive
+4002,子,Financing,汽车金融,Automotive
+4002,子,General,通用,Automotive
+4002,子,Hybrid,混合动力,Automotive
+4002,子,Leasing,租赁,Automotive
+4002,子,Luxury,奢侈品,Automotive
+4002,子,Manufacturers,制造商,Automotive
+4002,子,"Manufacturers, Cars",制造商（轿车）,Automotive
+4002,子,"Manufacturers, Trucks & Vans",制造商（卡车与厢式车）,Automotive
+4002,子,Minivan,MPV／小型厢式车,Automotive
+4002,子,Motor Home & RVs,房车与露营车,Automotive
+4002,子,Motorcycles & Scooters,摩托车与踏板车,Automotive
+4002,子,News & Auto Shows,资讯与车展,Automotive
+4002,子,"Parts, Tires & Wheels",配件、轮胎与轮毂,Automotive
+4002,子,"Parts, excluding Tires",配件（不含轮胎）,Automotive
+4002,子,Recreational Vehicles,休闲车辆,Automotive
+4002,子,"Repair, Maintenance & Services",维修保养与服务,Automotive
+4002,子,"Sales, New",销售（新车）,Automotive
+4002,子,"Sales, Used",销售（二手车）,Automotive
+4002,子,Sedan,轿车,Automotive
+4002,子,Sports Cars,跑车,Automotive
+4002,子,Sports Utility Vehicles (SUVs),SUV,Automotive
+4002,子,Tools & Maintenance Equipment,工具与养护设备,Automotive
+4003,父,Beauty & Fashion,美妆与时尚,
+4003,子,Accessories,配饰,Beauty & Fashion
+4003,子,"Apparel, Kids & Baby",服饰（儿童与婴儿）,Beauty & Fashion
+4003,子,"Apparel, Men's",服饰（男装）,Beauty & Fashion
+4003,子,"Apparel, Women's",服饰（女装）,Beauty & Fashion
+4003,子,Bath Products,沐浴用品,Beauty & Fashion
+4003,子,Cosmetic Procedures,医美项目,Beauty & Fashion
+4003,子,Cosmetics,彩妆,Beauty & Fashion
+4003,子,Discount,折扣,Beauty & Fashion
+4003,子,Fragrance,香水,Beauty & Fashion
+4003,子,General,通用,Beauty & Fashion
+4003,子,"General, Beauty",通用（美妆）,Beauty & Fashion
+4003,子,Hair,美发,Beauty & Fashion
+4003,子,Handbags & Purses,手袋与钱包,Beauty & Fashion
+4003,子,Jewelry,珠宝,Beauty & Fashion
+4003,子,Lingerie,内衣,Beauty & Fashion
+4003,子,Luggage,箱包,Beauty & Fashion
+4003,子,Luxury,奢侈品,Beauty & Fashion
+4003,子,Personal Care & Hygiene,个人护理与卫生,Beauty & Fashion
+4003,子,Salons & Spas,美发沙龙与SPA,Beauty & Fashion
+4003,子,Shoes,鞋履,Beauty & Fashion
+4003,子,Skincare,护肤,Beauty & Fashion
+4003,子,Swimsuits,泳装,Beauty & Fashion
+4003,子,Watches,腕表,Beauty & Fashion
+4004,父,Business,商业服务,
+4004,子,Cable Companies,有线电视运营商,Business
+4004,子,Conference/Events/Seminars,会议／活动／研讨会,Business
+4004,子,Convenience / Gas,便利店／加油站,Business
+4004,子,Customer Service,客户服务,Business
+4004,子,Equipment Rentals,设备租赁,Business
+4004,子,Financial Services,金融服务,Business
+4004,子,General,通用,Business
+4004,子,HR & Human Capital,人力资源,Business
+4004,子,Laundry / dry cleaning,洗衣／干洗,Business
+4004,子,Legal,法律服务,Business
+4004,子,Marketing & Services,营销与服务,Business
+4004,子,"Marketing & Services, Online",营销与服务（线上）,Business
+4004,子,Mortuaries,殡葬服务,Business
+4004,子,Office Supplies,办公用品,Business
+4004,子,"Office Supplies, Business Cards",办公用品（名片）,Business
+4004,子,Phone/Services,电话／通信服务,Business
+4004,子,Printing & Services,印刷与服务,Business
+4004,子,Record Labels,唱片公司,Business
+4004,子,"Shipping, Mailing & Packing",运输、邮寄与包装,Business
+4004,子,Small Business,小微企业,Business
+4004,子,"Small Business, Work from Home",小微企业（居家办公）,Business
+4004,子,Transportation,运输,Business
+4005,父,Consumer Electronics,消费电子,
+4005,子,Audio Equipment,音响设备,Consumer Electronics
+4005,子,Blu-Ray,蓝光,Consumer Electronics
+4005,子,Camera & Photography,相机与摄影,Consumer Electronics
+4005,子,"Digital Downloads, Books",数字下载（图书）,Consumer Electronics
+4005,子,"Digital Downloads, Game",数字下载（游戏）,Consumer Electronics
+4005,子,"Digital Downloads, Music",数字下载（音乐）,Consumer Electronics
+4005,子,"Digital Downloads, Software",数字下载（软件）,Consumer Electronics
+4005,子,Email & Messaging,邮件与即时通讯,Consumer Electronics
+4005,子,General,通用,Consumer Electronics
+4005,子,Home Theater,家庭影院,Consumer Electronics
+4005,子,"Online, Content & Social Media",线上内容与社交媒体,Consumer Electronics
+4005,子,Other Software,其他软件,Consumer Electronics
+4005,子,PC Games,PC 游戏,Consumer Electronics
+4005,子,"Personal Computing, Accessories",个人电脑配件,Consumer Electronics
+4005,子,"Personal Computing, Computers",个人电脑整机,Consumer Electronics
+4005,子,"Personal Computing, Laptops, Tablets, Netbooks",笔记本电脑、平板与上网本,Consumer Electronics
+4005,子,"Personal Computing, MP3 Players",MP3 播放器,Consumer Electronics
+4005,子,"Print, Fax, Copy & Scan",打印、传真、复印与扫描,Consumer Electronics
+4005,子,"Software, Personal",个人软件,Consumer Electronics
+4005,子,Stereo/TV,音响／电视,Consumer Electronics
+4005,子,Television,电视机,Consumer Electronics
+4005,子,"Video Games, Accessories & Controllers",电子游戏配件与手柄,Consumer Electronics
+4005,子,"Video Games, Computer",电脑游戏,Consumer Electronics
+4005,子,"Video Games, Console",主机游戏,Consumer Electronics
+4005,子,"Video Games, Games",电子游戏,Consumer Electronics
+4005,子,"Video Games, Games (Kid-friendly)",电子游戏（儿童向）,Consumer Electronics
+4005,子,"Video Games, Nintendo Games",任天堂游戏,Consumer Electronics
+4005,子,"Video Games, PlayStation Games",PlayStation 游戏,Consumer Electronics
+4005,子,"Video Games, XBox Games",Xbox 游戏,Consumer Electronics
+4005,子,Video Recording & Equipment,录像与摄像设备,Consumer Electronics
+4008,父,Dating,婚恋交友,
+4008,子,Directories & Sites,目录与网站,Dating
+4008,子,Forums & Chat,论坛与聊天,Dating
+4008,子,General,通用,Dating
+4008,子,Personals,征友,Dating
+4008,子,Social Networking,社交网络,Dating
+4006,父,Education,教育,
+4006,子,General,通用,Education
+4006,子,"Grants, Scholarships & Financial Aid",助学金、奖学金与助学贷款,Education
+4006,子,Language Education,语言教育,Education
+4006,子,"Schools, College & Universities",院校（大学）,Education
+4006,子,"Schools, K-12",院校（K-12 中小学）,Education
+4006,子,"Schools, Online Learning",院校（在线学习）,Education
+4006,子,Test Preparation,考试备考,Education
+4006,子,Training & Certification,培训与认证,Education
+4006,子,Vocational Training & Trade Schools,职业培训与技校,Education
+4007,父,Entertainment,娱乐,
+4007,子,Celebrity & Celeb Gossip,明星与八卦,Entertainment
+4007,子,Concerts,演唱会,Entertainment
+4007,子,"Events, Shows & Things to Do",活动、演出与休闲,Entertainment
+4007,子,Fun & Trivia,趣味与冷知识,Entertainment
+4007,子,Games,游戏,Entertainment
+4007,子,General,通用,Entertainment
+4007,子,Guides & Reviews,指南与评测,Entertainment
+4007,子,Humor & Jokes,幽默与笑话,Entertainment
+4007,子,Lottery,彩票,Entertainment
+4007,子,Movies,电影,Entertainment
+4007,子,Museums,博物馆,Entertainment
+4007,子,Music,音乐,Entertainment
+4007,子,Musical Instruments,乐器,Entertainment
+4007,子,"Nightclubs, Bars & Music Clubs",夜店、酒吧与音乐俱乐部,Entertainment
+4007,子,"Online Games, Casual and Puzzles",休闲与益智网游,Entertainment
+4007,子,"Online Games, Massive Multiplayer",大型多人在线网游,Entertainment
+4007,子,"Performing Arts, Dance",表演艺术（舞蹈）,Entertainment
+4007,子,"Performing Arts, Musicals",表演艺术（音乐剧）,Entertainment
+4007,子,"Performing Arts, Opera",表演艺术（歌剧）,Entertainment
+4007,子,"Performing Arts, Orchestra",表演艺术（管弦乐）,Entertainment
+4007,子,"Performing Arts, Plays",表演艺术（话剧）,Entertainment
+4007,子,TV Shows & Programs,电视节目,Entertainment
+4007,子,Ticket Sales,票务,Entertainment
+4010,父,Family,家庭与育儿,
+4010,子,Genealogy,家谱寻根,Family
+4010,子,General,通用,Family
+4010,子,"Parenting, Baby",育儿（婴儿）,Family
+4010,子,"Parenting, Kids",育儿（儿童）,Family
+4010,子,"Parenting, Maternity",育儿（孕产）,Family
+4010,子,"Parenting, Preschool",育儿（学龄前）,Family
+4010,子,"Parenting, Teens",育儿（青少年）,Family
+4010,子,"Parenting, Toddler",育儿（幼儿）,Family
+4010,子,"Parenting, Tweens",育儿（大童）,Family
+4012,父,"Finance, Commercial",金融（企业）,
+4012,子,"Banking, Banks & Institutional Investors",银行与机构投资者,"Finance, Commercial"
+4012,子,"Banking, Savings",银行储蓄,"Finance, Commercial"
+4012,子,Credit Cards,信用卡,"Finance, Commercial"
+4012,子,Currencies & Foreign Exchange,外汇与货币兑换,"Finance, Commercial"
+4012,子,Financial Planning & Management,财务规划与管理,"Finance, Commercial"
+4012,子,General,通用,"Finance, Commercial"
+4012,子,Loans & Lending,贷款与放贷,"Finance, Commercial"
+4012,子,Mortgages,按揭贷款,"Finance, Commercial"
+4011,父,"Finance, Personal",金融（个人）,
+4011,子,Accounting & Taxes,会计与报税,"Finance, Personal"
+4011,子,Banking,银行业务,"Finance, Personal"
+4011,子,"Banking, Online & Mobile",银行（线上与移动）,"Finance, Personal"
+4011,子,"Banking, Savings",银行储蓄,"Finance, Personal"
+4011,子,Credit Cards,信用卡,"Finance, Personal"
+4011,子,Credit Reports & Identity Theft,信用报告与身份盗用,"Finance, Personal"
+4011,子,Debt & Debt Consolidation,债务与债务整合,"Finance, Personal"
+4011,子,General,通用,"Finance, Personal"
+4011,子,Insurance,保险,"Finance, Personal"
+4011,子,Investments,投资,"Finance, Personal"
+4011,子,Loans & Credit Lines,贷款与授信额度,"Finance, Personal"
+4011,子,Mortgages,按揭贷款,"Finance, Personal"
+4011,子,Retirement,退休养老,"Finance, Personal"
+4011,子,"Stocks, Bonds & Trading",股票、债券与交易,"Finance, Personal"
+4013,父,Food & Dining,食品与餐饮,
+4013,子,"Appliances, Large",大家电,Food & Dining
+4013,子,"Appliances, Small",小家电,Food & Dining
+4013,子,BBQ,烧烤,Food & Dining
+4013,子,Bakeware,烘焙用具,Food & Dining
+4013,子,Barware,酒具,Food & Dining
+4013,子,"Beverages, Beer",饮品（啤酒）,Food & Dining
+4013,子,"Beverages, Coffee",饮品（咖啡）,Food & Dining
+4013,子,"Beverages, Energy Drinks",饮品（能量饮料）,Food & Dining
+4013,子,"Beverages, Juices",饮品（果汁）,Food & Dining
+4013,子,"Beverages, Milk",饮品（牛奶）,Food & Dining
+4013,子,"Beverages, Non-Alcoholic",饮品（无酒精）,Food & Dining
+4013,子,"Beverages, Soft Drinks",饮品（碳酸饮料）,Food & Dining
+4013,子,"Beverages, Spirits",饮品（烈酒）,Food & Dining
+4013,子,"Beverages, Tea",饮品（茶）,Food & Dining
+4013,子,"Beverages, Water",饮品（水）,Food & Dining
+4013,子,"Beverages, Wine",饮品（葡萄酒）,Food & Dining
+4013,子,Catering,配餐服务,Food & Dining
+4013,子,Cookbooks & Publications,食谱与出版物,Food & Dining
+4013,子,Cooking Tools,烹饪工具,Food & Dining
+4013,子,Cookware,锅具,Food & Dining
+4013,子,Decorations,装饰,Food & Dining
+4013,子,Diet & Healthy,膳食与健康,Food & Dining
+4013,子,Flatware,餐具,Food & Dining
+4013,子,"Food, Baby Food & Nutrition",食品（婴儿食品与营养）,Food & Dining
+4013,子,"Food, Biscuits & Bakery",食品（饼干与烘焙）,Food & Dining
+4013,子,"Food, Cereal & Breakfast",食品（麦片与早餐）,Food & Dining
+4013,子,"Food, Chocolate & Pralines",食品（巧克力与夹心糖）,Food & Dining
+4013,子,"Food, Cooking & Pantry",食品（烹饪与囤货）,Food & Dining
+4013,子,"Food, Dairy",食品（乳制品）,Food & Dining
+4013,子,"Food, Frozen Food",食品（冷冻食品）,Food & Dining
+4013,子,"Food, Frozen Pizza",食品（冷冻披萨）,Food & Dining
+4013,子,"Food, Ice Cream",食品（冰淇淋）,Food & Dining
+4013,子,"Food, Savoury Snacks",食品（咸味零食）,Food & Dining
+4013,子,"Food, Sugar Confectionery",食品（糖果）,Food & Dining
+4013,子,General,通用,Food & Dining
+4013,子,Gourmet,美食精品,Food & Dining
+4013,子,Groceries & Grocery Stores,杂货与超市,Food & Dining
+4013,子,Guides & Reviews,指南与评测,Food & Dining
+4013,子,Holiday,节日,Food & Dining
+4013,子,Ingredients & Spices,食材与香料,Food & Dining
+4013,子,"Meal, Appetizer & Snack",餐食（前菜与零食）,Food & Dining
+4013,子,"Meal, Breakfast & Brunch",餐食（早餐与早午餐）,Food & Dining
+4013,子,"Meal, Dinner",餐食（晚餐）,Food & Dining
+4013,子,"Meal, Lunch",餐食（午餐）,Food & Dining
+4013,子,Organic & Natural,有机与天然,Food & Dining
+4013,子,Pizza,披萨,Food & Dining
+4013,子,Recipes,菜谱,Food & Dining
+4013,子,Regional,地方风味,Food & Dining
+4013,子,"Restaurants, Fast Food",餐饮（快餐）,Food & Dining
+4013,子,"Restaurants, excluding Fast Food",餐饮（非快餐）,Food & Dining
+4013,子,Safety,安全,Food & Dining
+4013,子,Tableware,餐具器皿,Food & Dining
+4013,子,Vegetarian & Vegan,素食与纯素,Food & Dining
+4014,父,Government,政府,
+4014,子,Government,政府,Government
+4019,父,Health,健康,
+4019,子,Alternative Healing,替代疗法,Health
+4019,子,Anti-Aging,抗衰老,Health
+4019,子,Chiropractic,脊椎推拿,Health
+4019,子,Clinical Research,临床研究,Health
+4019,子,Dental,牙科,Health
+4019,子,Digestion,消化健康,Health
+4019,子,"Drugs/Pharmaceuticals, General",药品（通用）,Health
+4019,子,"Drugs/Pharmaceuticals, OTC",药品（非处方）,Health
+4019,子,"Fitness/Wellness, Classes",健身（课程）,Health
+4019,子,"Fitness/Wellness, Diet",健身（饮食）,Health
+4019,子,"Fitness/Wellness, Equipment",健身（器械）,Health
+4019,子,"Fitness/Wellness, Exercise",健身（运动）,Health
+4019,子,"Fitness/Wellness, General",健身（通用）,Health
+4019,子,"Fitness/Wellness, Nutrition",健身（营养）,Health
+4019,子,General,通用,Health
+4019,子,Hair Loss,脱发,Health
+4019,子,Hair Loss & Hair Care,脱发与护发,Health
+4019,子,Health Care Services & Insurance,医疗服务与保险,Health
+4019,子,"Health, Baby & Pre-natal",健康（母婴与产前）,Health
+4019,子,"Health, Child",健康（儿童）,Health
+4019,子,"Health, Elderly",健康（老年）,Health
+4019,子,"Health, Men",健康（男性）,Health
+4019,子,"Health, Men, Shaving & Grooming",健康（男性剃须与理容）,Health
+4019,子,"Health, Women",健康（女性）,Health
+4019,子,Hygiene,卫生,Health
+4019,子,Laboratory Testing & Medical Diagnostics,化验与医学诊断,Health
+4019,子,Laser Eye Care,激光眼科,Health
+4019,子,Medical Devices,医疗器械,Health
+4019,子,Medical Spa,医疗美容,Health
+4019,子,Mental & Emotional Health,心理与情绪健康,Health
+4019,子,Muscle Growth,增肌,Health
+4019,子,Orthopedic,骨科,Health
+4019,子,Pharmacy,药房,Health
+4019,子,Physicians / Physician Services,医生／诊疗服务,Health
+4019,子,Sexual & Reproductive Health,性与生殖健康,Health
+4019,子,Skin Care & Conditions,皮肤护理与皮肤问题,Health
+4019,子,Smoking & Cessation,吸烟与戒烟,Health
+4019,子,Sun Care & Tanning,防晒与美黑,Health
+4019,子,Tanning,美黑,Health
+4019,子,Vision,视力,Health
+4019,子,Vitamins & Supplements,维生素与膳食补充剂,Health
+4021,父,"Holiday, Events",节日与活动,
+4021,子,Academy Awards,奥斯卡颁奖礼,"Holiday, Events"
+4021,子,Anniversary,周年纪念,"Holiday, Events"
+4021,子,Back to School,开学季,"Holiday, Events"
+4021,子,Births & Birthdays,出生与生日,"Holiday, Events"
+4021,子,Black Friday,黑色星期五,"Holiday, Events"
+4021,子,Christmas,圣诞节,"Holiday, Events"
+4021,子,Cyber Monday,网购星期一,"Holiday, Events"
+4021,子,Easter,复活节,"Holiday, Events"
+4021,子,Father's Day,父亲节,"Holiday, Events"
+4021,子,Flowers,鲜花,"Holiday, Events"
+4021,子,Fourth of July,美国独立日,"Holiday, Events"
+4021,子,Graduation,毕业季,"Holiday, Events"
+4021,子,Greeting Cards,贺卡,"Holiday, Events"
+4021,子,Halloween,万圣节,"Holiday, Events"
+4021,子,Labor Day,劳动节,"Holiday, Events"
+4021,子,March Madness,疯狂三月（NCAA）,"Holiday, Events"
+4021,子,Mardi Gras,狂欢节,"Holiday, Events"
+4021,子,Memorial Day,阵亡将士纪念日,"Holiday, Events"
+4021,子,Mother's Day,母亲节,"Holiday, Events"
+4021,子,New Years Eve,跨年夜,"Holiday, Events"
+4021,子,Party Supplies,派对用品,"Holiday, Events"
+4021,子,President's Day,总统日,"Holiday, Events"
+4021,子,St. Patrick's Day,圣帕特里克节,"Holiday, Events"
+4021,子,Super Bowl,超级碗,"Holiday, Events"
+4021,子,Thanksgiving,感恩节,"Holiday, Events"
+4021,子,Valentine's Day,情人节,"Holiday, Events"
+4021,子,Wedding,婚礼,"Holiday, Events"
+4022,父,Home & Garden,家居与园艺,
+4022,子,Bathroom,浴室,Home & Garden
+4022,子,"Bathroom, Furnishings",浴室（家具陈设）,Home & Garden
+4022,子,Bedroom,卧室,Home & Garden
+4022,子,"Bedroom, Furnishings",卧室（家具陈设）,Home & Garden
+4022,子,Building Supplies,建材,Home & Garden
+4022,子,"Building Supplies, Fixtures",建材（固定装置）,Home & Garden
+4022,子,Cleaning & Cleaning Products,清洁与清洁用品,Home & Garden
+4022,子,DIY,DIY 自己动手,Home & Garden
+4022,子,Deck & Patio,露台与庭院,Home & Garden
+4022,子,Dining Room,餐厅,Home & Garden
+4022,子,Eco-friendly,环保,Home & Garden
+4022,子,Energy efficient,节能,Home & Garden
+4022,子,Fencing,围栏,Home & Garden
+4022,子,"Fix, Repair & Maintenance",维修与保养,Home & Garden
+4022,子,Flooring,地板,Home & Garden
+4022,子,Furniture,家具,Home & Garden
+4022,子,Garage,车库,Home & Garden
+4022,子,General,通用,Home & Garden
+4022,子,HVAC,暖通空调,Home & Garden
+4022,子,Hardware,五金,Home & Garden
+4022,子,Hot Tubs / Spas,按摩浴缸／SPA,Home & Garden
+4022,子,Interior Decorating & Design,室内装饰与设计,Home & Garden
+4022,子,Kitchen & Housewares,厨房与家居用品,Home & Garden
+4022,子,Lawn & Garden,草坪与园艺,Home & Garden
+4022,子,Lighting,灯具,Home & Garden
+4022,子,Mattress,床垫,Home & Garden
+4022,子,New Construction,新建住宅,Home & Garden
+4022,子,Painting Supplies,涂料与刷具,Home & Garden
+4022,子,Pest Control/Bug Extermination,虫害防治,Home & Garden
+4022,子,Plumbing,水暖,Home & Garden
+4022,子,Pool Supplies,泳池用品,Home & Garden
+4022,子,Security & Safety,安防,Home & Garden
+4022,子,Storage & Organization,收纳整理,Home & Garden
+4022,子,"Tools, Electrical",工具（电工）,Home & Garden
+4022,子,"Tools, Hand & Power",工具（手动与电动）,Home & Garden
+4022,子,"Tools, Heating & Cooling",工具（暖通）,Home & Garden
+4022,子,"Tools, Mowers & Outdoor Power",工具（割草与户外动力）,Home & Garden
+4022,子,Windows,门窗,Home & Garden
+4020,父,Interests,兴趣,
+4020,子,Antiques,古董,Interests
+4020,子,Arts & Crafts,手工艺,Interests
+4020,子,Astrology & Horoscope,占星与星座,Interests
+4020,子,"Collectibles, Sports",收藏品（体育）,Interests
+4020,子,"Collectibles, Toys",收藏品（玩具）,Interests
+4020,子,"Collectibles, Trading Cards",收藏品（集换卡）,Interests
+4020,子,General,通用,Interests
+4020,子,Psychics & Fortune Telling,通灵与算命,Interests
+4020,子,Toys & Games,玩具与游戏,Interests
+4020,子,Visual Art & Design,视觉艺术与设计,Interests
+4023,父,Jobs,招聘求职,
+4023,子,Career Development,职业发展,Jobs
+4023,子,Employment Agencies,人力资源中介,Jobs
+4023,子,General,通用,Jobs
+4023,子,Interviewing,面试,Jobs
+4023,子,Listings,职位信息,Jobs
+4023,子,Negotiating,薪酬谈判,Jobs
+4023,子,Recruiters,猎头招聘,Jobs
+4023,子,Search,求职搜索,Jobs
+4023,子,Services,服务,Jobs
+4025,父,Media,媒体,
+4025,子,"News, Business & Financial",新闻（商业财经）,Media
+4025,子,"News, Local",新闻（本地）,Media
+4025,子,"News, Online",新闻（线上）,Media
+4025,子,"News, Radio",新闻（广播）,Media
+4025,子,"News, TV (Broadcasting)",新闻（无线电视）,Media
+4025,子,"News, TV (Cable)",新闻（有线电视）,Media
+4025,子,"News, World/Global",新闻（国际）,Media
+4025,子,Newspapers,报纸,Media
+4025,子,"Online, Blogging Services",线上博客服务,Media
+4025,子,"Online, Blogs",线上博客,Media
+4025,子,"Online, Editorial",线上社论,Media
+4025,子,Public Service Announcements (PSAs),公益广告（PSA）,Media
+4025,子,"Publications, Books",出版物（图书）,Media
+4025,子,"Publications, Books (Audiobook)",出版物（有声书）,Media
+4025,子,"Publications, Magazines",出版物（杂志）,Media
+4025,子,Radio (Broadcast),广播（无线）,Media
+4025,子,Radio (Online),广播（线上）,Media
+4025,子,"Reference, Classified Ads",参考工具（分类广告）,Media
+4025,子,"Reference, Dictionary",参考工具（词典）,Media
+4025,子,"Reference, Directories & Listings",参考工具（名录）,Media
+4025,子,"Reference, Encyclopedia",参考工具（百科）,Media
+4025,子,"Reference, People Search",参考工具（人物搜索）,Media
+4025,子,"Reference, Search Engines",参考工具（搜索引擎）,Media
+4025,子,"Reference, Translation",参考工具（翻译）,Media
+4025,子,"Reference, Weather Services",参考工具（天气服务）,Media
+4015,父,Military,军事,
+4015,子,Military,军事,Military
+4000,父,Other,其他,
+4000,子,Other,其他,Other
+4026,父,Pets,宠物,
+4026,子,Adoption & Rescue,领养与救助,Pets
+4026,子,Breeding,繁育,Pets
+4026,子,Food & Supplies,食品与用品,Pets
+4026,子,General,通用,Pets
+4026,子,Services,服务,Pets
+4016,父,Public Services,公共服务,
+4016,子,Public Services,公共服务,Public Services
+4017,父,Public Utilities,公共事业,
+4017,子,Public Utilities,公共事业,Public Utilities
+4027,父,Real Estate,房地产,
+4027,子,Agents & Brokers,经纪与中介,Real Estate
+4027,子,General,通用,Real Estate
+4027,子,Homeowner,业主,Real Estate
+4027,子,Investments,投资,Real Estate
+4027,子,Moving & Storage,搬家与仓储,Real Estate
+4027,子,Rental Listings,租房房源,Real Estate
+4027,子,Renter,租客,Real Estate
+4027,子,Sales Listings,售房房源,Real Estate
+4028,父,Sensitive,敏感类,
+4028,子,Alcohol,酒精饮品,Sensitive
+4028,子,Gambling & Sports Betting,博彩与体育竞猜,Sensitive
+4029,父,Shopping,购物,
+4029,子,Auctions,拍卖,Shopping
+4029,子,Buying Guides,购买指南,Shopping
+4029,子,Cards & Greetings,贺卡与问候,Shopping
+4029,子,Cellular Stores,手机门店,Shopping
+4029,子,Coupons & Rebates,优惠券与返利,Shopping
+4029,子,Daily Deals,每日特惠,Shopping
+4029,子,Fairs/Farmers Markets,集市／农夫市集,Shopping
+4029,子,Fireworks,烟花,Shopping
+4029,子,Florists,花店,Shopping
+4029,子,General,通用,Shopping
+4029,子,Gifts,礼品,Shopping
+4029,子,Malls,购物中心,Shopping
+4029,子,Music Stores,乐器／唱片店,Shopping
+4029,子,Pawnshop,典当,Shopping
+4029,子,Product Reviews & Price Comparison,商品评测与比价,Shopping
+4029,子,"Retail Store, Convenience",零售门店（便利店）,Shopping
+4029,子,"Retail Store, Department",零售门店（百货）,Shopping
+4034,父,Society,社会,
+4034,子,Cemetary/Memorial,墓地／纪念,Society
+4034,子,Civic Organizations,公民组织,Society
+4034,子,Donation/Charity,捐赠／慈善,Society
+4034,子,Ecology,生态环保,Society
+4030,父,Sports,体育,
+4030,子,Baseball,棒球,Sports
+4030,子,Bicycling,骑行,Sports
+4030,子,Boating & Water Sports,划船与水上运动,Sports
+4030,子,Boxing,拳击,Sports
+4030,子,Coaching & Management,教练与管理,Sports
+4030,子,Entertainment,娱乐,Sports
+4030,子,Equipment,装备,Sports
+4030,子,Extreme Sports,极限运动,Sports
+4030,子,Fan Gear & Apparel,球迷装备与服饰,Sports
+4030,子,Fitness,健身,Sports
+4030,子,Football,橄榄球,Sports
+4030,子,General,通用,Sports
+4030,子,Golf,高尔夫,Sports
+4030,子,Hockey,冰球,Sports
+4030,子,Motorsports,赛车运动,Sports
+4030,子,NBA,NBA,Sports
+4030,子,NCAA,NCAA,Sports
+4030,子,NFL,NFL,Sports
+4030,子,Olympics,奥运会,Sports
+4030,子,Organizations,组织机构,Sports
+4030,子,Outdoor,户外,Sports
+4030,子,Running/Marathon,跑步／马拉松,Sports
+4030,子,Soccer,足球,Sports
+4030,子,Swimming,游泳,Sports
+4030,子,Team Sports,团队运动,Sports
+4030,子,Tennis,网球,Sports
+4030,子,World Cup,世界杯,Sports
+4030,子,Wrestling/MMA,摔跤／综合格斗,Sports
+4031,父,Tech B2B,技术（B2B）,
+4031,子,Data Storage & Recovery,数据存储与恢复,Tech B2B
+4031,子,Desktops & Hardware,台式机与硬件,Tech B2B
+4031,子,Developer Forums,开发者论坛,Tech B2B
+4031,子,Domains & Web Hosting,域名与主机托管,Tech B2B
+4031,子,General,通用,Tech B2B
+4031,子,Internet Service Providers,互联网服务提供商,Tech B2B
+4031,子,Online Marketing Services,在线营销服务,Tech B2B
+4031,子,Programming,编程开发,Tech B2B
+4031,子,Security,安全,Tech B2B
+4031,子,Servers & Networking,服务器与网络,Tech B2B
+4031,子,"Software, Business",商业软件,Tech B2B
+4031,子,Tech Support & Repair,技术支持与维修,Tech B2B
+4031,子,Technology Outsourcing,技术外包,Tech B2B
+4031,子,Wireless Data Communications,无线数据通信,Tech B2B
+4032,父,Telecom,电信,
+4032,子,Calling & Data Plans,通话与流量套餐,Telecom
+4032,子,General,通用,Telecom
+4032,子,Phone Accessories,手机配件,Telecom
+4032,子,Phones & Portable Media Devices,手机与便携播放设备,Telecom
+4032,子,Ringtones,铃声,Telecom
+4032,子,Service Providers,服务运营商,Telecom
+4033,父,Travel,旅行,
+4033,子,Airline & Air Travel,航空与机票,Travel
+4033,子,Airport Parking,机场停车,Travel
+4033,子,Airport Transportation Services,机场接送服务,Travel
+4033,子,Budget & Discount,经济与折扣,Travel
+4033,子,Bus & Rail,巴士与铁路,Travel
+4033,子,Business,商务出行,Travel
+4033,子,Camping & Backpacking,露营与背包旅行,Travel
+4033,子,Car Rental Services,租车服务,Travel
+4033,子,Convention Bureaus,会展局,Travel
+4033,子,Cruises & Cruise Services,邮轮与服务,Travel
+4033,子,Destination & Guides,目的地与攻略,Travel
+4033,子,General,通用,Travel
+4033,子,Honeymoon,蜜月,Travel
+4033,子,Last Minute Travel,临期旅行,Travel
+4033,子,"Lodging: Hotels, Motels & Resorts",住宿：酒店、汽车旅馆与度假村,Travel
+4033,子,Luggage & Products,行李箱与用品,Travel
+4033,子,Luxury,奢侈品,Travel
+4033,子,"Media, Publications & Reviews",媒体、出版物与评测,Travel
+4033,子,Online Sales & Retail,线上销售与零售,Travel
+4033,子,Spa Resorts & Day Spas,SPA 度假村与日间水疗,Travel
+4033,子,Specialty Travel,主题旅行,Travel
+4033,子,"Specialty Travel, Boat & Yachting",主题旅行（船艇与游艇）,Travel
+4033,子,"Specialty Travel, Golf",主题旅行（高尔夫）,Travel
+4033,子,"Specialty Travel, Skiing",主题旅行（滑雪）,Travel
+4033,子,Time Share Operators,分时度假运营商,Travel
+4033,子,Travel Agents & Booking Services,旅行社与预订服务,Travel
+4033,子,Vacation Rentals & Home Swaps,度假短租与换房,Travel
