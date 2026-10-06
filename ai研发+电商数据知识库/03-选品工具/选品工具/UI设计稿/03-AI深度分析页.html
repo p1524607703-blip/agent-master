@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 深度分析 — RADAR AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --teal: #0891b2; --teal-light: #06b6d4; --teal-sky: #22d3ee;
+  --teal-soft: rgba(6,182,212,0.12); --teal-glow: rgba(8,145,178,0.2);
+  --green: #10b981; --amber: #f59e0b; --red: #f43f5e; --purple: #8b5cf6;
+  --ai-blue: #0ea5e9;
+  --text-1: #0c2340; --text-2: #3d6b8a; --text-3: #7aafc8;
+  --glass-bg: rgba(255,255,255,0.45); --glass-border: rgba(255,255,255,0.65);
+  --glass-shadow: 0 8px 32px rgba(8,145,178,0.10), 0 1px 0 rgba(255,255,255,0.9) inset;
+  --radius: 20px;
+}
+body {
+  font-family: 'Inter', 'PingFang SC', system-ui, sans-serif;
+  background: linear-gradient(145deg, #bde8ff 0%, #d8f3fc 30%, #ecfbff 55%, #d0eefa 80%, #b5e5ff 100%);
+  min-height: 100vh; display: flex; color: var(--text-1); position: relative;
+}
+
+/* ── AI particle bg ── */
+.ai-bg { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+.particle { position: absolute; border-radius: 50%; animation: float-p 10s ease-in-out infinite; }
+.p1 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(14,165,233,0.12), transparent 60%); top: -80px; right: -80px; filter: blur(60px); animation-delay: 0s; }
+.p2 { width: 350px; height: 350px; background: radial-gradient(circle, rgba(8,145,178,0.10), transparent 60%); bottom: -60px; left: -60px; filter: blur(60px); animation-delay: 4s; }
+.p3 { width: 250px; height: 250px; background: radial-gradient(circle, rgba(139,92,246,0.07), transparent 60%); top: 40%; left: 35%; filter: blur(50px); animation-delay: 7s; }
+@keyframes float-p { 0%,100% { transform: scale(1) translate(0,0); } 50% { transform: scale(1.15) translate(10px,-10px); } }
+
+/* ── Sidebar ── */
+.sidebar { width: 64px; min-height: 100vh; background: rgba(255,255,255,0.52); backdrop-filter: blur(30px) saturate(200%); -webkit-backdrop-filter: blur(30px) saturate(200%); border-right: 1px solid rgba(255,255,255,0.65); display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 4px; position: fixed; left: 0; top: 0; bottom: 0; z-index: 100; }
+.sidebar-logo { width: 40px; height: 40px; background: linear-gradient(135deg, #0891b2, #06b6d4, #22d3ee); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 18px; box-shadow: 0 4px 16px rgba(8,145,178,0.35); }
+.sidebar-logo svg { color: white; }
+.nav-item { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; color: var(--text-3); }
+.nav-item:hover { background: var(--teal-soft); color: var(--teal); }
+.nav-item.active { background: linear-gradient(135deg, rgba(8,145,178,0.18), rgba(6,182,212,0.14)); color: var(--teal); }
+.sidebar-spacer { flex: 1; }
+
+/* ── Main layout ── */
+.main { margin-left: 64px; flex: 1; padding: 28px 32px; position: relative; z-index: 1; display: grid; grid-template-rows: auto 1fr; gap: 20px; height: 100vh; overflow: hidden; }
+
+/* ── Glass ── */
+.gc { background: var(--glass-bg); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border: 1px solid var(--glass-border); border-radius: var(--radius); box-shadow: var(--glass-shadow); }
+
+/* ── Topbar ── */
+.topbar { display: flex; align-items: center; justify-content: space-between; }
+.topbar-left h1 { font-size: 22px; font-weight: 700; }
+.topbar-left p { font-size: 13px; color: var(--text-2); margin-top: 3px; }
+.topbar-actions { display: flex; gap: 10px; align-items: center; }
+.product-select { display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--glass-border); border-radius: 12px; font-size: 13px; color: var(--text-1); cursor: pointer; }
+.product-select svg { color: var(--teal); }
+.btn-run { display: flex; align-items: center; gap: 8px; padding: 9px 18px; background: linear-gradient(135deg, #0891b2, #06b6d4); border: none; border-radius: 12px; color: white; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 14px rgba(8,145,178,0.3); transition: all 0.15s; }
+.btn-run:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(8,145,178,0.4); }
+
+/* ── 3-column layout ── */
+.analysis-grid { display: grid; grid-template-columns: 280px 1fr 300px; gap: 20px; overflow: hidden; }
+
+/* ── Left: Product info ── */
+.product-panel { padding: 20px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
+.product-header { text-align: center; padding-bottom: 14px; border-bottom: 1px solid rgba(8,145,178,0.1); }
+.product-thumb { width: 80px; height: 80px; border-radius: 16px; background: linear-gradient(135deg, rgba(8,145,178,0.15), rgba(6,182,212,0.1)); border: 2px solid rgba(255,255,255,0.7); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 32px; }
+.product-name { font-size: 15px; font-weight: 700; color: var(--text-1); }
+.product-cat { font-size: 11px; color: var(--teal); background: var(--teal-soft); border: 1px solid rgba(6,182,212,0.2); border-radius: 20px; padding: 3px 10px; display: inline-block; margin-top: 5px; }
+.info-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(8,145,178,0.06); }
+.info-row:last-child { border-bottom: none; }
+.info-key { font-size: 12px; color: var(--text-3); }
+.info-val { font-size: 12px; font-weight: 600; color: var(--text-1); }
+
+/* ── Center: AI chat ── */
+.ai-chat { padding: 0; display: flex; flex-direction: column; overflow: hidden; }
+.chat-header { padding: 18px 22px 14px; border-bottom: 1px solid rgba(8,145,178,0.08); display: flex; align-items: center; gap: 10px; }
+.ai-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #0891b2, #22d3ee); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 3px rgba(8,145,178,0.15), 0 0 15px rgba(8,145,178,0.2); }
+.ai-avatar svg { color: white; }
+.ai-name-wrap { flex: 1; }
+.ai-name { font-size: 14px; font-weight: 700; color: var(--text-1); }
+.ai-status { font-size: 11px; color: var(--green); display: flex; align-items: center; gap: 4px; }
+.status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: blink 2s ease-in-out infinite; }
+@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+.chat-body { flex: 1; padding: 18px 22px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+.chat-body::-webkit-scrollbar { width: 4px; }
+.chat-body::-webkit-scrollbar-track { background: transparent; }
+.chat-body::-webkit-scrollbar-thumb { background: rgba(8,145,178,0.2); border-radius: 2px; }
+
+.msg { display: flex; gap: 10px; }
+.msg-user { flex-direction: row-reverse; }
+.msg-bubble { max-width: 85%; padding: 12px 16px; border-radius: 16px; font-size: 13px; line-height: 1.6; }
+.msg-ai .msg-bubble { background: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.7); color: var(--text-1); border-radius: 4px 16px 16px 16px; }
+.msg-user .msg-bubble { background: linear-gradient(135deg, rgba(8,145,178,0.15), rgba(6,182,212,0.1)); border: 1px solid rgba(8,145,178,0.2); color: var(--text-1); border-radius: 16px 4px 16px 16px; }
+.msg-icon { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+.msg-ai .msg-icon { background: linear-gradient(135deg, #0891b2, #22d3ee); color: white; }
+.msg-user .msg-icon { background: linear-gradient(135deg, #334155, #475569); color: white; }
+
+.thinking-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; }
+.thinking-dots { display: flex; gap: 4px; }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); animation: think 1.2s ease-in-out infinite; }
+.dot:nth-child(2) { animation-delay: 0.2s; }
+.dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes think { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
+.thinking-text { font-size: 12px; color: var(--text-3); }
+
+/* AI 分析块 */
+.ai-section { background: rgba(8,145,178,0.04); border: 1px solid rgba(8,145,178,0.1); border-radius: 14px; padding: 14px 16px; margin-top: 6px; }
+.ai-section-title { font-size: 12px; font-weight: 700; color: var(--teal); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.ai-section p { font-size: 12.5px; color: var(--text-1); line-height: 1.7; }
+
+.swot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+.swot-item { padding: 10px 12px; border-radius: 10px; }
+.sw-s { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.15); }
+.sw-w { background: rgba(244,63,94,0.06); border: 1px solid rgba(244,63,94,0.12); }
+.sw-o { background: rgba(8,145,178,0.06); border: 1px solid rgba(8,145,178,0.12); }
+.sw-t { background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.12); }
+.swot-label { font-size: 10px; font-weight: 700; margin-bottom: 4px; }
+.sw-s .swot-label { color: var(--green); }
+.sw-w .swot-label { color: var(--red); }
+.sw-o .swot-label { color: var(--teal); }
+.sw-t .swot-label { color: var(--amber); }
+.swot-item p { font-size: 11.5px; color: var(--text-1); line-height: 1.5; }
+
+.chat-input { padding: 14px 22px; border-top: 1px solid rgba(8,145,178,0.08); display: flex; gap: 10px; }
+.input-box { flex: 1; display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.55); border: 1px solid rgba(255,255,255,0.75); border-radius: 14px; padding: 10px 16px; }
+.input-box input { flex: 1; border: none; background: none; outline: none; font-size: 13px; color: var(--text-1); font-family: inherit; }
+.input-box input::placeholder { color: var(--text-3); }
+.send-btn { width: 38px; height: 38px; border-radius: 12px; background: linear-gradient(135deg, #0891b2, #06b6d4); border: none; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(8,145,178,0.3); transition: all 0.15s; flex-shrink: 0; }
+.send-btn:hover { transform: scale(1.05); }
+
+/* ── Right: Scores ── */
+.score-panel { padding: 20px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
+.score-title { font-size: 13px; font-weight: 700; color: var(--text-1); margin-bottom: 4px; }
+
+/* Radial score */
+.radial-wrap { text-align: center; padding: 16px; background: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.6); border-radius: 16px; }
+.radial-label { font-size: 11px; color: var(--text-3); margin-bottom: 8px; }
+.big-score { font-size: 52px; font-weight: 800; background: linear-gradient(135deg, #0891b2, #06b6d4, #22d3ee); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1; }
+.big-score-lbl { font-size: 12px; color: var(--text-2); margin-top: 4px; }
+.score-circle-sub { display: flex; justify-content: space-around; margin-top: 12px; }
+.circle-item { text-align: center; }
+.circle-val { font-size: 20px; font-weight: 700; color: var(--text-1); }
+.circle-lbl { font-size: 10px; color: var(--text-3); }
+
+/* Dimension scores */
+.dim-item { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.dim-lbl { font-size: 12px; color: var(--text-2); width: 60px; flex-shrink: 0; }
+.dim-bar { flex: 1; height: 6px; background: rgba(8,145,178,0.08); border-radius: 3px; overflow: hidden; }
+.dim-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--teal), var(--teal-sky)); }
+.dim-val { font-size: 12px; font-weight: 600; color: var(--teal); width: 28px; text-align: right; }
+
+/* Risk -->
+.risk-item { display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px; background: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.6); border-radius: 12px; margin-bottom: 8px; }
+.risk-dot { width: 7px; height: 7px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+.r-low { background: var(--green); }
+.r-mid { background: var(--amber); }
+.r-high { background: var(--red); }
+.risk-text { font-size: 12px; color: var(--text-1); line-height: 1.5; }
+
+/* Recommendation */
+.rec-badge { display: flex; align-items: center; gap: 10px; padding: 14px 16px; background: linear-gradient(135deg, rgba(8,145,178,0.10), rgba(6,182,212,0.06)); border: 1px solid rgba(8,145,178,0.18); border-radius: 14px; }
+.rec-icon { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #0891b2, #06b6d4); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.rec-icon svg { color: white; }
+.rec-text { font-size: 13px; font-weight: 700; color: var(--teal); }
+.rec-sub { font-size: 11px; color: var(--text-2); margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<!-- AI background -->
+<div class="ai-bg">
+  <div class="particle p1"></div>
+  <div class="particle p2"></div>
+  <div class="particle p3"></div>
+</div>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-logo"><svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2v-4M9 21H5a2 2 0 01-2-2v-4m0 0h18"/></svg></div>
+  <div class="nav-item" title="仪表盘"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
+  <div class="nav-item" title="趋势发现"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/></svg></div>
+  <div class="nav-item active" title="AI分析"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></div>
+  <div class="nav-item" title="选品看板"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2"/></svg></div>
+  <div class="nav-item" title="Agent任务"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 2a2 2 0 012 2v2a2 2 0 01-2 2 2 2 0 01-2-2V4a2 2 0 012-2z"/></svg></div>
+  <div class="sidebar-spacer"></div>
+  <div class="nav-item" title="设置"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></div>
+</aside>
+
+<main class="main">
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>AI 深度分析</h1>
+      <p>MiniMax M2.5 驱动 · A-B-C 选品方法论</p>
+    </div>
+    <div class="topbar-actions">
+      <div class="product-select">
+        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/></svg>
+        无线蓝牙耳机 TWS Pro
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="#7aafc8" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <button class="btn-run">
+        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        重新分析
+      </button>
+    </div>
+  </div>
+
+  <!-- 3-col analysis -->
+  <div class="analysis-grid">
+    <!-- Left: product info -->
+    <div class="gc product-panel">
+      <div class="product-header">
+        <div class="product-thumb">🎧</div>
+        <div class="product-name">无线蓝牙耳机 TWS Pro</div>
+        <div class="product-cat">电子配件</div>
+      </div>
+      <div class="info-row"><span class="info-key">市场价格带</span><span class="info-val">$28 – $65</span></div>
+      <div class="info-row"><span class="info-key">7日趋势涨幅</span><span class="info-val" style="color:var(--green)">+234%</span></div>
+      <div class="info-row"><span class="info-key">竞争指数</span><span class="info-val" style="color:var(--green)">低</span></div>
+      <div class="info-row"><span class="info-key">TikTok播放量</span><span class="info-val">580k+</span></div>
+      <div class="info-row"><span class="info-key">Reddit讨论</span><span class="info-val">热议中</span></div>
+      <div class="info-row"><span class="info-key">Google趋势</span><span class="info-val">上升期</span></div>
+      <div class="info-row"><span class="info-key">FB广告密度</span><span class="info-val" style="color:var(--green)">低</span></div>
+      <div class="info-row"><span class="info-key">分析时间</span><span class="info-val">03-17 14:32</span></div>
+    </div>
+
+    <!-- Center: AI chat -->
+    <div class="gc ai-chat">
+      <div class="chat-header">
+        <div class="ai-avatar"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></div>
+        <div class="ai-name-wrap">
+          <div class="ai-name">RADAR AI · MiniMax M2.5</div>
+          <div class="ai-status"><span class="status-dot"></span>分析完成</div>
+        </div>
+        <div style="font-size:11px;color:var(--text-3)">A-B-C 方法论</div>
+      </div>
+
+      <div class="chat-body">
+        <!-- User -->
+        <div class="msg msg-user">
+          <div class="msg-icon">张</div>
+          <div class="msg-bubble">请对「无线蓝牙耳机 TWS Pro」进行完整的市场机会分析，包括 SWOT 和选品建议。</div>
+        </div>
+
+        <!-- AI response -->
+        <div class="msg msg-ai">
+          <div class="msg-icon"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4"/></svg></div>
+          <div style="flex:1">
+            <div class="msg-bubble">
+              根据 A-B-C 选品方法论，我对该商品完成了多维度深度分析：
+            </div>
+            <div class="ai-section" style="margin-top:10px">
+              <div class="ai-section-title"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/></svg> 市场机会判断（A 层）</div>
+              <p>TWS 无线耳机当前处于<strong>爆发期前夕</strong>，TikTok 同类视频在过去 7 天播放量增长 234%，Reddit r/BudgetAudiophile 版块出现 12 个相关高赞帖。Google Trends 搜索指数从 42 升至 89（+112%），关键词「wireless earbuds under $50」月均搜索量 <strong>180k+</strong>。</p>
+            </div>
+            <div class="ai-section" style="margin-top:8px">
+              <div class="ai-section-title"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg> SWOT 分析（B 层）</div>
+              <div class="swot-grid">
+                <div class="swot-item sw-s"><div class="swot-label">S 优势</div><p>需求快速增长，社媒热度高，利润空间 40-60%</p></div>
+                <div class="swot-item sw-w"><div class="swot-label">W 劣势</div><p>质量差异化大，退货率需管控，品控要求高</p></div>
+                <div class="swot-item sw-o"><div class="swot-label">O 机会</div><p>蓝牙5.3+ANC组合卖点尚未饱和，细分切入口大</p></div>
+                <div class="swot-item sw-t"><div class="swot-label">T 威胁</div><p>大卖家将在 4-6 周内跟进，窗口期约 8 周</p></div>
+              </div>
+            </div>
+            <div class="ai-section" style="margin-top:8px">
+              <div class="ai-section-title"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> 选品决策建议（C 层）</div>
+              <p><strong style="color:var(--green)">综合评级：强烈推荐（94分）</strong><br>建议<strong>立即切入</strong>，选择 ANC 主动降噪+蓝牙5.3 的差异化规格，定价区间 $35–$49，目标平台 TikTok Shop + Amazon。建议库存首批 200-500 件，8 周内完成第一轮流量测试。</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Thinking -->
+        <div class="thinking-row">
+          <div class="thinking-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+          <div class="thinking-text">AI 正在生成竞品对比数据...</div>
+        </div>
+      </div>
+
+      <div class="chat-input">
+        <div class="input-box">
+          <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="#7aafc8" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>
+          <input type="text" placeholder="继续提问：如何定价？竞品有哪些？供应商在哪？">
+        </div>
+        <button class="send-btn">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Right: scores -->
+    <div class="gc score-panel">
+      <div class="score-title">AI 综合评分</div>
+      <div class="radial-wrap">
+        <div class="radial-label">RADAR AI 选品评分</div>
+        <div class="big-score">94</div>
+        <div class="big-score-lbl">/ 100 · 强烈推荐</div>
+        <div class="score-circle-sub">
+          <div class="circle-item"><div class="circle-val" style="color:var(--green)">低</div><div class="circle-lbl">竞争度</div></div>
+          <div class="circle-item"><div class="circle-val">87%</div><div class="circle-lbl">置信度</div></div>
+          <div class="circle-item"><div class="circle-val" style="color:var(--green)">8周</div><div class="circle-lbl">窗口期</div></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="score-title" style="margin-bottom:12px">维度分析</div>
+        <div class="dim-item"><span class="dim-lbl">趋势热度</span><div class="dim-bar"><div class="dim-fill" style="width:94%"></div></div><span class="dim-val">94</span></div>
+        <div class="dim-item"><span class="dim-lbl">利润空间</span><div class="dim-bar"><div class="dim-fill" style="width:82%"></div></div><span class="dim-val">82</span></div>
+        <div class="dim-item"><span class="dim-lbl">竞争程度</span><div class="dim-bar"><div class="dim-fill" style="width:28%;background:linear-gradient(90deg,#10b981,#34d399)"></div></div><span class="dim-val" style="color:var(--green)">28</span></div>
+        <div class="dim-item"><span class="dim-lbl">社媒热度</span><div class="dim-bar"><div class="dim-fill" style="width:90%"></div></div><span class="dim-val">90</span></div>
+        <div class="dim-item"><span class="dim-lbl">供应链</span><div class="dim-bar"><div class="dim-fill" style="width:75%"></div></div><span class="dim-val">75</span></div>
+      </div>
+
+      <div>
+        <div class="score-title" style="margin-bottom:10px">风险提示</div>
+        <div class="risk-item"><div class="risk-dot r-low"></div><div class="risk-text">当前竞争密度低，大卖家尚未大规模跟进</div></div>
+        <div class="risk-item"><div class="risk-dot r-mid"></div><div class="risk-text">品控风险中等，建议严格筛选工厂</div></div>
+        <div class="risk-item"><div class="risk-dot r-mid"></div><div class="risk-text">窗口期约 8 周，需快速决策</div></div>
+        <div class="risk-item"><div class="risk-dot r-low"></div><div class="risk-text">物流成本可控，适合空运首批</div></div>
+      </div>
+
+      <div class="rec-badge">
+        <div class="rec-icon"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div><div class="rec-text">强烈推荐立即切入</div><div class="rec-sub">最佳时间窗口 · 高置信度</div></div>
+      </div>
+    </div>
+  </div>
+</main>
+</body>
+</html>

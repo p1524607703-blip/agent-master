@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-from __future__ import annotations
 """
 视频/音频转录 + AI 总结 → Obsidian 笔记
 

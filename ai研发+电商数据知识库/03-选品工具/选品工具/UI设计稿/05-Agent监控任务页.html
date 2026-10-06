@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent 监控 — RADAR AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --teal: #0891b2; --teal-light: #06b6d4; --teal-sky: #22d3ee;
+  --teal-soft: rgba(6,182,212,0.12); --teal-glow: rgba(8,145,178,0.2);
+  --green: #10b981; --amber: #f59e0b; --red: #f43f5e; --purple: #8b5cf6;
+  --text-1: #0c2340; --text-2: #3d6b8a; --text-3: #7aafc8;
+  --glass-bg: rgba(255,255,255,0.45); --glass-border: rgba(255,255,255,0.65);
+  --glass-shadow: 0 8px 32px rgba(8,145,178,0.10), 0 1px 0 rgba(255,255,255,0.9) inset;
+  --radius: 20px;
+}
+body {
+  font-family: 'Inter', 'PingFang SC', system-ui, sans-serif;
+  background: linear-gradient(145deg, #c2ebff 0%, #ddf3fc 30%, #eefbff 55%, #d8f2fb 80%, #bae6ff 100%);
+  min-height: 100vh; display: flex; color: var(--text-1); position: relative; overflow: hidden;
+}
+
+/* ── Real-time scan lines ── */
+.scan-bg { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.scan-line { position: absolute; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(6,182,212,0.08), transparent); animation: scan 8s linear infinite; }
+.scan-line:nth-child(1) { animation-delay: 0s; }
+.scan-line:nth-child(2) { animation-delay: 2.5s; }
+.scan-line:nth-child(3) { animation-delay: 5s; }
+@keyframes scan { from { top: -1px; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } to { top: 100%; opacity: 0; } }
+.hud-orb { position: absolute; border-radius: 50%; filter: blur(80px); }
+.ho1 { width: 500px; height: 300px; background: radial-gradient(ellipse, rgba(6,182,212,0.12), transparent 70%); top: -60px; right: 10%; }
+.ho2 { width: 400px; height: 400px; background: radial-gradient(ellipse, rgba(8,145,178,0.08), transparent 70%); bottom: -80px; left: 5%; }
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 200px; min-height: 100vh;
+  background: rgba(255,255,255,0.50); backdrop-filter: blur(30px) saturate(200%); -webkit-backdrop-filter: blur(30px) saturate(200%);
+  border-right: 1px solid rgba(255,255,255,0.65);
+  display: flex; flex-direction: column;
+  position: fixed; left: 0; top: 0; bottom: 0; z-index: 100;
+}
+.sb-logo { padding: 20px 18px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(8,145,178,0.08); }
+.logo-icon { width: 38px; height: 38px; background: linear-gradient(135deg, #0891b2, #06b6d4, #22d3ee); border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(8,145,178,0.3); }
+.logo-icon svg { color: white; }
+.logo-text { font-size: 15px; font-weight: 800; color: var(--text-1); }
+.logo-sub { font-size: 10px; color: var(--text-3); }
+.sb-nav { padding: 12px 10px; flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.sb-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; cursor: pointer; color: var(--text-3); font-size: 13px; font-weight: 500; transition: all 0.15s; }
+.sb-item:hover { background: rgba(8,145,178,0.06); color: var(--text-2); }
+.sb-item.active { background: linear-gradient(135deg, rgba(8,145,178,0.14), rgba(6,182,212,0.1)); color: var(--teal); }
+.sb-item svg { color: inherit; }
+.sb-badge { margin-left: auto; font-size: 10px; padding: 1px 7px; border-radius: 10px; font-weight: 600; background: rgba(244,63,94,0.12); color: var(--red); border: 1px solid rgba(244,63,94,0.2); }
+.sb-badge-teal { margin-left: auto; font-size: 10px; padding: 1px 7px; border-radius: 10px; font-weight: 600; background: var(--teal-soft); color: var(--teal); border: 1px solid rgba(6,182,212,0.2); }
+.sb-footer { padding: 14px 16px; border-top: 1px solid rgba(8,145,178,0.08); display: flex; align-items: center; gap: 10px; }
+.sb-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #0891b2, #22d3ee); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: white; }
+.sb-user-name { font-size: 13px; font-weight: 600; color: var(--text-1); }
+.sb-user-plan { font-size: 10px; color: var(--teal); }
+
+/* ── Main ── */
+.main { margin-left: 200px; flex: 1; padding: 28px 32px; position: relative; z-index: 1; display: flex; flex-direction: column; gap: 20px; overflow: hidden; height: 100vh; }
+
+/* ── Glass ── */
+.gc { background: var(--glass-bg); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border: 1px solid var(--glass-border); border-radius: var(--radius); box-shadow: var(--glass-shadow); }
+
+/* ── Topbar ── */
+.topbar { display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.topbar-left h1 { font-size: 22px; font-weight: 700; }
+.topbar-left p { font-size: 13px; color: var(--text-2); margin-top: 3px; }
+.topbar-right { display: flex; gap: 10px; align-items: center; }
+.live-badge { display: flex; align-items: center; gap: 6px; padding: 7px 14px; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); border-radius: 12px; font-size: 12px; font-weight: 600; color: var(--green); }
+.live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse-live 2s ease-in-out infinite; }
+@keyframes pulse-live { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.3); opacity: 0.7; } }
+.btn-glass { display: flex; align-items: center; gap: 6px; padding: 8px 14px; background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--glass-border); border-radius: 11px; font-size: 12px; font-weight: 600; color: var(--text-2); cursor: pointer; transition: all 0.15s; }
+.btn-glass:hover { color: var(--teal); }
+.btn-add { display: flex; align-items: center; gap: 6px; padding: 8px 16px; background: linear-gradient(135deg, #0891b2, #06b6d4); border: none; border-radius: 11px; font-size: 12px; font-weight: 600; color: white; cursor: pointer; box-shadow: 0 4px 14px rgba(8,145,178,0.3); transition: all 0.15s; }
+.btn-add:hover { transform: translateY(-1px); }
+
+/* ── HUD status row ── */
+.hud-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; flex-shrink: 0; }
+.hud-card { padding: 16px 18px; position: relative; overflow: hidden; }
+.hud-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; border-radius: 20px 20px 0 0; }
+.hud-running::before { background: linear-gradient(90deg, var(--teal), var(--teal-sky)); }
+.hud-success::before { background: linear-gradient(90deg, var(--green), #34d399); }
+.hud-waiting::before { background: linear-gradient(90deg, var(--amber), #fbbf24); }
+.hud-error::before { background: linear-gradient(90deg, var(--red), #fb7185); }
+.hud-total::before { background: linear-gradient(90deg, var(--purple), #a78bfa); }
+.hud-label { font-size: 11px; color: var(--text-3); margin-bottom: 6px; }
+.hud-val { font-size: 26px; font-weight: 800; }
+.hud-running .hud-val { color: var(--teal); }
+.hud-success .hud-val { color: var(--green); }
+.hud-waiting .hud-val { color: var(--amber); }
+.hud-error .hud-val { color: var(--red); }
+.hud-total .hud-val { color: var(--purple); }
+.hud-sub { font-size: 10px; color: var(--text-3); margin-top: 4px; }
+.hud-pulse { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); width: 10px; height: 10px; border-radius: 50%; }
+.hp-run { background: var(--teal); animation: pulse-live 1.5s ease-in-out infinite; }
+.hp-idle { background: rgba(8,145,178,0.2); }
+
+/* ── Main content ── */
+.content-row { display: grid; grid-template-columns: 1fr 340px; gap: 20px; flex: 1; overflow: hidden; }
+
+/* ── Task list ── */
+.task-list-wrap { padding: 20px; overflow: hidden; display: flex; flex-direction: column; }
+.tl-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-shrink: 0; }
+.tl-title { font-size: 14px; font-weight: 700; }
+.tl-tabs { display: flex; gap: 4px; background: rgba(8,145,178,0.06); padding: 3px; border-radius: 10px; }
+.tl-tab { font-size: 11px; padding: 5px 12px; border-radius: 7px; cursor: pointer; color: var(--text-3); font-weight: 500; transition: all 0.15s; }
+.tl-tab.active { background: white; color: var(--teal); box-shadow: 0 1px 4px rgba(8,145,178,0.12); }
+
+.task-items { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+.task-items::-webkit-scrollbar { width: 4px; }
+.task-items::-webkit-scrollbar-track { background: transparent; }
+.task-items::-webkit-scrollbar-thumb { background: rgba(8,145,178,0.15); border-radius: 2px; }
+
+.task-item { padding: 14px 16px; background: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.6); border-radius: 16px; transition: all 0.15s; }
+.task-item:hover { background: rgba(255,255,255,0.6); transform: translateX(2px); }
+.task-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.task-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 16px; }
+.ti-scan { background: linear-gradient(135deg, rgba(8,145,178,0.15), rgba(6,182,212,0.1)); }
+.ti-ai { background: linear-gradient(135deg, rgba(139,92,246,0.15), rgba(167,139,250,0.1)); }
+.ti-alert { background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(251,191,36,0.1)); }
+.ti-report { background: rgba(16,185,129,0.12); }
+.task-name { font-size: 13px; font-weight: 700; color: var(--text-1); flex: 1; }
+.task-status { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+.ts-run { background: rgba(8,145,178,0.1); color: var(--teal); border: 1px solid rgba(8,145,178,0.18); }
+.ts-done { background: rgba(16,185,129,0.1); color: var(--green); border: 1px solid rgba(16,185,129,0.18); }
+.ts-wait { background: rgba(245,158,11,0.1); color: var(--amber); border: 1px solid rgba(245,158,11,0.18); }
+.ts-err { background: rgba(244,63,94,0.1); color: var(--red); border: 1px solid rgba(244,63,94,0.18); }
+.status-pulse { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.sp-run { background: var(--teal); animation: pulse-live 1.5s ease-in-out infinite; }
+.sp-done { background: var(--green); }
+.sp-wait { background: var(--amber); }
+.sp-err { background: var(--red); }
+
+.task-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.meta-item { font-size: 11px; color: var(--text-3); display: flex; align-items: center; gap: 4px; }
+.meta-item svg { color: var(--text-3); }
+
+.prog-wrap { position: relative; }
+.prog-bar { height: 5px; background: rgba(8,145,178,0.08); border-radius: 3px; overflow: hidden; }
+.prog-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--teal), var(--teal-sky)); transition: width 0.5s ease; }
+.prog-fill.fill-done { background: linear-gradient(90deg, var(--green), #34d399); }
+.prog-fill.fill-err { background: linear-gradient(90deg, var(--red), #fb7185); }
+.prog-label { position: absolute; right: 0; top: -18px; font-size: 10px; font-weight: 700; color: var(--teal); }
+
+/* ── Right: Log stream ── */
+.log-panel { padding: 20px; display: flex; flex-direction: column; }
+.log-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-shrink: 0; }
+.log-title { font-size: 13px; font-weight: 700; }
+.log-clear { font-size: 11px; color: var(--text-3); cursor: pointer; }
+.log-clear:hover { color: var(--teal); }
+.log-stream { flex: 1; overflow-y: auto; font-size: 11.5px; font-family: 'JetBrains Mono', 'Cascadia Code', 'Consolas', monospace; line-height: 1.8; }
+.log-stream::-webkit-scrollbar { width: 3px; }
+.log-stream::-webkit-scrollbar-thumb { background: rgba(8,145,178,0.15); border-radius: 2px; }
+.log-line { display: flex; gap: 8px; padding: 2px 0; }
+.log-time { color: var(--text-3); flex-shrink: 0; width: 52px; }
+.log-lvl { flex-shrink: 0; width: 38px; font-weight: 700; }
+.lvl-info { color: var(--teal); }
+.lvl-ok { color: var(--green); }
+.lvl-warn { color: var(--amber); }
+.lvl-err { color: var(--red); }
+.log-msg { color: var(--text-1); flex: 1; }
+
+/* Typing cursor -->
+.cursor { display: inline-block; width: 7px; height: 12px; background: var(--teal); border-radius: 1px; animation: blink-cur 1s step-end infinite; vertical-align: text-bottom; }
+@keyframes blink-cur { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+/* ── Queue sidebar ── */
+.queue-section { flex-shrink: 0; margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(8,145,178,0.08); }
+.queue-title { font-size: 12px; font-weight: 700; color: var(--text-2); margin-bottom: 10px; }
+.queue-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.6); border-radius: 10px; margin-bottom: 6px; }
+.queue-num { width: 20px; height: 20px; border-radius: 6px; background: rgba(8,145,178,0.08); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: var(--teal); flex-shrink: 0; }
+.queue-name { font-size: 11.5px; color: var(--text-1); flex: 1; }
+.queue-eta { font-size: 10px; color: var(--text-3); }
+</style>
+</head>
+<body>
+
+<!-- Real-time scan bg -->
+<div class="scan-bg">
+  <div class="scan-line"></div>
+  <div class="scan-line"></div>
+  <div class="scan-line"></div>
+  <div class="hud-orb ho1"></div>
+  <div class="hud-orb ho2"></div>
+</div>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="logo-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2v-4M9 21H5a2 2 0 01-2-2v-4m0 0h18"/></svg></div>
+    <div><div class="logo-text">RADAR AI</div><div class="logo-sub">选品雷达</div></div>
+  </div>
+  <div class="sb-nav">
+    <div class="sb-item"><svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>仪表盘</div>
+    <div class="sb-item"><svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/></svg>趋势发现</div>
+    <div class="sb-item"><svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4"/></svg>AI深度分析</div>
+    <div class="sb-item"><svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/></svg>选品看板<span class="sb-badge-teal">64</span></div>
+    <div class="sb-item active"><svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 2a2 2 0 012 2v2a2 2 0 01-2 2 2 2 0 01-2-2V4a2 2 0 012-2z"/><path d="M12 8v4m0 0l-2 2m2-2l2 2M6 20a2 2 0 01-2-2v-2a2 2 0 012-2 2 2 0 012 2v2a2 2 0 01-2 2zm12 0a2 2 0 01-2-2v-2a2 2 0 012-2 2 2 0 012 2v2a2 2 0 01-2 2z"/></svg>Agent任务<span class="sb-badge">3</span></div>
+    <div style="height:1px;background:rgba(8,145,178,0.08);margin:10px 12px"></div>
+    <div class="sb-item"><svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg>预警中心<span class="sb-badge">47</span></div>
+    <div class="sb-item"><svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>设置</div>
+  </div>
+  <div class="sb-footer">
+    <div class="sb-avatar">张</div>
+    <div><div class="sb-user-name">张老板</div><div class="sb-user-plan">Pro 会员</div></div>
+  </div>
+</aside>
+
+<main class="main">
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>Agent 监控中心</h1>
+      <p>实时追踪所有自动化任务 · 上次刷新 0s 前</p>
+    </div>
+    <div class="topbar-right">
+      <div class="live-badge"><div class="live-dot"></div>实时监控中</div>
+      <button class="btn-glass"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>刷新</button>
+      <button class="btn-add"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>新建任务</button>
+    </div>
+  </div>
+
+  <!-- HUD stats -->
+  <div class="hud-row">
+    <div class="gc hud-card hud-running">
+      <div class="hud-pulse hp-run"></div>
+      <div class="hud-label">运行中</div>
+      <div class="hud-val">3</div>
+      <div class="hud-sub">活跃任务</div>
+    </div>
+    <div class="gc hud-card hud-success">
+      <div class="hud-label">今日完成</div>
+      <div class="hud-val">28</div>
+      <div class="hud-sub">成功率 93.3%</div>
+    </div>
+    <div class="gc hud-card hud-waiting">
+      <div class="hud-label">队列等待</div>
+      <div class="hud-val">5</div>
+      <div class="hud-sub">预计 12min</div>
+    </div>
+    <div class="gc hud-card hud-error">
+      <div class="hud-pulse hp-idle" style="background:rgba(244,63,94,0.3)"></div>
+      <div class="hud-label">失败</div>
+      <div class="hud-val">2</div>
+      <div class="hud-sub">需要检查</div>
+    </div>
+    <div class="gc hud-card hud-total">
+      <div class="hud-label">总任务数</div>
+      <div class="hud-val">38</div>
+      <div class="hud-sub">本月累计</div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content-row">
+    <!-- Task list -->
+    <div class="gc task-list-wrap">
+      <div class="tl-header">
+        <div class="tl-title">任务列表</div>
+        <div class="tl-tabs">
+          <div class="tl-tab active">全部</div>
+          <div class="tl-tab">运行中</div>
+          <div class="tl-tab">已完成</div>
+          <div class="tl-tab">失败</div>
+        </div>
+      </div>
+      <div class="task-items">
+        <!-- Task 1: Running -->
+        <div class="task-item">
+          <div class="task-top">
+            <div class="task-icon ti-scan">🔍</div>
+            <div class="task-name">全平台趋势扫描 · 第 3 轮</div>
+            <div class="task-status ts-run"><div class="status-pulse sp-run"></div>运行中</div>
+          </div>
+          <div class="task-meta">
+            <div class="meta-item"><svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>TikTok · Reddit · Google</div>
+            <div class="meta-item"><svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>已运行 4m 32s</div>
+            <div class="meta-item">扫描 1,284 / 2,000 商品</div>
+          </div>
+          <div class="prog-wrap">
+            <div class="prog-label">64%</div>
+            <div class="prog-bar"><div class="prog-fill" style="width:64%"></div></div>
+          </div>
+        </div>
+
+        <!-- Task 2: Running -->
+        <div class="task-item">
+          <div class="task-top">
+            <div class="task-icon ti-ai">🤖</div>
+            <div class="task-name">批量 AI 深度分析 · 23 件商品</div>
+            <div class="task-status ts-run"><div class="status-pulse sp-run"></div>运行中</div>
+          </div>
+          <div class="task-meta">
+            <div class="meta-item"><svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>MiniMax M2.5</div>
+            <div class="meta-item"><svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>已运行 2m 18s</div>
+            <div class="meta-item">已完成 14 / 23 件</div>
+          </div>
+          <div class="prog-wrap">
+            <div class="prog-label">61%</div>
+            <div class="prog-bar"><div class="prog-fill" style="width:61%"></div></div>
+          </div>
+        </div>
+
+        <!-- Task 3: Running -->
+        <div class="task-item">
+          <div class="task-top">
+            <div class="task-icon ti-alert">🔔</div>
+            <div class="task-name">预警规则检测 · 实时监控</div>
+            <div class="task-status ts-run"><div class="status-pulse sp-run"></div>运行中</div>
+          </div>
+          <div class="task-meta">
+            <div class="meta-item">47 条规则 · 1284 商品</div>
+            <div class="meta-item"><svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>持续运行 2h 14m</div>
+          </div>
+          <div class="prog-wrap">
+            <div class="prog-label">持续</div>
+            <div class="prog-bar"><div class="prog-fill" style="width:100%;animation:scan-prog 2s linear infinite"></div></div>
+          </div>
+        </div>
+
+        <!-- Task 4: Done -->
+        <div class="task-item" style="opacity:0.75">
+          <div class="task-top">
+            <div class="task-icon ti-report">📊</div>
+            <div class="task-name">日报生成 · 2026-03-17</div>
+            <div class="task-status ts-done"><div class="status-pulse sp-done"></div>已完成</div>
+          </div>
+          <div class="task-meta">
+            <div class="meta-item">覆盖 23 个推荐商品</div>
+            <div class="meta-item"><svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>耗时 1m 8s</div>
+            <div class="meta-item" style="color:var(--green)">✓ 已推送飞书</div>
+          </div>
+          <div class="prog-wrap">
+            <div class="prog-label" style="color:var(--green)">100%</div>
+            <div class="prog-bar"><div class="prog-fill fill-done" style="width:100%"></div></div>
+          </div>
+        </div>
+
+        <!-- Task 5: Error -->
+        <div class="task-item" style="border-color:rgba(244,63,94,0.15)">
+          <div class="task-top">
+            <div class="task-icon" style="background:rgba(244,63,94,0.1);font-size:16px">⚠️</div>
+            <div class="task-name">Facebook 广告抓取 · 批次 #7</div>
+            <div class="task-status ts-err"><div class="status-pulse sp-err"></div>失败</div>
+          </div>
+          <div class="task-meta">
+            <div class="meta-item" style="color:var(--red)">Apify API 超时 (30s)</div>
+            <div class="meta-item"><svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>14:28 失败</div>
+            <div class="meta-item" style="color:var(--teal);cursor:pointer">→ 点击重试</div>
+          </div>
+          <div class="prog-wrap">
+            <div class="prog-label" style="color:var(--red)">38%</div>
+            <div class="prog-bar"><div class="prog-fill fill-err" style="width:38%"></div></div>
+          </div>
+        </div>
+
+        <!-- Task 6: Waiting -->
+        <div class="task-item" style="opacity:0.65">
+          <div class="task-top">
+            <div class="task-icon" style="background:rgba(245,158,11,0.1);font-size:16px">⏳</div>
+            <div class="task-name">Reddit 竞品分析 · 批次 #2</div>
+            <div class="task-status ts-wait"><div class="status-pulse sp-wait"></div>等待中</div>
+          </div>
+          <div class="task-meta">
+            <div class="meta-item">排队第 3 位</div>
+            <div class="meta-item">预计 8 分钟后开始</div>
+          </div>
+          <div class="prog-wrap">
+            <div class="prog-label" style="color:var(--amber)">-</div>
+            <div class="prog-bar"><div class="prog-fill" style="width:0%"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Log panel -->
+    <div class="gc" style="padding:20px;display:flex;flex-direction:column;overflow:hidden">
+      <div class="log-header">
+        <div class="log-title">实时日志流</div>
+        <div class="log-clear">清空</div>
+      </div>
+      <div class="log-stream" style="flex:1;overflow-y:auto">
+        <div class="log-line"><span class="log-time">14:35:42</span><span class="log-lvl lvl-info">INFO</span><span class="log-msg">TikTok Scanner: 处理 batch #64 (50 items)</span></div>
+        <div class="log-line"><span class="log-time">14:35:41</span><span class="log-lvl lvl-ok">OK</span><span class="log-msg">AI Analysis: 无线耳机 TWS → 94分 ✓</span></div>
+        <div class="log-line"><span class="log-time">14:35:40</span><span class="log-lvl lvl-info">INFO</span><span class="log-msg">Google Trends: 获取 keyword[earbuds] → +112%</span></div>
+        <div class="log-line"><span class="log-time">14:35:38</span><span class="log-lvl lvl-ok">OK</span><span class="log-msg">Alert Engine: 检测到预警 #47 → LED美甲灯</span></div>
+        <div class="log-line"><span class="log-time">14:35:35</span><span class="log-lvl lvl-info">INFO</span><span class="log-msg">Reddit Scraper: r/BudgetAudio → 12 posts</span></div>
+        <div class="log-line"><span class="log-time">14:35:33</span><span class="log-lvl lvl-ok">OK</span><span class="log-msg">AI Analysis: 宠物饮水机 → 82分 ✓</span></div>
+        <div class="log-line"><span class="log-time">14:35:30</span><span class="log-lvl lvl-warn">WARN</span><span class="log-msg">Facebook API: rate limit 80% → 降速</span></div>
+        <div class="log-line"><span class="log-time">14:35:28</span><span class="log-lvl lvl-info">INFO</span><span class="log-msg">TikTok Scanner: batch #63 done (50/50)</span></div>
+        <div class="log-line"><span class="log-time">14:35:25</span><span class="log-lvl lvl-ok">OK</span><span class="log-msg">AI Analysis: LED美甲灯 → 88分 ✓</span></div>
+        <div class="log-line"><span class="log-time">14:35:22</span><span class="log-lvl lvl-err">ERR</span><span class="log-msg">Apify FB Scraper: timeout after 30s ✗</span></div>
+        <div class="log-line"><span class="log-time">14:35:20</span><span class="log-lvl lvl-info">INFO</span><span class="log-msg">Alert Engine: 规则扫描 1,247 / 1,284</span></div>
+        <div class="log-line"><span class="log-time">14:35:18</span><span class="log-lvl lvl-ok">OK</span><span class="log-msg">日报生成完成 → 已推送飞书 ✓</span></div>
+        <div class="log-line"><span class="log-time">14:35:15</span><span class="log-lvl lvl-info">INFO</span><span class="log-msg">MiniMax M2.5: 初始化 batch 分析 #14</span></div>
+        <div class="log-line"><span class="log-time">14:35:12</span><span class="log-lvl lvl-info">INFO</span><span class="log-msg">TikTok Scanner: 进度 1,284/2,000 (64%)<span class="cursor"></span></span></div>
+      </div>
+
+      <!-- Queue -->
+      <div class="queue-section">
+        <div class="queue-title">等待队列（5 个任务）</div>
+        <div class="queue-item"><div class="queue-num">1</div><div class="queue-name">Reddit批量抓取 #2</div><div class="queue-eta">~8min</div></div>
+        <div class="queue-item"><div class="queue-num">2</div><div class="queue-name">Google趋势补全扫描</div><div class="queue-eta">~15min</div></div>
+        <div class="queue-item"><div class="queue-num">3</div><div class="queue-name">AI分析 batch #15</div><div class="queue-eta">~22min</div></div>
+      </div>
+    </div>
+  </div>
+</main>
+</body>
+</html>

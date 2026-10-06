@@ -1,0 +1,73 @@
+// Prisma Schema — RADAR AI 选品雷达
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Dev: sqlite | Prod: change to "postgresql" before Railway deploy
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  category    String?
+  priceMin    Float?
+  priceMax    Float?
+  score       Int      @default(0)
+  status      String   @default("watching") // watching | recommended | dropped
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  trendData   TrendData[]
+  alerts      Alert[]
+
+  @@map("products")
+}
+
+model TrendData {
+  id          String   @id @default(cuid())
+  productId   String
+  platform    String   // tiktok | reddit | google | facebook
+  metric      String   // views | mentions | search_volume | ad_count
+  value       Float
+  deltaPercent Float   @default(0)
+  recordedAt  DateTime @default(now())
+
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, platform])
+  @@map("trend_data")
+}
+
+model Alert {
+  id          String   @id @default(cuid())
+  productId   String
+  type        String   // price_drop | surge | competitor | stock
+  message     String
+  severity    String   @default("info") // info | warning | critical
+  isRead      Boolean  @default(false)
+  triggeredAt DateTime @default(now())
+
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, isRead])
+  @@map("alerts")
+}
+
+model AgentTask {
+  id          String   @id @default(cuid())
+  name        String
+  type        String   // scan | ai_analysis | alert_check | report
+  status      String   @default("pending") // pending | running | completed | failed
+  progress    Int      @default(0)
+  result      String?
+  error       String?
+  startedAt   DateTime?
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([status, type])
+  @@map("agent_tasks")
+}

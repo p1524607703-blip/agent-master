@@ -66,11 +66,8 @@ STORE_TO_ACCOUNT = {
     "美国AMS": "AMS",
 }
 
-# ⚠️ 2026-10-05 订正：旧注释写「川鹏当前没有搜索词订阅」是【错误记载】。
-# 实测（probe_pick.js 两次只读探针：2026-09-29 / 2026-10-05）川鹏2号**有**「川鹏 搜索词 30D 日期 Copy」在跑。
-# 当年的 MISSING 是 ag-grid 虚拟滚动只渲染 ~11 行造成的探针误报。config.json 已把它加回 → 4 店各 6 类 = 24 份。
-# 但它仍留在 OPTIONAL 里是【刻意的】：川鹏偶尔会掉这一项，缺了不该让整家店判定「不齐」而整批丢弃。
-# 其余三家继续要求 6 类齐全。
+# 川鹏当前没有搜索词订阅；CPO只要求 campaign / advertised / purchased，
+# 但仍保留广告位与投放一起入 canonical 事实层。其余账户继续要求 6 类齐全。
 OPTIONAL_REPORT_TYPES_BY_STORE = {
     "川鹏2号": {"search_term"},
 }

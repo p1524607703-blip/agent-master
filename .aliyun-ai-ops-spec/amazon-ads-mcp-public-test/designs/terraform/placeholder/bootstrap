@@ -1,2 +1,0 @@
-#!/bin/sh
-printf 'Status: 503 Service Unavailable\r\nContent-Type: application/json\r\n\r\n{"status":"deployment_pending"}'
