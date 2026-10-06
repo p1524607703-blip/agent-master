@@ -18,7 +18,11 @@ const selectedDate = ref(String(route.query.date || ''))
 const loading = ref(true)
 const data = ref<any>({ data_date:'', account_split:false, operators:[], products:[], detailSummary:{}, note:'', me:null })
 const periods = ref<PeriodData>({ daily:[], weekly:[], monthly:[] })
-const adTypes = ['SP','SB','SD','STV'] as const
+const baseAdTypes = ['SP','SB','SD','STV'] as const
+const showDsp = ref(false)
+const visibleAdTypes = computed(() => showDsp.value ? [...baseAdTypes,'DSP'] : [...baseAdTypes])
+const typeGroupColspan = computed(() => visibleAdTypes.value.length)
+const detailColumnCount = computed(() => 9 + visibleAdTypes.value.length * 2)
 
 const reportRangeOptions = [
   { label:'每日', value:'daily' },
@@ -190,6 +194,7 @@ onActivated(() => { if (data.value?.operators?.length) load(false) })
         <div class="detail-badges">
           <span>{{ products.length }} 条产品记录</span>
           <span>{{ data.final_cpo === false ? '存在待补映射/非最终口径' : '完整口径' }}</span>
+          <NButton size="tiny" quaternary @click="showDsp = !showDsp">{{ showDsp ? '收起 DSP' : '展开 DSP' }}</NButton>
         </div>
       </div>
       <div class="detail-wrap">
@@ -199,8 +204,8 @@ onActivated(() => { if (data.value?.operators?.length) load(false) })
               <th rowspan="2" class="sticky-product">产品</th>
               <th rowspan="2">日期</th>
               <th rowspan="2">数据状态</th>
-              <th colspan="4" class="metric-start">广告费用</th>
-              <th colspan="4" class="metric-start">广告单</th>
+              <th :colspan="typeGroupColspan" class="metric-start">广告费用</th>
+              <th :colspan="typeGroupColspan" class="metric-start">广告单</th>
               <th rowspan="2" class="metric-start">总费用</th>
               <th rowspan="2">总广告单</th>
               <th rowspan="2">全部订单</th>
@@ -209,8 +214,8 @@ onActivated(() => { if (data.value?.operators?.length) load(false) })
               <th rowspan="2">TACOS</th>
             </tr>
             <tr>
-              <th v-for="type in adTypes" :key="`spend-${type}`">{{ type }}</th>
-              <th v-for="type in adTypes" :key="`orders-${type}`">{{ type }}</th>
+              <th v-for="type in visibleAdTypes" :key="`spend-${type}`">{{ type }}</th>
+              <th v-for="type in visibleAdTypes" :key="`orders-${type}`">{{ type }}</th>
             </tr>
           </thead>
           <tbody>
@@ -218,8 +223,8 @@ onActivated(() => { if (data.value?.operators?.length) load(false) })
               <td class="sticky-product"><strong>综合情况</strong></td>
               <td>{{ tablePeriod }}</td>
               <td><span class="data-status" :class="{warn:data.final_cpo===false}">{{ data.final_cpo===false ? '非完整口径' : '完整口径' }}</span></td>
-              <td v-for="type in adTypes" :key="`sum-s-${type}`">{{ money(typeTotal('adTypeSpend',type)) }}</td>
-              <td v-for="type in adTypes" :key="`sum-o-${type}`">{{ num(typeTotal('adTypeOrders',type)) }}</td>
+              <td v-for="type in visibleAdTypes" :key="`sum-s-${type}`">{{ money(typeTotal('adTypeSpend',type)) }}</td>
+              <td v-for="type in visibleAdTypes" :key="`sum-o-${type}`">{{ num(typeTotal('adTypeOrders',type)) }}</td>
               <td class="metric-start"><strong>{{ money(detailSummary.spend) }}</strong></td>
               <td>{{ num(detailSummary.adOrders) }}</td>
               <td>{{ num(detailSummary.totalOrders) }}</td>
@@ -231,8 +236,8 @@ onActivated(() => { if (data.value?.operators?.length) load(false) })
               <td class="sticky-product"><strong>{{ product.code }}</strong></td>
               <td>{{ tablePeriod }}</td>
               <td><span class="data-status" :class="{warn:product.dataStatus==='缺业务侧' || product.dataStatus==='部分缺业务侧' || product.dataStatus==='仅业务数据' || product.dataStatus==='缺业务报告'}">{{ product.dataStatus || '有数据' }}</span></td>
-              <td v-for="type in adTypes" :key="`s-${product.code}-${type}`">{{ money(typeValue(product,'adTypeSpend',type)) }}</td>
-              <td v-for="type in adTypes" :key="`o-${product.code}-${type}`">{{ num(typeValue(product,'adTypeOrders',type)) }}</td>
+              <td v-for="type in visibleAdTypes" :key="`s-${product.code}-${type}`">{{ money(typeValue(product,'adTypeSpend',type)) }}</td>
+              <td v-for="type in visibleAdTypes" :key="`o-${product.code}-${type}`">{{ num(typeValue(product,'adTypeOrders',type)) }}</td>
               <td class="metric-start"><strong>{{ money(product.spend) }}</strong></td>
               <td>{{ num(product.adOrders) }}</td>
               <td>{{ num(product.totalOrders) }}</td>
@@ -240,7 +245,7 @@ onActivated(() => { if (data.value?.operators?.length) load(false) })
               <td>{{ ratio(product.roas) }}</td>
               <td>{{ ratio(product.tacos,'%') }}</td>
             </tr>
-            <tr v-if="!products.length"><td colspan="17" class="muted empty-detail">该日期没有本运营组可用的产品级完整数据。</td></tr>
+            <tr v-if="!products.length"><td :colspan="detailColumnCount" class="muted empty-detail">该日期没有本运营组可用的产品级完整数据。</td></tr>
           </tbody>
         </table>
       </div>
