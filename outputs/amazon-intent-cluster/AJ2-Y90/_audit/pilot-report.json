@@ -1,0 +1,213 @@
+{
+  "run_id": "aj2-y90-20260714T234810-0bea2f52",
+  "passed": true,
+  "expected": 100,
+  "valid_records": 100,
+  "schema_valid_rate": 1.0,
+  "critical_issue_count": 0,
+  "general_affected_terms": 3,
+  "batch_audits": [
+    {
+      "batch_id": "pilot-0001",
+      "status": "success",
+      "attempts": [
+        {
+          "cache": "reused"
+        }
+      ]
+    },
+    {
+      "batch_id": "pilot-0002",
+      "status": "success",
+      "attempts": [
+        {
+          "cache": "reused"
+        }
+      ]
+    },
+    {
+      "batch_id": "pilot-0003",
+      "status": "success",
+      "attempts": [
+        {
+          "cache": "reused"
+        }
+      ]
+    },
+    {
+      "batch_id": "pilot-0004",
+      "status": "success",
+      "attempts": [
+        {
+          "cache": "reused"
+        }
+      ]
+    },
+    {
+      "batch_id": "pilot-0005",
+      "status": "success",
+      "attempts": [
+        {
+          "cache": "reused"
+        }
+      ]
+    }
+  ],
+  "critic_audits": [
+    {
+      "batch_id": "critic-pilot-0001",
+      "status": "success",
+      "issue_count": 0,
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "failed",
+          "error": "opencode exit -15: "
+        },
+        {
+          "attempt": 2,
+          "status": "failed",
+          "error": "opencode exit -15: "
+        },
+        {
+          "batch_id": "critic-pilot-0001",
+          "agent": "amazon-intent-critic",
+          "model": "deepseek/deepseek-v4-pro",
+          "duration_seconds": 256.722,
+          "exit_code": 0,
+          "session_ids": [
+            "ses_09bab4918ffeJKVzqMqaCnOlMA"
+          ],
+          "stderr_tail": "",
+          "attempt": 3,
+          "status": "success"
+        }
+      ]
+    },
+    {
+      "batch_id": "critic-pilot-0002",
+      "status": "success",
+      "issue_count": 3,
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "failed",
+          "error": "opencode exit -15: "
+        },
+        {
+          "attempt": 2,
+          "status": "failed",
+          "error": "opencode exit -15: "
+        },
+        {
+          "batch_id": "critic-pilot-0002",
+          "agent": "amazon-intent-critic",
+          "model": "deepseek/deepseek-v4-pro",
+          "duration_seconds": 419.028,
+          "exit_code": 0,
+          "session_ids": [
+            "ses_09bab4a4affegb0gWkkx0sKjvh"
+          ],
+          "stderr_tail": "",
+          "attempt": 3,
+          "status": "success"
+        }
+      ]
+    },
+    {
+      "batch_id": "critic-pilot-0003",
+      "status": "success",
+      "issue_count": 0,
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "failed",
+          "error": "Expecting value: line 1 column 1 (char 0)"
+        },
+        {
+          "batch_id": "critic-pilot-0003",
+          "agent": "amazon-intent-critic",
+          "model": "deepseek/deepseek-v4-pro",
+          "duration_seconds": 443.529,
+          "exit_code": 0,
+          "session_ids": [
+            "ses_09ba530e5ffezBSUjwA47M2Idk"
+          ],
+          "stderr_tail": "",
+          "attempt": 2,
+          "status": "success"
+        }
+      ]
+    },
+    {
+      "batch_id": "critic-pilot-0004",
+      "status": "success",
+      "issue_count": 0,
+      "attempts": [
+        {
+          "batch_id": "critic-pilot-0004",
+          "agent": "amazon-intent-critic",
+          "model": "deepseek/deepseek-v4-pro",
+          "duration_seconds": 132.988,
+          "exit_code": 0,
+          "session_ids": [
+            "ses_09ba4e81effeQvVogauDYCpxVt"
+          ],
+          "stderr_tail": "",
+          "attempt": 1,
+          "status": "success"
+        }
+      ]
+    },
+    {
+      "batch_id": "critic-pilot-0005",
+      "status": "success",
+      "issue_count": 0,
+      "attempts": [
+        {
+          "batch_id": "critic-pilot-0005",
+          "agent": "amazon-intent-critic",
+          "model": "deepseek/deepseek-v4-pro",
+          "duration_seconds": 98.855,
+          "exit_code": 0,
+          "session_ids": [
+            "ses_09ba2df9cffeSz8JKzBtNjnWMe"
+          ],
+          "stderr_tail": "",
+          "attempt": 1,
+          "status": "success"
+        }
+      ]
+    }
+  ],
+  "critic_cache_reused": true,
+  "issues": [
+    {
+      "term_id": "c6ba9c33c7c75696",
+      "severity": "general",
+      "code": "suboptimal_routing",
+      "field": "routing_action",
+      "message": "搜索词含未识别成分flack，首要问题是歧义而非商品清单缺口，路由应为ambiguity_review",
+      "phase": "pilot",
+      "batch_id": "critic-pilot-0002"
+    },
+    {
+      "term_id": "819886fc61bbe5e8",
+      "severity": "general",
+      "code": "suboptimal_routing",
+      "field": "routing_action",
+      "message": "搜索词含未识别品牌/拼写getoeu，首要问题是歧义而非商品清单缺口，路由应为ambiguity_review",
+      "phase": "pilot",
+      "batch_id": "critic-pilot-0002"
+    },
+    {
+      "term_id": "8b49ffcf3da5fe89",
+      "severity": "general",
+      "code": "weakly_supported_inference",
+      "field": "capability_intent",
+      "message": "shock_absorption仅由recovery一词单步推理得出，recovery更直接指向缓冲/支撑而非减震，推理链过长证据偏弱",
+      "phase": "pilot",
+      "batch_id": "critic-pilot-0002"
+    }
+  ]
+}

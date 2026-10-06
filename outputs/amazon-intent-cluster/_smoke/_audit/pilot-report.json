@@ -1,0 +1,23 @@
+{
+  "run_id": "aj2-y90-20260714T233319-fe69482f",
+  "passed": false,
+  "expected": 1,
+  "valid_records": 0,
+  "schema_valid_rate": 0.0,
+  "critical_issue_count": 0,
+  "general_affected_terms": 0,
+  "batch_audits": [
+    {
+      "batch_id": "pilot-0001",
+      "status": "failed",
+      "attempts": [
+        {
+          "attempt": 1,
+          "error": "opencode exit 1: "
+        }
+      ]
+    }
+  ],
+  "critic_audits": [],
+  "issues": []
+}

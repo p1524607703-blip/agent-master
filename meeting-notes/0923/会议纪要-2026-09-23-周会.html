@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>2026-09-23 周会纪要</title>
+<style>
+:root {
+  --bg:#f6f7f9; --panel:#fff; --ink:#1a1d21; --ink2:#5b6472; --ink3:#8b95a5;
+  --line:#e4e7ec; --line2:#eef0f3; --accent:#c0392b; --accent-bg:#fdf2f0;
+  --blue:#1d6fd0; --blue-bg:#eff5fd; --green:#1f8a55; --green-bg:#eef8f2;
+  --amber:#a8720a; --amber-bg:#fdf6e7; --grey-bg:#f3f4f6;
+}
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--ink);
+  font:15px/1.75 -apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  -webkit-font-smoothing:antialiased; }
+.wrap { max-width:1080px; margin:0 auto; padding:0 24px 80px; }
+header { background:linear-gradient(180deg,#fff 0%,#fbfcfd 100%); border-bottom:1px solid var(--line);
+  padding:40px 0 28px; }
+.eyebrow { font-size:12px; letter-spacing:.14em; color:var(--accent); font-weight:700;
+  text-transform:uppercase; margin-bottom:10px; }
+h1 { font-size:30px; margin:0 0 18px; letter-spacing:-.02em; }
+.meta { display:flex; flex-wrap:wrap; gap:8px; }
+.pill { background:var(--grey-bg); border:1px solid var(--line); color:var(--ink2);
+  font-size:12.5px; padding:5px 11px; border-radius:999px; }
+.pill b { color:var(--ink); font-weight:600; }
+.tldr { background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--accent);
+  border-radius:10px; padding:20px 22px; margin:28px 0; }
+.tldr .lbl { font-size:11.5px; letter-spacing:.1em; color:var(--accent); font-weight:700;
+  text-transform:uppercase; margin-bottom:8px; }
+.tldr p { margin:0; font-size:16px; line-height:1.8; }
+nav { position:sticky; top:0; z-index:20; background:rgba(246,247,249,.94);
+  backdrop-filter:blur(10px); border-bottom:1px solid var(--line); padding:10px 0; margin-bottom:28px; }
+nav a { color:var(--ink2); text-decoration:none; font-size:13px; padding:5px 10px;
+  border-radius:6px; display:inline-block; }
+nav a:hover { background:var(--grey-bg); color:var(--ink); }
+h2 { font-size:20px; margin:44px 0 16px; padding-bottom:10px;
+  border-bottom:1px solid var(--line); letter-spacing:-.01em; }
+h2 .em { color:var(--accent); }
+.card { background:var(--panel); border:1px solid var(--line); border-radius:12px;
+  padding:16px 18px; margin-bottom:12px; }
+.dec { background:var(--panel); border:1px solid var(--line); border-radius:12px;
+  padding:15px 18px; margin-bottom:10px; }
+.dec-h { display:flex; align-items:baseline; gap:10px; margin-bottom:5px; }
+.num { font-size:11px; font-weight:700; color:var(--accent); background:var(--accent-bg);
+  border-radius:5px; padding:2px 7px; flex:none; }
+.dec-t { font-size:15.5px; font-weight:650; }
+.dec-b { color:var(--ink2); font-size:14.5px; }
+.why { color:var(--ink3); font-size:13px; margin-top:6px; padding-left:12px;
+  border-left:2px solid var(--line); }
+table { width:100%; border-collapse:collapse; background:var(--panel);
+  border:1px solid var(--line); border-radius:12px; overflow:hidden; font-size:14.5px; }
+th { background:#fafbfc; text-align:left; font-weight:600; font-size:12.5px;
+  color:var(--ink2); letter-spacing:.04em; padding:11px 14px; border-bottom:1px solid var(--line); }
+td { padding:12px 14px; border-bottom:1px solid var(--line2); vertical-align:top; }
+tr:last-child td { border-bottom:none; }
+.tid { color:var(--ink3); font-size:12px; width:34px; }
+.who { white-space:nowrap; color:var(--blue); font-weight:600; font-size:13px; width:80px; }
+.note { color:var(--ink3); font-size:13px; }
+tr.p-high .tid { color:var(--accent); font-weight:700; }
+.sec { background:var(--panel); border:1px solid var(--line); border-radius:12px;
+  padding:20px 22px 22px; margin-bottom:16px; }
+.sec h3 { font-size:17px; margin:0 0 14px; display:flex; align-items:center;
+  gap:10px; flex-wrap:wrap; }
+.sno { font-size:12px; color:var(--accent); background:var(--accent-bg);
+  padding:2px 8px; border-radius:5px; font-weight:700; }
+.who-tag { font-size:12px; color:var(--ink2); background:var(--grey-bg);
+  padding:3px 9px; border-radius:999px; font-weight:500; margin-left:auto; }
+.blk { margin-bottom:16px; }
+.blk:last-child { margin-bottom:0; }
+.blk-t { font-size:13.5px; font-weight:650; color:var(--ink); margin-bottom:7px; }
+.blk ul { margin:0; padding-left:20px; }
+.blk li { margin-bottom:6px; color:#2b3038; }
+.blk li b { color:var(--ink); font-weight:650; }
+code { background:var(--grey-bg); border:1px solid var(--line2); border-radius:4px;
+  padding:1px 5px; font-size:12.5px; font-family:"SF Mono",Menlo,monospace; }
+.quote { margin:0 0 16px; padding:14px 18px; background:var(--blue-bg);
+  border-left:3px solid var(--blue); border-radius:0 8px 8px 0; color:#173a63;
+  font-size:15px; font-style:italic; }
+.chip { display:inline-flex; align-items:center; gap:6px; background:var(--panel);
+  border:1px solid var(--line); border-radius:999px; padding:5px 12px; margin:0 6px 8px 0;
+  font-size:13px; }
+.bad { color:var(--ink3); text-decoration:line-through; }
+.arrow { color:var(--accent); font-weight:700; }
+.good { color:var(--green); font-weight:650; }
+.ut { font-weight:600; color:var(--amber); white-space:nowrap; }
+details { background:var(--panel); border:1px solid var(--line); border-radius:12px;
+  padding:4px 18px; }
+summary { cursor:pointer; font-weight:650; padding:14px 0; font-size:15px;
+  list-style:none; display:flex; align-items:center; gap:8px; }
+summary::-webkit-details-marker { display:none; }
+summary::before { content:"▸"; color:var(--accent); transition:transform .18s; display:inline-block; }
+details[open] summary::before { transform:rotate(90deg); }
+.tl { display:flex; gap:14px; padding:4px 0; border-bottom:1px dashed var(--line2);
+  font-size:14px; }
+.tl:last-child { border-bottom:none; }
+.ts { color:var(--ink3); font-family:"SF Mono",Menlo,monospace; font-size:12px;
+  flex:none; padding-top:3px; }
+.tx { color:#2b3038; }
+.tr-box { max-height:620px; overflow-y:auto; padding:6px 0 16px; }
+footer { color:var(--ink3); font-size:12.5px; text-align:center; padding-top:32px; }
+.warn { background:var(--amber-bg); border:1px solid #f0e0b8; border-radius:10px;
+  padding:14px 18px; color:#6b4a10; font-size:14px; margin-bottom:16px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="eyebrow">Meeting Minutes</div>
+    <h1>2026-09-23 周会纪要</h1>
+    <div class="meta">
+      <span class="pill">日期 <b>2026-09-23 09:59</b></span>
+      <span class="pill">时长 <b>41 分 31 秒</b></span>
+      <span class="pill">转写片段 <b>825</b></span>
+      <span class="pill">素材 微信语音 · 39 MB · AAC 48kHz 立体声</span>
+      <span class="pill">引擎 mlx-whisper large-v3-turbo（本地推理，用时 4 分 10 秒）</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="tldr">
+    <div class="lbl">一句话总结</div>
+    <p>四线并行：技术侧在「把数据打通」，业务侧在「把广告做细」，视觉侧在「把品牌做统一」，管理侧在「把能力沉淀成流程」。全场的核心矛盾只有一个 —— <b>数据怎么自动、合规、可持续地流进来</b>。</p>
+  </div>
+
+  <div class="warn">
+    <b>发言人识别说明：</b>本机未做声纹分离（Whisper 不输出 speaker label）。
+    文中的【负责人】【A·数据与系统】【B·广告与运营】【C·视觉与知识库】是<b>按发言内容推断</b>的，
+    非机器判定，请人工核对后再对外引用。
+  </div>
+
+  <nav>
+    <div class="wrap" style="padding:0 24px;"><a href="#s1">4.1 广告数据中台</a>
+<a href="#s2">4.2 管理侧定调</a>
+<a href="#s3">4.3 广告诊断 / DSP / 费用分摊</a>
+<a href="#s4">4.4 视觉 / 图片生成 / 知识库</a>
+<a href="#s5">4.5 新增方向：品牌视觉统一（未来一个月主线）</a></div>
+  </nav>
+
+  <h2>二 · 决议事项（已拍板）</h2>
+  <div class="dec"><div class="dec-h"><span class="num">01</span><span class="dec-t">分组表不新建</span></div><div class="dec-b">直接对接现有绩效系统里已有的那张表</div><div class="why">该表变更不多；双头维护必然导致两边对不上</div></div>
+<div class="dec"><div class="dec-h"><span class="num">02</span><span class="dec-t">DSP 投在自己账号里</span></div><div class="dec-b">不走服务商渠道</div><div class="why">① 数据沉淀在对方，不合作就访问不了；② 自家账号里 DSP 与广告数据打通更顺；③ 摸索出的方法易被对方复制</div></div>
+<div class="dec"><div class="dec-h"><span class="num">03</span><span class="dec-t">费用分摊按归因</span></div><div class="dec-b">谁受益谁分摊</div><div class="why">投 A 款但 30% 成交出在 B 款 → B 款也要分摊。大方向运营已同意，比例细节后续再谈</div></div>
+<div class="dec"><div class="dec-h"><span class="num">04</span><span class="dec-t">口径不变，加一层视图</span></div><div class="dec-b">底层仍是 SalesSKU / ASIN，新增「款式级」表</div><div class="why">小组级那张表要保留（每月费用分摊要用）</div></div>
+<div class="dec"><div class="dec-h"><span class="num">05</span><span class="dec-t">知识库用 GitHub</span></div><div class="dec-b">不用付费仓库</div><div class="why">对比后 GitHub 更合适</div></div>
+<div class="dec"><div class="dec-h"><span class="num">06</span><span class="dec-t">知识库前期先用起来</span></div><div class="dec-b">不急于出规范</div><div class="why">先让大家熟悉，后续再流程化</div></div>
+<div class="dec"><div class="dec-h"><span class="num">07</span><span class="dec-t">视觉规范统一到「系列级」</span></div><div class="dec-b">不是统一到品牌级</div><div class="why">不同产品线可以用不同主色调</div></div>
+<div class="dec"><div class="dec-h"><span class="num">08</span><span class="dec-t">研究新形式 > 修修补补</span></div><div class="dec-b">广告活动数量在 AI 加持下不再是限制</div><div class="why">可以做得很细，一条大链接几十到几百个活动各有作用</div></div>
+<div class="dec"><div class="dec-h"><span class="num">09</span><span class="dec-t">预算拆小多开</span></div><div class="dec-b">大预算 → 小额多活动</div><div class="why">原 $100–200 起步 → 一天 $15 开 20 个，总额相近但更可控</div></div>
+
+  <h2>三 · 待办清单</h2>
+  <table>
+    <thead><tr><th>#</th><th>待办</th><th>责任人</th><th>备注 / 阻塞</th></tr></thead>
+    <tbody><tr class="p-high"><td class="tid">1</td><td>做「分摊到款式级」的表，从现有数据导出给运营</td><td class="who">A / B</td><td class="note">复用同一份数据，避免多系统各维护一份</td></tr>
+<tr class="p-high"><td class="tid">2</td><td>补齐 79 个测试广告的效果结论与优化建议</td><td class="who">B</td><td class="note">报告已出，效果与建议还在 VI 那边</td></tr>
+<tr class="p-mid"><td class="tid">3</td><td>验证 Codex 多账号代理/中转通路（阿里云日本站）</td><td class="who">A</td><td class="note">先跑通链路再谈部署</td></tr>
+<tr class="p-mid"><td class="tid">4</td><td>摸清 AMC / AWS 数据链路：能否不用外链、账号如何确认</td><td class="who">A</td><td class="note">有外链跳转，不敢直接放进资料里试</td></tr>
+<tr class="p-mid"><td class="tid">5</td><td>图片生成网页管理员界面上线，放提示词给运营用</td><td class="who">C</td><td class="note">后续新增模块走管理流程加入</td></tr>
+<tr class="p-mid"><td class="tid">6</td><td>研究品牌视觉规范（色彩/字体/页面），几周内出初稿</td><td class="who">C</td><td class="note">定位为未来一个月主线</td></tr>
+<tr class="p-low"><td class="tid">7</td><td>Logo 优化：字体风格不大改，只优化比例 + 颜色适配</td><td class="who">C</td><td class="note">需适配长条 / 方形 / 圆形</td></tr>
+<tr class="p-low"><td class="tid">8</td><td>补写品牌故事（Brand Story）</td><td class="who">C</td><td class="note">现状：为了卖货弄了个商标，没有故事</td></tr>
+<tr class="p-mid"><td class="tid">9</td><td>建个人草稿库 + 公司共享库两级 GitHub 知识库</td><td class="who">C</td><td class="note">每周整理一次再上传</td></tr>
+<tr class="p-mid"><td class="tid">10</td><td>研究团队级知识库的共享与检索方案（本地 vs 云端）</td><td class="who">全员</td><td class="note">Obsidian 同步是存到它自己云端；本地部署共享是难点</td></tr>
+<tr class="p-low"><td class="tid">11</td><td>确定 skills 优先级排序 + AGENTS.md 技能分级</td><td class="who">全员</td><td class="note">区分团队首要技能与个人需要技能</td></tr></tbody>
+  </table>
+
+  <h2>四 · 分板块详情</h2>
+  <section class="sec" id="s1"><h3><span class="sno">4.1</span>广告数据中台<span class="who-tag">【A · 数据与系统】</span></h3><div class="blk"><div class="blk-t">✅ 已完成</div><ul><li>数据库<b>已搭好并接入控制台</b>，后端 <b>FastAPI</b>，基本由 AI 维护。</li><li>映射链条理清：<b>子ASIN → 父ASIN → 运营组</b>。其中 <b>子ASIN → 运营组</b> 是<b>唯一可确定</b>的边。</li><li>仍有零星分不清的（举例 <b>W2030</b> 这类 ASIN）在慢慢调整 —— ⚠️ 与本地已知的 <code>B0DTK7FK2M</code> 被 1 条自指错标行污染成 <code>mixed_parent</code> 的问题<b>高度疑似同一件事</b>。</li><li><b>CPO 计算</b>：按广告类型分类后计算，对数据库脚本压力不大。</li></ul></div><div class="blk"><div class="blk-t">📌 关于分组表的口径决定（重要）</div><ul><li>A 建议<b>不要自己再建一套分组表</b>，直接用公司<b>现有绩效系统</b>里已有的那张表 → <b>已拍板</b>。</li><li>原因链：运营自己创建并<b>认领 Seller SKU</b>；公司算绩效时<b>也是按 SKU 落到小组</b>（每组卖多少、利润多少、花了多少费用）。</li><li>让现有表与中台对接即可，该表变更不多，避免「这个系统维护一次、那个系统再维护一次 → 对不上」。</li></ul></div><div class="blk"><div class="blk-t">🆕 本周新增</div><ul><li>做了一套 <b>DSP 分析链</b>模板。⚠️ 会上提到「之前分析成 <b>W8K</b> 了，实际上是 <b>W8K2</b>」（款号存疑），<b>W8K2 刚做完一份，数据还没上传</b>。</li></ul></div><div class="blk"><div class="blk-t">🔍 待验证：数据获取链路</div><ul><li>A 发现 <b>Codex 上可以连到 AWS 上的分析平台</b>（结合后文「AMC 容器」，疑似 <b>Amazon Marketing Cloud</b>），但会<b>跳出一个外链</b>，出于安全考虑<b>不敢直接放进资料里试</b>。</li><li>会上共识：<b>核心问题就是「数据怎么获取」</b> —— 走 API，还是走某种桥接？AWS 数据分析链路与 GPT 之间「肯定是有桥接的」。</li><li><b>唯一待验证项</b>：账户确认（确认账户后第三方应该能打通）。</li><li>【负责人】结论：<b>终极形态是 AI 直接从广告账户取数</b> —— 但取决于亚马逊广告平台到底开放哪些接口。</li></ul></div><div class="blk"><div class="blk-t">🔧 AI 工具链 / 代理方案</div><ul><li><b>方案一（自家）</b>：阿里云<b>日本站服务器</b>做中转 → 代理接入 Codex 客户端 → 再分发给各处。</li><li><b>方案二（同行演示）</b>：<b>20x 账号</b>装在虚拟机上做<b>中转站</b>；一个账号对应一个中转站 + 独立隧道/代理；在 Codex 客户端里<b>选择中转站</b>再启动 Codex，即可正常使用 GPT 的 token。</li><li><b>多账号轮换</b>：某账号触达上限进入「冷静期」时，<b>切到另一个中转账户接着用</b>；公司层面理论上<b>两三个账号循环就够</b>。可统计每个用户消耗多少 token。负责人点评：「看起来也不是很复杂的样子。」</li><li><b>风险点</b>：新开账户目前<b>买不到 20 倍套餐</b>（已下架）；存在一定的<b>代理风险</b>。</li><li><b>IP 分流疑虑已澄清</b>：实际用户都在<b>日本站的电脑</b>上，出口 IP 很稳定，甚至能<b>绕开翻墙影响</b>，国内可正常访问。</li><li><b>A 自己的用法</b>：账户级<b>网页端数据</b> + <b>DeepSeek 的 agent</b>，不消耗 token；写代码时用网页端免费流量接入本地数据；<b>多 subagent 并发</b>。「把网页端当 API 用」，中间有一条<b>隧道</b>连到本地，把 agent 的工作流和 <b>skills</b> 全部注入网页端。</li></ul></div></section>
+<section class="sec" id="s2"><h3><span class="sno">4.2</span>管理侧定调<span class="who-tag">【负责人】</span></h3><blockquote class="quote">大家要解决的问题是在于说，当整个团队都要用的时候，就变成一种情况 —— 人手一个 Codex。</blockquote><div class="blk"><div class="blk-t">🎯 三阶段判断</div><ul><li><b>① 现在 = 探索阶段</b>：目标是<b>让大家先用起来</b>。不做各种约束，因为每个人接受程度和使用效果不一样，对 AI 熟悉程度也不够。</li><li><b>② 下一步 = 流程化</b>：真正从业务流程来讲，它是需要流程化的 —— 做什么事、调用哪个 <b>skill</b>、怎么得到结果、结果传到哪。</li><li><b>③ 终局 = 规模化 / SOP</b>：此时<b>账号和 token 必须够多</b>，不能「用着用着就触上限」。</li></ul></div><div class="blk"><div class="blk-t">💸 规模化的代价（真实痛点）</div><ul><li>举例：「让他帮我写一个功能，<b>思考了三十多分钟，卡掉五小时上限</b>。」 → 流程化以后这类等待不可接受。</li></ul></div><div class="blk"><div class="blk-t">🚀 终极形态</div><ul><li>把能力<b>沉淀成一个个 agent</b>（「这个 agent 是做什么功能的」），大家按需调用 → 公司业务流程<b>相对 SOP 化</b>，<b>不再需要人人有账号</b>，也<b>解决了技能沉淀问题</b>。</li><li>更远一步：单一技能之后，可能直接在 AI 里把<b>全流程</b>跑完 —— 例如优化一个广告：从数据分析 → 调整建议 → 调整执行，<b>全在 AI 内完成</b>。</li></ul></div></section>
+<section class="sec" id="s3"><h3><span class="sno">4.3</span>广告诊断 / DSP / 费用分摊<span class="who-tag">【B · 广告与运营】</span></h3><div class="blk"><div class="blk-t">📊 广告诊断</div><ul><li>已跟运营对齐了几个<b>广告媒体</b>和<b>产品广告组</b>的分析；<b>四个账号的口子做了自动更新</b>。</li><li>此前运营做测试的广告<b>共 79 个</b>：<b>川鹏 ~70 多个</b>；<b>洁博利 十几个</b>（⚠️ 转写为「接过率」，比对店铺名单判定，请核对）；其他账号较少（很多测试此前已做过，属复测）。平均<b>每个运营测 5–10 个</b>。</li><li>现状：<b>分析报告基本已出</b>，但<b>效果与建议还在 VI 那边</b>，后面要给运营<b>对应策略</b>。</li></ul></div><div class="blk"><div class="blk-t">💰 DSP</div><ul><li>已摸清怎么投；服务商那边能看到的 <b>P+ 之类，我们这边基本都能看到，也能设置、能操作</b>。</li><li>已在账号里做了<b>功能测试 —— 除了没有点「启用」，其他操作都过了一遍</b>。</li><li>洁博利问能不能投 DSP → 结论：<b>自投，不走服务商</b>（详见决议 2）。</li><li><b>衡量标准很重要</b>：原先账号做到 2 点多的指标就觉得自己优秀，看到别人做到更高，<b>才知道差距在哪</b>。所以外部方案「就看一看」，然后<b>自己也跑一个测试框</b>验证放大效果。</li><li>⚠️ 关键前提：<b>如果 DSP 没有重复计算归因</b>，那就可以<b>放开投</b>；但目前给的金额都比较小，<b>放大效果未知</b>。</li></ul></div><div class="blk"><div class="blk-t">🎯 投放方法论</div><ul><li>以前开广告活动<b>只有几个大类</b>（SP、关键词、自动、大词），往后可以<b>做得很细致</b>。</li><li>对比 AMS 那边的分享，坦言<b>「我们运营这边的广告做得还没那么精细化」</b>。</li><li>精细化后：<b>一条大链接可能有几十到三百个广告活动，每个各有作用</b> → 可以把<b>整体 ROI 往上提</b>。</li><li>所以重点应该是<b>研究新形式</b>，而不是在原有广告上修补。</li></ul></div><div class="blk"><div class="blk-t">🧮 广告费用分摊（本周进展）</div><ul><li>之前的分摊<b>不含 SP</b>，主要是搜索广告；<b>现在把 SP 算进去</b>，并做了<b>「含 SP vs 不含 SP」的花费对比</b>，数据<b>已上传云文档</b>（⚠️ 转写为「英文单」，平台名待核）。价格波动较多，暂时未定论。</li><li><b>待办</b>：分摊目前只到<b>运营 / 小组级别</b>，<b>能否下沉到每个款式</b>？</li><li>动机：运营自己核算单个款式时，「分到款式」更直观。<b>做一条链接时，肯定不是按子ASIN 算，而是按父ASIN 或单个链接/销售组算</b>。</li><li>数据落脚点多为 <b>SalesSKU 或 ASIN</b> —— <b>不改变分摊口径</b>，只是多加一层视图。</li><li>利润算法：销售收入 − 各项费用 = 确切数字；<b>唯一没进系统的就是广告花费</b>（原先靠手动统计，会变、归因时间不同又会变）。</li><li>痛点举例：<b>投的是 A 款，但 30% 成交出在 B 款</b>；<b>B 款自己没投广告，按新分摊法也要分摊</b>。</li><li>更实际的场景：<b>新款转化比不好，广告其实出在成熟链接上</b> → 只看账面会误判「新款广告亏得厉害」，反映不出这个款到底好不好。</li><li><b>结论</b>：增加<b>「分到每个产品集合」</b>的表，<b>仍按月算</b>，但能落到款式。</li></ul></div></section>
+<section class="sec" id="s4"><h3><span class="sno">4.4</span>视觉 / 图片生成 / 知识库<span class="who-tag">【C · 视觉与知识库】</span></h3><div class="blk"><div class="blk-t">🖼️ 图片提示词实测</div><ul><li>用<b>通用图片提示词</b>测试了：<b>童鞋</b>、<b>以前的两款鞋</b>、<b>冬季鞋</b>；结果<b>动态效果不错</b>，已发给对方看。</li><li><b>亚马逊那边的 agent 也可以直接生成</b> —— 图方便可以直接用那边的。</li><li>主要瓶颈：<b>图片等待时间</b>。自建流程（<b>FLUX 那批</b>）也能批量生成很多个，但对时间/吞吐有要求。</li></ul></div><div class="blk"><div class="blk-t">🌐 网页端</div><ul><li>为<b>加快推出</b>做了调整：<b>增加了管理员界面</b>，仍在调整中。</li><li>上线后先<b>把提示词放进去让运营使用</b>；后续<b>新增模块通过管理流程加入</b>。</li></ul></div><div class="blk"><div class="blk-t">📚 知识库方案（重点讨论）</div><ul><li>选型：<b>GitHub vs 付费仓库</b> → <b>GitHub 更合适</b>。</li><li><b>两级结构</b>：每个运营一个<b>个人草稿库</b> + 公司一个<b>整体大库</b>；核验并符合规范后<b>从个人库上传到公司库</b>；需要时（如 Codex 需要某技能）<b>从公司库拉下来用</b>。</li><li><b>Obsidian 的局限</b>：自带同步（Sync）本质是存到它自己的云端仓库；<b>它的双链是「假连接」</b>，各文档之间的链接不是真连接。因此<b>知识库本身没有检索引擎能力</b>，主要充当<b>保存链路仓库</b>。</li><li><b>现状流程</b>：本地用 AI 做一轮 → 生成一个文件 → <b>钉钉上传一份 + 本地存一份</b>。</li><li><b>关键补充</b>：<b>skills 必须有优先级排序</b>；需要一份 <b>AGENTS.md（智能体 MD 文件）</b> 区分<b>团队首要技能</b>与<b>个人需要的技能</b>。单次任务产出很杂乱，要升级为可共用的通用知识库 / skill <b>必须人工维护</b>。流程：每周做好 → 整理成可共用的 → 上传共享库 → 再拉下来。</li><li><b>本地 agent vs web 端</b>：本地 agent <b>每次对话完都会保留一份 MD</b>；<b>web 端做不到</b>（除非走隧道）。负责人：自己的仓库<b>永远只有一个 <code>agent-master</code></b>，不管用 Codex、WorkBuddy 还是 <b>DeepSeek Harness</b>，都回归到这一个本地仓库；仓库里接的是 <b>GitHub 上很火的那位（Karpathy）的三层架构</b>，<code>AGENTS.md</code> 里已定义架构，每次对话产出按架构回填。</li><li>⚠️ 待解问题：<b>「你们俩的知识库没办法互相共享」</b> → Obsidian 有共享方案，但还有没有别的方案，需要再研究。</li><li><b>团队级视角</b>：不管装本地还是装集中，<b>技能最终要能在团队里顺畅流转、能沉淀</b>。目标：「同一个人或同小组做完分析，不需要别人去找他要」→ <b>直接通过 AI 调用</b>。</li><li><b>长期议题：如何给整个公司建一个知识库</b> —— 沉淀一两年后量会很大，慢慢会形成<b>标准 SOP</b>。</li></ul></div></section>
+<section class="sec" id="s5"><h3><span class="sno">4.5</span>新增方向：品牌视觉统一（未来一个月主线）<span class="who-tag">【负责人】→ 交给【C】</span></h3><div class="blk"><div class="blk-t">❗ 问题</div><ul><li>现在每个品牌、每个页面<b>五花八门</b>，设置、字体各式各样。前期没有强约束、让大家自由做，<b>到最终是需要统一起来的</b>。</li></ul></div><div class="blk"><div class="blk-t">📝 任务</div><ul><li><b>花时间研究，逐步做出规范</b>（色彩怎么选、字体、页面设置），以后生成时按规范走；<b>同一产品线的视觉最终形成相对统一的风格</b>。</li><li><b>不要求马上落地</b>，但要<b>花几周有意识往这个方向学</b>。</li><li>背后逻辑：这是<b>视觉影响 / 品牌营销</b>的概念 —— 理解概念后再回来做这些事，<b>就能选出更有影响力的方式</b>。</li></ul></div><div class="blk"><div class="blk-t">🎨 C 的现状与思路</div><ul><li>当前提示词方向：图片生成<b>往「实拍、整体清新明亮」</b>靠。</li><li>每个品牌看有无自身特征 —— <b>新华姐</b>提过 <b>WHITIN</b> 那边可能更多是<b>几何型</b>，<b>logo 要往那个方向靠</b>。</li><li><b>全局视野</b>：除了 <b>A+ 页面</b>，还有 <b>Brand Story</b>、投广告时的 <b>Logo</b>，都要统一到品牌表达上。</li></ul></div><div class="blk"><div class="blk-t">👟 WHITIN 品线现状</div><ul><li>品线较多（<b>涉水/水鞋、四季、宽楦、动物鞋</b> 等，⚠️ 品线名转写存疑），但<b>各品线的视觉不统一</b>。</li><li>目标：<b>根据品线特点 + AI 分析</b>，建议用<b>什么色调、什么 logo 字体</b>，最终各品牌之间能统一/呼应起来。</li></ul></div><div class="blk"><div class="blk-t">🔤 Logo 三条具体要求</div><ul><li><b>风格不能变化太大</b> —— 要与<b>鞋子上的 logo 字体风格保持一致</b>；</li><li><b>比例上借助 AI 重新设计</b>；</li><li><b>适配多形态</b> —— 有的场景是长条、有的是正方形、甚至圆形 → <b>字体保持不变的前提下，通过颜色变化达到显示效果</b>。</li></ul></div><div class="blk"><div class="blk-t">🌈 主色调与品牌故事</div><ul><li><b>主色调</b>：<b>不一定要统一到品牌级，统一到「系列」级即可</b> —— 针对不同产品线用不同主色调。</li><li><b>品牌故事</b>：要能在故事里<b>说服别人</b>。现状坦白：「从我们自己品牌的发展来讲是<b>没有故事</b>的，就是为了卖货弄了一个商标。」从营销角度讲，<b>必须有一个故事在那儿</b>。</li><li>以上作为<b>「接下去一个月，除主要工作之外的方向」</b>。</li></ul></div></section>
+
+  <h2>五 · <span class="em">⚠️ 存疑点</span>（务必人工核对）</h2>
+  <table>
+    <thead><tr><th>转写内容</th><th>问题</th><th>建议</th></tr></thead>
+    <tbody><tr><td class='ut'>埃局解采 / 接过率</td><td>被推测为<b>洁博利</b>，但两处转写差异大，未 100% 确认</td><td class='note'>核对是否确为洁博利，或另有其人/团队</td></tr>
+<tr><td class='ut'>W8K / W8K2</td><td>疑为<b>款号</b>，拼写不确定</td><td class='note'>核对款号全称</td></tr>
+<tr><td class='ut'>W2030</td><td>与已知 <code>B0DTK7FK2M</code> → 应为 <code>W2030J</code>/AJ1 的错标问题<b>疑似同一件事</b></td><td class='note'>核对是否就是那条自指错标行</td></tr>
+<tr><td class='ut'>「英文单」</td><td>云文档平台名识别失败</td><td class='note'>确认是飞书 / 钉钉 / 腾讯文档 / Excel 哪个</td></tr>
+<tr><td class='ut'>「金农座」</td><td>名词识别失败</td><td class='note'>确认指哪个系统/表格</td></tr>
+<tr><td class='ut'>「直言者」</td><td>人名/团队名识别失败</td><td class='note'>确认</td></tr>
+<tr><td class='ut'>「第七个」</td><td>语义不清</td><td class='note'>确认是指第几版/第几步</td></tr>
+<tr><td class='ut'>「空谷门地」</td><td>语义失败</td><td class='note'>听原音频确认</td></tr>
+<tr><td class='ut'>「Tata」</td><td>疑为某个<b>云端笔记/知识库服务</b>或工具简称</td><td class='note'>确认工具名</td></tr>
+<tr><td class='ut'>「四枚刀」</td><td>已按语境改写为 Obsidian <b>Sync</b>，属推测</td><td class='note'>确认</td></tr>
+<tr><td class='ut'>「过来一家」</td><td>语义失败</td><td class='note'>确认</td></tr>
+<tr><td class='ut'>「水旗、四组」</td><td>疑为「涉水/水鞋」「四季」</td><td class='note'>确认品线名</td></tr>
+<tr><td class='ut'>「新华姐」</td><td>人名</td><td class='note'>确认写法</td></tr>
+<tr><td class='ut'>「VI 那边」</td><td>疑为视觉/VI 团队</td><td class='note'>确认是团队还是某个系统</td></tr>
+<tr><td class='ut'>「零一放假」</td><td>已改写为<b>十一放假</b>（结合结尾「马上要过节」）</td><td class='note'>确认</td></tr></tbody>
+  </table>
+
+  <h2>六 · 术语纠错表（机器已自动修正）</h2>
+  <div class="card" style="padding:18px 18px 10px;"><div class="chip"><span class="bad">直A生 / 此A生 / 之A生 / A森</span><span class="arrow">→</span><span class="good">子ASIN</span></div>
+<div class="chip"><span class="bad">副A生</span><span class="arrow">→</span><span class="good">父ASIN</span></div>
+<div class="chip"><span class="bad">印射</span><span class="arrow">→</span><span class="good">映射</span></div>
+<div class="chip"><span class="bad">传门</span><span class="arrow">→</span><span class="good">川鹏（川鹏2号）</span></div>
+<div class="chip"><span class="bad">接过率 / 埃局解采</span><span class="arrow">→</span><span class="good">洁博利（存疑）</span></div>
+<div class="chip"><span class="bad">CPU 的计算</span><span class="arrow">→</span><span class="good">CPO 的计算</span></div>
+<div class="chip"><span class="bad">Divisic / Dithaseek</span><span class="arrow">→</span><span class="good">DeepSeek</span></div>
+<div class="chip"><span class="bad">Deep Thick Harness</span><span class="arrow">→</span><span class="good">DeepSeek Harness</span></div>
+<div class="chip"><span class="bad">Cotex / codec</span><span class="arrow">→</span><span class="good">Codex</span></div>
+<div class="chip"><span class="bad">LockerBody</span><span class="arrow">→</span><span class="good">WorkBuddy</span></div>
+<div class="chip"><span class="bad">冷守一个 Codex</span><span class="arrow">→</span><span class="good">人手一个 Codex</span></div>
+<div class="chip"><span class="bad">Fast API</span><span class="arrow">→</span><span class="good">FastAPI</span></div>
+<div class="chip"><span class="bad">丁丁</span><span class="arrow">→</span><span class="good">钉钉</span></div>
+<div class="chip"><span class="bad">OBSIDI</span><span class="arrow">→</span><span class="good">Obsidian</span></div>
+<div class="chip"><span class="bad">四枚刀 / 四刀</span><span class="arrow">→</span><span class="good">同步（Sync）</span></div>
+<div class="chip"><span class="bad">藏库</span><span class="arrow">→</span><span class="good">仓库</span></div>
+<div class="chip"><span class="bad">flow 那笔</span><span class="arrow">→</span><span class="good">FLUX 那批</span></div>
+<div class="chip"><span class="bad">气图型</span><span class="arrow">→</span><span class="good">几何型</span></div>
+<div class="chip"><span class="bad">无称的字体</span><span class="arrow">→</span><span class="good">无衬线字体</span></div>
+<div class="chip"><span class="bad">广告花费喷摊</span><span class="arrow">→</span><span class="good">广告费用分摊</span></div>
+<div class="chip"><span class="bad">口袍费</span><span class="arrow">→</span><span class="good">广告费</span></div>
+<div class="chip"><span class="bad">亚马军广告牌</span><span class="arrow">→</span><span class="good">亚马逊广告平台</span></div>
+<div class="chip"><span class="bad">零一放假</span><span class="arrow">→</span><span class="good">十一放假</span></div>
+<div class="chip"><span class="bad">STL</span><span class="arrow">→</span><span class="good">Skill</span></div>
+<div class="chip"><span class="bad">Roy 做到死</span><span class="arrow">→</span><span class="good">ROI 做到极致（存疑）</span></div></div>
+
+  <h2>七 · 转写全文（术语修正版）</h2>
+  <details>
+    <summary>展开 825 段带时间戳全文</summary>
+    <div class="tr-box"><div class="tl"><span class="ts">00:00:00</span><span class="tx">我们口头聊一聊,就跟大家讲一下过去一周大家做的事情。</span></div>
+<div class="tl"><span class="ts">00:00:10</span><span class="tx">我这周主要是从数据库接入控制台那边,然后现在的话整体的数据库已经搭好并且连接在控制台上面。</span></div>
+<div class="tl"><span class="ts">00:00:25</span><span class="tx">然后现在就是业务映射的那一方面还是有一点点像之前的话做的比较模糊一点</span></div>
+<div class="tl"><span class="ts">00:00:34</span><span class="tx">现在是从子ASIN映射到父ASIN,父ASIN再到运营组</span></div>
+<div class="tl"><span class="ts">00:00:38</span><span class="tx">然后唯一确定的就是说子ASIN到运营组这个是肯定可以区分出来就是他们对应的那些关系的</span></div>
+<div class="tl"><span class="ts">00:00:50</span><span class="tx">然后就是还会有一些情况像W2030啊</span></div>
+<div class="tl"><span class="ts">00:00:54</span><span class="tx">就是这个这个A森会有分不清的那些那些那些数据还在慢慢调整</span></div>
+<div class="tl"><span class="ts">00:00:59</span><span class="tx">这个这个这个这个先不要做</span></div>
+<div class="tl"><span class="ts">00:01:02</span><span class="tx">就是到时候就是本身这个就是我们在分组的时候</span></div>
+<div class="tl"><span class="ts">00:01:07</span><span class="tx">在我们自己的那个资争系统里面是有这个表</span></div>
+<div class="tl"><span class="ts">00:01:09</span><span class="tx">到时候看这个表怎么对接</span></div>
+<div class="tl"><span class="ts">00:01:11</span><span class="tx">然后那个表其实变更也不太多</span></div>
+<div class="tl"><span class="ts">00:01:14</span><span class="tx">就等于说我们原先里面就比如说这个应该是按照</span></div>
+<div class="tl"><span class="ts">00:01:20</span><span class="tx">就那个sell SKU</span></div>
+<div class="tl"><span class="ts">00:01:22</span><span class="tx">就卖家 SKU</span></div>
+<div class="tl"><span class="ts">00:01:24</span><span class="tx">然后他们自己</span></div>
+<div class="tl"><span class="ts">00:01:25</span><span class="tx">因为自己创建了自己去认领</span></div>
+<div class="tl"><span class="ts">00:01:27</span><span class="tx">认领完其实就等于我们</span></div>
+<div class="tl"><span class="ts">00:01:29</span><span class="tx">因为我们在他们去算绩效的时候</span></div>
+<div class="tl"><span class="ts">00:01:32</span><span class="tx">也是比如一个账号里面很多小组的人一起做</span></div>
+<div class="tl"><span class="ts">00:01:35</span><span class="tx">然后在算绩效的时候</span></div>
+<div class="tl"><span class="ts">00:01:37</span><span class="tx">他们其实也是算了每个 SKU去的</span></div>
+<div class="tl"><span class="ts">00:01:40</span><span class="tx">那就等于知道算了每个小组都去</span></div>
+<div class="tl"><span class="ts">00:01:43</span><span class="tx">比如你这个小组里面卖了多少</span></div>
+<div class="tl"><span class="ts">00:01:44</span><span class="tx">然后产生的利润是多少</span></div>
+<div class="tl"><span class="ts">00:01:46</span><span class="tx">然后他们所花费是多少</span></div>
+<div class="tl"><span class="ts">00:01:49</span><span class="tx">就那个没必要干脆搞一套</span></div>
+<div class="tl"><span class="ts">00:01:51</span><span class="tx">后期有个维护的一个问题</span></div>
+<div class="tl"><span class="ts">00:01:54</span><span class="tx">对那就主要就是说在展示的这一块</span></div>
+<div class="tl"><span class="ts">00:01:58</span><span class="tx">那个是没有问题</span></div>
+<div class="tl"><span class="ts">00:02:00</span><span class="tx">像CPO的计算就是按广告类型分类完以后</span></div>
+<div class="tl"><span class="ts">00:02:04</span><span class="tx">基本的计算对于那个数据库的那些脚本来说</span></div>
+<div class="tl"><span class="ts">00:02:08</span><span class="tx">是会有太大问题的</span></div>
+<div class="tl"><span class="ts">00:02:09</span><span class="tx">后段用的是Fast API</span></div>
+<div class="tl"><span class="ts">00:02:13</span><span class="tx">就是比较快一点的Python的代码写的</span></div>
+<div class="tl"><span class="ts">00:02:16</span><span class="tx">然后基本上是AI在维护这件事情</span></div>
+<div class="tl"><span class="ts">00:02:18</span><span class="tx">然后现在最主要的就是分类情况的场面</span></div>
+<div class="tl"><span class="ts">00:02:23</span><span class="tx">就是ASIN这一块</span></div>
+<div class="tl"><span class="ts">00:02:25</span><span class="tx">然后这周还有做了一个就是DSP的</span></div>
+<div class="tl"><span class="ts">00:02:32</span><span class="tx">一套分析链入下来的一个模板</span></div>
+<div class="tl"><span class="ts">00:02:36</span><span class="tx">然后之前分析成W8K了</span></div>
+<div class="tl"><span class="ts">00:02:41</span><span class="tx">实际上是W8K2的</span></div>
+<div class="tl"><span class="ts">00:02:43</span><span class="tx">然后W8K2的刚又做完了一份</span></div>
+<div class="tl"><span class="ts">00:02:50</span><span class="tx">这个数据还没有上传上面</span></div>
+<div class="tl"><span class="ts">00:02:53</span><span class="tx">然后第三件事就是昨天看了一下</span></div>
+<div class="tl"><span class="ts">00:02:57</span><span class="tx">那个codec上面就是可以</span></div>
+<div class="tl"><span class="ts">00:03:00</span><span class="tx">可以连那个AWS的那个Analysis</span></div>
+<div class="tl"><span class="ts">00:03:04</span><span class="tx">但是它就是有一个链接要跳出来</span></div>
+<div class="tl"><span class="ts">00:03:08</span><span class="tx">我不敢放到那个资料上面</span></div>
+<div class="tl"><span class="ts">00:03:10</span><span class="tx">就是如果能直接分析的话</span></div>
+<div class="tl"><span class="ts">00:03:13</span><span class="tx">就是可能也挺方便的</span></div>
+<div class="tl"><span class="ts">00:03:16</span><span class="tx">就是等于说</span></div>
+<div class="tl"><span class="ts">00:03:18</span><span class="tx">就这里面其实核心点就是这个数据怎么获取的一个问题</span></div>
+<div class="tl"><span class="ts">00:03:22</span><span class="tx">对不对</span></div>
+<div class="tl"><span class="ts">00:03:22</span><span class="tx">就等于说它是</span></div>
+<div class="tl"><span class="ts">00:03:24</span><span class="tx">是等于说是通过API去走</span></div>
+<div class="tl"><span class="ts">00:03:26</span><span class="tx">还是说通过它</span></div>
+<div class="tl"><span class="ts">00:03:27</span><span class="tx">其实比如说它是开了一个</span></div>
+<div class="tl"><span class="ts">00:03:30</span><span class="tx">它就是有办法</span></div>
+<div class="tl"><span class="ts">00:03:33</span><span class="tx">它就是有一个AWS的数据分析的链路和GPT之间肯定是有桥接的</span></div>
+<div class="tl"><span class="ts">00:03:42</span><span class="tx">然后唯一一个代验证的Token项就是你账户的确认</span></div>
+<div class="tl"><span class="ts">00:03:47</span><span class="tx">你只要确认账户引合之三方应该是打通那个装盘</span></div>
+<div class="tl"><span class="ts">00:03:52</span><span class="tx">但是它是账外的链接我不敢放到资料里面去试</span></div>
+<div class="tl"><span class="ts">00:03:57</span><span class="tx">对对包括有时候它有些账外链接它也不会</span></div>
+<div class="tl"><span class="ts">00:04:00</span><span class="tx">那這個到時候當初就有問題</span></div>
+<div class="tl"><span class="ts">00:04:02</span><span class="tx">我們在去討論</span></div>
+<div class="tl"><span class="ts">00:04:04</span><span class="tx">就等於說在這種試驗上面</span></div>
+<div class="tl"><span class="ts">00:04:07</span><span class="tx">其實如果說能夠直接介入AI</span></div>
+<div class="tl"><span class="ts">00:04:10</span><span class="tx">AI可以直接從我們的廣告裡面去</span></div>
+<div class="tl"><span class="ts">00:04:13</span><span class="tx">廣告帳戶裡面去獲取數據</span></div>
+<div class="tl"><span class="ts">00:04:15</span><span class="tx">這肯定是最直接嘛</span></div>
+<div class="tl"><span class="ts">00:04:16</span><span class="tx">比我們去下一份報告來講的話</span></div>
+<div class="tl"><span class="ts">00:04:21</span><span class="tx">可能是會能當</span></div>
+<div class="tl"><span class="ts">00:04:22</span><span class="tx">當然這取決於亞馬軍廣告牌</span></div>
+<div class="tl"><span class="ts">00:04:24</span><span class="tx">到底開放的那些接口</span></div>
+<div class="tl"><span class="ts">00:04:27</span><span class="tx">这个倒数在当初</span></div>
+<div class="tl"><span class="ts">00:04:31</span><span class="tx">昨天又继续了解Codex</span></div>
+<div class="tl"><span class="ts">00:04:35</span><span class="tx">有一个方案我上午提交</span></div>
+<div class="tl"><span class="ts">00:04:41</span><span class="tx">先用Codex买Pro20倍还是5倍的那个</span></div>
+<div class="tl"><span class="ts">00:04:49</span><span class="tx">它是有一定的代理风险</span></div>
+<div class="tl"><span class="ts">00:04:53</span><span class="tx">就是说新开的账户好像是现在没有办法购买20倍的套餐</span></div>
+<div class="tl"><span class="ts">00:04:58</span><span class="tx">对,就是20倍的下架</span></div>
+<div class="tl"><span class="ts">00:05:00</span><span class="tx">然后再上传到应该是要用阿里云的日本站的服务器</span></div>
+<div class="tl"><span class="ts">00:05:07</span><span class="tx">然后再代理接入到Codex++上面去</span></div>
+<div class="tl"><span class="ts">00:05:14</span><span class="tx">然后再中转到各个地方</span></div>
+<div class="tl"><span class="ts">00:05:16</span><span class="tx">然后我自己的电脑上面其实也是类似这样的代理</span></div>
+<div class="tl"><span class="ts">00:05:22</span><span class="tx">因为我是用账户级别的网页端数据</span></div>
+<div class="tl"><span class="ts">00:05:28</span><span class="tx">然后我用的是DeepSeek的agent的智能体</span></div>
+<div class="tl"><span class="ts">00:05:31</span><span class="tx">我个人的话我是不消耗Codex的token</span></div>
+<div class="tl"><span class="ts">00:05:35</span><span class="tx">我一般像我写代码的时候</span></div>
+<div class="tl"><span class="ts">00:05:37</span><span class="tx">我可能也是以网页端免费的流量</span></div>
+<div class="tl"><span class="ts">00:05:41</span><span class="tx">然后接入到本地的数据让他写这个负代码</span></div>
+<div class="tl"><span class="ts">00:05:43</span><span class="tx">然后有多agent</span></div>
+<div class="tl"><span class="ts">00:05:45</span><span class="tx">就是subagent的那个状态</span></div>
+<div class="tl"><span class="ts">00:05:47</span><span class="tx">就是可以数个对话一些病</span></div>
+<div class="tl"><span class="ts">00:05:50</span><span class="tx">并发写的那种情况</span></div>
+<div class="tl"><span class="ts">00:05:53</span><span class="tx">那其实等于你下一周写代码</span></div>
+<div class="tl"><span class="ts">00:05:56</span><span class="tx">它用的是DeepSeek的token</span></div>
+<div class="tl"><span class="ts">00:05:58</span><span class="tx">不用token</span></div>
+<div class="tl"><span class="ts">00:06:00</span><span class="tx">它就是网页端</span></div>
+<div class="tl"><span class="ts">00:06:01</span><span class="tx">就是等于是把它的网页端当一个API</span></div>
+<div class="tl"><span class="ts">00:06:05</span><span class="tx">它中间有个隧道</span></div>
+<div class="tl"><span class="ts">00:06:07</span><span class="tx">隧道可以连接到本地</span></div>
+<div class="tl"><span class="ts">00:06:09</span><span class="tx">然后把DeepSeek的agent的智能体里面有的工作数</span></div>
+<div class="tl"><span class="ts">00:06:14</span><span class="tx">还有技能</span></div>
+<div class="tl"><span class="ts">00:06:14</span><span class="tx">scale</span></div>
+<div class="tl"><span class="ts">00:06:15</span><span class="tx">都可以给它全到那个网页端</span></div>
+<div class="tl"><span class="ts">00:06:18</span><span class="tx">就是在网页端给他接一个手,空谷门地的数据,我个人本地的数据是这么操作的。</span></div>
+<div class="tl"><span class="ts">00:06:24</span><span class="tx">哦,那这个东西,因为现在我觉得大家要解决的问题是在于说,就是当整个团队比大家都要用的时候,就变成一种情况,就人手一个Codex,对不对?</span></div>
+<div class="tl"><span class="ts">00:06:40</span><span class="tx">那这里面其实用起来我觉得它会走向会突发吧</span></div>
+<div class="tl"><span class="ts">00:06:46</span><span class="tx">最终我们现在是属于探索阶段</span></div>
+<div class="tl"><span class="ts">00:06:48</span><span class="tx">当你真正进入了这种大规模应用</span></div>
+<div class="tl"><span class="ts">00:06:53</span><span class="tx">或者其实最终可能会变成SOP的流程</span></div>
+<div class="tl"><span class="ts">00:06:56</span><span class="tx">可能我们做什么事情然后调用一个STL</span></div>
+<div class="tl"><span class="ts">00:06:58</span><span class="tx">然后我们是怎么去做得到什么样的结果</span></div>
+<div class="tl"><span class="ts">00:07:01</span><span class="tx">这个结果传在哪里</span></div>
+<div class="tl"><span class="ts">00:07:02</span><span class="tx">就是这个其实真正从业务的一个流程来讲的话</span></div>
+<div class="tl"><span class="ts">00:07:05</span><span class="tx">它是需要流程化的</span></div>
+<div class="tl"><span class="ts">00:07:07</span><span class="tx">那在当前的阶段,至少还是处于让大家对AI先用起来的阶段</span></div>
+<div class="tl"><span class="ts">00:07:15</span><span class="tx">所以说没有各种约束,因为每个人的接受程度也不一样</span></div>
+<div class="tl"><span class="ts">00:07:19</span><span class="tx">使用的效果对AI熟悉程度也不太够</span></div>
+<div class="tl"><span class="ts">00:07:24</span><span class="tx">所以说第一步其实是让预理大家先用起来</span></div>
+<div class="tl"><span class="ts">00:07:28</span><span class="tx">慢慢的其实我们最终我觉得还是得规划化起来</span></div>
+<div class="tl"><span class="ts">00:07:33</span><span class="tx">规划起来的话,这里面就意味着,可能就是账号</span></div>
+<div class="tl"><span class="ts">00:07:38</span><span class="tx">就是等于说,你得有足够多的,不能够用一用的,这个Token就到上线了</span></div>
+<div class="tl"><span class="ts">00:07:44</span><span class="tx">一个事情做多少,也就是可能就像我昨天,让他帮我去写一个功能</span></div>
+<div class="tl"><span class="ts">00:07:51</span><span class="tx">他思考了三十多分钟,然后卡掉五小时上线,可以等二小时</span></div>
+<div class="tl"><span class="ts">00:07:57</span><span class="tx">这个过程我们就变得每次可当了</span></div>
+<div class="tl"><span class="ts">00:08:00</span><span class="tx">相對來講,那邊朋友的演示來講</span></div>
+<div class="tl"><span class="ts">00:08:05</span><span class="tx">比如說他用的就是20X的帳號</span></div>
+<div class="tl"><span class="ts">00:08:15</span><span class="tx">然後裝在某一個虛擬機上</span></div>
+<div class="tl"><span class="ts">00:08:19</span><span class="tx">就在那邊做了一個中轉帳</span></div>
+<div class="tl"><span class="ts">00:08:22</span><span class="tx">中轉帳就變成你有多少個帳號有多少個中轉帳</span></div>
+<div class="tl"><span class="ts">00:08:27</span><span class="tx">每个帐号都独立的一个加一个隧道也好</span></div>
+<div class="tl"><span class="ts">00:08:31</span><span class="tx">代理也好</span></div>
+<div class="tl"><span class="ts">00:08:32</span><span class="tx">反正就等于说</span></div>
+<div class="tl"><span class="ts">00:08:34</span><span class="tx">Codex 的交加里面可以选每个中等帐</span></div>
+<div class="tl"><span class="ts">00:08:38</span><span class="tx">选完以后</span></div>
+<div class="tl"><span class="ts">00:08:40</span><span class="tx">再通过Codex 交加来去启动Codex</span></div>
+<div class="tl"><span class="ts">00:08:44</span><span class="tx">这样子进去以后</span></div>
+<div class="tl"><span class="ts">00:08:47</span><span class="tx">就是正常又可以用GDP的Token</span></div>
+<div class="tl"><span class="ts">00:08:52</span><span class="tx">但是这个不会有一个账号多分发IP的分流的情况被GPT查封吗?</span></div>
+<div class="tl"><span class="ts">00:08:59</span><span class="tx">不会啊,因为所有的东西,比如这些是用户,比如在日门上的电脑,</span></div>
+<div class="tl"><span class="ts">00:09:06</span><span class="tx">就等于说这些实际的用户是电脑,从日门上的电脑,日门上在电脑,</span></div>
+<div class="tl"><span class="ts">00:09:13</span><span class="tx">所以说这个IP是很稳定的,甚至这种情况它都可以绕开了这种翻墙的影响,</span></div>
+<div class="tl"><span class="ts">00:09:20</span><span class="tx">你只要这个是在国内是可以顺利访问的</span></div>
+<div class="tl"><span class="ts">00:09:23</span><span class="tx">不需要那个</span></div>
+<div class="tl"><span class="ts">00:09:24</span><span class="tx">那现在的话我用我们自己的Path先做测试还是</span></div>
+<div class="tl"><span class="ts">00:09:32</span><span class="tx">对就是等于其实这个我们就接下来先去搞明白</span></div>
+<div class="tl"><span class="ts">00:09:36</span><span class="tx">就是第一等于在这里的路是可以跑得通</span></div>
+<div class="tl"><span class="ts">00:09:39</span><span class="tx">那等于我们比如说是看这个面路到底他怎么去做</span></div>
+<div class="tl"><span class="ts">00:09:42</span><span class="tx">然后在在那里面等于说他还又演示了有一个就是等于说在</span></div>
+<div class="tl"><span class="ts">00:09:47</span><span class="tx">里面可以去多用户去共享的</span></div>
+<div class="tl"><span class="ts">00:09:51</span><span class="tx">就等于说</span></div>
+<div class="tl"><span class="ts">00:09:51</span><span class="tx">就比如说他总共公司</span></div>
+<div class="tl"><span class="ts">00:09:53</span><span class="tx">可能有个数字</span></div>
+<div class="tl"><span class="ts">00:09:54</span><span class="tx">有用这两三个账号</span></div>
+<div class="tl"><span class="ts">00:09:56</span><span class="tx">但是呢</span></div>
+<div class="tl"><span class="ts">00:09:58</span><span class="tx">在那里面他可以看得到</span></div>
+<div class="tl"><span class="ts">00:09:59</span><span class="tx">每个人用的多少消耗的多少账号</span></div>
+<div class="tl"><span class="ts">00:10:01</span><span class="tx">然后就比如说可能</span></div>
+<div class="tl"><span class="ts">00:10:03</span><span class="tx">这个可能他其实用用用</span></div>
+<div class="tl"><span class="ts">00:10:05</span><span class="tx">他也是会出达上限的</span></div>
+<div class="tl"><span class="ts">00:10:07</span><span class="tx">出达上限的时候</span></div>
+<div class="tl"><span class="ts">00:10:08</span><span class="tx">可能他就进入了这个</span></div>
+<div class="tl"><span class="ts">00:10:09</span><span class="tx">就这个中档站</span></div>
+<div class="tl"><span class="ts">00:10:10</span><span class="tx">他进入了那个叫冷静期</span></div>
+<div class="tl"><span class="ts">00:10:12</span><span class="tx">那可能这个时候</span></div>
+<div class="tl"><span class="ts">00:10:13</span><span class="tx">他会有个状态缓回来</span></div>
+<div class="tl"><span class="ts">00:10:15</span><span class="tx">大家可以切换到另一个中档账户就接着用</span></div>
+<div class="tl"><span class="ts">00:10:19</span><span class="tx">就这样子</span></div>
+<div class="tl"><span class="ts">00:10:20</span><span class="tx">就等于说其实理论上可能你在一个公司里面</span></div>
+<div class="tl"><span class="ts">00:10:23</span><span class="tx">可能就两三个账号</span></div>
+<div class="tl"><span class="ts">00:10:25</span><span class="tx">循环的用可能就够了</span></div>
+<div class="tl"><span class="ts">00:10:26</span><span class="tx">而且可以统计说每个用户</span></div>
+<div class="tl"><span class="ts">00:10:29</span><span class="tx">去用了多少那个</span></div>
+<div class="tl"><span class="ts">00:10:31</span><span class="tx">Token</span></div>
+<div class="tl"><span class="ts">00:10:33</span><span class="tx">就等于说包括说他那个中档账户</span></div>
+<div class="tl"><span class="ts">00:10:36</span><span class="tx">这个其实也都是</span></div>
+<div class="tl"><span class="ts">00:10:37</span><span class="tx">蠻collect 去把它写出来的</span></div>
+<div class="tl"><span class="ts">00:10:39</span><span class="tx">看起来好像也不是很</span></div>
+<div class="tl"><span class="ts">00:10:41</span><span class="tx">很复杂的样子</span></div>
+<div class="tl"><span class="ts">00:10:42</span><span class="tx">对就是等于说像这个</span></div>
+<div class="tl"><span class="ts">00:10:44</span><span class="tx">这个只是说提供一个思路</span></div>
+<div class="tl"><span class="ts">00:10:45</span><span class="tx">我们去研究一下</span></div>
+<div class="tl"><span class="ts">00:10:47</span><span class="tx">因为其实现在大家还是用这种对话式的</span></div>
+<div class="tl"><span class="ts">00:10:50</span><span class="tx">当你真正到了以后</span></div>
+<div class="tl"><span class="ts">00:10:51</span><span class="tx">你要流程化以后</span></div>
+<div class="tl"><span class="ts">00:10:52</span><span class="tx">其实可能还是用Codex</span></div>
+<div class="tl"><span class="ts">00:10:54</span><span class="tx">这个work的方式去做</span></div>
+<div class="tl"><span class="ts">00:10:57</span><span class="tx">就是一个</span></div>
+<div class="tl"><span class="ts">00:10:58</span><span class="tx">就是不管是做广告分析也好</span></div>
+<div class="tl"><span class="ts">00:11:01</span><span class="tx">还是做具体的某些事情也好</span></div>
+<div class="tl"><span class="ts">00:11:03</span><span class="tx">我觉得这个是一个大趋势</span></div>
+<div class="tl"><span class="ts">00:11:06</span><span class="tx">可能制造了从目前来看</span></div>
+<div class="tl"><span class="ts">00:11:07</span><span class="tx">各家的AI产品</span></div>
+<div class="tl"><span class="ts">00:11:09</span><span class="tx">就是真正它会变成一个生产力的这种过程</span></div>
+<div class="tl"><span class="ts">00:11:13</span><span class="tx">所以它其实就是流程化,就完成一个,可能会有很多具体的论文在那里跑</span></div>
+<div class="tl"><span class="ts">00:11:21</span><span class="tx">不在于说这种是相对来讲比较随机式的对话</span></div>
+<div class="tl"><span class="ts">00:11:26</span><span class="tx">所以说在这个我们就先行去研究,然后至于什么时候部署,那这个我们觉得成熟了,我们可能就可以逐步的去替换上去</span></div>
+<div class="tl"><span class="ts">00:11:36</span><span class="tx">那这样子就对于运营来讲</span></div>
+<div class="tl"><span class="ts">00:11:38</span><span class="tx">它可能就不需要每个人有那么多个</span></div>
+<div class="tl"><span class="ts">00:11:40</span><span class="tx">就不见得每个人都需要有账号</span></div>
+<div class="tl"><span class="ts">00:11:43</span><span class="tx">而且就可以解决了这种技能沉淀的问题</span></div>
+<div class="tl"><span class="ts">00:11:48</span><span class="tx">因为它这样做完以后呢</span></div>
+<div class="tl"><span class="ts">00:11:50</span><span class="tx">其实可能顺便衍生出来的</span></div>
+<div class="tl"><span class="ts">00:11:53</span><span class="tx">可能就会我们会形成了很多个这种agent</span></div>
+<div class="tl"><span class="ts">00:11:57</span><span class="tx">就可能这个agent是做什么功能的</span></div>
+<div class="tl"><span class="ts">00:11:59</span><span class="tx">大家自己去调游一下就好了</span></div>
+<div class="tl"><span class="ts">00:12:01</span><span class="tx">那其实从另一个方面来讲</span></div>
+<div class="tl"><span class="ts">00:12:04</span><span class="tx">是不是就把整个公司的这种业务流程就相对的SOP了嘛</span></div>
+<div class="tl"><span class="ts">00:12:08</span><span class="tx">你就可能你开发做足够多的这个这个这个这个这个这个A点</span></div>
+<div class="tl"><span class="ts">00:12:13</span><span class="tx">那就大家都对于他们来讲就不需要去去去去天面研究这些东西</span></div>
+<div class="tl"><span class="ts">00:12:18</span><span class="tx">那就只是说去用这个工具来什么时候需要调用这个什么需要调用这个东西</span></div>
+<div class="tl"><span class="ts">00:12:23</span><span class="tx">这样子我觉得能够变成一个可复用的</span></div>
+<div class="tl"><span class="ts">00:12:27</span><span class="tx">然后也不会说大家使用的人会觉得有那么多难度</span></div>
+<div class="tl"><span class="ts">00:12:33</span><span class="tx">所以大概有一个思路流程</span></div>
+<div class="tl"><span class="ts">00:12:37</span><span class="tx">就是这样子</span></div>
+<div class="tl"><span class="ts">00:12:39</span><span class="tx">再往后变成单一的技能</span></div>
+<div class="tl"><span class="ts">00:12:43</span><span class="tx">可能在AI里面自己就直接对话</span></div>
+<div class="tl"><span class="ts">00:12:46</span><span class="tx">把一个全流程</span></div>
+<div class="tl"><span class="ts">00:12:48</span><span class="tx">比如说你要优化一个广告</span></div>
+<div class="tl"><span class="ts">00:12:50</span><span class="tx">可能从数据分析到要调整意见</span></div>
+<div class="tl"><span class="ts">00:12:54</span><span class="tx">然后后面的这种调整的知情</span></div>
+<div class="tl"><span class="ts">00:12:57</span><span class="tx">可能就全部在AI里面完成也是有可能的</span></div>
+<div class="tl"><span class="ts">00:12:59</span><span class="tx">对</span></div>
+<div class="tl"><span class="ts">00:13:01</span><span class="tx">对,差不多就是这一条</span></div>
+<div class="tl"><span class="ts">00:13:04</span><span class="tx">OK,我的话首先是跟运营那边是分析一下几个广告的媒体还有几个产品的广告组</span></div>
+<div class="tl"><span class="ts">00:13:14</span><span class="tx">就几个组的广告,然后这上面是</span></div>
+<div class="tl"><span class="ts">00:13:23</span><span class="tx">然后四个账号的口子是自动更新了一下</span></div>
+<div class="tl"><span class="ts">00:13:26</span><span class="tx">然后还有的就是那个关于之前他们有做测试的那个那些广告</span></div>
+<div class="tl"><span class="ts">00:13:32</span><span class="tx">就一共大概是79个</span></div>
+<div class="tl"><span class="ts">00:13:34</span><span class="tx">然后我现在是把那个分析报告基本是掏出来了</span></div>
+<div class="tl"><span class="ts">00:13:39</span><span class="tx">然后主要的效果和后面的建议还在那个VI那边</span></div>
+<div class="tl"><span class="ts">00:13:44</span><span class="tx">就是后面还要给他们一个对应的策略</span></div>
+<div class="tl"><span class="ts">00:13:47</span><span class="tx">然后就是DSP那边的话是看了一下大概怎么投</span></div>
+<div class="tl"><span class="ts">00:13:52</span><span class="tx">然后我们现在具体能看到的他们那边的一些P加什么的</span></div>
+<div class="tl"><span class="ts">00:13:58</span><span class="tx">基本上我们这边都可以看到</span></div>
+<div class="tl"><span class="ts">00:14:01</span><span class="tx">然后可以设置可以操作</span></div>
+<div class="tl"><span class="ts">00:14:02</span><span class="tx">然后是在账号里面稍微进了个测试</span></div>
+<div class="tl"><span class="ts">00:14:05</span><span class="tx">就是除了没有点体用以外</span></div>
+<div class="tl"><span class="ts">00:14:08</span><span class="tx">别的操作大概都看一下</span></div>
+<div class="tl"><span class="ts">00:14:10</span><span class="tx">然后就是埃局解采那边因为DSP投了</span></div>
+<div class="tl"><span class="ts">00:14:15</span><span class="tx">然后他前两天有说有没有办法去投一下DSP</span></div>
+<div class="tl"><span class="ts">00:14:20</span><span class="tx">然后是跟我们这边问了一下</span></div>
+<div class="tl"><span class="ts">00:14:23</span><span class="tx">然后就这边想要问一下您这边有没有说</span></div>
+<div class="tl"><span class="ts">00:14:26</span><span class="tx">如果他投DSP是跟代理商公司那边去投</span></div>
+<div class="tl"><span class="ts">00:14:32</span><span class="tx">还是说我们这边后面再找一个时间测试一下</span></div>
+<div class="tl"><span class="ts">00:14:36</span><span class="tx">就是假如我们自己要投的话</span></div>
+<div class="tl"><span class="ts">00:14:38</span><span class="tx">我觉得还是在账号里头</span></div>
+<div class="tl"><span class="ts">00:14:40</span><span class="tx">我觉得会更好</span></div>
+<div class="tl"><span class="ts">00:14:41</span><span class="tx">对</span></div>
+<div class="tl"><span class="ts">00:14:42</span><span class="tx">对</span></div>
+<div class="tl"><span class="ts">00:14:42</span><span class="tx">就是假如我们账号里面它是全功能的DSP的话</span></div>
+<div class="tl"><span class="ts">00:14:45</span><span class="tx">或者是我们想要的那些模块</span></div>
+<div class="tl"><span class="ts">00:14:47</span><span class="tx">就是它大多数都有的情况</span></div>
+<div class="tl"><span class="ts">00:14:49</span><span class="tx">我觉得在账号</span></div>
+<div class="tl"><span class="ts">00:14:50</span><span class="tx">因为就是那种服务商头的这个</span></div>
+<div class="tl"><span class="ts">00:14:53</span><span class="tx">毕竟数据是沉连在你</span></div>
+<div class="tl"><span class="ts">00:14:55</span><span class="tx">看的那边</span></div>
+<div class="tl"><span class="ts">00:14:56</span><span class="tx">那每个你没合作的</span></div>
+<div class="tl"><span class="ts">00:14:57</span><span class="tx">这数据你就访问不了了</span></div>
+<div class="tl"><span class="ts">00:14:59</span><span class="tx">那就是在自己本帐号里面</span></div>
+<div class="tl"><span class="ts">00:15:02</span><span class="tx">第一就等于ESP</span></div>
+<div class="tl"><span class="ts">00:15:04</span><span class="tx">跟后面的广告之间关联</span></div>
+<div class="tl"><span class="ts">00:15:06</span><span class="tx">那种东西我觉得整个数据打通</span></div>
+<div class="tl"><span class="ts">00:15:07</span><span class="tx">下会更方便一些</span></div>
+<div class="tl"><span class="ts">00:15:09</span><span class="tx">就知道你去都在一个MC容器里面</span></div>
+<div class="tl"><span class="ts">00:15:12</span><span class="tx">是不是</span></div>
+<div class="tl"><span class="ts">00:15:13</span><span class="tx">那就我觉得就是因为原先是</span></div>
+<div class="tl"><span class="ts">00:15:16</span><span class="tx">就是店铺的广告后台里面</span></div>
+<div class="tl"><span class="ts">00:15:19</span><span class="tx">它没有这个功能</span></div>
+<div class="tl"><span class="ts">00:15:21</span><span class="tx">那现在就等于我们后面开了这个东西</span></div>
+<div class="tl"><span class="ts">00:15:24</span><span class="tx">其实也是知道说</span></div>
+<div class="tl"><span class="ts">00:15:26</span><span class="tx">他们在每周或者一两周的开会里面</span></div>
+<div class="tl"><span class="ts">00:15:29</span><span class="tx">能够给我们普及一些支持</span></div>
+<div class="tl"><span class="ts">00:15:32</span><span class="tx">就等于像这样子</span></div>
+<div class="tl"><span class="ts">00:15:33</span><span class="tx">就我们在这上面去学习到一些</span></div>
+<div class="tl"><span class="ts">00:15:37</span><span class="tx">比如他们怎么去思考这个问题</span></div>
+<div class="tl"><span class="ts">00:15:39</span><span class="tx">然后包括这里面其实还有一个很重要的</span></div>
+<div class="tl"><span class="ts">00:15:41</span><span class="tx">叫做衡量标准</span></div>
+<div class="tl"><span class="ts">00:15:42</span><span class="tx">就是到底做到多少的时候好</span></div>
+<div class="tl"><span class="ts">00:15:44</span><span class="tx">比如说可能原先账号可能是2点多的Loss的时候</span></div>
+<div class="tl"><span class="ts">00:15:49</span><span class="tx">那你做到3点多觉得很优秀</span></div>
+<div class="tl"><span class="ts">00:15:51</span><span class="tx">那一看人家可以做到实际</span></div>
+<div class="tl"><span class="ts">00:15:52</span><span class="tx">是不是</span></div>
+<div class="tl"><span class="ts">00:15:53</span><span class="tx">就在这上面其实就知道自己差距在哪里</span></div>
+<div class="tl"><span class="ts">00:15:57</span><span class="tx">所以说外部的那边</span></div>
+<div class="tl"><span class="ts">00:15:58</span><span class="tx">我们就看一看</span></div>
+<div class="tl"><span class="ts">00:16:00</span><span class="tx">就原先我们设想说</span></div>
+<div class="tl"><span class="ts">00:16:02</span><span class="tx">我们自己在那里头</span></div>
+<div class="tl"><span class="ts">00:16:02</span><span class="tx">那后面其实</span></div>
+<div class="tl"><span class="ts">00:16:03</span><span class="tx">电影后来就有了</span></div>
+<div class="tl"><span class="ts">00:16:05</span><span class="tx">那我觉得就可以自己去模仿他们的</span></div>
+<div class="tl"><span class="ts">00:16:09</span><span class="tx">比如我们另外选一个框</span></div>
+<div class="tl"><span class="ts">00:16:10</span><span class="tx">可能就做一些测试</span></div>
+<div class="tl"><span class="ts">00:16:12</span><span class="tx">看看它是不是可以跑出一个比较好的效果</span></div>
+<div class="tl"><span class="ts">00:16:16</span><span class="tx">或者说类似的这种效果</span></div>
+<div class="tl"><span class="ts">00:16:17</span><span class="tx">因为其实我是觉得</span></div>
+<div class="tl"><span class="ts">00:16:18</span><span class="tx">如果说那个东西它没有重复去计算的话</span></div>
+<div class="tl"><span class="ts">00:16:22</span><span class="tx">就是没有重复去算那个归因的话</span></div>
+<div class="tl"><span class="ts">00:16:24</span><span class="tx">我觉得能做到实是</span></div>
+<div class="tl"><span class="ts">00:16:26</span><span class="tx">就是等于说你是可以放开去投</span></div>
+<div class="tl"><span class="ts">00:16:29</span><span class="tx">就是你能投多少就投多少出去</span></div>
+<div class="tl"><span class="ts">00:16:32</span><span class="tx">那当然因为它现在给的金额都比较小</span></div>
+<div class="tl"><span class="ts">00:16:36</span><span class="tx">所以说就是它的那个放大的功能到底</span></div>
+<div class="tl"><span class="ts">00:16:39</span><span class="tx">有没有不确定</span></div>
+<div class="tl"><span class="ts">00:16:41</span><span class="tx">所以说这一部分我觉得还是我们自己去投为比较好</span></div>
+<div class="tl"><span class="ts">00:16:45</span><span class="tx">然后还有一个我就不太愿意在他们那里头是在什么</span></div>
+<div class="tl"><span class="ts">00:16:49</span><span class="tx">就是真的假如在这个过程中我们摸索出的一些好的方法</span></div>
+<div class="tl"><span class="ts">00:16:53</span><span class="tx">他们很快就复制</span></div>
+<div class="tl"><span class="ts">00:16:54</span><span class="tx">对那你在自己后台的我觉得他们就不太容易看得到</span></div>
+<div class="tl"><span class="ts">00:17:00</span><span class="tx">所以说就等于说在这上面我觉得还是首要在自己自己后台里头</span></div>
+<div class="tl"><span class="ts">00:17:07</span><span class="tx">一種是你們去主導</span></div>
+<div class="tl"><span class="ts">00:17:10</span><span class="tx">去做這個事情</span></div>
+<div class="tl"><span class="ts">00:17:11</span><span class="tx">一種是運營它如果自己有興趣</span></div>
+<div class="tl"><span class="ts">00:17:13</span><span class="tx">那他們也賓得做他們的話</span></div>
+<div class="tl"><span class="ts">00:17:15</span><span class="tx">那有那麼多款式</span></div>
+<div class="tl"><span class="ts">00:17:17</span><span class="tx">就等於說這個初期其實給的預算應該都</span></div>
+<div class="tl"><span class="ts">00:17:20</span><span class="tx">就是它至少見效沒那麼快的情況下</span></div>
+<div class="tl"><span class="ts">00:17:24</span><span class="tx">就是說多做幾支</span></div>
+<div class="tl"><span class="ts">00:17:27</span><span class="tx">也沒有多選幾個款</span></div>
+<div class="tl"><span class="ts">00:17:29</span><span class="tx">一個款可能也會有好幾個</span></div>
+<div class="tl"><span class="ts">00:17:30</span><span class="tx">好多個廣告活動的這個組合</span></div>
+<div class="tl"><span class="ts">00:17:33</span><span class="tx">就這樣去做</span></div>
+<div class="tl"><span class="ts">00:17:34</span><span class="tx">我覺得到後面就有了AI這個東西</span></div>
+<div class="tl"><span class="ts">00:17:37</span><span class="tx">就是可能就是就是可能那个广告活动的数量就不再是限制</span></div>
+<div class="tl"><span class="ts">00:17:42</span><span class="tx">以前是人工去维护</span></div>
+<div class="tl"><span class="ts">00:17:44</span><span class="tx">那就觉得可能就是一个人能管的广告活动数量是有些平点的</span></div>
+<div class="tl"><span class="ts">00:17:50</span><span class="tx">靠人工查看当你有了AI</span></div>
+<div class="tl"><span class="ts">00:17:52</span><span class="tx">有很多人在接触这种自动化的这种流程</span></div>
+<div class="tl"><span class="ts">00:17:56</span><span class="tx">那很多的这种自主的分析都都有了这种对于分析的话</span></div>
+<div class="tl"><span class="ts">00:18:00</span><span class="tx">其实你就完全一个人他是</span></div>
+<div class="tl"><span class="ts">00:18:02</span><span class="tx">就是你刚才一两百个广告活动</span></div>
+<div class="tl"><span class="ts">00:18:05</span><span class="tx">就一个完一两百个广告活动</span></div>
+<div class="tl"><span class="ts">00:18:07</span><span class="tx">就都不是问题</span></div>
+<div class="tl"><span class="ts">00:18:09</span><span class="tx">那其实就变得每个广告活动</span></div>
+<div class="tl"><span class="ts">00:18:12</span><span class="tx">它会有一个很明确的一个目标</span></div>
+<div class="tl"><span class="ts">00:18:15</span><span class="tx">以前其实开广告活动</span></div>
+<div class="tl"><span class="ts">00:18:17</span><span class="tx">就是为了可能只有大体上</span></div>
+<div class="tl"><span class="ts">00:18:20</span><span class="tx">可能几块</span></div>
+<div class="tl"><span class="ts">00:18:21</span><span class="tx">可能做SP的</span></div>
+<div class="tl"><span class="ts">00:18:22</span><span class="tx">可能做关键词的</span></div>
+<div class="tl"><span class="ts">00:18:23</span><span class="tx">做自动的</span></div>
+<div class="tl"><span class="ts">00:18:24</span><span class="tx">做这种可能某些大词的</span></div>
+<div class="tl"><span class="ts">00:18:26</span><span class="tx">可能大概就这些</span></div>
+<div class="tl"><span class="ts">00:18:28</span><span class="tx">那往后的话</span></div>
+<div class="tl"><span class="ts">00:18:29</span><span class="tx">我觉得就可以做得很细致</span></div>
+<div class="tl"><span class="ts">00:18:31</span><span class="tx">因为就确实从他们AMS的昨天这听下来</span></div>
+<div class="tl"><span class="ts">00:18:36</span><span class="tx">我就觉得相对来讲我们寓营这里面的广告做的还没有那么精细化</span></div>
+<div class="tl"><span class="ts">00:18:42</span><span class="tx">那就得说你做的足够精细的时候</span></div>
+<div class="tl"><span class="ts">00:18:45</span><span class="tx">其实很多并不一定是靠一个烧大几百亿两千美金的广告去撑着</span></div>
+<div class="tl"><span class="ts">00:18:52</span><span class="tx">还是可以一个链接可能会大链接可能会有这种几十三百个广告</span></div>
+<div class="tl"><span class="ts">00:18:57</span><span class="tx">可能它每个广告都有各自的作用</span></div>
+<div class="tl"><span class="ts">00:19:00</span><span class="tx">那这样做的话</span></div>
+<div class="tl"><span class="ts">00:19:01</span><span class="tx">那可能就可以把这种整个ROI</span></div>
+<div class="tl"><span class="ts">00:19:05</span><span class="tx">可能再往上去提</span></div>
+<div class="tl"><span class="ts">00:19:06</span><span class="tx">所以说就是在这上面</span></div>
+<div class="tl"><span class="ts">00:19:09</span><span class="tx">就对于你们的工作来讲</span></div>
+<div class="tl"><span class="ts">00:19:11</span><span class="tx">最重要就是去研究这里面有新的形式</span></div>
+<div class="tl"><span class="ts">00:19:15</span><span class="tx">而不在于说在他们原有的上面去做修修补补</span></div>
+<div class="tl"><span class="ts">00:19:18</span><span class="tx">就是可以大胆地去做一些尝试</span></div>
+<div class="tl"><span class="ts">00:19:22</span><span class="tx">不再局限于原有的他们的广告</span></div>
+<div class="tl"><span class="ts">00:19:25</span><span class="tx">那原有广告这个就比如说</span></div>
+<div class="tl"><span class="ts">00:19:27</span><span class="tx">我们现在做的分析的话</span></div>
+<div class="tl"><span class="ts">00:19:28</span><span class="tx">只是去找出他们原来广告</span></div>
+<div class="tl"><span class="ts">00:19:31</span><span class="tx">他可能有哪些毛病</span></div>
+<div class="tl"><span class="ts">00:19:32</span><span class="tx">有哪些有有法的一个点</span></div>
+<div class="tl"><span class="ts">00:19:34</span><span class="tx">那这个是等于说是相当于一个基本盘</span></div>
+<div class="tl"><span class="ts">00:19:37</span><span class="tx">但是就在未来的这种广告</span></div>
+<div class="tl"><span class="ts">00:19:40</span><span class="tx">投放方式或者投放思路上面</span></div>
+<div class="tl"><span class="ts">00:19:42</span><span class="tx">我们可能会变得更多样化</span></div>
+<div class="tl"><span class="ts">00:19:46</span><span class="tx">就是等于说假设说在未来</span></div>
+<div class="tl"><span class="ts">00:19:48</span><span class="tx">这种大多数流量</span></div>
+<div class="tl"><span class="ts">00:19:50</span><span class="tx">可能就是靠花钱去买的情况下</span></div>
+<div class="tl"><span class="ts">00:19:54</span><span class="tx">那你买的话</span></div>
+<div class="tl"><span class="ts">00:19:55</span><span class="tx">说比如说真的</span></div>
+<div class="tl"><span class="ts">00:19:56</span><span class="tx">假如整理这广告</span></div>
+<div class="tl"><span class="ts">00:19:57</span><span class="tx">然后Roy做到死的话</span></div>
+<div class="tl"><span class="ts">00:19:59</span><span class="tx">那就是有没有什么资料</span></div>
+<div class="tl"><span class="ts">00:20:01</span><span class="tx">都一定不重要</span></div>
+<div class="tl"><span class="ts">00:20:03</span><span class="tx">所以说就等于说在这上面</span></div>
+<div class="tl"><span class="ts">00:20:05</span><span class="tx">就一来还是要保持热情</span></div>
+<div class="tl"><span class="ts">00:20:09</span><span class="tx">去继续去研究广告里面</span></div>
+<div class="tl"><span class="ts">00:20:11</span><span class="tx">这种投放方式上的一些</span></div>
+<div class="tl"><span class="ts">00:20:13</span><span class="tx">创新</span></div>
+<div class="tl"><span class="ts">00:20:15</span><span class="tx">一种是等于说挖掘原有广告里面</span></div>
+<div class="tl"><span class="ts">00:20:17</span><span class="tx">但能改进的一个地方</span></div>
+<div class="tl"><span class="ts">00:20:19</span><span class="tx">然后还有一个就是在</span></div>
+<div class="tl"><span class="ts">00:20:21</span><span class="tx">投放方式上去创新</span></div>
+<div class="tl"><span class="ts">00:20:23</span><span class="tx">就比如说像这种原先</span></div>
+<div class="tl"><span class="ts">00:20:25</span><span class="tx">大概我们就是一个广告都是100美金或者200美金起步</span></div>
+<div class="tl"><span class="ts">00:20:29</span><span class="tx">那就在那边就看可能一天少15美金它也是一种方式</span></div>
+<div class="tl"><span class="ts">00:20:34</span><span class="tx">是不是</span></div>
+<div class="tl"><span class="ts">00:20:34</span><span class="tx">这15美金的广告可能你得开开世界20个</span></div>
+<div class="tl"><span class="ts">00:20:38</span><span class="tx">可能就可能总消化了那么多</span></div>
+<div class="tl"><span class="ts">00:20:39</span><span class="tx">但是你就变得更加的可控</span></div>
+<div class="tl"><span class="ts">00:20:42</span><span class="tx">对所以说就在这这这里面就是</span></div>
+<div class="tl"><span class="ts">00:20:45</span><span class="tx">就我们去研究的过程中可以把这个思路再去破坏一些</span></div>
+<div class="tl"><span class="ts">00:20:51</span><span class="tx">然后就是在广告费用分摊那边就之前是没有包括SP的嘛</span></div>
+<div class="tl"><span class="ts">00:20:57</span><span class="tx">然后之前主要是搜索海藏原来的他们的那个基础商</span></div>
+<div class="tl"><span class="ts">00:21:01</span><span class="tx">然后现在是把SP一算进去</span></div>
+<div class="tl"><span class="ts">00:21:04</span><span class="tx">然后做了一下有SP的和没SP的做一下那个花费的对比</span></div>
+<div class="tl"><span class="ts">00:21:09</span><span class="tx">然后数据是上传在那个英文单上</span></div>
+<div class="tl"><span class="ts">00:21:13</span><span class="tx">有发货给你</span></div>
+<div class="tl"><span class="ts">00:21:16</span><span class="tx">暂时还没有,因为它的价格还是会比较多</span></div>
+<div class="tl"><span class="ts">00:21:22</span><span class="tx">对,这个先发现其他,然后就给了东西能不能更</span></div>
+<div class="tl"><span class="ts">00:21:29</span><span class="tx">因为目前其实我们只是分到了这种运营级别</span></div>
+<div class="tl"><span class="ts">00:21:33</span><span class="tx">就小组的那种级别,它其实能不能做到说分到每个款式</span></div>
+<div class="tl"><span class="ts">00:21:41</span><span class="tx">因为其实这个意思是什么,就是等于说我们最终,假如我们给出一个数据表里面,比如说有哪个小路,它的款式是什么,然后它款式下面有哪些,因为那里面算出来大多数应该是以SalesKU或者是ASM,就是作为落脚点,其实我们不会改变那种途径口径,因为如果能够到每个款式的,它其实最终我们自己再去核算这一个款式,</span></div>
+<div class="tl"><span class="ts">00:22:11</span><span class="tx">是他的一个这个理论情况的时候就比较直观</span></div>
+<div class="tl"><span class="ts">00:22:16</span><span class="tx">不然的话也应该我们去做一条链接</span></div>
+<div class="tl"><span class="ts">00:22:20</span><span class="tx">因为我们一般肯定不会按子ASIN去算</span></div>
+<div class="tl"><span class="ts">00:22:23</span><span class="tx">他利论是哪个可能都是以一个费生</span></div>
+<div class="tl"><span class="ts">00:22:26</span><span class="tx">或者是这个单个利益销组里面</span></div>
+<div class="tl"><span class="ts">00:22:30</span><span class="tx">他比如说可能他在这个链接上面</span></div>
+<div class="tl"><span class="ts">00:22:34</span><span class="tx">他创造的利润是多少</span></div>
+<div class="tl"><span class="ts">00:22:35</span><span class="tx">那通常就是销售数据</span></div>
+<div class="tl"><span class="ts">00:22:37</span><span class="tx">比如你销售收入减据各种各样的费用</span></div>
+<div class="tl"><span class="ts">00:22:39</span><span class="tx">这些都是确切的</span></div>
+<div class="tl"><span class="ts">00:22:40</span><span class="tx">唯一在我们的自己的系统里面没有加入的就是广告这一块</span></div>
+<div class="tl"><span class="ts">00:22:45</span><span class="tx">广告这一块原先就是靠手动统计</span></div>
+<div class="tl"><span class="ts">00:22:47</span><span class="tx">那个东西它又会变</span></div>
+<div class="tl"><span class="ts">00:22:49</span><span class="tx">那就因为它归音时间不同又会变</span></div>
+<div class="tl"><span class="ts">00:22:51</span><span class="tx">然后它其实再加上现在很多广告它其实并不是少在这上面的</span></div>
+<div class="tl"><span class="ts">00:22:57</span><span class="tx">就等于或者说它归音它不是</span></div>
+<div class="tl"><span class="ts">00:22:58</span><span class="tx">可能投的是A款式</span></div>
+<div class="tl"><span class="ts">00:23:00</span><span class="tx">然后实际上它这里面可能有30%是这个电脑出在B款式上面的</span></div>
+<div class="tl"><span class="ts">00:23:06</span><span class="tx">那B款式它可能它本身都没投广告</span></div>
+<div class="tl"><span class="ts">00:23:08</span><span class="tx">但是按我们现在的新的分摊方法的话</span></div>
+<div class="tl"><span class="ts">00:23:11</span><span class="tx">其实B款式是有分摊的</span></div>
+<div class="tl"><span class="ts">00:23:13</span><span class="tx">那算其实我们就确定按</span></div>
+<div class="tl"><span class="ts">00:23:18</span><span class="tx">至少从大方向来讲</span></div>
+<div class="tl"><span class="ts">00:23:19</span><span class="tx">大家运营同意说按规因来去存</span></div>
+<div class="tl"><span class="ts">00:23:22</span><span class="tx">比如说谁受益</span></div>
+<div class="tl"><span class="ts">00:23:23</span><span class="tx">谁去分摊这个广告费</span></div>
+<div class="tl"><span class="ts">00:23:25</span><span class="tx">那就无非有可能中间一些比例的问题</span></div>
+<div class="tl"><span class="ts">00:23:27</span><span class="tx">在这上面</span></div>
+<div class="tl"><span class="ts">00:23:31</span><span class="tx">那后面我再来当入细节跟他们去沟通</span></div>
+<div class="tl"><span class="ts">00:23:34</span><span class="tx">至少在当下这里面</span></div>
+<div class="tl"><span class="ts">00:23:38</span><span class="tx">如果说一个小组类型的这个是要保留的</span></div>
+<div class="tl"><span class="ts">00:23:42</span><span class="tx">这个是直接涉及到说</span></div>
+<div class="tl"><span class="ts">00:23:44</span><span class="tx">我们那个叫什么来着</span></div>
+<div class="tl"><span class="ts">00:23:47</span><span class="tx">就是在每个月他们的这种费用分摊的时候</span></div>
+<div class="tl"><span class="ts">00:23:51</span><span class="tx">这个要用的就是一张表</span></div>
+<div class="tl"><span class="ts">00:23:52</span><span class="tx">另一张表就来讲</span></div>
+<div class="tl"><span class="ts">00:23:54</span><span class="tx">就加入到款式这种级别的</span></div>
+<div class="tl"><span class="ts">00:23:56</span><span class="tx">到款式这种级别的</span></div>
+<div class="tl"><span class="ts">00:23:58</span><span class="tx">其实跟那个</span></div>
+<div class="tl"><span class="ts">00:23:59</span><span class="tx">跟金农座的这个其实有点类似</span></div>
+<div class="tl"><span class="ts">00:24:03</span><span class="tx">只能做的几块呢</span></div>
+<div class="tl"><span class="ts">00:24:04</span><span class="tx">我们之前最开始是为了解决他们去登记</span></div>
+<div class="tl"><span class="ts">00:24:07</span><span class="tx">每天那花费是多少</span></div>
+<div class="tl"><span class="ts">00:24:09</span><span class="tx">那这个就是你在那边其实做的</span></div>
+<div class="tl"><span class="ts">00:24:12</span><span class="tx">其实到底也是一样</span></div>
+<div class="tl"><span class="ts">00:24:13</span><span class="tx">就等于说我们的最终</span></div>
+<div class="tl"><span class="ts">00:24:17</span><span class="tx">比如说以周或者以月回单位</span></div>
+<div class="tl"><span class="ts">00:24:19</span><span class="tx">可能分摊到每个款式里面是多少</span></div>
+<div class="tl"><span class="ts">00:24:23</span><span class="tx">我们就到时候在运营他们自己填的这个表格里面</span></div>
+<div class="tl"><span class="ts">00:24:26</span><span class="tx">就很容易拉出来说</span></div>
+<div class="tl"><span class="ts">00:24:27</span><span class="tx">我做的这个登记到底还是挣钱还是亏钱的</span></div>
+<div class="tl"><span class="ts">00:24:30</span><span class="tx">不然的话呢</span></div>
+<div class="tl"><span class="ts">00:24:31</span><span class="tx">从账面去看</span></div>
+<div class="tl"><span class="ts">00:24:33</span><span class="tx">尤其你广告如果不算进来</span></div>
+<div class="tl"><span class="ts">00:24:35</span><span class="tx">那每个款都是挣钱的</span></div>
+<div class="tl"><span class="ts">00:24:36</span><span class="tx">当你往里面扣的时候</span></div>
+<div class="tl"><span class="ts">00:24:37</span><span class="tx">就会发觉有的款</span></div>
+<div class="tl"><span class="ts">00:24:39</span><span class="tx">可能就不挣钱</span></div>
+<div class="tl"><span class="ts">00:24:40</span><span class="tx">或者有的款</span></div>
+<div class="tl"><span class="ts">00:24:41</span><span class="tx">感觉特别是新款</span></div>
+<div class="tl"><span class="ts">00:24:42</span><span class="tx">上去广告投了很多</span></div>
+<div class="tl"><span class="ts">00:24:44</span><span class="tx">然后你看一下</span></div>
+<div class="tl"><span class="ts">00:24:45</span><span class="tx">广告亏损很厉害</span></div>
+<div class="tl"><span class="ts">00:24:47</span><span class="tx">但实际上这里面</span></div>
+<div class="tl"><span class="ts">00:24:48</span><span class="tx">新款往往它转化比那么好</span></div>
+<div class="tl"><span class="ts">00:24:50</span><span class="tx">它很多时候那里面广告</span></div>
+<div class="tl"><span class="ts">00:24:51</span><span class="tx">是出到了成熟的连结里面去</span></div>
+<div class="tl"><span class="ts">00:24:55</span><span class="tx">对</span></div>
+<div class="tl"><span class="ts">00:24:56</span><span class="tx">那就其实它不能反映出</span></div>
+<div class="tl"><span class="ts">00:24:58</span><span class="tx">这个款它到底好还是不好</span></div>
+<div class="tl"><span class="ts">00:25:00</span><span class="tx">所以说在这上面再增加一个分到</span></div>
+<div class="tl"><span class="ts">00:25:07</span><span class="tx">我们算还是按月来算</span></div>
+<div class="tl"><span class="ts">00:25:09</span><span class="tx">但是就能够分到每一个产品的集合上面</span></div>
+<div class="tl"><span class="ts">00:25:15</span><span class="tx">这个集合的这个表</span></div>
+<div class="tl"><span class="ts">00:25:18</span><span class="tx">待会我再去找一找</span></div>
+<div class="tl"><span class="ts">00:25:21</span><span class="tx">从我们自己现有的数据导出来</span></div>
+<div class="tl"><span class="ts">00:25:25</span><span class="tx">你们能不能直接用</span></div>
+<div class="tl"><span class="ts">00:25:28</span><span class="tx">因为这个就同一个数据的话</span></div>
+<div class="tl"><span class="ts">00:25:33</span><span class="tx">就特别是分类的这个它是很明确的</span></div>
+<div class="tl"><span class="ts">00:25:36</span><span class="tx">你如果做多头的话</span></div>
+<div class="tl"><span class="ts">00:25:38</span><span class="tx">比如在这个地方这个系统要维护一次</span></div>
+<div class="tl"><span class="ts">00:25:40</span><span class="tx">在那个系统再维护一次</span></div>
+<div class="tl"><span class="ts">00:25:41</span><span class="tx">它就会出现对不上那个问题</span></div>
+<div class="tl"><span class="ts">00:25:43</span><span class="tx">然后基本上就这些</span></div>
+<div class="tl"><span class="ts">00:25:48</span><span class="tx">然后现在还在做广告分析</span></div>
+<div class="tl"><span class="ts">00:25:51</span><span class="tx">它每一个产品上运营做测试的那个东西比较多</span></div>
+<div class="tl"><span class="ts">00:25:56</span><span class="tx">所以说账还没有了</span></div>
+<div class="tl"><span class="ts">00:25:58</span><span class="tx">就是等于他们做了哪些操作</span></div>
+<div class="tl"><span class="ts">00:26:02</span><span class="tx">然后后面的效果</span></div>
+<div class="tl"><span class="ts">00:26:03</span><span class="tx">效果会有</span></div>
+<div class="tl"><span class="ts">00:26:04</span><span class="tx">对对对</span></div>
+<div class="tl"><span class="ts">00:26:04</span><span class="tx">他们一共已经测了79个广告号多了</span></div>
+<div class="tl"><span class="ts">00:26:07</span><span class="tx">就是账号那边</span></div>
+<div class="tl"><span class="ts">00:26:08</span><span class="tx">基本上每个运营他都有测5到10个这样子</span></div>
+<div class="tl"><span class="ts">00:26:12</span><span class="tx">量还比较多的</span></div>
+<div class="tl"><span class="ts">00:26:13</span><span class="tx">那这个是在是分布在川鹏的</span></div>
+<div class="tl"><span class="ts">00:26:18</span><span class="tx">还是说是分布在多个账号</span></div>
+<div class="tl"><span class="ts">00:26:19</span><span class="tx">都有都有</span></div>
+<div class="tl"><span class="ts">00:26:20</span><span class="tx">然后川鹏主要是有70多个</span></div>
+<div class="tl"><span class="ts">00:26:23</span><span class="tx">然后剩下账号洁博利那边十几个</span></div>
+<div class="tl"><span class="ts">00:26:26</span><span class="tx">然后玄米简单因为很多测试是我之前就已经做过</span></div>
+<div class="tl"><span class="ts">00:26:29</span><span class="tx">所以它那边会比较少</span></div>
+<div class="tl"><span class="ts">00:26:31</span><span class="tx">因为大部分是之前已经做过在我这边再做测试</span></div>
+<div class="tl"><span class="ts">00:26:38</span><span class="tx">OK 这个节奏因为现在拿到十一放假</span></div>
+<div class="tl"><span class="ts">00:26:42</span><span class="tx">整个节奏就大概各自安排</span></div>
+<div class="tl"><span class="ts">00:26:48</span><span class="tx">然后我传说就是把之前的提示词</span></div>
+<div class="tl"><span class="ts">00:26:52</span><span class="tx">整个通用的图片提示词</span></div>
+<div class="tl"><span class="ts">00:26:54</span><span class="tx">然后去测试了一下</span></div>
+<div class="tl"><span class="ts">00:26:56</span><span class="tx">测试了同鞋</span></div>
+<div class="tl"><span class="ts">00:26:58</span><span class="tx">然后以前的两个鞋</span></div>
+<div class="tl"><span class="ts">00:27:00</span><span class="tx">然后冬季的鞋子也测试了一下</span></div>
+<div class="tl"><span class="ts">00:27:02</span><span class="tx">那个刚好直言者有找我</span></div>
+<div class="tl"><span class="ts">00:27:04</span><span class="tx">然后去测试一下发给他看</span></div>
+<div class="tl"><span class="ts">00:27:06</span><span class="tx">然后那个动态效果不错</span></div>
+<div class="tl"><span class="ts">00:27:07</span><span class="tx">然后那个提示器现在是</span></div>
+<div class="tl"><span class="ts">00:27:10</span><span class="tx">呃原本是第七个生成的时候在用</span></div>
+<div class="tl"><span class="ts">00:27:13</span><span class="tx">然后我去亚马逊那边的agent去试了一下</span></div>
+<div class="tl"><span class="ts">00:27:17</span><span class="tx">他那边也可以直接生成</span></div>
+<div class="tl"><span class="ts">00:27:19</span><span class="tx">然后就是使用方便的话</span></div>
+<div class="tl"><span class="ts">00:27:21</span><span class="tx">也可以直接用那边的agent生成</span></div>
+<div class="tl"><span class="ts">00:27:23</span><span class="tx">主要就是图片的等待上面需要时间</span></div>
+<div class="tl"><span class="ts">00:27:26</span><span class="tx">然后我们生成FLUX那批也是可以生成很多个</span></div>
+<div class="tl"><span class="ts">00:27:31</span><span class="tx">但是要足够缺乱就是这块有一点时间上的那个</span></div>
+<div class="tl"><span class="ts">00:27:37</span><span class="tx">然后就是网页那一块我调整了一下</span></div>
+<div class="tl"><span class="ts">00:27:42</span><span class="tx">因为照要推出</span></div>
+<div class="tl"><span class="ts">00:27:43</span><span class="tx">尽快推出的话</span></div>
+<div class="tl"><span class="ts">00:27:45</span><span class="tx">我全部弄完</span></div>
+<div class="tl"><span class="ts">00:27:46</span><span class="tx">然后提出其他要测试会比较久</span></div>
+<div class="tl"><span class="ts">00:27:49</span><span class="tx">然后我就调整一下增加的管理员界面</span></div>
+<div class="tl"><span class="ts">00:27:52</span><span class="tx">现在就还在调整</span></div>
+<div class="tl"><span class="ts">00:27:54</span><span class="tx">之后的话调整好了就可以先退出把我的提示词放进去</span></div>
+<div class="tl"><span class="ts">00:27:59</span><span class="tx">然后让他们使用</span></div>
+<div class="tl"><span class="ts">00:28:00</span><span class="tx">之后有新增的模块就可以通过管理流的那块加进去</span></div>
+<div class="tl"><span class="ts">00:28:04</span><span class="tx">然后还有一个就是上昨天提到的那个知识库</span></div>
+<div class="tl"><span class="ts">00:28:09</span><span class="tx">然后那个知识库的话</span></div>
+<div class="tl"><span class="ts">00:28:12</span><span class="tx">讲那边有说Github</span></div>
+<div class="tl"><span class="ts">00:28:14</span><span class="tx">Github那边</span></div>
+<div class="tl"><span class="ts">00:28:15</span><span class="tx">然后它那块</span></div>
+<div class="tl"><span class="ts">00:28:17</span><span class="tx">那个那个知识库是</span></div>
+<div class="tl"><span class="ts">00:28:20</span><span class="tx">仓库的话要充钱</span></div>
+<div class="tl"><span class="ts">00:28:22</span><span class="tx">然后去评估一下用github和充钱的话</span></div>
+<div class="tl"><span class="ts">00:28:26</span><span class="tx">哪个比较好</span></div>
+<div class="tl"><span class="ts">00:28:27</span><span class="tx">然后就是用github会更合适一些</span></div>
+<div class="tl"><span class="ts">00:28:30</span><span class="tx">这个文档我有传承到知识库</span></div>
+<div class="tl"><span class="ts">00:28:34</span><span class="tx">比如像Obsidian</span></div>
+<div class="tl"><span class="ts">00:28:36</span><span class="tx">对对本地库就是如果要达知识库的话</span></div>
+<div class="tl"><span class="ts">00:28:40</span><span class="tx">Obsidian它本身有一个同步(Sync)的</span></div>
+<div class="tl"><span class="ts">00:28:43</span><span class="tx">然后给一个仓库的</span></div>
+<div class="tl"><span class="ts">00:28:45</span><span class="tx">但是那个其实感觉也就是同步(Sync)</span></div>
+<div class="tl"><span class="ts">00:28:48</span><span class="tx">买在他们的那个对他们自己的那个仓库里面去云端仓库</span></div>
+<div class="tl"><span class="ts">00:28:52</span><span class="tx">那感觉还是用github做一个</span></div>
+<div class="tl"><span class="ts">00:28:55</span><span class="tx">就是如果有知识库的每个运营的话自己个人草稿库一个</span></div>
+<div class="tl"><span class="ts">00:29:01</span><span class="tx">然后公司的一个整体的一个大库一个</span></div>
+<div class="tl"><span class="ts">00:29:03</span><span class="tx">然后核验完以后就是有规范的时候按照这个个人的那个方式上传到公司库里面去</span></div>
+<div class="tl"><span class="ts">00:29:10</span><span class="tx">然后有需要codex需要就是什么什么样的技能从那个公司库里面拔下来然后去用</span></div>
+<div class="tl"><span class="ts">00:29:16</span><span class="tx">那如果用Tata,Tata有一个问题就是他网络访问比不是那么问题,你就证明他有没有办法本地部署</span></div>
+<div class="tl"><span class="ts">00:29:25</span><span class="tx">就假如说我们自己在计划里,自己在这个里面买一个电脑或者买一个小服器,塞在那里,就大家在内部网络去访问</span></div>
+<div class="tl"><span class="ts">00:29:35</span><span class="tx">这种事也是一种事,因为至少他那一天能够展示他只是把那个Obsidian 装在他自己的本机上面</span></div>
+<div class="tl"><span class="ts">00:29:45</span><span class="tx">在本期的可能是最快的,但本期的这个有个问题就是没关于共享的问题</span></div>
+<div class="tl"><span class="ts">00:29:51</span><span class="tx">或者是说你要给别人共享,在本期开共享,共享完了,就等于说我们在团队里别人查,怎么复用的问题</span></div>
+<div class="tl"><span class="ts">00:30:01</span><span class="tx">或者说这个其实它是可能会到后面,用Codex的时候可能会联动起来的</span></div>
+<div class="tl"><span class="ts">00:30:09</span><span class="tx">在前期就如果你们之前没用过这个网络的话</span></div>
+<div class="tl"><span class="ts">00:30:14</span><span class="tx">就自己先试用一下</span></div>
+<div class="tl"><span class="ts">00:30:15</span><span class="tx">就看看感受也看到你能带来什么东西</span></div>
+<div class="tl"><span class="ts">00:30:18</span><span class="tx">是不是</span></div>
+<div class="tl"><span class="ts">00:30:18</span><span class="tx">嗯</span></div>
+<div class="tl"><span class="ts">00:30:19</span><span class="tx">其实我们之前也有在用</span></div>
+<div class="tl"><span class="ts">00:30:21</span><span class="tx">但主要可能更多</span></div>
+<div class="tl"><span class="ts">00:30:23</span><span class="tx">对对就是个人的</span></div>
+<div class="tl"><span class="ts">00:30:24</span><span class="tx">对共享上是没有</span></div>
+<div class="tl"><span class="ts">00:30:26</span><span class="tx">其实你们也是用这个制作</span></div>
+<div class="tl"><span class="ts">00:30:28</span><span class="tx">对我们一开始就有这个</span></div>
+<div class="tl"><span class="ts">00:30:30</span><span class="tx">哦那其实等于在平时你们跟AI交互的过程中</span></div>
+<div class="tl"><span class="ts">00:30:35</span><span class="tx">会让他把整个聊天过程直接传进去吗</span></div>
+<div class="tl"><span class="ts">00:30:38</span><span class="tx">还是有靠手</span></div>
+<div class="tl"><span class="ts">00:30:39</span><span class="tx">它这个逻辑</span></div>
+<div class="tl"><span class="ts">00:30:42</span><span class="tx">它会有一个本地文件夹</span></div>
+<div class="tl"><span class="ts">00:30:45</span><span class="tx">然后它做过哪些东西</span></div>
+<div class="tl"><span class="ts">00:30:47</span><span class="tx">它都会有一个MD文章的记录在本地库一个</span></div>
+<div class="tl"><span class="ts">00:30:50</span><span class="tx">然后我们每一次上传到钉钉的</span></div>
+<div class="tl"><span class="ts">00:30:53</span><span class="tx">就是它在线上传的另外一个</span></div>
+<div class="tl"><span class="ts">00:30:55</span><span class="tx">就是等于你一轮不能在AI里面做一个论</span></div>
+<div class="tl"><span class="ts">00:31:00</span><span class="tx">可能它生成一个文件</span></div>
+<div class="tl"><span class="ts">00:31:02</span><span class="tx">然后这个文件钉钉的那边传一本</span></div>
+<div class="tl"><span class="ts">00:31:04</span><span class="tx">然后这个本地保存一本</span></div>
+<div class="tl"><span class="ts">00:31:07</span><span class="tx">那保手码以后,他的知识库自动会把你去链接起来吗?</span></div>
+<div class="tl"><span class="ts">00:31:13</span><span class="tx">会,但是Obsidian本身是一个假性连接,各个文档之间的连接,并不是一个真连接,是一个假连接</span></div>
+<div class="tl"><span class="ts">00:31:24</span><span class="tx">要有其实还是说skills他本身就是比较重要的skills</span></div>
+<div class="tl"><span class="ts">00:31:31</span><span class="tx">肯定是要有一个优先级的一个排序给</span></div>
+<div class="tl"><span class="ts">00:31:35</span><span class="tx">还有个agentMD文件就是智能体MD文件</span></div>
+<div class="tl"><span class="ts">00:31:39</span><span class="tx">就是哪一些是我们首要要去用的那些技能</span></div>
+<div class="tl"><span class="ts">00:31:43</span><span class="tx">哪一些是我们可能个人需要的那些要区分开来</span></div>
+<div class="tl"><span class="ts">00:31:48</span><span class="tx">相当于这一块主要其实它是我们用的AI那边的一个skill</span></div>
+<div class="tl"><span class="ts">00:31:52</span><span class="tx">就是那个支持库主要还是作为一个保存的链路仓库</span></div>
+<div class="tl"><span class="ts">00:31:59</span><span class="tx">他本身其实是没有什么争引的</span></div>
+<div class="tl"><span class="ts">00:32:03</span><span class="tx">我知道就是等于说他的</span></div>
+<div class="tl"><span class="ts">00:32:05</span><span class="tx">因为他那天大概跟我讲</span></div>
+<div class="tl"><span class="ts">00:32:07</span><span class="tx">就是也就拿电脑给我大概讲一下</span></div>
+<div class="tl"><span class="ts">00:32:10</span><span class="tx">因为这个我确实也还没花时间去研究这个</span></div>
+<div class="tl"><span class="ts">00:32:13</span><span class="tx">他到底怎么怎么去用</span></div>
+<div class="tl"><span class="ts">00:32:15</span><span class="tx">他就等于说一个</span></div>
+<div class="tl"><span class="ts">00:32:16</span><span class="tx">他说可能就比较跟AI交互吧</span></div>
+<div class="tl"><span class="ts">00:32:18</span><span class="tx">到最后面他可能会就直接给AI放一去</span></div>
+<div class="tl"><span class="ts">00:32:21</span><span class="tx">放入一半就存到支持库去</span></div>
+<div class="tl"><span class="ts">00:32:24</span><span class="tx">这个好像是不需要的</span></div>
+<div class="tl"><span class="ts">00:32:26</span><span class="tx">他会自动帮忙说他每次任务对话完</span></div>
+<div class="tl"><span class="ts">00:32:29</span><span class="tx">他就存在支持库里面一边</span></div>
+<div class="tl"><span class="ts">00:32:31</span><span class="tx">对对对</span></div>
+<div class="tl"><span class="ts">00:32:32</span><span class="tx">因为但是每一次单次的任务可能</span></div>
+<div class="tl"><span class="ts">00:32:35</span><span class="tx">就是做出来了就是</span></div>
+<div class="tl"><span class="ts">00:32:37</span><span class="tx">他能升级为skill的可能会很杂乱</span></div>
+<div class="tl"><span class="ts">00:32:40</span><span class="tx">因为就是要上升到共行才是一个</span></div>
+<div class="tl"><span class="ts">00:32:43</span><span class="tx">通用的支持库</span></div>
+<div class="tl"><span class="ts">00:32:44</span><span class="tx">这一点的话肯定是要人工去维护的</span></div>
+<div class="tl"><span class="ts">00:32:46</span><span class="tx">因为你每次对话下来的每一条分支链路都是非常庞大的</span></div>
+<div class="tl"><span class="ts">00:32:50</span><span class="tx">如果说按照这样的链路</span></div>
+<div class="tl"><span class="ts">00:32:52</span><span class="tx">它其实就是本身会自动来保存</span></div>
+<div class="tl"><span class="ts">00:32:54</span><span class="tx">但是能不能用就是因为是另外一个问题</span></div>
+<div class="tl"><span class="ts">00:32:56</span><span class="tx">因为维护和共用的那一层</span></div>
+<div class="tl"><span class="ts">00:32:59</span><span class="tx">一定要就是重新再开一条</span></div>
+<div class="tl"><span class="ts">00:33:02</span><span class="tx">每次我们可能每一周做好了以后</span></div>
+<div class="tl"><span class="ts">00:33:05</span><span class="tx">然后保存下来</span></div>
+<div class="tl"><span class="ts">00:33:06</span><span class="tx">然后整理成一个能共用的地方</span></div>
+<div class="tl"><span class="ts">00:33:09</span><span class="tx">然后上传到一个整体的共享库里面</span></div>
+<div class="tl"><span class="ts">00:33:12</span><span class="tx">然后再拉下来就行</span></div>
+<div class="tl"><span class="ts">00:33:13</span><span class="tx">它大概流程是这</span></div>
+<div class="tl"><span class="ts">00:33:14</span><span class="tx">他每一次对话完成以后都会保留一支MD文档</span></div>
+<div class="tl"><span class="ts">00:33:18</span><span class="tx">就你在路本上对话也可以</span></div>
+<div class="tl"><span class="ts">00:33:21</span><span class="tx">应该不行</span></div>
+<div class="tl"><span class="ts">00:33:22</span><span class="tx">web端不行</span></div>
+<div class="tl"><span class="ts">00:33:24</span><span class="tx">我的是可以</span></div>
+<div class="tl"><span class="ts">00:33:25</span><span class="tx">我那个有隧道是可以的</span></div>
+<div class="tl"><span class="ts">00:33:27</span><span class="tx">是如果我用隧道</span></div>
+<div class="tl"><span class="ts">00:33:30</span><span class="tx">当隧道的间链会比较麻烦</span></div>
+<div class="tl"><span class="ts">00:33:31</span><span class="tx">网页端其实我不考虑Oversidian的问题</span></div>
+<div class="tl"><span class="ts">00:33:34</span><span class="tx">一般还是用本地agent的</span></div>
+<div class="tl"><span class="ts">00:33:36</span><span class="tx">因为我永远就只有一个仓库</span></div>
+<div class="tl"><span class="ts">00:33:40</span><span class="tx">就是不管是我用Codex</span></div>
+<div class="tl"><span class="ts">00:33:41</span><span class="tx">还是用WorkBuddy</span></div>
+<div class="tl"><span class="ts">00:33:42</span><span class="tx">还是用那个DeepSeek Harness</span></div>
+<div class="tl"><span class="ts">00:33:45</span><span class="tx">他永远回归到的仓库</span></div>
+<div class="tl"><span class="ts">00:33:46</span><span class="tx">只有Agent Master一个</span></div>
+<div class="tl"><span class="ts">00:33:48</span><span class="tx">Agent Master这个</span></div>
+<div class="tl"><span class="ts">00:33:49</span><span class="tx">我这个本地仓库里面</span></div>
+<div class="tl"><span class="ts">00:33:51</span><span class="tx">有连接一个就是</span></div>
+<div class="tl"><span class="ts">00:33:52</span><span class="tx">之前那个Git上面</span></div>
+<div class="tl"><span class="ts">00:33:54</span><span class="tx">比较火</span></div>
+<div class="tl"><span class="ts">00:33:55</span><span class="tx">那个人叫什么</span></div>
+<div class="tl"><span class="ts">00:33:56</span><span class="tx">对对对</span></div>
+<div class="tl"><span class="ts">00:33:58</span><span class="tx">就是那一个人的仓库</span></div>
+<div class="tl"><span class="ts">00:33:59</span><span class="tx">对对</span></div>
+<div class="tl"><span class="ts">00:34:00</span><span class="tx">他就是用他</span></div>
+<div class="tl"><span class="ts">00:34:01</span><span class="tx">他整体搭建了一个架构</span></div>
+<div class="tl"><span class="ts">00:34:05</span><span class="tx">对对对架构</span></div>
+<div class="tl"><span class="ts">00:34:06</span><span class="tx">他Agent MD文件里面</span></div>
+<div class="tl"><span class="ts">00:34:08</span><span class="tx">就已经有这个架构</span></div>
+<div class="tl"><span class="ts">00:34:09</span><span class="tx">按照这个架构来</span></div>
+<div class="tl"><span class="ts">00:34:11</span><span class="tx">我每次对话完以后</span></div>
+<div class="tl"><span class="ts">00:34:12</span><span class="tx">然后每次输出的东西</span></div>
+<div class="tl"><span class="ts">00:34:14</span><span class="tx">要怎么回到这个架构部里面去</span></div>
+<div class="tl"><span class="ts">00:34:15</span><span class="tx">那大概是这样的一个方案</span></div>
+<div class="tl"><span class="ts">00:34:17</span><span class="tx">那其实就等于说</span></div>
+<div class="tl"><span class="ts">00:34:20</span><span class="tx">你们俩的这个知识部</span></div>
+<div class="tl"><span class="ts">00:34:22</span><span class="tx">是没办法互相共享的</span></div>
+<div class="tl"><span class="ts">00:34:23</span><span class="tx">这个没有试过</span></div>
+<div class="tl"><span class="ts">00:34:26</span><span class="tx">对它里面有共享的方案</span></div>
+<div class="tl"><span class="ts">00:34:29</span><span class="tx">就是说那个同步(Sync)</span></div>
+<div class="tl"><span class="ts">00:34:30</span><span class="tx">但是还有没有别的方案</span></div>
+<div class="tl"><span class="ts">00:34:32</span><span class="tx">我们再去研究一下</span></div>
+<div class="tl"><span class="ts">00:34:33</span><span class="tx">对因为其实就对于我来讲</span></div>
+<div class="tl"><span class="ts">00:34:35</span><span class="tx">我就觉得就等于在一个团队里面</span></div>
+<div class="tl"><span class="ts">00:34:38</span><span class="tx">这个东西不管你装本地也好</span></div>
+<div class="tl"><span class="ts">00:34:40</span><span class="tx">装一个集中地方也好</span></div>
+<div class="tl"><span class="ts">00:34:41</span><span class="tx">当最终这里面的一些技能</span></div>
+<div class="tl"><span class="ts">00:34:45</span><span class="tx">是要能够在旁边里面去顺畅地流转</span></div>
+<div class="tl"><span class="ts">00:34:50</span><span class="tx">或者说它能够沉淀下来</span></div>
+<div class="tl"><span class="ts">00:34:53</span><span class="tx">就可能这个人</span></div>
+<div class="tl"><span class="ts">00:34:54</span><span class="tx">我可能就通过这个研究</span></div>
+<div class="tl"><span class="ts">00:34:56</span><span class="tx">或者是他同一个小组的</span></div>
+<div class="tl"><span class="ts">00:34:58</span><span class="tx">他这个支持</span></div>
+<div class="tl"><span class="ts">00:34:59</span><span class="tx">就是可能他做完分析他的肇杂</span></div>
+<div class="tl"><span class="ts">00:35:02</span><span class="tx">就不需要我们去找他去要</span></div>
+<div class="tl"><span class="ts">00:35:04</span><span class="tx">可能就比如说直接通过AI脚步</span></div>
+<div class="tl"><span class="ts">00:35:06</span><span class="tx">他是不是就可以了</span></div>
+<div class="tl"><span class="ts">00:35:07</span><span class="tx">可以把这一个小组里</span></div>
+<div class="tl"><span class="ts">00:35:08</span><span class="tx">甚至整个公司内的东西都可以进行去查看或者调用</span></div>
+<div class="tl"><span class="ts">00:35:14</span><span class="tx">就是在一个组织体系内的支持库怎么去用</span></div>
+<div class="tl"><span class="ts">00:35:20</span><span class="tx">或者说更具体的密集就是如何给整个公司去建一个支持库</span></div>
+<div class="tl"><span class="ts">00:35:28</span><span class="tx">这个东西可能会成为一个长期有用的东西</span></div>
+<div class="tl"><span class="ts">00:35:33</span><span class="tx">就这样,这个落年层比较能再沉滅了一两年,这个量可能也会很庞大</span></div>
+<div class="tl"><span class="ts">00:35:39</span><span class="tx">然后后面可能慢慢就会形成一个比较标准的一个SV</span></div>
+<div class="tl"><span class="ts">00:35:45</span><span class="tx">底下来</span></div>
+<div class="tl"><span class="ts">00:35:46</span><span class="tx">好</span></div>
+<div class="tl"><span class="ts">00:35:47</span><span class="tx">好</span></div>
+<div class="tl"><span class="ts">00:35:48</span><span class="tx">就这样做作为一个讨论点</span></div>
+<div class="tl"><span class="ts">00:35:52</span><span class="tx">好</span></div>
+<div class="tl"><span class="ts">00:35:53</span><span class="tx">谢谢</span></div>
+<div class="tl"><span class="ts">00:35:54</span><span class="tx">然后就是后面最近几天,他们应该是在过来一家,然后也有找一些那种做视频的</span></div>
+<div class="tl"><span class="ts">00:36:02</span><span class="tx">然后大概就是还在听不懂</span></div>
+<div class="tl"><span class="ts">00:36:05</span><span class="tx">对啊对啊</span></div>
+<div class="tl"><span class="ts">00:36:06</span><span class="tx">然后那</span></div>
+<div class="tl"><span class="ts">00:36:08</span><span class="tx">那就另外一个就是等于说</span></div>
+<div class="tl"><span class="ts">00:36:10</span><span class="tx">如果有空运的时间就完了</span></div>
+<div class="tl"><span class="ts">00:36:12</span><span class="tx">就一个这个方向去思考一下</span></div>
+<div class="tl"><span class="ts">00:36:14</span><span class="tx">就是去研究就是叫做</span></div>
+<div class="tl"><span class="ts">00:36:16</span><span class="tx">这种品牌的同意</span></div>
+<div class="tl"><span class="ts">00:36:19</span><span class="tx">就是等于说因为你看现在</span></div>
+<div class="tl"><span class="ts">00:36:21</span><span class="tx">每个同样玩一品</span></div>
+<div class="tl"><span class="ts">00:36:22</span><span class="tx">可能每个做的都能弄过同意</span></div>
+<div class="tl"><span class="ts">00:36:24</span><span class="tx">然后这个页面的这个</span></div>
+<div class="tl"><span class="ts">00:36:28</span><span class="tx">这个设置设表</span></div>
+<div class="tl"><span class="ts">00:36:30</span><span class="tx">可能就说就也五花八米各种各样</span></div>
+<div class="tl"><span class="ts">00:36:33</span><span class="tx">也字体什么都各种一样</span></div>
+<div class="tl"><span class="ts">00:36:35</span><span class="tx">就是这个就是到了可能前面没有这种强约书</span></div>
+<div class="tl"><span class="ts">00:36:41</span><span class="tx">一直以为大家先自由去做</span></div>
+<div class="tl"><span class="ts">00:36:43</span><span class="tx">当你到最终可能在这里面</span></div>
+<div class="tl"><span class="ts">00:36:46</span><span class="tx">我觉得它是需要去平一起来的</span></div>
+<div class="tl"><span class="ts">00:36:48</span><span class="tx">那这一部分呢</span></div>
+<div class="tl"><span class="ts">00:36:49</span><span class="tx">你可以花一点时间去研究一下</span></div>
+<div class="tl"><span class="ts">00:36:52</span><span class="tx">然后它逐步的可能去做一些规范出来</span></div>
+<div class="tl"><span class="ts">00:36:56</span><span class="tx">那就这些规范回头其实就可以写在这种</span></div>
+<div class="tl"><span class="ts">00:36:58</span><span class="tx">大家以後去生成的時候</span></div>
+<div class="tl"><span class="ts">00:37:01</span><span class="tx">可能就這些東西就比如說可能選怎麼樣色彩啊</span></div>
+<div class="tl"><span class="ts">00:37:05</span><span class="tx">然後就這個產品</span></div>
+<div class="tl"><span class="ts">00:37:07</span><span class="tx">或者說可能同樣外體來設計的產品</span></div>
+<div class="tl"><span class="ts">00:37:09</span><span class="tx">那至少說同一場一線的</span></div>
+<div class="tl"><span class="ts">00:37:12</span><span class="tx">可能最終去形成一個相對統一的一個分隔</span></div>
+<div class="tl"><span class="ts">00:37:18</span><span class="tx">這樣子就對於說同一個用群</span></div>
+<div class="tl"><span class="ts">00:37:21</span><span class="tx">大家可能會比較熟悉</span></div>
+<div class="tl"><span class="ts">00:37:23</span><span class="tx">但這個不是說馬上去用產品</span></div>
+<div class="tl"><span class="ts">00:37:25</span><span class="tx">至少說在前面的</span></div>
+<div class="tl"><span class="ts">00:37:26</span><span class="tx">要花多这种几周的时间</span></div>
+<div class="tl"><span class="ts">00:37:28</span><span class="tx">去要有意思的往这上面去学习</span></div>
+<div class="tl"><span class="ts">00:37:31</span><span class="tx">因为这里面其实它的背后逻辑就是</span></div>
+<div class="tl"><span class="ts">00:37:33</span><span class="tx">属于试图的影响</span></div>
+<div class="tl"><span class="ts">00:37:35</span><span class="tx">就如何</span></div>
+<div class="tl"><span class="ts">00:37:36</span><span class="tx">就或者是平台营销的这种概念</span></div>
+<div class="tl"><span class="ts">00:37:38</span><span class="tx">对</span></div>
+<div class="tl"><span class="ts">00:37:39</span><span class="tx">就理解了这概念</span></div>
+<div class="tl"><span class="ts">00:37:40</span><span class="tx">那可能会回过头来</span></div>
+<div class="tl"><span class="ts">00:37:42</span><span class="tx">再去做这些事情的时候</span></div>
+<div class="tl"><span class="ts">00:37:43</span><span class="tx">可能就</span></div>
+<div class="tl"><span class="ts">00:37:44</span><span class="tx">就能够选择出一个比较</span></div>
+<div class="tl"><span class="ts">00:37:47</span><span class="tx">影响的一种方式</span></div>
+<div class="tl"><span class="ts">00:37:50</span><span class="tx">嗯</span></div>
+<div class="tl"><span class="ts">00:37:51</span><span class="tx">我现在是弄的一个提示</span></div>
+<div class="tl"><span class="ts">00:37:53</span><span class="tx">其实是</span></div>
+<div class="tl"><span class="ts">00:37:54</span><span class="tx">把他的图片生存基本是往实拍</span></div>
+<div class="tl"><span class="ts">00:37:58</span><span class="tx">整体是清新的有明亮的设计来做</span></div>
+<div class="tl"><span class="ts">00:38:02</span><span class="tx">然后像每个品牌都有</span></div>
+<div class="tl"><span class="ts">00:38:05</span><span class="tx">看看每个品牌有没有一些现象</span></div>
+<div class="tl"><span class="ts">00:38:08</span><span class="tx">上次新华姐有跟我说</span></div>
+<div class="tl"><span class="ts">00:38:11</span><span class="tx">waiting那边可能更多的是几何型</span></div>
+<div class="tl"><span class="ts">00:38:14</span><span class="tx">那那种标志logo是要更向那个方向靠的</span></div>
+<div class="tl"><span class="ts">00:38:19</span><span class="tx">对,其实这个意思是说</span></div>
+<div class="tl"><span class="ts">00:38:22</span><span class="tx">这所有东西我们最终它其实是在因为除了A加以外</span></div>
+<div class="tl"><span class="ts">00:38:26</span><span class="tx">它上面还有那个Blend Story</span></div>
+<div class="tl"><span class="ts">00:38:29</span><span class="tx">然后可能还有投广告的时候</span></div>
+<div class="tl"><span class="ts">00:38:31</span><span class="tx">它还上场那个Logo</span></div>
+<div class="tl"><span class="ts">00:38:33</span><span class="tx">然后可能在广告的这种图片和视频的生成上</span></div>
+<div class="tl"><span class="ts">00:38:38</span><span class="tx">就是这个东西它其实</span></div>
+<div class="tl"><span class="ts">00:38:41</span><span class="tx">现在Whiting这个品牌它做到的品线</span></div>
+<div class="tl"><span class="ts">00:38:43</span><span class="tx">它有水旗、有四组、有宽楦</span></div>
+<div class="tl"><span class="ts">00:38:46</span><span class="tx">然后还有动物鞋</span></div>
+<div class="tl"><span class="ts">00:38:47</span><span class="tx">它其实品线比较多</span></div>
+<div class="tl"><span class="ts">00:38:49</span><span class="tx">但是各种品线对应的完全会有点不利</span></div>
+<div class="tl"><span class="ts">00:38:53</span><span class="tx">当然我们目前要做的就是根据这种品线的特点</span></div>
+<div class="tl"><span class="ts">00:38:57</span><span class="tx">那结合AI 还有分析</span></div>
+<div class="tl"><span class="ts">00:38:59</span><span class="tx">可能会建议我们选一个什么样的色调</span></div>
+<div class="tl"><span class="ts">00:39:02</span><span class="tx">就比较连logo的字体</span></div>
+<div class="tl"><span class="ts">00:39:04</span><span class="tx">最终它其他品牌可能会运异起来</span></div>
+<div class="tl"><span class="ts">00:39:07</span><span class="tx">因为我最早其实就是最终</span></div>
+<div class="tl"><span class="ts">00:39:10</span><span class="tx">这个原先这个logo也没有涉及过</span></div>
+<div class="tl"><span class="ts">00:39:12</span><span class="tx">其实最开始我可能就找了一个</span></div>
+<div class="tl"><span class="ts">00:39:15</span><span class="tx">是未来的一个字体</span></div>
+<div class="tl"><span class="ts">00:39:17</span><span class="tx">直接打一下然后生成了</span></div>
+<div class="tl"><span class="ts">00:39:18</span><span class="tx">就是成为一个无衬线字体</span></div>
+<div class="tl"><span class="ts">00:39:22</span><span class="tx">作为logo</span></div>
+<div class="tl"><span class="ts">00:39:25</span><span class="tx">那种的风格是保持这样子</span></div>
+<div class="tl"><span class="ts">00:39:27</span><span class="tx">但我觉得可能可以借助AI</span></div>
+<div class="tl"><span class="ts">00:39:30</span><span class="tx">把我们重新优化一下这种</span></div>
+<div class="tl"><span class="ts">00:39:33</span><span class="tx">首先logo的这种可能不能变化太大</span></div>
+<div class="tl"><span class="ts">00:39:37</span><span class="tx">就可能在跟我们鞋子上的logo</span></div>
+<div class="tl"><span class="ts">00:39:41</span><span class="tx">那种字体差不多分格</span></div>
+<div class="tl"><span class="ts">00:39:43</span><span class="tx">但是你在比例上可能可以借助AI</span></div>
+<div class="tl"><span class="ts">00:39:45</span><span class="tx">去把我们重新设计一下</span></div>
+<div class="tl"><span class="ts">00:39:47</span><span class="tx">然後這個東西可能就比較統一起來</span></div>
+<div class="tl"><span class="ts">00:39:49</span><span class="tx">去可能放在不同的地方</span></div>
+<div class="tl"><span class="ts">00:39:51</span><span class="tx">然後可能還有一個就是這個Logo</span></div>
+<div class="tl"><span class="ts">00:39:54</span><span class="tx">它可能就是有的地方是長條的</span></div>
+<div class="tl"><span class="ts">00:39:57</span><span class="tx">有的可能是一個正方形的</span></div>
+<div class="tl"><span class="ts">00:40:00</span><span class="tx">甚至有的圓形的</span></div>
+<div class="tl"><span class="ts">00:40:02</span><span class="tx">那就等於說這裡面能夠變化的</span></div>
+<div class="tl"><span class="ts">00:40:04</span><span class="tx">就在這個字體保持度的情況下</span></div>
+<div class="tl"><span class="ts">00:40:06</span><span class="tx">那你可以通過顏色上的變化</span></div>
+<div class="tl"><span class="ts">00:40:08</span><span class="tx">來達到一個顯示的一個效果</span></div>
+<div class="tl"><span class="ts">00:40:11</span><span class="tx">這個是給我關於Logo是第一步</span></div>
+<div class="tl"><span class="ts">00:40:14</span><span class="tx">就是关于整个品牌的主色调的问题</span></div>
+<div class="tl"><span class="ts">00:40:18</span><span class="tx">主色调这个东西就可能我们不一定要同意到品牌级别</span></div>
+<div class="tl"><span class="ts">00:40:21</span><span class="tx">但是可以同意到这个系列这一级别</span></div>
+<div class="tl"><span class="ts">00:40:26</span><span class="tx">比如说我们在这上面去可能针对不同产品线</span></div>
+<div class="tl"><span class="ts">00:40:34</span><span class="tx">做不同的主色调的问题</span></div>
+<div class="tl"><span class="ts">00:40:37</span><span class="tx">然后顺便延伸出来可能就是说有品牌故事</span></div>
+<div class="tl"><span class="ts">00:40:41</span><span class="tx">就在故事裡面,說服別人</span></div>
+<div class="tl"><span class="ts">00:40:45</span><span class="tx">甚至是品牌故事</span></div>
+<div class="tl"><span class="ts">00:40:48</span><span class="tx">反正就是知道從我們自己品牌的發展來講是沒有故事</span></div>
+<div class="tl"><span class="ts">00:40:52</span><span class="tx">就是為了賣過,就弄了一個商標</span></div>
+<div class="tl"><span class="ts">00:40:55</span><span class="tx">賣的真正來講,從銀行的角度來講</span></div>
+<div class="tl"><span class="ts">00:40:59</span><span class="tx">你得有一個故事在那邊</span></div>
+<div class="tl"><span class="ts">00:41:01</span><span class="tx">就像你說有一定的相對古特性</span></div>
+<div class="tl"><span class="ts">00:41:04</span><span class="tx">那這個東西我們就在接觸AI的情況下</span></div>
+<div class="tl"><span class="ts">00:41:07</span><span class="tx">这些就作为一个相对接下去一个月的一个</span></div>
+<div class="tl"><span class="ts">00:41:14</span><span class="tx">就是除了主要要做的事情以外的一个月的方向</span></div>
+<div class="tl"><span class="ts">00:41:19</span><span class="tx">其他就这样了</span></div>
+<div class="tl"><span class="ts">00:41:23</span><span class="tx">马上要过节的更简单</span></div></div>
+  </details>
+
+  <footer>原始音频 41 分 31 秒 · 本地 Whisper 转写 · 术语修正 32 处 · 生成于 2026-09-23</footer>
+</div>
+</body>
+</html>

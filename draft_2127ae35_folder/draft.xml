@@ -1,0 +1,159 @@
+<title>FBA 退货数据每日增量导出 · 自动化方案</title>
+<p>本文说明川鹏 2 号店铺（storeId 27661378824000）FBA 退货数据的每日增量导出方案：它每天自动拉取新增退货记录、去重累积成一张主表，在无人工干预的前提下保证数据不重不漏。读者是维护这套脚本的人，以及需要判断当天结果是否健康的运营负责人。</p>
+<callout emoji="⚠️" background-color="light-yellow" border-color="yellow"><p><b>关键前置</b>：紫鸟浏览器必须已启动并保持川鹏 2 号店铺的登录态，ZClaw Bridge 必须已连接。两者任一缺失，脚本会直接失败退出——这是刻意的设计选择，不做无意义的重试，次日自动续跑即可。</p></callout>
+
+<h1 seq="auto">这套方案解决什么问题</h1>
+<p>Amazon Seller Central 的 FBA 退货列表没有开放官方报表接口，只能走界面导出。这条路有三个绕不开的现实约束，方案全部围绕它们设计：</p>
+<table>
+<thead>
+<tr><th background-color="light-gray"><p>约束</p></th><th background-color="light-gray"><p>后果</p></th><th background-color="light-gray"><p>方案对策</p></th></tr>
+</thead>
+<tbody>
+<tr><td><p>每天新增条数不固定</p></td><td><p>实测同一店铺一天内新增量在 <b>26 条到 1663 条</b>之间波动，相差 64 倍</p></td><td><p>游标增量：不假设任何条数，遇到边界才停</p></td></tr>
+<tr><td><p>日期筛选只有 6 个预设区间</p></td><td><p>无自定义起止日期，无法按日期窗口切片</p></td><td><p>固定用 LAST_7_DAYS，边界交给游标判定</p></td></tr>
+<tr><td><p>界面表格服务端约 1 万行封顶</p></td><td><p>翻到第 10 页即卡死，重置页面无效</p></td><td><p>每日只取增量，全量历史改走 SP-API</p></td></tr>
+</tbody>
+</table>
+
+<h1 seq="auto">核心机制：游标增量</h1>
+<p>这是全篇唯一需要建立的心智模型。列表按退款日倒序排列，<b>顶部永远是最新的记录</b>。每次运行从顶部往下翻页，一旦在当前页重新遇到"上一次运行时的最新订单号"，就说明已经抵达上次的边界——这一行以上的全部是新增，到此停止翻页。</p>
+<whiteboard type="mermaid">graph TD
+  A[每日定时运行] --&gt; B[打开退货列表 按退款日倒序]
+  B --&gt; C[读取上次游标 OrderID]
+  C --&gt; D[提取当前页 1000 行]
+  D --&gt; E{本页是否出现游标ID}
+  E --&gt;|否| F[点击下一页]
+  F --&gt; D
+  E --&gt;|是| G[抵达边界 停止翻页]
+  G --&gt; H[按 订单号+ASIN 去重]
+  H --&gt; I[追加写入 master 主表]
+  I --&gt; J[生成当日日报]
+  J --&gt; K[游标更新为本次顶部订单号]
+</whiteboard>
+<p>这个设计带来两个可以直接用来判断当天情况的性质：</p>
+<ul>
+<li><p><b>命中页码是增量规模的滞后指标</b>：在第 1 页就命中，说明新增不足 1000 条；命中在第 2 页，说明新增在 1000～2000 条之间。不需要另外统计就能大致判断当天增量量级。</p></li>
+<li><p><b>新增量大小与是否漏抓无关</b>：因为停止条件由游标决定，而不是条数。今天抓到 26 条不代表漏了 1600 条，只说明当时列表里确实只有这么多。</p></li>
+</ul>
+
+<h1 seq="auto">每日执行流程</h1>
+<p>定时任务只调用一条命令，脚本内部按序完成五个阶段：</p>
+<pre lang="bash" caption="定时任务入口命令"><code>/Users/panjinlong/.workbuddy/binaries/node/versions/22.22.2/bin/node \
+  /Users/panjinlong/Documents/agent-master/fba-returns/daily_pull.js</code></pre>
+<ol>
+<li><p><b>打开页面</b>：通过 ZClaw Bridge 在紫鸟浏览器内打开退货列表页，取得 targetId。</p></li>
+<li><p><b>设置筛选</b>：把退款日期筛选设为 LAST_7_DAYS，等待页面重新渲染。</p></li>
+<li><p><b>注入分页</b>：向页面注入 recordsPerPage=1000 选项并触发 change，让界面自身发起请求拿到每页 1000 行。</p></li>
+<li><p><b>逐页提取</b>：调用浏览器内脚本做 DOM 结构化提取，直接产出 13 列；随后点击下一页，直到命中游标或页数触顶。</p></li>
+<li><p><b>去重落盘</b>：按去重键过滤后追加进 master，生成当日日报，更新游标状态。</p></li>
+</ol>
+<p>单次运行耗时通常在 <b>30～60 秒</b>。脚本采用串行零并发、6～10 秒随机抖动，避免触发限流。</p>
+
+<h1 seq="auto">文件与数据</h1>
+<p>所有文件位于 <code>/Users/panjinlong/Documents/agent-master/fba-returns/</code>。</p>
+<table>
+<thead>
+<tr><th background-color="light-gray"><p>文件</p></th><th background-color="light-gray"><p>作用</p></th></tr>
+</thead>
+<tbody>
+<tr><td><p>daily_pull.js</p></td><td><p>每日游标增量主脚本，定时任务唯一入口</p></td></tr>
+<tr><td><p>extract_full.js</p></td><td><p>浏览器内 DOM 结构化提取，直接返回 13 列</p></td></tr>
+<tr><td><p>set_filter.js / next.js</p></td><td><p>设置退款日筛选 / 点击下一页</p></td></tr>
+<tr><td><p>master.csv</p></td><td><p>累计去重主表，全量历史沉淀</p></td></tr>
+<tr><td><p>&lt;日期&gt;导出增量数据_&lt;分布&gt;.csv</p></td><td><p>当日新增日报，当天无新增则不生成</p></td></tr>
+<tr><td><p>daily_state.json</p></td><td><p>游标状态：上次运行日期、最新订单号、主表行数</p></td></tr>
+<tr><td><p>master.csv.good.bak</p></td><td><p>last-known-good 自愈快照，主表损坏时自动回滚</p></td></tr>
+<tr><td><p>deep_scan.js</p></td><td><p>30 天深扫（实验性），共用同一张 master</p></td></tr>
+</tbody>
+</table>
+
+<h2 seq="auto">主表字段与去重键</h2>
+<p>主表固定 13 列：Marketplace、Order ID、Image、Title、ASIN、Seller SKU、Return Reason、Authorization Date、Refund Date、Unit Received Date、Disposition、Status、Action。</p>
+<p><b>去重键 = 订单号 + ASIN</b>，即一条退货事件只记录一次。后续状态变化不会重写已存行，因此这张表是"事件流水"而非"状态跟踪表"——需要看最新状态时，以列表页为准。</p>
+
+<h2 seq="auto">日报命名规则</h2>
+<p>日报文件名自带数据摘要，不打开就能看出当天抓了哪些退款日、各多少条：</p>
+<pre lang="text" caption="命名格式"><code>&lt;北京时间 M月D日&gt;导出增量数据_&lt;MM-DD&gt; (N 条) + &lt;MM-DD&gt; (M 条).csv</code></pre>
+<p>实例：<code>9月2日导出增量数据_08-31 (548 条) + 09-01 (1115 条).csv</code></p>
+<ul>
+<li><p>统计维度是 <b>Refund Date（退款日）</b>，多天时按日期升序，用「 + 」连接。</p></li>
+<li><p>原始日期为 MM/DD/YYYY，文件名只取月日。因为斜杠在 Unix 文件名中是路径分隔符，统一改写作连字符：<code>08/31 → 08-31</code>。</p></li>
+<li><p>日期缺失的记录归入「未标注」并排在最后；若退款日分布天数过多导致文件名超长，自动降级为区间摘要，如 <code>08-26~09-01 (1663 条)</code>。</p></li>
+</ul>
+
+<h1 seq="auto">定时排期与夏令时校正</h1>
+<table>
+<thead>
+<tr><th background-color="light-gray"><p>任务</p></th><th background-color="light-gray"><p>规则</p></th><th background-color="light-gray"><p>说明</p></th></tr>
+</thead>
+<tbody>
+<tr><td><p>每日增量提取</p></td><td><p>FREQ=DAILY;BYHOUR=21;BYMINUTE=0</p></td><td><p>本机 21:00 运行。本机时区为 America/New_York，夏令时下即北京时间 09:00</p></td></tr>
+<tr><td><p>DST 校正</p></td><td><p>一次性任务，换季日触发</p></td><td><p>自动改 BYHOUR（夏令时 21 / 冬令时 20）并自我续建下一次，避免北京时间漂移</p></td></tr>
+</tbody>
+</table>
+<callout emoji="💡" background-color="light-blue" border-color="blue"><p>rrule 按本机本地时间解释且不支持时区标识，所以"北京时间 09:00"必须换算成本机小时：夏令时为 21 点，冬令时为 20 点。换季日（美国 3 月第二个周日、11 月第一个周日）若不做校正，任务会整整偏移一小时。</p></callout>
+
+<h1 seq="auto">安全设计：五道防线</h1>
+<p>历史上一度出现过主表被写成 xlsx 二进制、日报半截写入等问题，因此脚本在写入路径上布了五道检查，任一不通过就中止，绝不静默损坏数据。</p>
+<table>
+<thead>
+<tr><th background-color="light-gray"><p>时机</p></th><th background-color="light-gray"><p>检查</p></th><th background-color="light-gray"><p>不通过时</p></th></tr>
+</thead>
+<tbody>
+<tr><td><p>读入主表前</p></td><td><p>是否二进制文件、表头是否合法 13 列</p></td><td><p>从 good.bak 自动恢复后重读；无快照则拒绝运行</p></td></tr>
+<tr><td><p>提取每一行时</p></td><td><p>列数必须等于 13</p></td><td><p>中止写入，退出码 3</p></td></tr>
+<tr><td><p>落盘前</p></td><td><p>待写内容是否为二进制</p></td><td><p>中止写入，退出码 4</p></td></tr>
+<tr><td><p>写入前一刻</p></td><td><p>主表 mtime 是否被外部改动过</p></td><td><p>放弃本次写入，保留外部的好数据，退出码 5</p></td></tr>
+<tr><td><p>写入之后</p></td><td><p>主表与日报逐行校验列数</p></td><td><p>打印告警；只有校验通过才更新 good.bak 快照</p></td></tr>
+</tbody>
+</table>
+<p>写入采用原子操作：先写临时文件再重命名，杜绝进程中断留下半截文件。</p>
+
+<h1 seq="auto">数据判读要点</h1>
+<callout emoji="⚠️" background-color="light-yellow" border-color="yellow"><p><b>最容易被误判的一点</b>：每日新增条数波动极大是正常的，不要用条数多少判断当天是否漏抓。2026-09-01 只新增 26 条，次日新增 1663 条，差 64 倍，但两次数据都健康。</p></callout>
+<p>根因是 Amazon 退货列表存在<b>录入延迟</b>：某个退款日的记录并非当天全部进入列表，往往次日才补齐。所以当天抓得少，只是当时列表里还没有，次日会自然补登。</p>
+<p>正确的判断方法是<b>看日报的 Refund Date 分布，而不是条数</b>。每次跑完固定做三项检查：</p>
+<ol>
+<li><p><b>日报内部重复数</b>——应为 0。不为 0 说明去重键失效。</p></li>
+<li><p><b>主表列数异常行数</b>——应为 0。脚本写后已自动校验并打印。</p></li>
+<li><p><b>日报 Refund Date 分布</b>——应集中在最近 1～2 天。用 Excel 打开日报对该列做数据透视即可，若出现大量陈旧日期说明游标异常。</p></li>
+</ol>
+<callout emoji="💡" background-color="light-gray" border-color="gray"><p><b>Authorization Date 不能用来判断增量边界</b>。它可以比退款日早数周，这是"授权早、退款晚"的正常业务形态。界面筛选器走的是 REFUND_DATE_FILTER_GROUP，只有退款日才是排序与切片依据。</p></callout>
+
+<h1 seq="auto">失败处理与幂等</h1>
+<p>浏览器未开、桥未连、页面超时，脚本都直接记录原因并退出，<b>不重试、不循环</b>。这是安全的，因为幂等由两重机制保证：</p>
+<ul>
+<li><p><b>去重键</b>：同一条退货事件即使被重复采集，也只会在主表里出现一次。</p></li>
+<li><p><b>游标</b>：只在成功采集到数据后才前移；本次无数据则沿用旧游标，下次从同一位置继续。</p></li>
+</ul>
+<p>因此次日续跑不会漏数据，手动重跑也不会产生重复行。</p>
+
+<h1 seq="auto">已知限制</h1>
+<table>
+<thead>
+<tr><th background-color="light-gray"><p>限制</p></th><th background-color="light-gray"><p>影响</p></th><th background-color="light-gray"><p>应对</p></th></tr>
+</thead>
+<tbody>
+<tr><td><p>界面约 1 万行封顶</p></td><td><p>单趟最多取最新约 1 万条，拿不到 30 天全量</p></td><td><p>全量历史走 SP-API 官方 Customer Returns 报表</p></td></tr>
+<tr><td><p>紫鸟 F12 被企业策略禁用</p></td><td><p>无法用开发者工具排查</p></td><td><p>改用 page exec 注入脚本读取 DOM</p></td></tr>
+<tr><td><p>直接重放 refresh 请求会触发 CSRF</p></td><td><p>返回壳页而非数据</p></td><td><p>"借页面自身的请求"：注入选项触发 change 再读渲染结果</p></td></tr>
+<tr><td><p>游标滚出 7 天窗口</p></td><td><p>跑满 50 页仍未命中游标</p></td><td><p>改用每周深扫补登</p></td></tr>
+<tr><td><p>主表存在 2 个历史遗留重复键</p></td><td><p>2 行冗余，不影响使用</p></td><td><p>可择机统一跑一次去重</p></td></tr>
+</tbody>
+</table>
+
+<h1 seq="auto">常见故障速查</h1>
+<table>
+<thead>
+<tr><th background-color="light-gray"><p>症状</p></th><th background-color="light-gray"><p>原因</p></th><th background-color="light-gray"><p>处理</p></th></tr>
+</thead>
+<tbody>
+<tr><td><p>no targetId</p></td><td><p>紫鸟浏览器未启动或店铺未打开</p></td><td><p>启动浏览器并登录川鹏 2 号，重跑即可</p></td></tr>
+<tr><td><p>设置筛选失败 / 注入失败</p></td><td><p>页面未加载完或前端结构变更</p></td><td><p>脚本内置重试；连续失败需检查页面结构是否改版</p></td></tr>
+<tr><td><p>首页主键未变化，翻页卡死</p></td><td><p>触达服务端 1 万行上限</p></td><td><p>属正常保护，当日增量过大时改走深扫</p></td></tr>
+<tr><td><p>主表被写坏</p></td><td><p>历史遗留问题，现已有多道防线</p></td><td><p>从 master.csv.good.bak 恢复</p></td></tr>
+<tr><td><p>当天没有生成日报</p></td><td><p>当天确实没有新增记录</p></td><td><p>属正常，主表与游标已同步</p></td></tr>
+</tbody>
+</table>
+<hr/>
+<p>最近一次成功运行：北京时间 2026-09-02 09:13，拉取 2 页后命中游标停止，采集 2000 行、去重后新增 1663 条，主表累计 18992 行，耗时 54.5 秒，五道防线全部通过。</p>

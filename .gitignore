@@ -16,7 +16,6 @@ node_modules
 .claude/skills/gemini-designer
 .claude/skills/ui-ux-pro-max
 .claude/worktrees
-01-产品/优西四海官网/芯威霆企业网站-admin
 
 # 其他临时文件
 *.tmp
@@ -33,3 +32,18 @@ settings.json
 *secret*
 *key*
 *token*
+
+# 本地缓存、临时检查结果与独立仓库
+.cache/
+.codex-artifact-runtime/
+.codex_tmp/
+tmp/
+aily-faas-field
+apps/amazon-image-studio
+deepseek-harness
+*.inspect.ndjson
+
+# 运行时数据及含凭据的本地文档
+n8n-automation/n8n-data/
+dsh-gpt-mcp-bridge/ACCEPTANCE-2026-09-10.md
+wiki/AI工程/工具参考/DeepSeek-AI分析.md

@@ -1,0 +1,40 @@
+# Full-access ChatGPT MCP bridge layered after dsh-base and dsh-web-app.
+
+- id: sandbox-policy
+  config:
+    mode: danger-full-access
+    workspaceRoot: !!js process.cwd()
+
+- id: approval
+  config:
+    policy: never
+
+- id: permission
+  config:
+    defaultPreset: danger-full-access
+
+- id: session-query-sqlite
+  config:
+    path: !!js dshHomePath('storages/gpt-mcp-session-search.sqlite')
+    openAt: first-search
+
+- insert:
+    - id: gpt-mcp-bridge
+      name: '@panjinlong/dsh-gpt-mcp-bridge'
+      inject: [webServer, sessionController, sessionQuery, agents, sessions, permissionPresets, llm, agentPresets]
+      config:
+        route: /mcp
+        healthRoute: /mcp-health
+        workspaceRoot: !!js process.env.DSH_GPT_MCP_ROOT ?? process.cwd()
+        maxOutputChars: 2000000
+        mode: agent-loop
+        taskStateDir: !!js dshHomePath('storages/gpt-mcp-tasks')
+        maxConcurrentTasks: 8
+        maxQueuedTasks: 32
+        maxQueueWaitMs: 900000
+        maxTaskDurationMs: 900000
+        maxTaskLifetimeMs: 3600000
+        maxWaitMs: 20000
+        modelDriver: external
+        maxModelRequestChars: 2000000
+        maxInlineModelChars: 16000

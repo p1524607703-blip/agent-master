@@ -1,0 +1,632 @@
+{
+  "headline": {
+    "unique_keyword_terms": 2394,
+    "accepted_terms": 2315,
+    "accepted_rate_pct": 96.7,
+    "needs_review_terms": 79,
+    "raw_intent_clusters": 1674,
+    "raw_singleton_clusters": 1433,
+    "raw_singleton_cluster_term_pct": 59.9,
+    "normalized_intent_clusters": 1668,
+    "normalized_singleton_clusters": 1428,
+    "standardized_changed_terms": 2040,
+    "standardized_changed_pct": 85.2,
+    "fit_or_partial_terms": 2076,
+    "fit_or_partial_pct": 86.7,
+    "high_or_brand_intent_terms": 1043,
+    "high_or_brand_intent_pct": 43.6,
+    "max_theme_sensitivity_pp": 0.3,
+    "source_files": 120,
+    "schema_version": "1.0.0",
+    "raw_prompt_versions": {
+      "1.0.0": 734,
+      "1.1.0": 1660
+    },
+    "normalized_prompt_version": [
+      "1.1.0"
+    ],
+    "model_name": "deepseek/deepseek-v4-pro",
+    "performance_metrics_used": []
+  },
+  "theme_share": [
+    {
+      "rank": 1,
+      "theme_id": "generic_category_only",
+      "theme": "基础品类/人群词",
+      "terms": 680,
+      "share": 0.284,
+      "share_pct": 28.4,
+      "lexical_terms": 428,
+      "lexical_share_pct": 17.9,
+      "accepted_terms": 657,
+      "accepted_share_pct": 28.4,
+      "sensitivity_pp": 0.0,
+      "definition": "只表达夹脚拖、人字拖、凉鞋及女士等基础条件，没有更具体的差异化要求。",
+      "examples": "拖鞋；拖鞋女；women"
+    },
+    {
+      "rank": 2,
+      "theme_id": "style_color",
+      "theme": "颜色与外观风格",
+      "terms": 477,
+      "share": 0.1992,
+      "share_pct": 19.9,
+      "lexical_terms": 726,
+      "lexical_share_pct": 30.3,
+      "accepted_terms": 455,
+      "accepted_share_pct": 19.7,
+      "sensitivity_pp": 0.3,
+      "definition": "颜色、图案、造型、厚底/坡跟、鞋带结构、时尚或正式外观等。",
+      "examples": "tan flops；coral flip；pink flops"
+    },
+    {
+      "rank": 3,
+      "theme_id": "water_outdoor",
+      "theme": "海滩/泳池/涉水与户外",
+      "terms": 422,
+      "share": 0.1763,
+      "share_pct": 17.6,
+      "lexical_terms": 411,
+      "lexical_share_pct": 17.2,
+      "accepted_terms": 413,
+      "accepted_share_pct": 17.8,
+      "sensitivity_pp": -0.2,
+      "definition": "海滩、泳池、淋浴、游泳、潮湿环境、防水、户外、夏季等场景能力。",
+      "examples": "拖鞋女生夏天；pool sandals；womens beach"
+    },
+    {
+      "rank": 4,
+      "theme_id": "support_foot_health",
+      "theme": "足弓支撑与足部健康",
+      "terms": 413,
+      "share": 0.1725,
+      "share_pct": 17.3,
+      "lexical_terms": 502,
+      "lexical_share_pct": 21.0,
+      "accepted_terms": 401,
+      "accepted_share_pct": 17.3,
+      "sensitivity_pp": -0.1,
+      "definition": "足弓、矫形、足底筋膜炎、足跟/足部疼痛、扁平足、高足弓、恢复等需求。",
+      "examples": "arch slides；arch footwear；arch+footwear"
+    },
+    {
+      "rank": 5,
+      "theme_id": "comfort_cushion",
+      "theme": "舒适、缓震与全天穿着",
+      "terms": 213,
+      "share": 0.089,
+      "share_pct": 8.9,
+      "lexical_terms": 200,
+      "lexical_share_pct": 8.4,
+      "accepted_terms": 209,
+      "accepted_share_pct": 9.0,
+      "sensitivity_pp": -0.1,
+      "definition": "舒适、软弹、缓震、记忆泡棉、厚实脚感、久站/久走或全天穿着。",
+      "examples": "fit flops；cozy flops；soft sandals"
+    },
+    {
+      "rank": 6,
+      "theme_id": "material_build",
+      "theme": "材质与结构性能",
+      "terms": 205,
+      "share": 0.0856,
+      "share_pct": 8.6,
+      "lexical_terms": 222,
+      "lexical_share_pct": 9.3,
+      "accepted_terms": 195,
+      "accepted_share_pct": 8.4,
+      "sensitivity_pp": 0.1,
+      "definition": "EVA、橡胶、塑料、泡棉等材质，以及轻量、耐用、透气、易清洁、一体成型等。",
+      "examples": "eva flip flop；eva flipflops；foam flip flop"
+    },
+    {
+      "rank": 7,
+      "theme_id": "brand_competitor",
+      "theme": "品牌与竞品替代",
+      "terms": 200,
+      "share": 0.0835,
+      "share_pct": 8.4,
+      "lexical_terms": 248,
+      "lexical_share_pct": 10.4,
+      "accepted_terms": 190,
+      "accepted_share_pct": 8.2,
+      "sensitivity_pp": 0.1,
+      "definition": "指定 Joomra、Archies、FitFlop、Crocs、Nike 等品牌，或寻找某品牌替代品。",
+      "examples": "kuailu；archie；joomra"
+    },
+    {
+      "rank": 8,
+      "theme_id": "size_fit",
+      "theme": "尺码、宽窄与合脚性",
+      "terms": 119,
+      "share": 0.0497,
+      "share_pct": 5.0,
+      "lexical_terms": 174,
+      "lexical_share_pct": 7.3,
+      "accepted_terms": 114,
+      "accepted_share_pct": 4.9,
+      "sensitivity_pp": 0.0,
+      "definition": "指定尺码、宽脚/窄脚、宽度、半码、脚型与合脚性要求。",
+      "examples": "women flip size 11；flip flops size 40；size 7 sandals women"
+    },
+    {
+      "rank": 9,
+      "theme_id": "indoor_home",
+      "theme": "居家与室内使用",
+      "terms": 52,
+      "share": 0.0217,
+      "share_pct": 2.2,
+      "lexical_terms": 48,
+      "lexical_share_pct": 2.0,
+      "accepted_terms": 48,
+      "accepted_share_pct": 2.1,
+      "sensitivity_pp": 0.1,
+      "definition": "在家、室内、浴室、家务或居家拖鞋替代场景。",
+      "examples": "home archies；flip flops home；home flip flops"
+    },
+    {
+      "rank": 10,
+      "theme_id": "slip_safety",
+      "theme": "防滑、抓地与安全",
+      "terms": 46,
+      "share": 0.0192,
+      "share_pct": 1.9,
+      "lexical_terms": 46,
+      "lexical_share_pct": 1.9,
+      "accepted_terms": 44,
+      "accepted_share_pct": 1.9,
+      "sensitivity_pp": 0.0,
+      "definition": "明确要求 non-slip、slip-resistant、grip、traction 等防滑抓地能力。",
+      "examples": "flip flop non-slip；non slip flip flops；flipflop with floor grip"
+    },
+    {
+      "rank": 11,
+      "theme_id": "price_fulfillment",
+      "theme": "价格、促销与配送",
+      "terms": 44,
+      "share": 0.0184,
+      "share_pct": 1.8,
+      "lexical_terms": 83,
+      "lexical_share_pct": 3.5,
+      "accepted_terms": 43,
+      "accepted_share_pct": 1.9,
+      "sensitivity_pp": -0.0,
+      "definition": "便宜、预算上限、清仓/折扣、当日或隔夜配送等交易条件。",
+      "examples": "fit flops sale；flipflops sale；cheap flip flop"
+    }
+  ],
+  "functional_needs": [
+    {
+      "rank": 1,
+      "need": "足弓支撑与足部健康",
+      "terms": 644,
+      "share": 0.269,
+      "share_pct": 26.9,
+      "method": "标准化18字段语义归并"
+    },
+    {
+      "rank": 2,
+      "need": "海滩/泳池/淋浴与涉水",
+      "terms": 407,
+      "share": 0.17,
+      "share_pct": 17.0,
+      "method": "标准化18字段语义归并"
+    },
+    {
+      "rank": 3,
+      "need": "舒适、缓震与全天穿着",
+      "terms": 346,
+      "share": 0.1445,
+      "share_pct": 14.5,
+      "method": "标准化18字段语义归并"
+    },
+    {
+      "rank": 4,
+      "need": "防滑、抓地与安全",
+      "terms": 107,
+      "share": 0.0447,
+      "share_pct": 4.5,
+      "method": "标准化18字段语义归并"
+    }
+  ],
+  "selection_modifiers": [
+    {
+      "rank": 1,
+      "modifier": "颜色与外观风格",
+      "terms": 726,
+      "share": 0.3033,
+      "share_pct": 30.3,
+      "method": "搜索词原文审计"
+    },
+    {
+      "rank": 2,
+      "modifier": "品牌与竞品替代",
+      "terms": 248,
+      "share": 0.1036,
+      "share_pct": 10.4,
+      "method": "搜索词原文+品牌阶段标签"
+    },
+    {
+      "rank": 3,
+      "modifier": "材质与结构性能",
+      "terms": 222,
+      "share": 0.0927,
+      "share_pct": 9.3,
+      "method": "搜索词原文审计"
+    },
+    {
+      "rank": 4,
+      "modifier": "尺码、宽窄与合脚性",
+      "terms": 174,
+      "share": 0.0727,
+      "share_pct": 7.3,
+      "method": "搜索词原文审计"
+    },
+    {
+      "rank": 5,
+      "modifier": "价格、促销与配送",
+      "terms": 83,
+      "share": 0.0347,
+      "share_pct": 3.5,
+      "method": "搜索词原文审计"
+    }
+  ],
+  "product_audience": [
+    {
+      "dimension": "产品类型",
+      "category": "夹脚拖/人字拖",
+      "terms": 2119,
+      "share_pct": 88.5
+    },
+    {
+      "dimension": "产品类型",
+      "category": "其他凉鞋",
+      "terms": 213,
+      "share_pct": 8.9
+    },
+    {
+      "dimension": "产品类型",
+      "category": "其他鞋类或跨品类",
+      "terms": 30,
+      "share_pct": 1.3
+    },
+    {
+      "dimension": "产品类型",
+      "category": "拖鞋/一字拖/淋浴鞋",
+      "terms": 22,
+      "share_pct": 0.9
+    },
+    {
+      "dimension": "产品类型",
+      "category": "未识别",
+      "terms": 10,
+      "share_pct": 0.4
+    },
+    {
+      "dimension": "使用人群",
+      "category": "女士明确",
+      "terms": 1565,
+      "share_pct": 65.4
+    },
+    {
+      "dimension": "使用人群",
+      "category": "未明确人群",
+      "terms": 801,
+      "share_pct": 33.5
+    },
+    {
+      "dimension": "使用人群",
+      "category": "其他/泛人群",
+      "terms": 28,
+      "share_pct": 1.2
+    }
+  ],
+  "fit_stage": [
+    {
+      "dimension": "intent_stage",
+      "category": "consideration",
+      "terms": 1062,
+      "share": 0.4436,
+      "share_pct": 44.4
+    },
+    {
+      "dimension": "intent_stage",
+      "category": "high_intent",
+      "terms": 795,
+      "share": 0.3321,
+      "share_pct": 33.2
+    },
+    {
+      "dimension": "intent_stage",
+      "category": "exploration",
+      "terms": 265,
+      "share": 0.1107,
+      "share_pct": 11.1
+    },
+    {
+      "dimension": "intent_stage",
+      "category": "brand_harvest",
+      "terms": 248,
+      "share": 0.1036,
+      "share_pct": 10.4
+    },
+    {
+      "dimension": "intent_stage",
+      "category": "unknown",
+      "terms": 24,
+      "share": 0.01,
+      "share_pct": 1.0
+    },
+    {
+      "dimension": "asin_fit",
+      "category": "match",
+      "terms": 1122,
+      "share": 0.4687,
+      "share_pct": 46.9
+    },
+    {
+      "dimension": "asin_fit",
+      "category": "partial_match",
+      "terms": 954,
+      "share": 0.3985,
+      "share_pct": 39.8
+    },
+    {
+      "dimension": "asin_fit",
+      "category": "mismatch",
+      "terms": 311,
+      "share": 0.1299,
+      "share_pct": 13.0
+    },
+    {
+      "dimension": "asin_fit",
+      "category": "unknown",
+      "terms": 7,
+      "share": 0.0029,
+      "share_pct": 0.3
+    },
+    {
+      "dimension": "confidence_level",
+      "category": "high",
+      "terms": 1433,
+      "share": 0.5986,
+      "share_pct": 59.9
+    },
+    {
+      "dimension": "confidence_level",
+      "category": "medium",
+      "terms": 874,
+      "share": 0.3651,
+      "share_pct": 36.5
+    },
+    {
+      "dimension": "confidence_level",
+      "category": "low",
+      "terms": 87,
+      "share": 0.0363,
+      "share_pct": 3.6
+    },
+    {
+      "dimension": "review_status",
+      "category": "accepted",
+      "terms": 2315,
+      "share": 0.967,
+      "share_pct": 96.7
+    },
+    {
+      "dimension": "review_status",
+      "category": "needs_review",
+      "terms": 79,
+      "share": 0.033,
+      "share_pct": 3.3
+    }
+  ],
+  "slot_coverage": [
+    {
+      "field": "product_type",
+      "terms": 2384,
+      "share": 0.9958,
+      "share_pct": 99.6
+    },
+    {
+      "field": "audience_intent",
+      "terms": 1593,
+      "share": 0.6654,
+      "share_pct": 66.5
+    },
+    {
+      "field": "capability_intent",
+      "terms": 1170,
+      "share": 0.4887,
+      "share_pct": 48.9
+    },
+    {
+      "field": "function_intent",
+      "terms": 715,
+      "share": 0.2987,
+      "share_pct": 29.9
+    },
+    {
+      "field": "secondary_domain",
+      "terms": 421,
+      "share": 0.1759,
+      "share_pct": 17.6
+    },
+    {
+      "field": "location_intent",
+      "terms": 377,
+      "share": 0.1575,
+      "share_pct": 15.7
+    },
+    {
+      "field": "body_need_intent",
+      "terms": 319,
+      "share": 0.1332,
+      "share_pct": 13.3
+    },
+    {
+      "field": "event_intent",
+      "terms": 258,
+      "share": 0.1078,
+      "share_pct": 10.8
+    },
+    {
+      "field": "substitute_intent",
+      "terms": 97,
+      "share": 0.0405,
+      "share_pct": 4.1
+    },
+    {
+      "field": "time_intent",
+      "terms": 71,
+      "share": 0.0297,
+      "share_pct": 3.0
+    },
+    {
+      "field": "complement_intent",
+      "terms": 10,
+      "share": 0.0042,
+      "share_pct": 0.4
+    }
+  ],
+  "raw_cluster_top": [
+    {
+      "intent_cluster": "womens_arch_support_flip_flops",
+      "terms": 43,
+      "share_pct": 1.8
+    },
+    {
+      "intent_cluster": "arch_support_flip_flops",
+      "terms": 39,
+      "share_pct": 1.6
+    },
+    {
+      "intent_cluster": "womens_flip_flops",
+      "terms": 33,
+      "share_pct": 1.4
+    },
+    {
+      "intent_cluster": "womens_beach_flip_flops",
+      "terms": 18,
+      "share_pct": 0.8
+    },
+    {
+      "intent_cluster": "unclassified",
+      "terms": 17,
+      "share_pct": 0.7
+    },
+    {
+      "intent_cluster": "womens_black_flip_flops",
+      "terms": 17,
+      "share_pct": 0.7
+    },
+    {
+      "intent_cluster": "womens_white_flip_flops",
+      "terms": 14,
+      "share_pct": 0.6
+    },
+    {
+      "intent_cluster": "womens_waterproof_flip_flops",
+      "terms": 14,
+      "share_pct": 0.6
+    },
+    {
+      "intent_cluster": "womens_flip_flops_color",
+      "terms": 12,
+      "share_pct": 0.5
+    },
+    {
+      "intent_cluster": "womens_arch_support_sandals",
+      "terms": 12,
+      "share_pct": 0.5
+    },
+    {
+      "intent_cluster": "womens_rubber_flip_flops",
+      "terms": 11,
+      "share_pct": 0.5
+    },
+    {
+      "intent_cluster": "womens_flip_flops_size",
+      "terms": 11,
+      "share_pct": 0.5
+    },
+    {
+      "intent_cluster": "white_flip_flops",
+      "terms": 9,
+      "share_pct": 0.4
+    },
+    {
+      "intent_cluster": "arch_support_flip_flops_women",
+      "terms": 8,
+      "share_pct": 0.3
+    },
+    {
+      "intent_cluster": "plantar_fasciitis_flip_flops",
+      "terms": 8,
+      "share_pct": 0.3
+    },
+    {
+      "intent_cluster": "womens_orthopedic_flip_flops",
+      "terms": 8,
+      "share_pct": 0.3
+    },
+    {
+      "intent_cluster": "archies_brand_flip_flops",
+      "terms": 8,
+      "share_pct": 0.3
+    },
+    {
+      "intent_cluster": "womens_comfort_flip_flops",
+      "terms": 7,
+      "share_pct": 0.3
+    },
+    {
+      "intent_cluster": "flip_flops_color",
+      "terms": 7,
+      "share_pct": 0.3
+    },
+    {
+      "intent_cluster": "womens_black_arch_support_flip_flops",
+      "terms": 7,
+      "share_pct": 0.3
+    }
+  ],
+  "quality": [
+    {
+      "check": "自然语言唯一词覆盖",
+      "value": "2394/2394",
+      "status": "通过",
+      "note": "term_id 无重复"
+    },
+    {
+      "check": "模型复核状态",
+      "value": "96.7% accepted",
+      "status": "带条件通过",
+      "note": "79 条 needs_review"
+    },
+    {
+      "check": "原始意图簇碎片化",
+      "value": "1674 个簇",
+      "status": "需归并",
+      "note": "1433 个单例簇"
+    },
+    {
+      "check": "确定性标准化",
+      "value": "85.2% 记录变化",
+      "status": "已应用",
+      "note": "正式汇总使用标准化后记录"
+    },
+    {
+      "check": "敏感性",
+      "value": "最大 0.3 个百分点",
+      "status": "稳定",
+      "note": "全量与 accepted 子集主题占比差异"
+    },
+    {
+      "check": "绩效指标",
+      "value": "未使用",
+      "status": "通过",
+      "note": "无 ACOS/CVR/点击/订单加权"
+    }
+  ]
+}

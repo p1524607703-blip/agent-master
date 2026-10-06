@@ -1,0 +1,17 @@
+{
+  "name": "boss-resume-filter-extension",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Chrome MV3 extension for job-related resume screening assistance on Boss Zhipin pages.",
+  "scripts": {
+    "package": "node scripts/package-extension.js",
+    "test": "node tests/scoring.test.js",
+    "test:e2e": "node tests/e2e-extension-smoke.test.js",
+    "test:all": "npm test && npm run test:e2e",
+    "setup:browsers": "playwright install chromium"
+  },
+  "devDependencies": {
+    "adm-zip": "0.5.16",
+    "playwright": "1.59.1"
+  }
+}

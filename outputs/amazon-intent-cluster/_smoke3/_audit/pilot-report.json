@@ -1,0 +1,49 @@
+{
+  "run_id": "aj2-y90-20260714T233851-d8147069",
+  "passed": false,
+  "expected": 1,
+  "valid_records": 0,
+  "schema_valid_rate": 0.0,
+  "critical_issue_count": 0,
+  "general_affected_terms": 0,
+  "batch_audits": [
+    {
+      "batch_id": "pilot-0001",
+      "status": "failed",
+      "attempts": [
+        {
+          "batch_id": "pilot-0001",
+          "agent": "amazon-intent-tagger",
+          "model": "deepseek/deepseek-v4-pro",
+          "duration_seconds": 107.264,
+          "exit_code": 0,
+          "session_ids": [
+            "ses_09c24dde8ffeGHKLvUGwbZ48Fi"
+          ],
+          "stderr_tail": "Performing one time database migration, may take a few minutes...\nsqlite-migration:done\nDatabase migration complete.\n",
+          "attempt": 1,
+          "validation_errors": [
+            "82970e4139205bf4:unknown_asin_fact:The product material is EVA (fact: material_eva), which is inherently water-friendly closed-cell foam, but the manufacturer has chosen not to claim waterproof capability for this listing.,The search term explicitly demands 'waterproof' capability, but the product baseline lists waterproof_or_quick_dry as an excluded claim — the product page does not state or support waterproof performance."
+          ]
+        },
+        {
+          "batch_id": "pilot-0001",
+          "agent": "amazon-intent-tagger",
+          "model": "deepseek/deepseek-v4-pro",
+          "duration_seconds": 163.63,
+          "exit_code": 0,
+          "session_ids": [
+            "ses_09c2330fcffeVNt9eOHss55iid"
+          ],
+          "stderr_tail": "",
+          "attempt": 2,
+          "validation_errors": [
+            "82970e4139205bf4:unknown_asin_fact:The product material EVA (material_eva) is inherently water-friendly closed-cell foam, but the manufacturer has chosen not to claim waterproof capability for this listing.,The search term demands waterproof capability, but the product baseline lists waterproof_or_quick_dry as an excluded claim — the product page does not state or support waterproof performance."
+          ]
+        }
+      ]
+    }
+  ],
+  "critic_audits": [],
+  "issues": []
+}

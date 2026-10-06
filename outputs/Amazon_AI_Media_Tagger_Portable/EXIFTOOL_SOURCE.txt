@@ -1,0 +1,27 @@
+Bundled dependencies for the cross-platform portable package:
+
+Windows name: ExifTool Windows Executable 64-bit
+Version: 13.59
+Windows official download:
+https://sourceforge.net/projects/exiftool/files/exiftool-13.59_64.zip/download
+
+Windows archive SHA2-256:
+44b512b25af500724ba579d0a53c8fc5851628b692dd5e5d94ae4a15c2cba9ec
+
+macOS name: Image::ExifTool full Perl distribution
+Version: 13.59
+macOS official download:
+https://sourceforge.net/projects/exiftool/files/Image-ExifTool-13.59.tar.gz/download
+
+macOS archive SHA2-256:
+668ea3acececb7235fbd0f4900e72d5f12c9b07e5c778fd36cb1e9b5828fd65a
+
+Official checksum page:
+https://exiftool.org/checksums-13.59.txt
+
+Installation documentation:
+https://exiftool.org/install.html
+
+The ExifTool licenses are included at:
+exiftool_files/LICENSE
+exiftool-mac/README (see the COPYRIGHT AND LICENSE section)

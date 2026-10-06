@@ -1,0 +1,1 @@
+{"ts": "2026-07-16T01:56:27+00:00", "batch_id": "full-0115", "attempt": 1, "top_level_keys": ["part", "sessionID", "timestamp", "type"], "diagnostic": {"type": "step_start"}, "validation_errors": ["top_level_records_not_array", "record_count:0!=14"]}

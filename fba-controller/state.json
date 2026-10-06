@@ -1,0 +1,277 @@
+{
+  "pending": [
+    {
+      "sku": "X004RL5HHZ",
+      "ts": 1789452426061
+    },
+    {
+      "sku": "X004RL0T7X",
+      "ts": 1789452426061
+    },
+    {
+      "sku": "X004S7HBS1",
+      "ts": 1789452426061
+    },
+    {
+      "sku": "X004S7LQ5Z",
+      "ts": 1789452426061
+    },
+    {
+      "sku": "X004S75ZAH",
+      "ts": 1789452426061
+    },
+    {
+      "sku": "X004S7LQCD",
+      "ts": 1789452426061
+    },
+    {
+      "sku": "X004S75ZCF",
+      "ts": 1789452426061
+    },
+    {
+      "sku": "X004S7HBTF",
+      "ts": 1789452426061
+    },
+    {
+      "sku": "X004S75ZDJ",
+      "ts": 1789452426061
+    },
+    {
+      "sku": "X004S7LQ8R",
+      "ts": 1789452426061
+    },
+    {
+      "sku": "X004RKNYDP",
+      "ts": 1789452426061
+    },
+    {
+      "sku": "X004RKVZZT",
+      "ts": 1789452426061
+    },
+    {
+      "sku": "X004RKY19V",
+      "ts": 1789452426061
+    },
+    {
+      "sku": "X004RKRVK7",
+      "ts": 1789452426061
+    },
+    {
+      "sku": "X004RKVZZJ",
+      "ts": 1789452426061
+    },
+    {
+      "sku": "X004RKVQBR",
+      "ts": 1789452426061
+    },
+    {
+      "sku": "X004RKNTX5",
+      "ts": 1789452426061
+    },
+    {
+      "sku": "X004RKVQC1",
+      "ts": 1789452426061
+    },
+    {
+      "sku": "X004RKY1C3",
+      "ts": 1789452426061
+    },
+    {
+      "sku": "X004RKYDZD",
+      "ts": 1789452426061
+    },
+    {
+      "sku": "X004RMD8OX",
+      "ts": 1789452426061
+    },
+    {
+      "sku": "X004RMD8UH",
+      "ts": 1789452426061
+    },
+    {
+      "sku": "X004RWNB1D",
+      "ts": 1789452426061
+    },
+    {
+      "sku": "X004RWQQF1",
+      "ts": 1789452426061
+    },
+    {
+      "sku": "X004RWNB1X",
+      "ts": 1789452426061
+    },
+    {
+      "sku": "X004RWQKT3",
+      "ts": 1789452426061
+    },
+    {
+      "sku": "X004RWQVJR",
+      "ts": 1789452426061
+    },
+    {
+      "sku": "X004RWAYSV",
+      "ts": 1789452426061
+    },
+    {
+      "sku": "X004RWQQER",
+      "ts": 1789452426061
+    },
+    {
+      "sku": "X004RWAYSL",
+      "ts": 1789452426061
+    }
+  ],
+  "done": [],
+  "failed": [
+    {
+      "sku": "X004RLKU1N",
+      "reason": "亚马逊判定该 FNSKU 不符合重新测量资格（终态页，无可用按钮）",
+      "ts": 1789452480974,
+      "dims": {
+        "size": "11.34 x 6.3 x 4.69 inches",
+        "weight": "1.21 pounds",
+        "eligible": "未知"
+      },
+      "step": "inform_seller_not_eligible_for_re_measurement_p4s_usertask_0f5z8n2"
+    },
+    {
+      "sku": "X004RMGHY1",
+      "reason": "亚马逊判定该 FNSKU 不符合重新测量资格（终态页，无可用按钮）",
+      "ts": 1789452533041,
+      "dims": {
+        "size": "11.1 x 6.42 x 4.41 inches",
+        "weight": "1.28 pounds",
+        "eligible": "未知"
+      },
+      "step": "inform_seller_not_eligible_for_re_measurement_p4s_usertask_0f5z8n2"
+    },
+    {
+      "sku": "X004VJTL7F",
+      "reason": "亚马逊判定该 FNSKU 不符合重新测量资格（终态页，无可用按钮）",
+      "ts": 1789452590234,
+      "dims": {
+        "size": "12.28 x 6.85 x 5.16 inches",
+        "weight": "1.9 pounds",
+        "eligible": "未知"
+      },
+      "step": "inform_seller_not_eligible_for_re_measurement_p4s_usertask_0f5z8n2"
+    },
+    {
+      "sku": "X004VJRHQ7",
+      "reason": "亚马逊判定该 FNSKU 不符合重新测量资格（终态页，无可用按钮）",
+      "ts": 1789453812022,
+      "dims": {
+        "size": "11.65 x 6.65 x 5.16 inches",
+        "weight": "1.61 pounds",
+        "eligible": "未知"
+      },
+      "step": "inform_seller_not_eligible_for_re_measurement_p4s_usertask_0f5z8n2"
+    },
+    {
+      "sku": "X004S7HKPP",
+      "reason": "亚马逊判定该 FNSKU 不符合重新测量资格（终态页，无可用按钮）",
+      "ts": 1789453863038,
+      "dims": {
+        "size": "10.47 x 7.87 x 3.15 inches",
+        "weight": "0.93 pounds",
+        "eligible": "未知"
+      },
+      "step": "inform_seller_not_eligible_for_re_measurement_p4s_usertask_0f5z8n2"
+    },
+    {
+      "sku": "X004RL3Z1F",
+      "reason": "亚马逊判定该 FNSKU 不符合重新测量资格（终态页，无可用按钮）",
+      "ts": 1789453917813,
+      "dims": {
+        "size": "11.18 x 4.84 x 4.61 inches",
+        "weight": "1.23 pounds",
+        "eligible": "未知"
+      },
+      "step": "inform_seller_not_eligible_for_re_measurement_p4s_usertask_0f5z8n2"
+    }
+  ],
+  "config": {
+    "issueText": "重新测量和赔偿亚马逊物流配送费用",
+    "reasonText": "尽管我的包装没有变化，亚马逊的商品测量值却不正确了",
+    "packageText": "塑料袋（聚乙烯塑料袋和铝箔袋等）"
+  },
+  "throttle": {
+    "preset": "conservative",
+    "customGapMin": null,
+    "customGapMax": null
+  },
+  "inProgress": null,
+  "submitClicks": {
+    "X004RUQ1N5": 1789434965664,
+    "X004RULD2T": 1789435326762,
+    "X004RR0GG1": 1789435396357,
+    "X004RR0GFR": 1789435535751,
+    "X004RR7KZB": 1789435618225,
+    "X004RRJF4Z": 1789435692332,
+    "X004RR7L0P": 1789435764480,
+    "X004RRJF59": 1789435836694,
+    "X004RREMQV": 1789436362564,
+    "X004RRJ5TP": 1789436439805,
+    "X004RS2VFJ": 1789436521416,
+    "X004RRWAH9": 1789436608665,
+    "X004RRWAHJ": 1789436685059,
+    "X004RRWAKB": 1789436783370,
+    "X004RSDKZJ": 1789436870090,
+    "X004RRWAKL": 1789436955988,
+    "X004RSC4B5": 1789437029644,
+    "X004RSDI3N": 1789437101796,
+    "X004RSDL1R": 1789437177169,
+    "X004X428D7": 1789437255814,
+    "X004RRWAQF": 1789437335867,
+    "X004RS9ZFX": 1789437417656,
+    "X004RSBZPV": 1789437495203,
+    "X004RSBZP1": 1789437659979,
+    "X004RSBZQZ": 1789437743678,
+    "X004RRUPMB": 1789437829620,
+    "X004RS2SCZ": 1789437962682,
+    "X004RSBXYT": 1789438093779,
+    "X004RS2SF7": 1789438176530,
+    "X004RSDF95": 1789438258963,
+    "X004RSDF8B": 1789438338404,
+    "X004RSBXZN": 1789438417751,
+    "X004SEUQ6X": 1789438486830,
+    "X004SEUQ6N": 1789438567586,
+    "X004SEOSKD": 1789438638372,
+    "X004X0NU1Z": 1789438847087,
+    "X004SEOSHB": 1789438934053,
+    "X004X0V8AZ": 1789439057190,
+    "X004X0NXM1": 1789439133426,
+    "X004X0O4OR": 1789439202768,
+    "X004X0MBXD": 1789439294893,
+    "X004X0NTRZ": 1789439380732,
+    "X004SEP8XT": 1789439455326,
+    "X004SEXPF7": 1789439528823,
+    "X004SEUK73": 1789439781520,
+    "X004YELFWL": 1789439860808,
+    "X004YEO76R": 1789440018824,
+    "X004YELFWB": 1789440093923,
+    "X004YETCSZ": 1789440168911,
+    "X004YEO799": 1789440249030,
+    "X004YETDEX": 1789440325624,
+    "X004YETCSP": 1789440398368,
+    "X004YEDHX1": 1789440474858,
+    "X004YENGRX": 1789440550651,
+    "X004YEM41R": 1789440640708,
+    "X004YENJJX": 1789440711077,
+    "X00560O7T5": 1789440784801,
+    "X00560IC8R": 1789440859403,
+    "X00560O8FX": 1789440940760,
+    "X00560OB0Z": 1789441010047,
+    "X00560IAX9": 1789441097486,
+    "X004YEM33B": 1789441175137,
+    "X004YEM3SV": 1789441254083,
+    "X004YEMG97": 1789441339122,
+    "X004YEIOP7": 1789441411958,
+    "X004YDASAH": 1789441486011,
+    "X004YDBLET": 1789441557678,
+    "X004YD9529": 1789441626898,
+    "X004YDBLE9": 1789441771163,
+    "X004RULTQT": 1789442238566,
+    "X004RPUJAV": 1789442317850
+  }
+}

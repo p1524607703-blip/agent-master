@@ -1,0 +1,19 @@
+{
+  "ok": true,
+  "data": {
+    "data": {
+      "exceptionDetails": null,
+      "result": "{\n \"url\": \"https://advertising.amazon.com/dsp/ENTITY1F7KI15KHQ4NT/advertisers/592097575016190071/orders/new\",\n \"hitCount\": 0,\n \"deepestCount\": 0,\n \"targets\": [],\n \"toggle\": []\n}",
+      "targetId": "9F33D12E59ED0BFCD88E8368A35B13A3"
+    },
+    "ok": true,
+    "storeId": "27661378824000"
+  },
+  "_notice": {
+    "update": {
+      "current": "1.1.2",
+      "latest": "1.1.3",
+      "message": "ziniao-cli 1.1.3 可用，当前 1.1.2，运行 npm update -g @ziniao-open/cli 更新"
+    }
+  }
+}

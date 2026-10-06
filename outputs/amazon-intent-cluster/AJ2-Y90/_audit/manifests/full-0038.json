@@ -1,0 +1,210 @@
+{
+  "run_id": "aj2-y90-20260714T234810-0bea2f52",
+  "schema_version": "1.0.0",
+  "prompt_version": "1.1.0",
+  "batch_id": "full-0038",
+  "model_name": "deepseek/deepseek-v4-pro",
+  "product_baseline": {
+    "product_asin": "B0GKDNPHJM",
+    "brand": "joomra",
+    "page_evidence_policy": "Only the fact IDs below may be cited as page_validated evidence. Alexa summaries, real-time price/delivery/inventory, review percentages, frequent-return notices, and medical-treatment claims are excluded.",
+    "facts": [
+      {
+        "id": "title_womens_flip_flop",
+        "claim": "The page title identifies a women's arch-support flip flop / thong sandal."
+      },
+      {
+        "id": "material_eva",
+        "claim": "Outer material is Ethylene Vinyl Acetate (EVA)."
+      },
+      {
+        "id": "closure_slip_on",
+        "claim": "Closure type is Slip On."
+      },
+      {
+        "id": "lightweight_breathable",
+        "claim": "The page states super lightweight and breathable."
+      },
+      {
+        "id": "soft_toe_post",
+        "claim": "The page states an upgraded soft toe post."
+      },
+      {
+        "id": "arch_support",
+        "claim": "The page states ergonomic arch support and proper alignment for all-day comfort."
+      },
+      {
+        "id": "padded_cushioning",
+        "claim": "Special features include Padded."
+      },
+      {
+        "id": "easy_clean",
+        "claim": "Seamless EVA construction is stated as easy to clean."
+      },
+      {
+        "id": "slip_resistant_grip",
+        "claim": "A deep textured lattice outsole is stated to provide grip and slip-resistant steps."
+      },
+      {
+        "id": "style_flip_flop",
+        "claim": "Sandal type is Flip Flop."
+      },
+      {
+        "id": "style_flat",
+        "claim": "Heel type is Flat."
+      },
+      {
+        "id": "style_outdoor",
+        "claim": "Lifestyle is outdoor."
+      },
+      {
+        "id": "style_open_toe",
+        "claim": "Toe style is Open Toe."
+      },
+      {
+        "id": "style_thong",
+        "claim": "Strap type is Thong."
+      },
+      {
+        "id": "sizes_6_11",
+        "claim": "The visible size selector includes US sizes 6 through 11."
+      },
+      {
+        "id": "colors_visible",
+        "claim": "The visible color selectors include black, pink/mauve, brown, dark gray, light blue, and white."
+      }
+    ],
+    "excluded_claims": [
+      "treats_or_cures_plantar_fasciitis",
+      "waterproof_or_quick_dry",
+      "review_sentiment_percentages",
+      "continuous_hours_without_discomfort",
+      "real_time_price",
+      "delivery_speed",
+      "inventory",
+      "frequent_return_notice"
+    ]
+  },
+  "terms": [
+    {
+      "term_id": "e8cc26ada3c071d3",
+      "source_term": "white sleeper sandals",
+      "normalized_term": "white sleeper sandals",
+      "language": "en"
+    },
+    {
+      "term_id": "4ee88dfb59d85dee",
+      "source_term": "women flip flos for the water",
+      "normalized_term": "women flip flos for the water",
+      "language": "en"
+    },
+    {
+      "term_id": "c2a5a4a32f21333e",
+      "source_term": "flip flops support women not noisy",
+      "normalized_term": "flip flops support women not noisy",
+      "language": "en"
+    },
+    {
+      "term_id": "b6519ef76317219a",
+      "source_term": "flip flops for outdoor women",
+      "normalized_term": "flip flops for outdoor women",
+      "language": "en"
+    },
+    {
+      "term_id": "ed0774cfe2b83519",
+      "source_term": "baseball flip-flops",
+      "normalized_term": "baseball flip-flops",
+      "language": "en"
+    },
+    {
+      "term_id": "c2497fc5de347bc3",
+      "source_term": "arch support flip flop women",
+      "normalized_term": "arch support flip flop women",
+      "language": "en"
+    },
+    {
+      "term_id": "2a0f9d2b9761a07e",
+      "source_term": "chocolate brown flip flops women",
+      "normalized_term": "chocolate brown flip flops women",
+      "language": "en"
+    },
+    {
+      "term_id": "d561fec7fc41acfc",
+      "source_term": "supportive sandals",
+      "normalized_term": "supportive sandals",
+      "language": "en"
+    },
+    {
+      "term_id": "1cede1733de4b482",
+      "source_term": "white flip flop with arch support",
+      "normalized_term": "white flip flop with arch support",
+      "language": "en"
+    },
+    {
+      "term_id": "61c1933df469ecfc",
+      "source_term": "flip flops for neuropathy",
+      "normalized_term": "flip flops for neuropathy",
+      "language": "en"
+    },
+    {
+      "term_id": "2f2f4dcabbced64c",
+      "source_term": "indoor flip flops",
+      "normalized_term": "indoor flip flops",
+      "language": "en"
+    },
+    {
+      "term_id": "696ae86361967995",
+      "source_term": "womens flip flops size 8 rubber",
+      "normalized_term": "womens flip flops size 8 rubber",
+      "language": "en"
+    },
+    {
+      "term_id": "3fe69d755f687bbc",
+      "source_term": "flip flops with memory foam for women",
+      "normalized_term": "flip flops with memory foam for women",
+      "language": "en"
+    },
+    {
+      "term_id": "ece1287883772a90",
+      "source_term": "op brand flip flops for women",
+      "normalized_term": "op brand flip flops for women",
+      "language": "en"
+    },
+    {
+      "term_id": "f36d8a23e02894db",
+      "source_term": "beach slippers",
+      "normalized_term": "beach slippers",
+      "language": "en"
+    },
+    {
+      "term_id": "251b81c4bf52468a",
+      "source_term": "beach sandal women waterproof",
+      "normalized_term": "beach sandal women waterproof",
+      "language": "en"
+    },
+    {
+      "term_id": "f553f9df82b644c0",
+      "source_term": "womens size 6 flip flops",
+      "normalized_term": "womens size 6 flip flops",
+      "language": "en"
+    },
+    {
+      "term_id": "0821de08ed615f64",
+      "source_term": "women flip flips on sale",
+      "normalized_term": "women flip flips on sale",
+      "language": "en"
+    },
+    {
+      "term_id": "c7eba7de0acabd0d",
+      "source_term": "womens flip flops with soft bottoms all rubber",
+      "normalized_term": "womens flip flops with soft bottoms all rubber",
+      "language": "en"
+    },
+    {
+      "term_id": "f81187b6038229ac",
+      "source_term": "women flip flops same day",
+      "normalized_term": "women flip flops same day",
+      "language": "en"
+    }
+  ]
+}

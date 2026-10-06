@@ -1,0 +1,38 @@
+{
+  "name": "tib-daypart-dashboard",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vue-tsc -b && vite build",
+    "typecheck": "vue-tsc -b",
+    "typecheck:functions": "tsc -p tsconfig.functions.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "preview": "vite preview --host 127.0.0.1",
+    "cf:types": "wrangler types",
+    "cf:dev": "pnpm build && wrangler pages dev dist",
+    "cf:deploy": "pnpm build && wrangler pages deploy dist --project-name tib-daypart-dashboard"
+  },
+  "dependencies": {
+    "echarts": "^6.0.0",
+    "idb": "^8.0.3",
+    "papaparse": "^5.5.3",
+    "vue": "^3.5.18"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "5.20260804.1",
+    "@playwright/test": "^1.58.2",
+    "@types/node": "^26.1.2",
+    "@types/papaparse": "^5.3.16",
+    "@vitejs/plugin-vue": "^6.0.1",
+    "@vue/tsconfig": "^0.8.1",
+    "typescript": "~5.8.3",
+    "vite": "^7.1.2",
+    "vitest": "^3.2.4",
+    "vue-tsc": "^3.0.5",
+    "wrangler": "4.118.0"
+  }
+}

@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Boss Resume Filter</title>
+    <link rel="stylesheet" href="styles/popup.css">
+  </head>
+  <body>
+    <main class="popup">
+      <header class="header">
+        <div>
+          <h1>简历筛查</h1>
+          <p>岗位相关条件，本地判断</p>
+        </div>
+        <label class="switch" title="启用页面高亮">
+          <input id="enabled" type="checkbox">
+          <span></span>
+        </label>
+      </header>
+
+      <section class="section">
+        <div class="section-title">岗位条件</div>
+        <label class="field">
+          <span>职位方向</span>
+          <input id="jobDirection" type="text" placeholder="鞋类供应链开发">
+        </label>
+        <label class="field">
+          <span>工作年限</span>
+          <select id="minYears">
+            <option value="0">不限</option>
+            <option value="1">1年以上</option>
+            <option value="3">3年以上</option>
+            <option value="5">5年以上</option>
+            <option value="8">8年以上</option>
+            <option value="10">10年以上</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>学历要求</span>
+          <select id="education">
+            <option>不限</option>
+            <option>大专</option>
+            <option>本科</option>
+            <option>硕士</option>
+            <option>博士</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>年龄范围</span>
+          <input id="ageRangeNote" type="text" value="35-40岁" readonly>
+        </label>
+        <p class="notice">年龄范围仅作人工备注，不参与自动筛查、打分或隐藏。</p>
+      </section>
+
+      <section class="section compact">
+        <label class="range-field">
+          <span>推荐阈值 <strong id="thresholdValue">70</strong></span>
+          <input id="threshold" type="range" min="45" max="95" step="1">
+        </label>
+        <label class="check">
+          <input id="hideBelowThreshold" type="checkbox">
+          <span>筛查后隐藏低于阈值的卡片</span>
+        </label>
+      </section>
+
+      <section class="actions">
+        <button id="saveAndScan" class="primary" type="button">保存并筛查</button>
+        <button id="scan" type="button">筛查当前页</button>
+        <button id="clear" type="button">清除标记</button>
+      </section>
+
+      <footer class="footer">
+        <button id="exportCsv" class="link-button" type="button">导出 CSV</button>
+        <span id="status">未运行</span>
+      </footer>
+    </main>
+
+    <script src="src/scoring.js"></script>
+    <script src="src/popup.js"></script>
+  </body>
+</html>
