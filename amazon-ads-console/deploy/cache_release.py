@@ -7,6 +7,7 @@ import argparse
 import json
 import os
 import sys
+import time
 from pathlib import Path
 
 
@@ -40,6 +41,22 @@ def clear_snapshots(client):
     return {'deleted_snapshots': deleted, 'preserved_locks': locks}
 
 
+def warm_period(loader, period, busy_error, *, wait_seconds=180, clock=time.monotonic, pause=time.sleep):
+    """A surviving build lease must expire or finish, never be deleted/bypassed."""
+    deadline = clock() + wait_seconds
+    retries = 0
+    while True:
+        try:
+            result = loader(None, period)
+            return {'period': period, 'date': result.get('data_date') or result.get('date') or result.get('stat_date'),
+                    'busy_retries': retries}
+        except busy_error:
+            if clock() >= deadline:
+                raise
+            retries += 1
+            pause(min(1.0, max(0, deadline - clock())))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('release', type=Path)
@@ -56,11 +73,11 @@ def main():
         else:
             client.ping()
             from app.services.operator_cpo import operator_cpo_summary
+            from app.services.build_cache import BuildBusyError
             warmed = []
             # Same public read model as startup/UI. No imports, seeds or mutations.
             for period in ('daily', 'monthly'):
-                result = operator_cpo_summary(None, period)
-                warmed.append({'period': period, 'date': result.get('date') or result.get('stat_date')})
+                warmed.append(warm_period(operator_cpo_summary, period, BuildBusyError))
             result = {'warmed': warmed}
         print(json.dumps({'action': args.action, 'healthy': True, **result}))
     except Exception as error:

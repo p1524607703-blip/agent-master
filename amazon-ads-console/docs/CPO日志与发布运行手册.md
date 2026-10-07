@@ -55,7 +55,7 @@ python3 amazon-ads-console/scripts/release.py deploy <同一个tag或commit>
 python3 amazon-ads-console/scripts/release.py rollback <以前成功的tag或commit>
 ```
 
-激活顺序：校验与只读两库检查 → 停旧服务 → 删除 Redis 派生 snapshots → 切换前后端及 unit → restart → 等待鉴权边界返回 401（startup warmup 已完成）→ 预热最新 daily/monthly → 检查两库、公开前端 commit 和鉴权 → 记录成功。
+激活顺序：校验与只读两库检查 → 停旧服务 → 删除 Redis 派生 snapshots → 切换前后端及 unit → restart → 等待鉴权边界返回 401（startup warmup 已完成）→ 预热最新 daily/monthly（构建锁争用时最多等待重试180秒，保留锁且不绕过互斥）→ 检查两库、公开前端 commit 和鉴权 → 记录成功。
 
 清理只针对 `cpo:build:v1:*` / `cpo:complete-days:v1:*`，保留所有 `:lock`、会话和其他 key，并分批删除。停服务先于清理，避免旧进程重新写回旧快照；Redis 关闭时跳过，Redis 配置启用但不可用时停止此次激活并恢复旧代码。
 

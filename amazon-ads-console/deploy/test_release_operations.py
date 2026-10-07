@@ -41,6 +41,32 @@ class FakeRedis:
 
 
 class ReleaseOperationsTests(unittest.TestCase):
+    def test_prewarm_waits_for_busy_build_without_bypassing_lock(self):
+        from cache_release import warm_period
+        class Busy(Exception): pass
+        now = [0.0]
+        calls = []
+        def loader(date, period):
+            calls.append(period)
+            if len(calls) < 3: raise Busy()
+            return {'data_date': '2026-10-04'}
+        result = warm_period(loader, 'daily', Busy, wait_seconds=4,
+                             clock=lambda: now[0], pause=lambda seconds: now.__setitem__(0, now[0]+seconds))
+        self.assertEqual(result, {'period': 'daily', 'date': '2026-10-04', 'busy_retries': 2})
+        self.assertEqual(len(calls), 3)
+
+    def test_prewarm_busy_wait_is_bounded_and_other_failures_propagate(self):
+        from cache_release import warm_period
+        class Busy(Exception): pass
+        now = [0.0]
+        def loader(date, period): raise Busy()
+        with self.assertRaises(Busy):
+            warm_period(loader, 'daily', Busy, wait_seconds=2,
+                        clock=lambda: now[0], pause=lambda seconds: now.__setitem__(0, now[0]+seconds))
+        self.assertEqual(now[0], 2)
+        def failed(date, period): raise ValueError('failed')
+        with self.assertRaises(ValueError): warm_period(failed, 'daily', Busy)
+
     def test_clear_preserves_locks_sessions_and_other_namespaces(self):
         snapshots = {f'cpo:build:v1:rev:day:{number}'.encode() for number in range(450)}
         snapshots.add(b'cpo:complete-days:v1:rev:all:all')
