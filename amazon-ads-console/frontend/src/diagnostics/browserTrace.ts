@@ -26,9 +26,11 @@ function safePath(input: string): string {
   catch { return input.split(/[?#]/)[0] || '/' }
 }
 
-function append(event: Omit<BrowserTraceEvent, 'timestamp'>): void {
-  events.push({ ...event, timestamp: new Date().toISOString() })
+function append(event: Omit<BrowserTraceEvent, 'timestamp'>): BrowserTraceEvent {
+  const recorded = { ...event, timestamp: new Date().toISOString() }
+  events.push(recorded)
   if (events.length > CAPACITY) events.splice(0, events.length - CAPACITY)
+  return recorded
 }
 
 export function enterPage(path: string): string {
@@ -58,10 +60,14 @@ export async function tracedFetch(url: string, init: RequestInit = {}): Promise<
   const base = { page_id: page.id, page_path: page.path, request_id: requestId,
     method: (init.method || 'GET').toUpperCase(), endpoint: safePath(url) }
   const started = performance.now()
-  append({ ...base, event: 'api_start' })
+  const startEvent = append({ ...base, event: 'api_start' })
   try {
     const response = await fetch(url, { ...init, headers })
-    append({ ...base, event: 'api_end', request_id: response.headers.get('X-Request-ID') || requestId,
+    const serverRequestId = response.headers.get('X-Request-ID') || requestId
+    // Nginx owns the authoritative ID. Update this exact start event, so
+    // overlapping calls to the same endpoint remain paired in exported traces.
+    startEvent.request_id = serverRequestId
+    append({ ...base, event: 'api_end', request_id: serverRequestId,
       duration_ms: Math.round((performance.now() - started) * 100) / 100,
       status_code: response.status, outcome: response.ok ? 'ok' : 'http_error' })
     return response
