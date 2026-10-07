@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getJson } from '../api/client'
+import { getJson, getJsonStrict } from '../api/client'
 import { NButton, NDatePicker, NSelect } from 'naive-ui'
 import DataSkeleton from '../components/DataSkeleton.vue'
+import CpoDataQuality from '../components/CpoDataQuality.vue'
+import { qualityLabel } from '../diagnostics/cpoQuality'
+import { usePageRenderTrace } from '../diagnostics/pageTrace'
 
 type Period = 'daily'|'weekly'|'monthly'
 type PeriodOption = { value:string; label:string; start?:string; end?:string }
@@ -31,6 +34,8 @@ const period = ref<Period>(['weekly','monthly'].includes(String(route.query.peri
 const periods = ref<PeriodData>({ daily:[],weekly:[],monthly:[] })
 const detail = ref<any>({ operator:operatorName.value, products:[], summary:{}, account_split:false })
 const loading = ref(false)
+usePageRenderTrace(loading)
+const loadError = ref('')
 let requestSeq = 0
 
 const reportRangeOptions = [
@@ -77,6 +82,7 @@ const load = async () => {
   const seq = ++requestSeq
   const targetOperator = operatorName.value
   loading.value = true
+  loadError.value = ''
   try {
     if (!periods.value.daily.length) await loadPeriods()
     if (seq !== requestSeq) return
@@ -87,10 +93,7 @@ const load = async () => {
     const params = new URLSearchParams({ period:targetPeriod })
     if (targetDate) params.set('date', targetDate)
 
-    const result = await getJson(
-      `/operators/${encodeURIComponent(targetOperator)}?${params.toString()}`,
-      { operator:targetOperator, products:[], summary:{}, account_split:false, period:targetPeriod } as any,
-    )
+    const result = await getJsonStrict<any>(`/operators/${encodeURIComponent(targetOperator)}?${params.toString()}`)
     if (seq !== requestSeq || operatorName.value !== targetOperator) return
 
     detail.value = result
@@ -111,6 +114,10 @@ const load = async () => {
         query:{ period:currentPeriod, ...(canonicalDate ? { date:canonicalDate } : {}) },
       })
     }
+  } catch (error) {
+    if (seq !== requestSeq) return
+    loadError.value = error instanceof Error ? error.message : '数据读取失败，请稍后重试'
+    detail.value = { operator:targetOperator, products:[], summary:{}, data_date:selectedDate.value, period:period.value }
   } finally {
     if (seq === requestSeq) loading.value = false
   }
@@ -225,9 +232,13 @@ const tablePeriod = computed(() => period.value === 'weekly'
       <span>{{ detail.summary?.dataProducts ?? 0 }} / {{ detail.summary?.products ?? products.length }} {{ period === 'weekly' ? '周内命中' : period === 'monthly' ? '月内命中' : '有数据' }}</span>
       <span v-if="period !== 'daily'">覆盖 {{ detail.coverageDays ?? 0 }}/{{ detail.expectedDays ?? (period==='weekly' ? 7 : 0) }} 天</span>
       <span>全部账户合并</span>
-      <span>{{ detail.final_cpo === false ? '跨账户归属预览' : '正式口径' }}</span>
+      <span>{{ qualityLabel(detail) }}</span>
       <span>DSP 默认折叠，可在明细表中展开</span>
     </div>
+
+    <p v-if="loadError && !loading" class="load-error" role="alert">{{ loadError }}。本次数据未读取成功，请重试后确认口径。</p>
+
+    <CpoDataQuality v-if="!loading" :data="detail" />
 
     <div v-if="!loading" class="card ad-detail-card">
       <div class="ad-detail-title">
@@ -265,8 +276,8 @@ const tablePeriod = computed(() => period.value === 'weekly'
               <td class="sticky-product product-cell"><strong>综合情况</strong></td>
               <td class="sticky-date date-cell">{{ tablePeriod }}</td>
               <td class="data-status-col">
-                <span class="data-status-pill" :class="{ partial: detail.final_cpo === false }">
-                  {{ detail.final_cpo === false ? '非完整口径' : '完整口径' }}
+                <span class="data-status-pill" :class="{ partial: detail.final_cpo !== true }">
+                  {{ qualityLabel(detail) }}
                 </span>
               </td>
               <td v-for="type in visibleAdTypes" :key="`sum-s-${type}`">{{ money(typeTotal('adTypeSpend', type)) }}</td>
@@ -314,6 +325,7 @@ const tablePeriod = computed(() => period.value === 'weekly'
 </template>
 
 <style scoped>
+.load-error{padding:10px 12px;border:1px solid #f2d6b5;background:#fff6ef;color:#a45f16;border-radius:8px;font-size:12px}
 .operator-simple-page { min-width: 0; }
 .operator-breadcrumb { margin-bottom: 8px; }
 .back-link { border: 0; background: transparent; padding: 0; color: #667085; font-size: 12px; cursor: pointer; }

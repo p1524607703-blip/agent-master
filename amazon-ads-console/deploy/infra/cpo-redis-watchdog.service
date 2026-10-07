@@ -1,0 +1,17 @@
+[Unit]
+Description=CPO Redis health transition watchdog
+After=network.target redis-server.service
+
+[Service]
+Type=oneshot
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/opt/agent/cpo/current/amazon-ads-console/backend
+ExecStart=/opt/agent/cpo/current/.venv/bin/python /opt/agent/cpo/tooling/redis_watchdog.py
+Environment=CPO_WATCHDOG_STATE=/opt/agent/cpo/shared/watchdog/redis-state.json
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=cpo-redis-watchdog

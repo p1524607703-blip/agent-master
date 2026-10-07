@@ -1,4 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { nextTick } from 'vue'
+import DiagnosticsView from '../views/DiagnosticsView.vue'
+import { canViewDiagnostics } from '../diagnostics/permissions'
+import { enterPage, completePageRender } from '../diagnostics/browserTrace'
 import DashboardView from '../views/DashboardView.vue'
 import CpoJobsView from '../views/CpoJobsView.vue'
 import IssuesView from '../views/IssuesView.vue'
@@ -41,6 +45,7 @@ const router = createRouter({
     { path: '/product-mappings', component: ProductMappingsView },
     { path: '/rules', component: RulesView },
     { path: '/reports', component: ReportsView },
+    { path: '/diagnostics', component: DiagnosticsView, meta: { managementOnly: true } },
     { path: '/operators/:operator', component: OperatorDetailView },
     // 已下架模块直达链接 → 回看板（不暴露「模块已下线」这种信息给终端用户）
     ...Object.keys(RETIRED).map(p => ({ path: p, redirect: '/dashboard' })),
@@ -67,6 +72,7 @@ router.beforeEach(async (to) => {
 
   const role = session.user?.roleCode
   if (to.meta.roleHome) return homeFor(role)
+  if (to.meta.managementOnly && !canViewDiagnostics(role)) return homeFor(role)
   // 运营：只能进自己的页面，其余访问一律回 /my-cpo
   if (role === 'operator' && !OPERATOR_ALLOWED.has(to.path)) {
     return '/my-cpo'
@@ -76,6 +82,13 @@ router.beforeEach(async (to) => {
     return '/operator-cpo'
   }
   return true
+})
+
+router.afterEach(async (to, _from, failure) => {
+  if (failure) return
+  const pageId = enterPage(to.path)
+  await nextTick()
+  requestAnimationFrame(() => completePageRender(pageId, 'shell'))
 })
 
 export default router

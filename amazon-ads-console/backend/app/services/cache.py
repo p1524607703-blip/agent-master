@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import threading
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Callable
+
+from app.core.observability import capture_quality, context_metadata, increment, update_context
 
 
 @dataclass
@@ -11,6 +13,7 @@ class _Entry:
     value: Any
     expires_at: float
     stale_until: float
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class MemoryTTLCache:
@@ -37,11 +40,15 @@ class MemoryTTLCache:
             entry = self._data.get(key)
             if entry is None:
                 self._misses += 1
+                increment('l1_miss')
                 return None
             if entry.expires_at <= now:
                 self._misses += 1
+                increment('l1_miss')
                 return None
             self._hits += 1
+            increment('l1_hit')
+            update_context(**entry.metadata)
             return entry.value
 
     def set(self, key: str, value: Any, ttl: int, stale_ttl: int = 3600) -> Any:
@@ -51,6 +58,7 @@ class MemoryTTLCache:
                 value=value,
                 expires_at=now + max(1, ttl),
                 stale_until=now + max(ttl, stale_ttl),
+                metadata=context_metadata(),
             )
         return value
 
@@ -61,12 +69,15 @@ class MemoryTTLCache:
         stale = self._entry(key)
         try:
             value = loader()
+            capture_quality(value)
             return self.set(key, value, ttl, stale_ttl)
         except Exception:
             now = time.monotonic()
             if stale is not None and stale.stale_until > now:
                 with self._lock:
                     self._stale_hits += 1
+                increment('l1_stale')
+                update_context(**stale.metadata)
                 return stale.value
             raise
 

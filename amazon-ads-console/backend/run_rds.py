@@ -52,4 +52,4 @@ _configure_pg_env(settings.data_database_url, "RDS_PG")
 if __name__ == "__main__":
     print(f"[auth] app  db = {os.environ['PGUSER']}@{os.environ['PGHOST']}:{os.environ['PGPORT']}/{os.environ['PGDATABASE']}")
     print(f"[data] data db = {os.environ['RDS_PGUSER']}@{os.environ['RDS_PGHOST']}:{os.environ['RDS_PGPORT']}/{os.environ['RDS_PGDATABASE']}")
-    uvicorn.run("app.main:app", host="127.0.0.1", port=8000)
+    uvicorn.run("app.main:app", host="127.0.0.1", port=8000, access_log=False, proxy_headers=False)

@@ -1,0 +1,9 @@
+[Unit]
+Description=CPO bounded log rotation check
+
+[Service]
+Type=oneshot
+# Use the same state/lock as the normal daily logrotate task.
+ExecStart=/usr/sbin/logrotate /etc/logrotate.d/nginx /etc/logrotate.d/cpo-traces
+NoNewPrivileges=true
+PrivateTmp=true

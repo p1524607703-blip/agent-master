@@ -1,0 +1,13 @@
+# The API opens the trace file per event; rename/create is safe, no copytruncate.
+/opt/agent/cpo/shared/traces/requests.jsonl {
+    daily
+    rotate 30
+    maxage 30
+    maxsize 20M
+    missingok
+    notifempty
+    compress
+    delaycompress
+    su ubuntu ubuntu
+    create 0600 ubuntu ubuntu
+}

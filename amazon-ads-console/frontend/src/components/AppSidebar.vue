@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { NIcon } from 'naive-ui'
 import { GripVertical } from '@vicons/tabler'
 import { useSessionStore } from '../stores/session'
+import { canViewDiagnostics } from '../diagnostics/permissions'
 
 type NavItem = [string, string]
 type NavGroup = { title: string; items: NavItem[] }
@@ -25,6 +26,7 @@ const DEFAULT_GROUPS: NavGroup[] = [
   {title:'概览',items:[['/dashboard','概览看板']]},
   {title:'数据处理',items:[['/cpo-jobs','CPO处理中心'],['/issues','待确认异常']]},
   {title:'规则与数据',items:[['/product-mappings','产品映射'],['/rules','规则管理'],['/reports','报告管理']]},
+  {title:'系统',items:[['/diagnostics','系统诊断 / 请求追踪']]},
 ]
 
 // 运营视角的导航：只有自己的那个页面
@@ -42,11 +44,11 @@ const cloneDefaults = (): NavGroup[] => DEFAULT_GROUPS.map(g => ({ title:g.title
 const stripRetired = (groups: NavGroup[]): NavGroup[] => {
   const allow = allowedPaths()
   return groups
-    .map(g => ({ title: g.title, items: g.items.filter(i => !RETIRED_PATHS.has(i[0]) && (!allow || allow.has(i[0]))) }))
+    .map(g => ({ title: g.title, items: g.items.filter(i => !RETIRED_PATHS.has(i[0]) && (!allow || allow.has(i[0])) && (i[0] !== '/diagnostics' || canViewDiagnostics(session.user?.roleCode))) }))
     .filter(g => g.items.length > 0)
 }
 
-const loadLayout = (): NavGroup[] => (isOperator.value ? OPERATOR_GROUPS : stripRetired(_loadLayout()))
+const loadLayout = (): NavGroup[] => (isOperator.value ? OPERATOR_GROUPS : _loadLayout())
 
 const _loadLayout = (): NavGroup[] => {
   try {
@@ -87,7 +89,7 @@ const _loadLayout = (): NavGroup[] => {
 const groups = ref<NavGroup[]>(loadLayout())
 // 运营视角固定单项，不参与拖拽排序；角色在登录态解析完成后才会确定，
 // 所以这里用 computed 而不是初始值，避免首屏短暂渲染出管理端导航。
-const visibleGroups = computed<NavGroup[]>(() => (isOperator.value ? OPERATOR_GROUPS : groups.value))
+const visibleGroups = computed<NavGroup[]>(() => (isOperator.value ? OPERATOR_GROUPS : stripRetired(groups.value)))
 const draggingGroup = ref<number | null>(null)
 const draggingItem = ref<{ group:number; item:number } | null>(null)
 const overGroup = ref<number | null>(null)

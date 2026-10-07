@@ -1,5 +1,7 @@
 import { defineStore } from 'pinia'
 import { API_BASE, AUTH_TOKEN_KEY } from '../api/client'
+import { tracedFetch } from '../diagnostics/browserTrace'
+import { clearBrowserTrace } from '../diagnostics/browserTrace'
 
 export type AuthUser = {
   userId: number
@@ -33,13 +35,14 @@ export const useSessionStore = defineStore('session', {
   },
   actions: {
     clear() {
+      clearBrowserTrace()
       this.token = null
       this.user = null
       this.initialized = true
       localStorage.removeItem(AUTH_TOKEN_KEY)
     },
     async login(username: string, password: string) {
-      const response = await fetch(`${API_BASE}/auth/login`, {
+      const response = await tracedFetch(`${API_BASE}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
@@ -60,7 +63,7 @@ export const useSessionStore = defineStore('session', {
       if (this.user) return true
       if (this.initialized) return false
       try {
-        const response = await fetch(`${API_BASE}/auth/me`, {
+        const response = await tracedFetch(`${API_BASE}/auth/me`, {
           headers: { Authorization: `Bearer ${this.token}` },
         })
         if (!response.ok) {
@@ -80,7 +83,7 @@ export const useSessionStore = defineStore('session', {
       const token = this.token
       if (token) {
         try {
-          await fetch(`${API_BASE}/auth/logout`, {
+          await tracedFetch(`${API_BASE}/auth/logout`, {
             method: 'POST',
             headers: { Authorization: `Bearer ${token}` },
           })

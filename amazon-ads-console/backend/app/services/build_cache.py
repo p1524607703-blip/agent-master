@@ -3,8 +3,16 @@ from __future__ import annotations
 import os
 import pickle
 import threading
+import time
+from weakref import WeakValueDictionary
 from datetime import date
 from typing import Any, Callable, Optional
+
+from app.core.observability import increment, update_context
+
+
+class BuildBusyError(RuntimeError):
+    """Another worker owns the build or its renewable lease was lost."""
 
 try:
     import redis
@@ -48,8 +56,13 @@ class RedisBuildCache:
         self._misses = 0
         self._errors = 0
         self._writes = 0
+        self.lock_wait_seconds = max(0.01, float(os.getenv("CPO_REDIS_LOCK_WAIT_SECONDS", "8")))
+        self.lock_lease_seconds = max(0.3, float(os.getenv("CPO_REDIS_LOCK_LEASE_SECONDS", "30")))
+        self._fallback_locks: Any = WeakValueDictionary()
+        self._fallback_values: dict[str, tuple[float, Any]] = {}
 
     def _record(self, field: str) -> None:
+        increment({"hit": "l2_hit", "miss": "l2_miss", "error": "l2_error"}.get(field, ""))
         with self._stats_lock:
             if field == "hit":
                 self._hits += 1
@@ -89,40 +102,110 @@ class RedisBuildCache:
             age = 0
         return self.recent_ttl if age <= self.recent_days else self.historical_ttl
 
+    def _fallback(self, key: str, ttl: int, loader: Callable[[], Any]) -> Any:
+        # A Redis outage must not produce a stampede within each worker either.
+        with self._client_lock:
+            lock = self._fallback_locks.setdefault(key, threading.Lock())
+        started = time.perf_counter()
+        acquired = lock.acquire(timeout=self.lock_wait_seconds)
+        increment("lock_wait_ms", (time.perf_counter() - started) * 1000)
+        if not acquired:
+            increment("lock_timeout")
+            raise BuildBusyError("Local CPO build is busy")
+        increment("lock_acquired")
+        try:
+            entry = self._fallback_values.get(key)
+            if entry and entry[0] > time.monotonic():
+                return entry[1]
+            value = loader()
+            self._fallback_values[key] = (time.monotonic() + ttl, value)
+            # Bound the emergency cache across historical-date requests.
+            if len(self._fallback_values) > 256:
+                self._fallback_values.pop(next(iter(self._fallback_values)))
+            return value
+        finally:
+            lock.release()
+
     def _get_or_set_key(self, key: str, ttl: int, loader: Callable[[], Any]) -> Any:
         client = self._get_client()
         if client is None:
-            return loader()
+            return loader() if not self.enabled else self._fallback(key, ttl, loader)
         try:
             raw = client.get(key)
             if raw is not None:
                 self._record("hit")
                 return pickle.loads(raw)
-            self._record("miss")
-
-            lock = client.lock(f"{key}:lock", timeout=30, blocking_timeout=8)
+        except Exception:
+            self._record("error")
+            return self._fallback(key, ttl, loader)
+        self._record("miss")
+        started = time.perf_counter()
+        try:
+            lock = client.lock(f"{key}:lock", timeout=self.lock_lease_seconds,
+                               blocking_timeout=self.lock_wait_seconds, thread_local=False)
             acquired = lock.acquire(blocking=True)
-            if not acquired:
-                return loader()
+        except Exception:
+            self._record("error")
+            return self._fallback(key, ttl, loader)
+        finally:
+            increment("lock_wait_ms", (time.perf_counter() - started) * 1000)
+        if not acquired:
             try:
                 raw = client.get(key)
                 if raw is not None:
                     self._record("hit")
                     return pickle.loads(raw)
-                value = loader()
+            except Exception:
+                self._record("error")
+            increment("lock_timeout")
+            raise BuildBusyError("CPO build lock wait timed out")
+        increment("lock_acquired")
+        stop = threading.Event()
+        lease_lost = threading.Event()
+
+        def renew():
+            while not stop.wait(self.lock_lease_seconds / 3):
+                try:
+                    if not lock.extend(self.lock_lease_seconds, replace_ttl=True):
+                        lease_lost.set()
+                        return
+                except Exception:
+                    lease_lost.set()
+                    return
+
+        renewer = threading.Thread(target=renew, daemon=True, name="cpo-build-lease")
+        renewer.start()
+        try:
+            try:
+                raw = client.get(key)
+                if raw is not None:
+                    self._record("hit")
+                    return pickle.loads(raw)
+            except Exception:
+                self._record("error")
+            # Loader exceptions deliberately bypass Redis I/O error handlers:
+            # never retry an expensive or mutating loader after it has started.
+            value = loader()
+            if lease_lost.is_set():
+                self._record("error")
+                increment("lock_timeout")
+                raise BuildBusyError("CPO build lease was lost")
+            try:
                 client.setex(key, ttl, pickle.dumps(value, protocol=pickle.HIGHEST_PROTOCOL))
                 self._record("write")
-                return value
-            finally:
-                try:
-                    lock.release()
-                except Exception:
-                    pass
-        except Exception:
-            self._record("error")
-            return loader()
+            except Exception:
+                self._record("error")
+            return value
+        finally:
+            stop.set()
+            renewer.join(timeout=1)
+            try:
+                lock.release()
+            except Exception:
+                self._record("error")
 
     def get_or_set(self, start: str, end: str, revision: str, loader: Callable[[], Any]) -> Any:
+        update_context(revision=revision, period_start=start, period_end=end)
         return self._get_or_set_key(self.key(start, end, revision), self._ttl(end), loader)
 
     def get_or_set_complete_days(
@@ -134,17 +217,20 @@ class RedisBuildCache:
     ) -> Any:
         start_key = start or "all"
         end_key = end or "all"
+        update_context(revision=revision)
         key = f"cpo:complete-days:v1:{revision}:{start_key}:{end_key}"
         return self._get_or_set_key(key, self.historical_ttl, loader)
 
     def clear(self) -> int:
+        with self._client_lock:
+            self._fallback_values.clear()
         client = self._get_client()
         if client is None:
             return 0
         try:
             keys = list(client.scan_iter(match="cpo:build:v1:*"))
             keys.extend(client.scan_iter(match="cpo:complete-days:v1:*"))
-            unique_keys = list(dict.fromkeys(keys))
+            unique_keys = [key for key in dict.fromkeys(keys) if not (key.decode() if isinstance(key, bytes) else key).endswith(":lock")]
             return int(client.delete(*unique_keys)) if unique_keys else 0
         except Exception:
             self._record("error")

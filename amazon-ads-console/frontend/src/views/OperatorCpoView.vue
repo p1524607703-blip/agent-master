@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { getJson } from '../api/client'
 import { NButton, NDatePicker, NSelect } from 'naive-ui'
 import DataSkeleton from '../components/DataSkeleton.vue'
+import { usePageRenderTrace } from '../diagnostics/pageTrace'
 
 type Period = 'daily'|'weekly'|'monthly'
 type PeriodOption = { value:string; label:string; start?:string; end?:string }
@@ -14,6 +15,7 @@ const route = useRoute()
 const period = ref<Period>(['weekly','monthly'].includes(String(route.query.period)) ? route.query.period as Period : 'daily')
 const selectedDate = ref(String(route.query.date || ''))
 const loading = ref(true)
+usePageRenderTrace(loading)
 const data = ref<any>({ data_date:'', account_split:false, operators:[], note:'' })
 const periods = ref<PeriodData>({ daily:[], weekly:[], monthly:[] })
 

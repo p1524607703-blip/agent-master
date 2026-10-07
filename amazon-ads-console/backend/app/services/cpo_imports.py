@@ -412,7 +412,7 @@ def source_status(target_date: str) -> dict[str,Any]:
             if child_rows>0:
                 items.append({'account':account,'reportType':'业务报告','date':target_date,'rows':child_rows,'status':'CHILD_READY','businessLevel':'child_asin_daily','detail':'子ASIN业务报告（正式口径）'})
             else:
-                parent=query_one("SELECT count(*)::int rows FROM core.business_report_parent_asin_period " f"WHERE account_id='{_sqlq(aid)}' AND report_start_date=DATE '{target_date}' AND report_end_date=DATE '{target_date}'") or {'rows':0}
+                parent=query_one("SELECT count(*)::int rows FROM core.report_business_parent_asin_period " f"WHERE account_id='{_sqlq(aid)}' AND report_start_date=DATE '{target_date}' AND report_end_date=DATE '{target_date}'") or {'rows':0}
                 parent_rows=int(parent.get('rows') or 0)
                 items.append({'account':account,'reportType':'业务报告','date':target_date,'rows':parent_rows,'status':'LEGACY_PARENT_READY' if parent_rows>0 else 'MISSING','businessLevel':'legacy_parent_asin_daily' if parent_rows>0 else 'missing','detail':'父ASIN业务报告（兼容旧口径）' if parent_rows>0 else '缺少子ASIN业务报告'})
         else:

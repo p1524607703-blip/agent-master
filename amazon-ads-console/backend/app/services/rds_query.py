@@ -8,7 +8,14 @@
 import json
 import os
 import subprocess
+import time
 from typing import Any, Optional
+
+from app.core.observability import increment
+
+
+class DatabaseQueryError(RuntimeError):
+    """Sanitized SQL subprocess failure; query and stderr stay private."""
 
 _PREFIX = "RDS_PG"
 
@@ -29,14 +36,21 @@ def _run(sql: str) -> str:
             env[f'PG{key}'] = value
         else:
             env.pop(f'PG{key}', None)
-    proc = subprocess.run(
-        ['psql', '-h', _pg_setting('HOST'), '-p', _pg_setting('PORT'),
-         '-U', _pg_setting('USER'), '-d', _pg_setting('DATABASE'),
-         '-X', '-q', '-t', '-A', '-v', 'ON_ERROR_STOP=1', '-c', sql],
-        env=env, capture_output=True, text=True, timeout=30,
-    )
+    started = time.perf_counter()
+    increment('psql_calls')
+    try:
+        proc = subprocess.run(
+            ['psql', '-h', _pg_setting('HOST'), '-p', _pg_setting('PORT'),
+             '-U', _pg_setting('USER'), '-d', _pg_setting('DATABASE'),
+             '-X', '-q', '-t', '-A', '-v', 'ON_ERROR_STOP=1', '-c', sql],
+            env=env, capture_output=True, text=True, timeout=30,
+        )
+    except subprocess.TimeoutExpired:
+        raise DatabaseQueryError('Database query timed out') from None
+    finally:
+        increment('db_wall_ms', (time.perf_counter() - started) * 1000)
     if proc.returncode != 0:
-        raise RuntimeError(proc.stderr.strip() if proc.stderr else 'RDS query failed')
+        raise DatabaseQueryError('Database query failed')
     return proc.stdout.strip()
 
 

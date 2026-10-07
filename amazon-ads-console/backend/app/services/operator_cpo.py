@@ -10,10 +10,13 @@ Hard rules enforced here:
 from __future__ import annotations
 
 import re
+import time
 
 from collections import defaultdict
 from datetime import date, timedelta
 from typing import Any, Optional
+from fastapi import HTTPException
+from app.core.observability import increment, update_context
 
 from .app_db import query_rows as app_query_rows
 from .build_cache import build_cache
@@ -249,7 +252,9 @@ def _data_revision() -> str:
             'core.report_purchased_product_daily'
         )
     """) or {}
-    return str(row.get("revision") or 0)
+    revision = str(row.get("revision") or 0)
+    update_context(revision=revision)
+    return revision
 
 
 def _complete_days_uncached(start: Optional[str] = None, end: Optional[str] = None) -> list[str]:
@@ -328,13 +333,59 @@ def _date_filter(column: str, days: list[str]) -> str:
 
 def _source_days(start: str, end: str, revision: Optional[str] = None) -> dict[str, Any]:
     days = _complete_days(start, end, revision)
-    n = len(days)
+    start_day, end_day = date.fromisoformat(start), date.fromisoformat(end)
+    rows = query_rows(f"""
+        SELECT 'businessChild' AS source, stat_date::text AS d, array_agg(DISTINCT account_name ORDER BY account_name) AS accounts
+        FROM core.report_business_child_asin_daily
+        WHERE stat_date BETWEEN DATE '{start}' AND DATE '{end}' AND account_name IN ({_sql_names(BUSINESS_ACCOUNTS)})
+        GROUP BY stat_date
+        UNION ALL
+        SELECT 'businessParent', report_start_date::text, array_agg(DISTINCT account_name ORDER BY account_name)
+        FROM core.report_business_parent_asin_period
+        WHERE report_start_date=report_end_date AND report_start_date BETWEEN DATE '{start}' AND DATE '{end}'
+          AND account_name IN ({_sql_names(BUSINESS_ACCOUNTS)}) GROUP BY report_start_date
+        UNION ALL
+        SELECT 'advertisedProduct', r.stat_date::text, array_agg(DISTINCT r.account_name ORDER BY r.account_name)
+        FROM core.report_advertised_product_daily r JOIN core.import_batches ib ON ib.batch_id=r.batch_id
+          AND ib.target_table='core.report_advertised_product_daily'
+        WHERE r.stat_date BETWEEN DATE '{start}' AND DATE '{end}' AND r.account_name IN ({_sql_names(AD_ACCOUNTS)})
+        GROUP BY r.stat_date
+        UNION ALL
+        SELECT 'purchasedProduct', r.stat_date::text, array_agg(DISTINCT r.account_name ORDER BY r.account_name)
+        FROM core.report_purchased_product_daily r JOIN core.import_batches ib ON ib.batch_id=r.batch_id
+          AND ib.target_table='core.report_purchased_product_daily'
+        WHERE r.stat_date BETWEEN DATE '{start}' AND DATE '{end}' AND r.account_name IN ({_sql_names(AD_ACCOUNTS)})
+        GROUP BY r.stat_date
+    """)
+    availability = {(row['source'], row['d']): set(row.get('accounts') or []) for row in rows}
+    dates = [(start_day + timedelta(days=n)).isoformat() for n in range((end_day - start_day).days + 1)]
+    complete: dict[str, list[str]] = {source: [] for source in ('business', 'advertisedProduct', 'purchasedProduct')}
+    missing: dict[str, dict[str, list[str]]] = {source: {} for source in complete}
+    for day in dates:
+        child = availability.get(('businessChild', day), set())
+        parent = availability.get(('businessParent', day), set())
+        # Never combine partially covered child and parent reports into a
+        # complete business date; this mirrors the CPO denominator fallback.
+        business = child if set(BUSINESS_ACCOUNTS) <= child else parent if set(BUSINESS_ACCOUNTS) <= parent else max((child, parent), key=len)
+        for source, expected, actual in (
+            ('business', BUSINESS_ACCOUNTS, business),
+            ('advertisedProduct', AD_ACCOUNTS, availability.get(('advertisedProduct', day), set())),
+            ('purchasedProduct', AD_ACCOUNTS, availability.get(('purchasedProduct', day), set())),
+        ):
+            absent = sorted(set(expected) - actual)
+            if absent:
+                missing[source][day] = absent
+            else:
+                complete[source].append(day)
     return {
-        "advertisedProductDays": n,
-        "purchasedProductDays": n,
-        "businessDays": n,
-        "completeDays": n,
+        "advertisedProductDays": len(complete['advertisedProduct']),
+        "purchasedProductDays": len(complete['purchasedProduct']),
+        "businessDays": len(complete['business']),
+        "completeDays": len(days),
         "completeDates": days,
+        "sourceDates": complete,
+        "sourceMissingDates": {source: list(absent) for source, absent in missing.items()},
+        "missingAccountsByDate": missing,
     }
 
 
@@ -751,11 +802,17 @@ def _build_uncached(start: str, end: str, revision: Optional[str] = None) -> dic
 
 def _build(start: str, end: str) -> dict[str, Any]:
     revision = _data_revision()
+    def loader():
+        started = time.perf_counter()
+        try:
+            return _build_uncached(start, end, revision)
+        finally:
+            increment('build_ms', (time.perf_counter() - started) * 1000)
     return build_cache.get_or_set(
         start,
         end,
         revision,
-        lambda: _build_uncached(start, end, revision),
+        loader,
     )
 
 
@@ -829,6 +886,7 @@ def _latest_complete_date() -> Optional[str]:
 def operator_cpo_summary(stat_date: Optional[str] = None, period: str = "daily") -> dict[str, Any]:
     period = period if period in ("daily", "weekly", "monthly") else "daily"
     anchor = stat_date or _latest_complete_date()
+    update_context(date=anchor, period=period)
     if not anchor:
         return {
             "data_source": "child_asin_first_three_report_cpo", "period": period,
@@ -961,6 +1019,7 @@ def operator_cpo_detail(name: str, stat_date: Optional[str] = None, period: str 
     name = canonical_operator_name(name)
     period = period if period in ("daily", "weekly", "monthly") else "daily"
     anchor = stat_date or _latest_complete_date()
+    update_context(date=anchor, period=period)
     if not anchor:
         return {
             "data_source": "explicit_parent_mapping_three_report_cpo", "operator": name,
@@ -1028,7 +1087,8 @@ def operator_cpo_detail(name: str, stat_date: Optional[str] = None, period: str 
 
 
 def operator_group_of(operator_code: Optional[str]) -> str:
-    return (operator_code or "").strip().upper()[:2]
+    raw = (operator_code or "").strip().upper()
+    return raw[:2] if re.fullmatch(r'[A-Z]{2}[0-9]+', raw) and raw[:2] in OPERATOR_NAMES else ''
 
 
 def my_cpo_summary(
@@ -1039,12 +1099,9 @@ def my_cpo_summary(
 ) -> dict[str, Any]:
     """Operator view reuses the same management CPO service, filtered only by group."""
     prefix = operator_group_of(operator_code)
-    data = operator_cpo_summary(stat_date, period)
     if not prefix:
-        return {
-            **data, "operators": [], "products": [], "detailSummary": {},
-            "me": None, "note": "当前账号没有绑定运营组（operator_code），无法定位运营组数据。",
-        }
+        raise HTTPException(status_code=403, detail='An active operator group is required')
+    data = operator_cpo_summary(stat_date, period)
     group_name = OPERATOR_NAMES.get(prefix, prefix)
     rows = [
         r for r in data.get("operators", [])
@@ -1057,7 +1114,8 @@ def my_cpo_summary(
         "name": (display_name or "").strip() or group_name,
     }
     return {
-        **data,
+        **{key: data[key] for key in ('data_source', 'data_date', 'period', 'period_start', 'period_end',
+           'coverageDays', 'expectedDays', 'account_split', 'sourceCompleteness', 'qualityFlags') if key in data},
         "operators": rows,
         "me": me,
         "products": detail.get("products", []),
@@ -1066,6 +1124,6 @@ def my_cpo_summary(
         "scope": "own_operator_group_all_paired_accounts",
         "note": (
             f"{me['name']} 登录 → {prefix} 运营组 → 本组全部 ASIN；组内成员共享同一组数据。 "
-            + (data.get("note") or "")
+            + "只使用业务报告、推广商品报告、达成转化商品报告三项完整日期；仅展示本组已确认产品。"
         ),
     }

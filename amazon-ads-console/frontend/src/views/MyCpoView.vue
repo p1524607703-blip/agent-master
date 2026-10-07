@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { computed, onActivated, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getJson } from '../api/client'
+import { getJson, getJsonStrict } from '../api/client'
 import { useSessionStore } from '../stores/session'
 import { NButton, NDatePicker, NSelect } from 'naive-ui'
 import DataSkeleton from '../components/DataSkeleton.vue'
+import CpoDataQuality from '../components/CpoDataQuality.vue'
+import { qualityLabel } from '../diagnostics/cpoQuality'
+import { usePageRenderTrace } from '../diagnostics/pageTrace'
 
 type Period = 'daily'|'weekly'|'monthly'
 type PeriodOption = { value:string; label:string; start?:string; end?:string }
@@ -16,6 +19,9 @@ const session = useSessionStore()
 const period = ref<Period>(['weekly','monthly'].includes(String(route.query.period)) ? route.query.period as Period : 'daily')
 const selectedDate = ref(String(route.query.date || ''))
 const loading = ref(true)
+usePageRenderTrace(loading)
+const loadError = ref('')
+let requestSeq = 0
 const data = ref<any>({ data_date:'', account_split:false, operators:[], products:[], detailSummary:{}, note:'', me:null })
 const periods = ref<PeriodData>({ daily:[], weekly:[], monthly:[] })
 const baseAdTypes = ['SP','SB','SD','STV'] as const
@@ -62,19 +68,28 @@ const loadPeriods = async () => {
 }
 
 const load = async (showLoading=true) => {
+  const seq = ++requestSeq
   if (showLoading) loading.value = true
-  const params = new URLSearchParams({ period:period.value })
-  if (selectedDate.value) params.set('date', selectedDate.value)
-  const fallback = data.value?.operators?.length
-    ? data.value
-    : { data_date:selectedDate.value, period:period.value, account_split:false, operators:[], products:[], detailSummary:{}, me:data.value?.me || null, note:'数据服务暂时不可用，请稍后重试' }
-  const result = await getJson(`/my-cpo?${params.toString()}`, fallback as any)
-  data.value = result
-  if (!selectedDate.value && result.data_date) selectedDate.value = result.data_date
-  if (selectedDate.value) {
-    await router.replace({ path:'/my-cpo', query:{ period:period.value, date:selectedDate.value } })
+  loadError.value = ''
+  const targetPeriod = period.value
+  const targetDate = selectedDate.value
+  const params = new URLSearchParams({ period:targetPeriod })
+  if (targetDate) params.set('date', targetDate)
+  try {
+    const result = await getJsonStrict<any>(`/my-cpo?${params.toString()}`)
+    if (seq !== requestSeq || period.value !== targetPeriod || selectedDate.value !== targetDate) return
+    data.value = result
+    if (!selectedDate.value && result.data_date) selectedDate.value = result.data_date
+    if (selectedDate.value) {
+      await router.replace({ path:'/my-cpo', query:{ period:period.value, date:selectedDate.value } })
+    }
+  } catch (error) {
+    if (seq !== requestSeq) return
+    loadError.value = error instanceof Error ? error.message : '数据读取失败，请稍后重试'
+    data.value = { data_date:targetDate, period:targetPeriod, operators:[], products:[], detailSummary:{}, me:data.value?.me || null }
+  } finally {
+    if (seq === requestSeq) loading.value = false
   }
-  if (showLoading) loading.value = false
 }
 
 const changePeriod = async (value:Period) => {
@@ -150,6 +165,10 @@ onActivated(() => { if (data.value?.operators?.length) load(false) })
       <strong>统一口径：</strong>{{ data.note || '只使用业务报告 + 推广的商品 + 达成转化的商品三项完整日期。' }}
     </div>
 
+    <p v-if="loadError && !loading" class="load-error" role="alert">{{ loadError }}。本次数据未读取成功，请重试后确认口径。</p>
+
+    <CpoDataQuality v-if="!loading" :data="data" />
+
     <div v-if="!loading" class="card panel">
       <div class="panel-head">
         <div>
@@ -193,7 +212,7 @@ onActivated(() => { if (data.value?.operators?.length) load(false) })
         </div>
         <div class="detail-badges">
           <span>{{ products.length }} 条产品记录</span>
-          <span>{{ data.final_cpo === false ? '存在待补映射/非最终口径' : '完整口径' }}</span>
+          <span>{{ qualityLabel(data) }}</span>
           <NButton size="tiny" quaternary @click="showDsp = !showDsp">{{ showDsp ? '收起 DSP' : '展开 DSP' }}</NButton>
         </div>
       </div>
@@ -222,7 +241,7 @@ onActivated(() => { if (data.value?.operators?.length) load(false) })
             <tr class="summary-first-row">
               <td class="sticky-product"><strong>综合情况</strong></td>
               <td>{{ tablePeriod }}</td>
-              <td><span class="data-status" :class="{warn:data.final_cpo===false}">{{ data.final_cpo===false ? '非完整口径' : '完整口径' }}</span></td>
+              <td><span class="data-status" :class="{warn:data.final_cpo!==true}">{{ qualityLabel(data) }}</span></td>
               <td v-for="type in visibleAdTypes" :key="`sum-s-${type}`">{{ money(typeTotal('adTypeSpend',type)) }}</td>
               <td v-for="type in visibleAdTypes" :key="`sum-o-${type}`">{{ num(typeTotal('adTypeOrders',type)) }}</td>
               <td class="metric-start"><strong>{{ money(detailSummary.spend) }}</strong></td>
@@ -254,6 +273,7 @@ onActivated(() => { if (data.value?.operators?.length) load(false) })
 </template>
 
 <style scoped>
+.load-error{padding:10px 12px;border:1px solid #f2d6b5;background:#fff6ef;color:#a45f16;border-radius:8px;font-size:12px}
 .operator-date-filter{display:flex;align-items:flex-end;gap:8px;flex-wrap:nowrap;min-width:max-content}
 .operator-date-filter label{display:flex;flex-direction:column;gap:5px;font-size:11px;color:#7b8492;flex:0 0 auto}
 .operator-scope-note{margin:10px 0 12px;padding:9px 12px;border-radius:8px;border:1px solid #e7ebf1;background:#f8fafc;color:#667085;font-size:12px;line-height:1.65}

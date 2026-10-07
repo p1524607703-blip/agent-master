@@ -12,7 +12,10 @@ from __future__ import annotations
 import json
 import os
 import subprocess
+import time
 from typing import Any, Optional
+from app.core.observability import increment
+from .rds_query import DatabaseQueryError
 
 _PREFIX = "PG"
 
@@ -26,14 +29,21 @@ def _setting(name: str) -> str:
 
 
 def _run(sql: str) -> str:
-    proc = subprocess.run(
-        ["psql", "-h", _setting("HOST"), "-p", _setting("PORT"),
-         "-U", _setting("USER"), "-d", _setting("DATABASE"),
-         "-X", "-q", "-t", "-A", "-v", "ON_ERROR_STOP=1", "-c", sql],
-        env=os.environ.copy(), capture_output=True, text=True, timeout=30,
-    )
+    started = time.perf_counter()
+    increment('psql_calls')
+    try:
+        proc = subprocess.run(
+            ["psql", "-h", _setting("HOST"), "-p", _setting("PORT"),
+             "-U", _setting("USER"), "-d", _setting("DATABASE"),
+             "-X", "-q", "-t", "-A", "-v", "ON_ERROR_STOP=1", "-c", sql],
+            env=os.environ.copy(), capture_output=True, text=True, timeout=30,
+        )
+    except subprocess.TimeoutExpired:
+        raise DatabaseQueryError('Application database query timed out') from None
+    finally:
+        increment('db_wall_ms', (time.perf_counter() - started) * 1000)
     if proc.returncode != 0:
-        raise RuntimeError(proc.stderr.strip() if proc.stderr else "app db query failed")
+        raise DatabaseQueryError('Application database query failed')
     return proc.stdout.strip()
 
 

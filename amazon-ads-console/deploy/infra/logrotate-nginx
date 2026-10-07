@@ -1,0 +1,19 @@
+# Replaces the distribution nginx rule; do not add a second overlapping glob.
+/var/log/nginx/*.log {
+    daily
+    rotate 30
+    maxage 30
+    maxsize 100M
+    missingok
+    notifempty
+    compress
+    delaycompress
+    create 0640 www-data adm
+    sharedscripts
+    prerotate
+        if [ -d /etc/logrotate.d/httpd-prerotate ]; then run-parts /etc/logrotate.d/httpd-prerotate; fi
+    endscript
+    postrotate
+        invoke-rc.d nginx rotate >/dev/null 2>&1
+    endscript
+}
