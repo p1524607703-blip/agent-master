@@ -1,7 +1,8 @@
 """Production acceptance through HTTPS; does not import or mutate business facts.
 
 Run on Agent-server from a prepared release. The existing account password is
-provided only through CPO_ACCEPTANCE_PASSWORD; tokens never enter output files.
+provided only through CPO_ACCEPTANCE_PASSWORD or short-lived test sessions through
+CPO_ACCEPTANCE_TOKENS; tokens never enter output files. Sessions are revoked on exit.
 """
 import argparse
 import concurrent.futures
@@ -21,6 +22,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--base-url', default='https://193.112.27.91:80')
     parser.add_argument('--date', default='2026-10-04')
+    parser.add_argument('--management-user', default='mana_czy')
+    parser.add_argument('--xm-user', default='op_lm')
+    parser.add_argument('--aj-user', default='op_zll')
     args = parser.parse_args()
     sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'backend'))
     import run_rds
@@ -51,6 +55,14 @@ def main():
             return response.code, data, request_id
 
     def login(username):
+        # Optional short-lived sessions issued by an authorized server-side test
+        # harness. Their tokens stay in memory/environment and are logged out.
+        supplied = json.loads(os.environ.get('CPO_ACCEPTANCE_TOKENS', '{}'))
+        if supplied.get(username):
+            token = supplied[username]
+            sessions.append(token)
+            assert request('/auth/me', token)[0] == 200
+            return token
         password = os.environ.get('CPO_ACCEPTANCE_PASSWORD')
         assert password, 'CPO_ACCEPTANCE_PASSWORD is required for existing account acceptance'
         status, data, _ = request('/auth/login', payload={'username': username, 'password': password})
@@ -64,7 +76,7 @@ def main():
         assert status == 200 and data == {'ok': True}
         assert request('/diagnostics/status')[0] == 401
         assert request('/operators/XM')[0] == 401
-        boss, xm, aj = (login(name) for name in ('boss', 'op_xm1', 'op_aj1'))
+        boss, xm, aj = (login(name) for name in (args.management_user, args.xm_user, args.aj_user))
         date_query = '?date=' + urllib.parse.quote(args.date) + '&period=daily'
         assert request('/operators/AJ'+date_query, xm)[0] == 403
         assert request('/operators/XM'+date_query, aj)[0] == 403
