@@ -236,6 +236,35 @@ class RedisBuildCache:
             self._record("error")
             return 0
 
+    def health(self) -> dict[str, Any]:
+        """Probe Redis without mutating business cache counters or exposing its URL."""
+        started = time.perf_counter()
+        with self._stats_lock:
+            errors = self._errors
+        if not self.enabled:
+            return {
+                "enabled": False,
+                "available": False,
+                "status": "disabled",
+                "errors": errors,
+                "check_ms": round((time.perf_counter() - started) * 1000, 3),
+            }
+        client = self._get_client()
+        available = False
+        if client is not None:
+            try:
+                available = bool(client.ping())
+            except Exception:
+                available = False
+        status = "unavailable" if not available else "degraded" if errors > 0 else "healthy"
+        return {
+            "enabled": True,
+            "available": available,
+            "status": status,
+            "errors": errors,
+            "check_ms": round((time.perf_counter() - started) * 1000, 3),
+        }
+
     def stats(self) -> dict[str, Any]:
         with self._stats_lock:
             return {

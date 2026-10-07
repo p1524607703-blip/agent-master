@@ -7,10 +7,36 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import patch
 
-from app.services.diagnostics import request_traces
+from app.services.diagnostics import diagnostic_status, request_traces
 
 
 class DiagnosticsHistoryTests(unittest.TestCase):
+    @patch('app.services.diagnostics.build_cache')
+    def test_status_exposes_safe_redis_health_and_critical_alert(self, mocked_cache):
+        mocked_cache.stats.return_value = {'backend': 'redis', 'enabled': True, 'url': 'redis://user:secret@host:6379/0', 'errors': 0}
+        mocked_cache.health.return_value = {'enabled': True, 'available': False, 'status': 'unavailable', 'errors': 0, 'check_ms': 1.2}
+        result = diagnostic_status()
+        self.assertNotIn('url', result['cache']['redis'])
+        self.assertNotIn('secret', json.dumps(result))
+        self.assertEqual(result['redis_health']['status'], 'unavailable')
+        self.assertEqual(result['alerts'][0]['level'], 'critical')
+        self.assertEqual(result['alerts'][0]['code'], 'REDIS_UNAVAILABLE')
+
+    @patch('app.services.diagnostics.build_cache')
+    def test_status_warns_when_redis_is_degraded(self, mocked_cache):
+        mocked_cache.stats.return_value = {'backend': 'redis', 'enabled': True, 'url': 'redis://host:6379/0', 'errors': 3}
+        mocked_cache.health.return_value = {'enabled': True, 'available': True, 'status': 'degraded', 'errors': 3, 'check_ms': 0.8}
+        result = diagnostic_status()
+        self.assertEqual(result['alerts'][0]['level'], 'warning')
+        self.assertEqual(result['alerts'][0]['code'], 'REDIS_ERRORS_RECORDED')
+
+    @patch('app.services.diagnostics.build_cache')
+    def test_status_has_no_redis_alert_when_healthy(self, mocked_cache):
+        mocked_cache.stats.return_value = {'backend': 'redis', 'enabled': True, 'url': 'redis://host:6379/0', 'errors': 0}
+        mocked_cache.health.return_value = {'enabled': True, 'available': True, 'status': 'healthy', 'errors': 0, 'check_ms': 0.5}
+        result = diagnostic_status()
+        self.assertEqual(result['alerts'], [])
+
     def test_filters_current_and_rotated_logs_and_omits_unapproved_fields(self):
         now = datetime.now(timezone.utc)
         def row(request_id, days=0, user_id=7):

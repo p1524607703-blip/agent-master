@@ -43,11 +43,27 @@ def diagnostic_status() -> dict[str, Any]:
     path = _trace_path()
     metadata = release_metadata()
     redis_stats = build_cache.stats()
+    redis_health = build_cache.health()
     # Avoid revealing the Redis hostname or credentials in the management UI.
     redis_stats.pop('url', None)
+    alerts: list[dict[str, str]] = []
+    if redis_health['enabled'] and not redis_health['available']:
+        alerts.append({
+            'level': 'critical',
+            'code': 'REDIS_UNAVAILABLE',
+            'message': 'Redis 当前不可用，CPO 会降级到进程内互斥与数据库计算；请检查 Redis 服务。',
+        })
+    elif redis_health['status'] == 'degraded':
+        alerts.append({
+            'level': 'warning',
+            'code': 'REDIS_ERRORS_RECORDED',
+            'message': f"Redis 当前可连接，但本进程已记录 {redis_health['errors']} 次缓存错误；建议结合请求追踪复核。",
+        })
     return {
         'release': {'release_version': metadata['release'], 'git_commit': metadata['commit']},
         'cache': {'memory': cache.stats(), 'redis': redis_stats},
+        'redis_health': redis_health,
+        'alerts': alerts,
         'trace': {'available': bool(path and path.is_file()), 'retention_days': RETENTION_DAYS},
     }
 

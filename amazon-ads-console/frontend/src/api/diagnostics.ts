@@ -47,6 +47,8 @@ export type DiagnosticRequest = {
 export type DiagnosticStatus = {
   release: { release_version?: string; git_commit?: string }
   cache: Record<string, unknown>
+  redis_health?: { enabled: boolean; available: boolean; status: 'healthy' | 'degraded' | 'unavailable' | 'disabled'; errors: number; check_ms: number }
+  alerts?: Array<{ level: 'critical' | 'warning'; code: string; message: string }>
   trace: { available: boolean; retention_days?: number }
 }
 

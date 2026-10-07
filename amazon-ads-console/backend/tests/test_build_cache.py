@@ -23,6 +23,9 @@ class _FakeRedis:
         self.data = {}
         self.ttls = {}
 
+    def ping(self):
+        return True
+
     def get(self, key):
         return self.data.get(key)
 
@@ -48,6 +51,36 @@ class _FakeRedis:
 
 
 class RedisBuildCacheTests(unittest.TestCase):
+    def test_health_reports_healthy_without_incrementing_errors(self):
+        fake = _FakeRedis()
+        cache = RedisBuildCache(client=fake, enabled=True)
+        before = cache.stats()['errors']
+        health = cache.health()
+        self.assertEqual(health['status'], 'healthy')
+        self.assertTrue(health['available'])
+        self.assertEqual(health['errors'], before)
+        self.assertNotIn('url', health)
+        self.assertEqual(cache.stats()['errors'], before)
+
+    def test_health_reports_unavailable_without_recording_probe_error(self):
+        fake = _FakeRedis()
+        fake.ping = Mock(side_effect=ConnectionError('redis down'))
+        cache = RedisBuildCache(client=fake, enabled=True)
+        health = cache.health()
+        self.assertEqual(health['status'], 'unavailable')
+        self.assertFalse(health['available'])
+        self.assertEqual(health['errors'], 0)
+        self.assertEqual(cache.stats()['errors'], 0)
+
+    def test_health_reports_degraded_after_business_error(self):
+        fake = _FakeRedis()
+        cache = RedisBuildCache(client=fake, enabled=True)
+        cache._record('error')
+        health = cache.health()
+        self.assertEqual(health['status'], 'degraded')
+        self.assertTrue(health['available'])
+        self.assertEqual(health['errors'], 1)
+
     def test_same_period_reuses_one_build(self):
         fake = _FakeRedis()
         cache = RedisBuildCache(client=fake, enabled=True, recent_ttl=300, historical_ttl=3600)
