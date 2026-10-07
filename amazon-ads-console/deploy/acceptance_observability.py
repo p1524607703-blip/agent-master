@@ -83,11 +83,15 @@ def main():
         assert request('/diagnostics/requests', xm)[0] == 403
         assert request('/operator-cpo'+date_query, xm)[0] == 403
         status, own, _ = request('/operators/XM'+date_query, xm)
-        assert status == 200
+        assert status == 200 and own.get('products')
+        if own.get('final_cpo') is False:
+            assert own.get('qualityReasons'), 'Incomplete CPO must explain its blocking reasons'
         assert all(p.get('operatorName') == OPERATOR_NAMES['XM'] for p in own.get('products', []))
         assert 'businessMappingConflictOrders' not in own
         status, own, _ = request('/my-cpo'+date_query, xm)
-        assert status == 200 and own['me']['group'] == 'XM'
+        assert status == 200 and own['me']['group'] == 'XM' and own.get('products')
+        if own.get('final_cpo') is False:
+            assert own.get('qualityReasons'), 'My CPO must preserve safe blocking reasons'
         assert all(str(p.get('group', '')).startswith('XM') for p in own.get('products', []))
         for secret_scope in ('unmappedAdSpend', 'unmappedAd', 'businessMappingConflictOrders', 'businessOutOfScopeOrders'):
             assert secret_scope not in own
@@ -113,7 +117,7 @@ def main():
         evidence['checks'].extend(['anonymous ping 200', 'anonymous protected API 401',
             'cross-group and diagnostics denied 403', 'own-group products isolated',
             'management summary 200', 'HTTPS/Nginx/FastAPI/trace file ID correlation',
-            'release and revision recorded'])
+            'release and revision recorded', 'explicit quality blocking reasons'])
 
         # Exercise new single-flight behavior with an isolated ephemeral Redis key.
         client = build_cache._get_client()

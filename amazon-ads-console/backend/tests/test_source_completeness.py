@@ -31,5 +31,28 @@ class SourceCompletenessTests(unittest.TestCase):
         self.assertEqual(result['sourceMissingDates']['business'], ['2026-10-04'])
 
 
+class QualityReasonTests(unittest.TestCase):
+    def test_complete_reports_explain_global_mapping_block_without_global_amounts(self):
+        result = cpo._quality_reasons({'unmappedAd': {'spend': 9876.54}, 'businessUnmappedOrders': 8765},
+                                     {'completeDays': 1}, 1, 'daily')
+        self.assertEqual(len(result), 2)
+        self.assertIn('公司级广告产品归属', result[0])
+        self.assertIn('业务订单尚有未明确归属', result[1])
+        self.assertNotIn('9876', str(result))
+        self.assertNotIn('8765', str(result))
+        self.assertEqual(cpo._quality_reasons({'unmappedAd': {'spend': 0}, 'businessUnmappedOrders': 0},
+                                             {'completeDays': 1}, 1, 'daily'), [])
+
+    def test_operator_specific_and_coverage_reasons_remain_distinct(self):
+        result = cpo._quality_reasons({}, {'completeDays': 2}, 3, 'monthly',
+                                     has_business=False, missing_products=2, unpaired_spend=20)
+        self.assertEqual(len(result), 4)
+        self.assertIn('2/3', result[0])
+        self.assertIn('当前运营范围', result[1])
+        self.assertIn('2 个本组', result[2])
+        self.assertIn('本组部分广告花费', result[3])
+        self.assertNotIn('20', str(result))
+
+
 if __name__ == '__main__':
     unittest.main()

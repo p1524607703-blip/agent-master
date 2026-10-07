@@ -85,7 +85,8 @@ def capture_quality(value: Any) -> None:
     update_context(quality={"final_cpo": bool(value["final_cpo"]),
                            "missingBusinessProducts": summary.get("missingBusinessProducts"),
                            "unpairedAdSpend": summary.get("unpairedAdSpend"),
-                           "sourceCompleteness": value.get("sourceCompleteness")})
+                           "sourceCompleteness": value.get("sourceCompleteness"),
+                           "qualityReasons": value.get("qualityReasons", [])})
 
 
 def capture_exception(exc: BaseException) -> None:

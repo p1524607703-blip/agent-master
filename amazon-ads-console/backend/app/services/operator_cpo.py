@@ -883,6 +883,29 @@ def _latest_complete_date() -> Optional[str]:
     return days[-1] if days else None
 
 
+def _quality_reasons(data: dict[str, Any], source: dict[str, Any], expected: int, period: str,
+                     *, has_business: bool = True, missing_products: int = 0,
+                     unpaired_spend: float = 0) -> list[str]:
+    """Explain the existing final-CPO predicate without exposing global amounts."""
+    reasons: list[str] = []
+    complete = int(source.get("completeDays") or 0)
+    if not complete:
+        reasons.append("当前区间没有三项来源同时完整的可计算日期。")
+    elif period != "daily" and complete != expected:
+        reasons.append(f"三项来源同时完整日期覆盖 {complete}/{expected} 天；未覆盖日期不进入计算。")
+    if not has_business:
+        reasons.append("当前运营范围暂无可配对的业务侧订单记录，无法确认最终 CPO。")
+    if missing_products:
+        reasons.append(f"有 {missing_products} 个本组已确认产品缺业务侧记录，请核对产品清单。")
+    if unpaired_spend > 0.005:
+        reasons.append("本组部分广告花费尚未配对到业务侧订单，当前 CPO 不能认定为完整。")
+    if float(data.get("unmappedAd", {}).get("spend") or 0) > 0.005:
+        reasons.append("公司级广告产品归属尚未完成，最终 CPO 暂未确认；请由管理层核查未归属广告。")
+    if float(data.get("businessUnmappedOrders") or 0) > 0.005:
+        reasons.append("业务订单尚有未明确归属记录，最终 CPO 暂未确认；请由管理层核查产品映射与白名单。")
+    return reasons
+
+
 def operator_cpo_summary(stat_date: Optional[str] = None, period: str = "daily") -> dict[str, Any]:
     period = period if period in ("daily", "weekly", "monthly") else "daily"
     anchor = stat_date or _latest_complete_date()
@@ -918,6 +941,7 @@ def operator_cpo_summary(stat_date: Optional[str] = None, period: str = "daily")
         "data_source": "child_asin_first_three_report_cpo", "data_date": anchor, "period": period,
         "period_start": start, "period_end": end, "coverageDays": complete_days, "expectedDays": expected,
         "account_split": True, "operators": rows, "sourceCompleteness": src, "final_cpo": final_cpo,
+        "qualityReasons": _quality_reasons(data, src, expected, period),
         "mappingCount": data["mappingCount"], "childMappingCount": data.get("childMappingCount", 0),
         "businessSource": data.get("businessSource"), "businessAudit": data.get("businessAudit", {}),
         "adMappingAudit": data.get("adMappingAudit", {}),
@@ -1058,6 +1082,9 @@ def operator_cpo_detail(name: str, stat_date: Optional[str] = None, period: str 
         "range": anchor if period == "daily" else f"{start}~{end}", "data_date": anchor, "period": period,
         "period_start": start, "period_end": end, "coverageDays": complete_days, "expectedDays": expected,
         "account_split": False, "final_cpo": final_ok, "allocation_status": "explicit_parent_asin_mapping",
+        "qualityReasons": _quality_reasons(data, src, expected, period, has_business=bool(business_ps_raw),
+             missing_products=len({(p["code"], p.get("parentAsin")) for p in missing_report_ps}),
+             unpaired_spend=missing_business_spend),
         "summary": {
             "spend": round(spend, 2), "adOrders": round(ad_orders, 2), "adSales": round(ad_sales, 2),
             "totalOrders": round(total_orders, 2) if business_ps_raw else None,
@@ -1121,6 +1148,7 @@ def my_cpo_summary(
         "products": detail.get("products", []),
         "detailSummary": detail.get("summary", {}),
         "final_cpo": bool(detail.get("final_cpo")),
+        "qualityReasons": detail.get("qualityReasons", []),
         "scope": "own_operator_group_all_paired_accounts",
         "note": (
             f"{me['name']} 登录 → {prefix} 运营组 → 本组全部 ASIN；组内成员共享同一组数据。 "
