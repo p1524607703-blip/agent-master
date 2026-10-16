@@ -1,10 +1,11 @@
 # Codex++ 多设备接入方案与配置 Skill
 
-版本codex-device-relay-v0.1.0，2026-10-15发布。适用本人少于20台Mac/Windows设备：模型源集中在主机，各设备使用Codex++纯API与独立设备Key，任务工具仍在各设备本地执行。当前只完成本机试点，跨设备接入按真实验收推进。
+版本codex-device-relay-v0.1.1，2026-10-16更新，新增Windows专用接入指南与Skill路由。适用本人少于20台Mac/Windows设备：模型源集中在主机，各设备使用Codex++纯API与独立设备Key，任务工具仍在各设备本地执行。当前只完成本机试点，Windows与跨设备接入按真实验收推进。
 
 - [完整架构方案与流程图](../../.agents/skills/codex-device-relay/references/architecture.md)
 - [安装后供Codex执行的Skill](../../.agents/skills/codex-device-relay/SKILL.md)
 - [Mac / Windows客户端接入](../../.agents/skills/codex-device-relay/references/client.md)
+- [Windows专用方案、PowerShell命令与配置提示词](../../.agents/skills/codex-device-relay/references/windows.md)
 - [主机私网入口与设备Key准备](../../.agents/skills/codex-device-relay/references/host.md)
 - [M6远程试点](../../.agents/skills/codex-device-relay/references/m6.md)
 
@@ -15,9 +16,10 @@
 把下面这段发给**目标设备上已有可用连接的Codex**：
 
 ```text
-请从 https://github.com/p1524607703-blip/agent-master/tree/codex-device-relay-v0.1.0
+请从 https://github.com/p1524607703-blip/agent-master/tree/codex-device-relay-v0.1.1
 安装 .agents/skills/codex-device-relay 到本机用户级Skill目录。
 阅读并使用 $codex-device-relay，帮当前设备接入已有Codex++模型服务。
+当前是Windows时同时读取 references/windows.md，使用Windows原生路径、PowerShell和Key ACL检查。
 先运行doctor，保留正在工作的主管和原模型入口；使用独立纯API供应商及多开实例。
 实际私网Base URL和本设备Key文件由我在本机私下提供，不从公开仓库寻找凭据。
 缺少服务地址、Key、软件或界面权限时，先完成能做的准备，准确列出剩余步骤。

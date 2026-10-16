@@ -10,6 +10,7 @@ description: 为本人 Mac 或 Windows 配置已有 Codex++ 私网模型入口�
 ## 选择本次角色
 
 - **当前设备接入**：默认读 [client.md](references/client.md)，支持 macOS/Windows。
+- **Windows设备**：同时读 [windows.md](references/windows.md)，按原生PowerShell、Windows路径与Key ACL步骤接入；不要混用WSL配置或把脚本成功当成桌面验收。
 - **主机入口准备或设备 Key 管理**：读 [host.md](references/host.md)，客户端不要自行改服务器。
 - **M6 不在身边、远程试点**：读 [m6.md](references/m6.md)，先确认受信远程登录；在线或端口开放不等于已取得操作权限。
 - **解释架构与进度**：读 [architecture.md](references/architecture.md)，区分已验证、待验收和后续功能。

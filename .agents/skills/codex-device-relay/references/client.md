@@ -1,5 +1,7 @@
 # Mac / Windows 客户端接入
 
+Windows完整步骤、PowerShell命令与验收清单见 [Windows专用指南](windows.md)。
+
 安装前记录原供应商、Codex配置位置与当前进程，仅备份实际要改动的配置到私有目录。优先新增纯API供应商并用「Codex多开」启动，原主管继续运行。
 
 | 字段 | 填写内容 |
