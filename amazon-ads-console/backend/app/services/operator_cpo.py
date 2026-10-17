@@ -987,7 +987,7 @@ def _quality_reasons(data: dict[str, Any], source: dict[str, Any], expected: int
     if float(data.get("businessUnmappedOrders") or 0) > 0.005:
         reasons.append("业务订单尚有未明确归属记录，最终 CPO 暂未确认；请由管理层核查产品映射与白名单。")
     if float(data.get('fullFunnel',{}).get('unallocatedSpend') or 0)>0.005:
-        reasons.append('全流域广告存在混合活动待分摊费用，已独立列示，未计入任一运营产品。')
+        reasons.append('公司全流域仍有混合活动待分摊，完整口径暂未确认；详情仅向相关运营组展示，未计入任一产品。')
     return reasons
 
 

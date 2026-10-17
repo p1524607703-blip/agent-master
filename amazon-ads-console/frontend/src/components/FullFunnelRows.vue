@@ -4,11 +4,9 @@ const money = (value: any) => `$${Number(value || 0).toLocaleString(undefined, {
 </script>
 
 <template>
-  <section v-if="ledger?.modules?.length" class="card full-funnel-panel">
-    <div class="full-funnel-heading">
-      <h2>全流域广告活动</h2>
-      <p>{{ ledger.note }}</p>
-    </div>
+  <details v-if="ledger?.modules?.length" class="card full-funnel-panel">
+    <summary class="full-funnel-heading"><span>全流域广告活动</span><small>点击展开／收起</small></summary>
+    <p class="full-funnel-note">{{ ledger.note }}</p>
     <div class="brand-modules">
       <section v-for="brand in ledger.modules" :key="brand.account" class="brand-module">
         <div class="brand-heading">
@@ -33,14 +31,15 @@ const money = (value: any) => `$${Number(value || 0).toLocaleString(undefined, {
         <p v-else class="empty-brand">所选可计算日期没有全流域记录。</p>
       </section>
     </div>
-  </section>
+  </details>
 </template>
 
 <style scoped>
 .full-funnel-panel{margin:12px 0 16px;min-width:0;text-align:left;color:#344054}
-.full-funnel-heading{padding:16px 18px 12px;border-bottom:1px solid #e7ebf1}
-.full-funnel-heading h2{margin:0 0 7px;font-size:17px;color:#243247}
-.full-funnel-heading p{margin:0;font-size:12px;line-height:1.7;color:#667085}
+.full-funnel-heading{padding:14px 18px;cursor:pointer;color:#243247;font-size:16px;font-weight:600}
+.full-funnel-heading small{margin-left:12px;font-size:12px;font-weight:400;color:#667085}
+.full-funnel-panel[open]>.full-funnel-heading{border-bottom:1px solid #e7ebf1}
+.full-funnel-note{margin:0;padding:12px 18px 0;font-size:12px;line-height:1.7;color:#667085}
 .brand-modules{display:flex;flex-direction:column;gap:14px;padding:16px}
 .brand-module{min-width:0;border:1px solid #e3e9f2;border-radius:9px;overflow:hidden;background:#fff}
 .brand-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:11px 13px;background:#f5f8fc}

@@ -117,27 +117,28 @@ class PermissionTests(unittest.TestCase):
             finally:
                 USERS['xm']['operatorCode'] = 'XM1'
 
-    def test_warm_detail_cache_is_filtered_per_authenticated_viewer(self):
+    def test_warm_detail_cache_has_no_management_panel_and_scoped_operator_rows(self):
         payload = {'products': [], 'fullFunnel': LEDGER}
         path = '/api/operators/XM?date=2026-10-04'
         with patch.object(routes, 'operator_cpo_detail', return_value=payload) as loader:
-            for user, expected in [('manager', ['WHITIN', 'BLOOMNEXT', 'JOOMRA DIRECT', 'UNKNOWN']),
-                                   ('xm', ['WHITIN', 'BLOOMNEXT']),
-                                   ('manager', ['WHITIN', 'BLOOMNEXT', 'JOOMRA DIRECT', 'UNKNOWN'])]:
+            for user in ('manager','xm','admin'):
                 response = self.get(path, user)
                 self.assertEqual(response.status_code, 200)
-                self.assertEqual([m['account'] for m in response.json()['fullFunnel']['modules']], expected)
+                if user == 'xm':
+                    self.assertEqual([m['account'] for m in response.json()['fullFunnel']['modules']], ['BLOOMNEXT'])
+                else:
+                    self.assertNotIn('fullFunnel',response.json())
             self.assertEqual(loader.call_count, 1)
-        self.assertEqual(len(payload['fullFunnel']['rows']), 5)
+        self.assertEqual(len(payload['fullFunnel']['rows']), 6)
 
     def test_warm_my_cache_revocation_and_policy_failure(self):
         with patch.object(routes, 'my_cpo_summary', return_value={'products': [], 'fullFunnel': LEDGER}) as loader:
             path = '/api/my-cpo?date=2026-10-04&operatorCode=AJ1'
             first = self.get(path, 'xm')
-            self.assertEqual([m['account'] for m in first.json()['fullFunnel']['modules']], ['WHITIN', 'BLOOMNEXT'])
+            self.assertEqual([m['account'] for m in first.json()['fullFunnel']['modules']], ['BLOOMNEXT'])
             self.policy_reader.return_value = [p for p in POLICIES if p['account_name'] != 'BLOOMNEXT']
             revoked = self.get(path, 'xm')
-            self.assertEqual([m['account'] for m in revoked.json()['fullFunnel']['modules']], ['WHITIN'])
+            self.assertEqual([m['account'] for m in revoked.json()['fullFunnel']['modules']], [])
             self.assertNotIn('private-xm', revoked.text)
             self.policy_reader.side_effect = RuntimeError('unavailable')
             failed = self.get(path, 'xm')

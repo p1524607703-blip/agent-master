@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import FullFunnelRows from '../components/FullFunnelRows.vue'
+import { useSessionStore } from '../stores/session'
 import CampaignCostNotes from '../components/CampaignCostNotes.vue'
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -14,6 +15,7 @@ type Period = 'daily'|'weekly'|'monthly'
 type PeriodOption = { value:string; label:string; start?:string; end?:string }
 type PeriodData = { daily:PeriodOption[]; weekly:PeriodOption[]; monthly:PeriodOption[]; latestDate?:string; weekRule?:string; note?:string }
 
+const session = useSessionStore()
 const route = useRoute()
 const router = useRouter()
 const operatorAliases: Record<string,string> = {
@@ -229,7 +231,7 @@ const tablePeriod = computed(() => period.value === 'weekly'
 
     <DataSkeleton v-if="loading" variant="detail" :rows="8" />
 
-    <FullFunnelRows v-if="!loading" :ledger="detail.fullFunnel" />
+    <FullFunnelRows v-if="!loading && session.user?.roleCode === 'operator'" :ledger="detail.fullFunnel" />
 
     <div v-if="!loading" class="simple-data-note">
       <strong>{{ displayPeriod }}</strong>

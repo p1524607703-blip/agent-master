@@ -78,6 +78,9 @@ def operator_view(operator: str, date: Optional[str] = None, period: str = Query
                   session: Tuple[str, Dict[str, Any]] = Depends(require_operator_access)):
     period = period if period in ('daily','weekly','monthly') else 'daily'
     data = cache.get_or_set(f'operator:detail:{operator}:{period}:{date or "latest"}', lambda: operator_cpo_detail(operator,date,period), 60)
+    if session[1].get('roleCode') != 'operator':
+        # Management uses the aggregate disclosure panel, never an operator detail panel.
+        return {key: value for key, value in data.items() if key != 'fullFunnel'}
     data = _full_funnel_response(data, session[1])
     if session[1].get('roleCode') == 'operator':
         # Group detail is shared, but global audit volumes are management-only.
