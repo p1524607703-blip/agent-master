@@ -7,6 +7,7 @@ from app.main import app
 from app.api import auth, routes
 from app.services import operator_cpo
 from app.services.build_cache import BuildBusyError
+from test_full_funnel_visibility import POLICIES, LEDGER
 from app.services.cache import cache
 
 
@@ -28,6 +29,8 @@ class PermissionTests(unittest.TestCase):
         self.resolver.start()
         self.query_block = patch('app.services.rds_query.subprocess.run', side_effect=AssertionError('No live DB calls in permission tests'))
         self.query_block.start()
+        self.policy = patch('app.services.full_funnel_visibility.query_rows', return_value=POLICIES)
+        self.policy_reader = self.policy.start()
         self.logger = patch('app.core.observability.logger.info')
         self.logger.start()
         self.client = TestClient(app)
@@ -37,6 +40,7 @@ class PermissionTests(unittest.TestCase):
     def tearDown(self):
         self.client.__exit__(None, None, None)
         self.query_block.stop()
+        self.policy.stop()
         self.logger.stop()
         self.resolver.stop()
         self.warmup.stop()
@@ -112,6 +116,34 @@ class PermissionTests(unittest.TestCase):
                 self.assertEqual(self.get('/api/my-cpo', 'xm').status_code, 403)
             finally:
                 USERS['xm']['operatorCode'] = 'XM1'
+
+    def test_warm_detail_cache_is_filtered_per_authenticated_viewer(self):
+        payload = {'products': [], 'fullFunnel': LEDGER}
+        path = '/api/operators/XM?date=2026-10-04'
+        with patch.object(routes, 'operator_cpo_detail', return_value=payload) as loader:
+            for user, expected in [('manager', ['WHITIN', 'BLOOMNEXT', 'JOOMRA DIRECT', 'UNKNOWN']),
+                                   ('xm', ['WHITIN', 'BLOOMNEXT']),
+                                   ('manager', ['WHITIN', 'BLOOMNEXT', 'JOOMRA DIRECT', 'UNKNOWN'])]:
+                response = self.get(path, user)
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual([m['account'] for m in response.json()['fullFunnel']['modules']], expected)
+            self.assertEqual(loader.call_count, 1)
+        self.assertEqual(len(payload['fullFunnel']['rows']), 5)
+
+    def test_warm_my_cache_revocation_and_policy_failure(self):
+        with patch.object(routes, 'my_cpo_summary', return_value={'products': [], 'fullFunnel': LEDGER}) as loader:
+            path = '/api/my-cpo?date=2026-10-04&operatorCode=AJ1'
+            first = self.get(path, 'xm')
+            self.assertEqual([m['account'] for m in first.json()['fullFunnel']['modules']], ['WHITIN', 'BLOOMNEXT'])
+            self.policy_reader.return_value = [p for p in POLICIES if p['account_name'] != 'BLOOMNEXT']
+            revoked = self.get(path, 'xm')
+            self.assertEqual([m['account'] for m in revoked.json()['fullFunnel']['modules']], ['WHITIN'])
+            self.assertNotIn('private-xm', revoked.text)
+            self.policy_reader.side_effect = RuntimeError('unavailable')
+            failed = self.get(path, 'xm')
+            self.assertEqual(failed.status_code, 503)
+            self.assertNotIn('private-', failed.text)
+            self.assertEqual(loader.call_count, 1)
 
     def test_busy_build_is_controlled_503(self):
         with patch.object(routes, 'operator_cpo_summary', side_effect=BuildBusyError('busy')):

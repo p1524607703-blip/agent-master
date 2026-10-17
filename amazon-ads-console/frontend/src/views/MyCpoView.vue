@@ -163,6 +163,8 @@ onActivated(() => { if (data.value?.operators?.length) load(false) })
 
     <DataSkeleton v-if="loading" variant="detail" :rows="8" />
 
+    <FullFunnelRows v-if="!loading" :ledger="data.fullFunnel" />
+
     <div v-if="!loading" class="operator-scope-note">
       <strong>统一口径：</strong>{{ data.note || '只使用业务报告 + 推广的商品 + 达成转化的商品三项完整日期。' }}
     </div>
@@ -241,7 +243,6 @@ onActivated(() => { if (data.value?.operators?.length) load(false) })
             </tr>
           </thead>
           <tbody>
-            <tr v-if="data.fullFunnel?.rows?.length"><td :colspan="detailColumnCount"><FullFunnelRows :ledger="data.fullFunnel" /></td></tr>
             <tr class="summary-first-row">
               <td class="sticky-product"><strong>综合情况</strong></td>
               <td>{{ tablePeriod }}</td>

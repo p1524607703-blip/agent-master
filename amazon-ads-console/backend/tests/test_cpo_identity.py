@@ -1,6 +1,6 @@
 import unittest
 from app.services.cpo_identity import AdIdentityResolver, FullFunnelLedger
-from app.services.operator_cpo import _campaign_prefix, _operator_full_funnel, _data_revision
+from app.services.operator_cpo import _campaign_prefix, _data_revision
 from app.services import operator_cpo
 from unittest.mock import patch
 
@@ -73,9 +73,5 @@ class IdentityTests(unittest.TestCase):
         self.assertEqual(result['spend'],24.49)
         self.assertEqual(result['allocatedSpend'],12.34)
         self.assertEqual(result['unallocatedSpend'],12.15)
-        private=_operator_full_funnel({'fullFunnel':result},'XM')
-        self.assertEqual(private['spend'],12.34)
-        self.assertEqual(len(private['rows']),1)
-        self.assertTrue(all(r['operatorName']=='XM' for r in private['rows']))
 
 if __name__=='__main__':unittest.main()

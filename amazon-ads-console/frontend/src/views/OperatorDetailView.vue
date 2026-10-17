@@ -229,6 +229,8 @@ const tablePeriod = computed(() => period.value === 'weekly'
 
     <DataSkeleton v-if="loading" variant="detail" :rows="8" />
 
+    <FullFunnelRows v-if="!loading" :ledger="detail.fullFunnel" />
+
     <div v-if="!loading" class="simple-data-note">
       <strong>{{ displayPeriod }}</strong>
       <span>{{ detail.summary?.dataProducts ?? 0 }} / {{ detail.summary?.products ?? products.length }} {{ period === 'weekly' ? '周内命中' : period === 'monthly' ? '月内命中' : '有数据' }}</span>
@@ -275,7 +277,6 @@ const tablePeriod = computed(() => period.value === 'weekly'
           </thead>
 
           <tbody>
-            <tr v-if="detail.fullFunnel?.rows?.length"><td :colspan="detailColumnCount"><FullFunnelRows :ledger="detail.fullFunnel" /></td></tr>
             <tr class="summary-first-row">
               <td class="sticky-product product-cell"><strong>综合情况</strong></td>
               <td class="sticky-date date-cell">{{ tablePeriod }}</td>

@@ -20,6 +20,7 @@ from fastapi import HTTPException
 from app.core.observability import increment, update_context
 
 from .cpo_identity import AdIdentityResolver, CampaignOwnerRules, FullFunnelLedger
+from .full_funnel_visibility import full_funnel_for_viewer
 
 # All product identities are read through the V2 mapping interface.
 # Authentication continues to use the application database independently.
@@ -266,7 +267,7 @@ def _data_revision() -> str:
           (SELECT md5(coalesce(string_agg(to_jsonb(c)::text,E'\n' ORDER BY rule_id),'')) FROM ops_products.cpo_campaign_cost_rules c)
         )) revision
     """) or {}
-    revision = 'identity-v2-campaign-owner-v4:' + str(row.get("revision") or 0) + ':' + str(mapping.get("revision") or '')
+    revision = 'identity-v2-brand-disclosure-v5:' + str(row.get("revision") or 0) + ':' + str(mapping.get("revision") or '')
     update_context(revision=revision)
     return revision
 
@@ -990,13 +991,6 @@ def _quality_reasons(data: dict[str, Any], source: dict[str, Any], expected: int
     return reasons
 
 
-def _operator_full_funnel(data, name):
-    rows=[r for r in data.get('fullFunnel',{}).get('rows',[]) if r['operatorName']==name]
-    total=round(sum(r['spend'] for r in rows),2)
-    return {'label':'全流域广告活动','rows':rows,'spend':total,'allocatedSpend':total,'unallocatedSpend':0,
-            'note':'拆分列示；以下费用已包含在对应产品总费用中，不重复计费。'}
-
-
 def operator_cpo_summary(stat_date: Optional[str] = None, period: str = "daily") -> dict[str, Any]:
     period = period if period in ("daily", "weekly", "monthly") else "daily"
     anchor = stat_date or _latest_complete_date()
@@ -1202,7 +1196,7 @@ def operator_cpo_detail(name: str, stat_date: Optional[str] = None, period: str 
             "unpairedAdSpend": round(missing_business_spend, 2),
             "purchasedValidationOrders": round(sum(p["purchasedValidationOrders"] for p in raw_ps), 2),
         },
-        "products": ps, "sourceCompleteness": src, "fullFunnel":_operator_full_funnel(data,name),
+        "products": ps, "sourceCompleteness": src, "fullFunnel":data['fullFunnel'],
         "businessMappingConflictOrders": data.get("businessMappingConflictOrders", 0),
         "businessOutOfScopeOrders": data.get("businessOutOfScopeOrders", 0),
         "warning": (
@@ -1252,12 +1246,12 @@ def my_cpo_summary(
         "me": me,
         "products": detail.get("products", []),
         "detailSummary": detail.get("summary", {}),
-        "fullFunnel": detail.get('fullFunnel',{}),
+        "fullFunnel": full_funnel_for_viewer(data['fullFunnel'],'operator',operator_code) if 'fullFunnel' in data else {},
         "final_cpo": bool(detail.get("final_cpo")),
         "qualityReasons": detail.get("qualityReasons", []),
         "scope": "own_operator_group_all_paired_accounts",
         "note": (
             f"{me['name']} 登录 → {prefix} 运营组 → 本组全部 ASIN；组内成员共享同一组数据。 "
-            + "只使用业务报告、推广商品报告、达成转化商品报告三项完整日期；仅展示本组已确认产品。"
+            + "产品 CPO 只统计本组；全流域按品牌权限另表展示，可见金额不追加本人费用。只使用三项来源完整日期。"
         ),
     }

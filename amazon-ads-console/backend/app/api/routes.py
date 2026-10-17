@@ -9,6 +9,7 @@ from app.services.operator_cpo import operator_cpo_summary, operator_cpo_detail,
 # 运营页权限在读取缓存之前验证角色与运营组绑定
 from app.api.auth import require_session, require_management_session, require_operator_access, require_own_operator_session
 # 产品主数据：读取V2正式映射视图，只读直显，无控制台确认写入路径
+from app.services.full_funnel_visibility import full_funnel_for_viewer
 from app.services.roster import product_mappings, not_supported
 from app.services.rds_query import ping
 from app.services.cpo_imports import validate_upload, commit_upload, source_status
@@ -54,16 +55,30 @@ def trend(account_id: Optional[str] = None, end_date: Optional[str] = None, days
 def operator_periods():
     return operator_period_options()
 
+def _full_funnel_response(data, user):
+    if 'fullFunnel' not in data:
+        return data
+    try:
+        ledger = full_funnel_for_viewer(data['fullFunnel'], user.get('roleCode'),
+                                      user.get('operatorCode') or user.get('operator_code'))
+    except Exception:
+        raise HTTPException(status_code=503, detail='全流域权限规则暂时不可用，请稍后重试。') from None
+    return {**data, 'fullFunnel': ledger}
+
+
 @router.get('/operator-cpo', dependencies=[Depends(require_management_session)])
-def operator_cpo(date: Optional[str] = None, period: str = Query('daily')):
+def operator_cpo(date: Optional[str] = None, period: str = Query('daily'),
+                 session: Tuple[str, Dict[str, Any]] = Depends(require_management_session)):
     period = period if period in ('daily','weekly','monthly') else 'daily'
-    return cache.get_or_set(f'operator:summary:{period}:{date or "latest"}', lambda: operator_cpo_summary(date, period), 60)
+    data = cache.get_or_set(f'operator:summary:{period}:{date or "latest"}', lambda: operator_cpo_summary(date, period), 60)
+    return _full_funnel_response(data, session[1])
 
 @router.get('/operators/{operator}', dependencies=[Depends(require_operator_access)])
 def operator_view(operator: str, date: Optional[str] = None, period: str = Query('daily'),
                   session: Tuple[str, Dict[str, Any]] = Depends(require_operator_access)):
     period = period if period in ('daily','weekly','monthly') else 'daily'
     data = cache.get_or_set(f'operator:detail:{operator}:{period}:{date or "latest"}', lambda: operator_cpo_detail(operator,date,period), 60)
+    data = _full_funnel_response(data, session[1])
     if session[1].get('roleCode') == 'operator':
         # Group detail is shared, but global audit volumes are management-only.
         return {key: value for key, value in data.items()
@@ -81,8 +96,9 @@ def my_cpo(date: Optional[str] = None, period: str = Query('daily'),
     user = session[1] or {}
     code = user.get('operatorCode') or user.get('operator_code') or ''
     display_name = user.get('displayName') or user.get('display_name') or ''
-    return cache.get_or_set(f'my-cpo:{code or "none"}:{display_name}:{period}:{date or "latest"}',
+    data = cache.get_or_set(f'my-cpo:{code or "none"}:{display_name}:{period}:{date or "latest"}',
                             lambda: my_cpo_summary(code, date, period, display_name), 60)
+    return _full_funnel_response(data, user)
 
 @router.get('/products', dependencies=[Depends(require_management_session)])
 def product_list(account_id: Optional[str] = None, date: Optional[str] = None, limit: int = Query(50,ge=1,le=200)):
