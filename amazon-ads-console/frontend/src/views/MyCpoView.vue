@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import FullFunnelRows from '../components/FullFunnelRows.vue'
 import { computed, onActivated, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getJson, getJsonStrict } from '../api/client'
@@ -238,6 +239,7 @@ onActivated(() => { if (data.value?.operators?.length) load(false) })
             </tr>
           </thead>
           <tbody>
+            <tr v-if="data.fullFunnel?.rows?.length"><td :colspan="detailColumnCount"><FullFunnelRows :ledger="data.fullFunnel" /></td></tr>
             <tr class="summary-first-row">
               <td class="sticky-product"><strong>综合情况</strong></td>
               <td>{{ tablePeriod }}</td>

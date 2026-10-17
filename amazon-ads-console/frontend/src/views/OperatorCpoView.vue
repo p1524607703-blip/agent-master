@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import FullFunnelRows from '../components/FullFunnelRows.vue'
 import { computed, onActivated, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getJson } from '../api/client'
@@ -154,6 +155,7 @@ onActivated(() => { if (data.value?.operators?.length) load(false) })
             <tr><th>运营</th><th>产品数据（有/应）</th><th>广告花费</th><th>广告单</th><th>全部订单</th><th>综合 CPO</th><th>ROAS</th><th>TACOS</th><th>状态</th></tr>
           </thead>
           <tbody>
+            <tr v-if="data.fullFunnel?.rows?.length"><td colspan="9"><FullFunnelRows :ledger="data.fullFunnel" /></td></tr>
             <tr v-for="r in data.operators" :key="r.name" class="clickable-row" @click="openDetail(r.name)">
               <td><strong>{{ r.name }}</strong></td>
               <td><strong>{{ num(r.dataProducts) }} / {{ num(r.products) }}</strong></td>

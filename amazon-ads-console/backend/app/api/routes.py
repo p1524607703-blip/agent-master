@@ -5,10 +5,10 @@ from fastapi.responses import JSONResponse
 from app.services.mock_data import JOBS,ISSUES,PRODUCT_RULES,AD_TYPE_RULES
 # 业务读全部走「一份报告一张表」的新事实层（core.report_*_daily）
 from app.services.report_data import dashboard_overview, dashboard_trend, products, reports
-from app.services.operator_cpo import operator_cpo_summary, operator_cpo_detail, operator_period_options, my_cpo_summary
+from app.services.operator_cpo import operator_cpo_summary, operator_cpo_detail, operator_period_options, my_cpo_summary, _data_revision
 # 运营页权限在读取缓存之前验证角色与运营组绑定
 from app.api.auth import require_session, require_management_session, require_operator_access, require_own_operator_session
-# 产品主数据：直接读应用库 app.product_roster，只读直显，无「管理/确认」写入路径
+# 产品主数据：读取V2正式映射视图，只读直显，无控制台确认写入路径
 from app.services.roster import product_mappings, not_supported
 from app.services.rds_query import ping
 from app.services.cpo_imports import validate_upload, commit_upload, source_status
@@ -91,7 +91,7 @@ def product_list(account_id: Optional[str] = None, date: Optional[str] = None, l
 
 @router.get('/product-mappings', dependencies=[Depends(require_management_session)])
 def product_mapping_list():
-    return cache.get_or_set('roster:v1', product_mappings, 300)
+    return cache.get_or_set('roster:v2:'+_data_revision(), product_mappings, 300)
 
 @router.post('/product-mappings/discover', dependencies=[Depends(require_management_session)])
 def product_mapping_discover(date: Optional[str] = None, account: Optional[str] = None):

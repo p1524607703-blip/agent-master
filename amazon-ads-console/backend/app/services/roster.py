@@ -2,9 +2,9 @@
 from __future__ import annotations
 
 from typing import Any
-from .app_db import query_rows
+from .rds_query import query_rows
 
-SOURCE_TABLE = "app.product_mapping"
+SOURCE_TABLE = "ops_products.product_mapping"
 
 
 def product_mappings() -> dict[str, Any]:
@@ -65,5 +65,5 @@ def not_supported(op: str) -> dict[str, Any]:
         "status": "GONE",
         "code": "PRODUCT_MAPPING_READONLY",
         "message": f"{op} 已停用：正式产品映射由开发端核验后只读展示。",
-        "hint": "如需变更映射，请先核验产品身份与当前父 ASIN，再更新 app.product_mapping。",
+        "hint": "如需变更映射，请先核验产品身份与当前父 ASIN，再更新 V2 的 ops_products 本地确认映射层。",
     }
