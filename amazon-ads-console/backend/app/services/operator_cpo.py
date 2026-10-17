@@ -1,6 +1,7 @@
 """Operator CPO service based on explicit product mappings and the new one-report-one-table facts.
 
 Hard rules enforced here:
+- confirmed account/campaign accounting rules precede child/parent identity for SB mixed campaigns;
 - child/parent mappings are primary; exact operator-product campaign prefix is an ad-only identity fallback when Amazon omits usable advertised ASIN detail.
 - product codes are exact identities; suffixes such as S71W/W81女/W823男 are never stripped.
 - daily eligibility is the explicit mapped product intersected with the business-report parent ASINs present that day.
@@ -18,7 +19,7 @@ from typing import Any, Optional
 from fastapi import HTTPException
 from app.core.observability import increment, update_context
 
-from .cpo_identity import AdIdentityResolver, FullFunnelLedger
+from .cpo_identity import AdIdentityResolver, CampaignOwnerRules, FullFunnelLedger
 
 # All product identities are read through the V2 mapping interface.
 # Authentication continues to use the application database independently.
@@ -261,10 +262,11 @@ def _data_revision() -> str:
           (SELECT md5(coalesce(string_agg(concat_ws('|',brand,product_code,parent_asin,operator_group,status),E'\n' ORDER BY parent_asin),'')) FROM ops_products.product_mapping),
           (SELECT md5(coalesce(string_agg(to_jsonb(o)::text,E'\n' ORDER BY brand,product_code,parent_asin),'')) FROM ops_products.product_ownership o),
           (SELECT md5(coalesce(string_agg(to_jsonb(r)::text,E'\n' ORDER BY roster_id),'')) FROM ops_products.product_roster r),
-          (SELECT md5(coalesce(string_agg(concat_ws('|',child_asin,operator_group,source_product_code,canonical_product_code,source_file_hash),E'\n' ORDER BY child_asin),'')) FROM ops_products.confirmed_sku_registry)
+          (SELECT md5(coalesce(string_agg(concat_ws('|',child_asin,operator_group,source_product_code,canonical_product_code,source_file_hash),E'\n' ORDER BY child_asin),'')) FROM ops_products.confirmed_sku_registry),
+          (SELECT md5(coalesce(string_agg(to_jsonb(c)::text,E'\n' ORDER BY rule_id),'')) FROM ops_products.cpo_campaign_cost_rules c)
         )) revision
     """) or {}
-    revision = 'identity-v2-full-funnel-v2:' + str(row.get("revision") or 0) + ':' + str(mapping.get("revision") or '')
+    revision = 'identity-v2-campaign-owner-v3:' + str(row.get("revision") or 0) + ':' + str(mapping.get("revision") or '')
     update_context(revision=revision)
     return revision
 
@@ -438,7 +440,7 @@ def _new_product(meta: dict[str, str]) -> dict[str, Any]:
         "purchasedValidationOrders": 0.0, "purchasedValidationSales": 0.0,
         "adTypeSpend": {k: 0.0 for k in AD_TYPES},
         "adTypeOrders": {k: 0.0 for k in AD_TYPES},
-        "fullFunnelSpend": 0.0,
+        "fullFunnelSpend": 0.0, "campaignCostAllocations": [],
     }
 
 
@@ -710,6 +712,7 @@ def _build_uncached(start: str, end: str, revision: Optional[str] = None) -> dic
         GROUP BY r.stat_date,r.account_id,r.account_name,r.campaign_id,r.campaign_name,r.advertised_product_id,r.advertised_product_parent_id,r.ad_product
     """)
     identity_resolver = AdIdentityResolver(child_mapping, products.values(), ownership, sku_registry.values())
+    campaign_rules = CampaignOwnerRules(query_rows("SELECT * FROM ops_products.cpo_campaign_cost_rules WHERE active=true"), identity_resolver.candidates, parent_mapping)
     full_funnel = FullFunnelLedger()
     ad_scopes = {}
     for evidence in ad_rows:
@@ -720,7 +723,7 @@ def _build_uncached(start: str, end: str, revision: Optional[str] = None) -> dic
             identity_resolver.observe(evidence,evidence_scope,evidence_meta)
     unmapped_ad = {"spend":0.0,"orders":0.0,"sales":0.0,"parents":set(),"rows":0}
     unknown_ad_types: set[str] = set()
-    ad_audit={"childExactRows":0,"parentFallbackRows":0,"campaignPrefixRows":0,"unmappedRows":0,"ambiguousScopeRows":0}
+    ad_audit={"childExactRows":0,"parentFallbackRows":0,"campaignPrefixRows":0,"unmappedRows":0,"ambiguousScopeRows":0,"confirmedCampaignRows":0,"campaignRuleReviewRows":0}
     for row in ad_rows:
         parent=row.get("parent_asin") or ""; child=row.get("child_asin") or ""
         ad_account=row.get("account_name") or ""
@@ -734,7 +737,12 @@ def _build_uncached(start: str, end: str, revision: Optional[str] = None) -> dic
             if parent: unmapped_ad["parents"].add(parent)
             continue
         meta,method=resolve_meta(account_scope,child,parent)
-        if not meta and (account_scope,child) not in blocked_child_keys:
+        source_meta = meta
+        rule_meta, rule_method, rule = campaign_rules.resolve(row,account_scope,source_meta)
+        if rule is not None:
+            meta,method = rule_meta,rule_method
+            ad_audit['confirmedCampaignRows' if meta else 'campaignRuleReviewRows'] += int(row.get('rows') or 0)
+        if not meta and rule is None and (account_scope,child) not in blocked_child_keys:
             meta,method=identity_resolver.resolve(row,account_scope)
         if not meta:
             if row['ad_product']=='Full-Funnel':
@@ -751,8 +759,19 @@ def _build_uncached(start: str, end: str, revision: Optional[str] = None) -> dic
         else:
             ad_audit["campaignPrefixRows"] += int(row.get("rows") or 0)
         p=bucket(meta,account_scope)
-        if child and child not in ("-1",) and not child.startswith("__"): p["childAsins"].add(child)
-        if parent: p["parentAsins"].add(parent)
+        if rule is None:
+            if child and child not in ("-1",) and not child.startswith("__"): p["childAsins"].add(child)
+            if parent: p["parentAsins"].add(parent)
+        else:
+            # The budget owner must not inherit another product's ASIN relationship.
+            p['parentAsins'].add(meta['parentAsin'])
+            p['campaignCostAllocations'].append({
+                'ruleId':rule['rule_id'],'date':row['stat_date'],'account':ad_account,
+                'campaignId':row['campaign_id'],'campaignName':row['campaign_name'],
+                'adProduct':row['ad_product'],'sourceProduct':source_meta['productCode'],
+                'targetProduct':meta['productCode'],'spend':round(float(row.get('spend') or 0),2),
+                'adOrders':float(row.get('ad_orders') or 0),
+            })
         p["allocationMethods"].add(method)
         p["adAccounts"].add(ad_account or row.get("account_id") or "")
         spend=float(row.get("spend") or 0); orders=float(row.get("ad_orders") or 0)
@@ -766,10 +785,10 @@ def _build_uncached(start: str, end: str, revision: Optional[str] = None) -> dic
         else:
             unknown_ad_types.add(row.get("ad_product") or "")
 
-    # Purchased-product remains attribution validation. SB-collection purchased-ASIN
-    # cost allocation is deliberately not claimed as implemented here.
+    # Purchased ASIN is a separate conversion audit, never a cost allocation key.
+    # Campaign-level validation follows the same confirmed accounting owner.
     purchased_rows = query_rows(f"""
-        SELECT r.stat_date::text stat_date, r.account_id, r.account_name, r.campaign_name,
+        SELECT r.stat_date::text stat_date, r.account_id, r.account_name, r.campaign_id, r.campaign_name, r.ad_product,
                r.advertised_product_id child_asin, r.advertised_product_parent_id parent_asin,
                COALESCE(sum(r.purchases),0)::float8 purchases,
                COALESCE(sum(r.sales),0)::float8 sales, count(*)::int rows
@@ -778,7 +797,7 @@ def _build_uncached(start: str, end: str, revision: Optional[str] = None) -> dic
            AND ib.target_table='core.report_purchased_product_daily'
         WHERE r.account_name IN ({_sql_names(AD_ACCOUNTS)})
           AND {_date_filter("r.stat_date", complete_days)}
-        GROUP BY r.stat_date,r.account_id,r.account_name,r.campaign_id,r.campaign_name,r.advertised_product_id,r.advertised_product_parent_id
+        GROUP BY r.stat_date,r.account_id,r.account_name,r.campaign_id,r.campaign_name,r.ad_product,r.advertised_product_id,r.advertised_product_parent_id
     """)
     purchased_unmapped_rows=0
     for row in purchased_rows:
@@ -787,6 +806,9 @@ def _build_uncached(start: str, end: str, revision: Optional[str] = None) -> dic
         if not scope or scope.startswith("__AMS_"):
             purchased_unmapped_rows += int(row.get("rows") or 0); continue
         meta,_=resolve_meta(scope,child,parent)
+        rule_meta,_,rule=campaign_rules.resolve(row,scope,meta)
+        if rule is not None:
+            meta=rule_meta
         if not meta:
             purchased_unmapped_rows += int(row.get("rows") or 0); continue
         p=bucket(meta,scope)
@@ -820,6 +842,7 @@ def _build_uncached(start: str, end: str, revision: Optional[str] = None) -> dic
             "tacos":round(spend/total_sales*100,2) if has_business and total_sales>0 else None,
             "sessions":round(p["sessions"],2) if has_business else None,"dataStatus":status,
             "fullFunnelSpend":round(p['fullFunnelSpend'],2),
+            "campaignCostAllocations":p['campaignCostAllocations'],
             "adTypeSpend":{k:round(float(v),2) for k,v in p["adTypeSpend"].items()},
             "adTypeOrders":{k:round(float(v),2) for k,v in p["adTypeOrders"].items()},
             "purchasedValidationRows":p["purchasedRows"],"purchasedValidationOrders":round(p["purchasedValidationOrders"],2),
@@ -1031,6 +1054,7 @@ def _merge_detail_products(products: list[dict[str, Any]]) -> list[dict[str, Any
             row = dict(src)
             row["businessAccounts"] = list(src.get("businessAccounts") or [])
             row["adAccounts"] = list(src.get("adAccounts") or [])
+            row['campaignCostAllocations'] = list(src.get('campaignCostAllocations') or [])
             row["_has_business"] = src.get("totalOrders") is not None
             row["_has_missing_business_spend"] = (
                 src.get("totalOrders") is None and float(src.get("spend") or 0) > 0.005
@@ -1038,6 +1062,7 @@ def _merge_detail_products(products: list[dict[str, Any]]) -> list[dict[str, Any
             merged[key] = row
             continue
         row = merged[key]
+        row['campaignCostAllocations'].extend(src.get('campaignCostAllocations') or [])
         row["spend"] = round(float(row.get("spend") or 0) + float(src.get("spend") or 0), 2)
         row["adOrders"] = round(float(row.get("adOrders") or 0) + float(src.get("adOrders") or 0), 2)
         row["adSales"] = round(float(row.get("adSales") or 0) + float(src.get("adSales") or 0), 2)

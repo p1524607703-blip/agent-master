@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import FullFunnelRows from '../components/FullFunnelRows.vue'
+import CampaignCostNotes from '../components/CampaignCostNotes.vue'
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getJson, getJsonStrict } from '../api/client'
@@ -250,6 +251,7 @@ const tablePeriod = computed(() => period.value === 'weekly'
         <NButton size="small" quaternary @click="showDsp = !showDsp">{{ showDsp ? '收起 DSP' : '展开 DSP' }}</NButton>
       </div>
 
+      <CampaignCostNotes :products="products" />
       <div class="ad-detail-table-wrap">
         <table class="operator-ad-table">
           <thead>

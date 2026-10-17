@@ -60,6 +60,46 @@ class AdIdentityResolver:
         return None,'unresolved'
 
 
+class CampaignOwnerRules:
+    """Confirmed accounting overrides, separate from actual product identities."""
+
+    def __init__(self, rules, scoped_candidates, parent_mapping):
+        self.rules = defaultdict(list)
+        self.scoped_candidates = scoped_candidates
+        self.parent_mapping = parent_mapping
+        for rule in rules:
+            if rule.get('active'):
+                self.rules[(rule['account_name'], rule['campaign_id'], rule['ad_product'])].append(rule)
+
+    def resolve(self, row, scope, source_meta):
+        day = str(row['stat_date'])
+        rules = [r for r in self.rules[(row['account_name'], row['campaign_id'], row['ad_product'])]
+                 if str(r['valid_from']) <= day and (not r.get('valid_to') or day <= str(r['valid_to']))]
+        if not rules:
+            return None, '', None
+        # A matching but invalid rule must not silently fall back to source identity.
+        rule = rules[0]
+        if len(rules) != 1:
+            return None, 'campaign_owner_rule_conflict', rule
+        identity = (rule['operator_group'], rule['product_code'])
+        target = self.parent_mapping.get(rule['parent_asin'])
+        valid = (
+            rule['allocation_mode'] == 'campaign_owner'
+            and row['ad_product'] == 'Sponsored Brands'
+            and row['campaign_name'] == rule['expected_campaign_name']
+            and scope == rule['business_account']
+            and source_meta is not None
+            and source_meta['group'] == rule['operator_group']
+            and source_meta['productCode'] in rule['allowed_source_products']
+            and identity in self.scoped_candidates.get(scope, {})
+            and target is not None
+            and (target['group'], target['productCode']) == identity
+        )
+        if not valid:
+            return None, 'campaign_owner_rule_needs_review', rule
+        return dict(target), 'campaign_owner_confirmed', rule
+
+
 class FullFunnelLedger:
     """A disclosure ledger; allocated amounts stay in product totals exactly once."""
     def __init__(self):self.rows={}

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import FullFunnelRows from '../components/FullFunnelRows.vue'
+import CampaignCostNotes from '../components/CampaignCostNotes.vue'
 import { computed, onActivated, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getJson, getJsonStrict } from '../api/client'
@@ -217,6 +218,7 @@ onActivated(() => { if (data.value?.operators?.length) load(false) })
           <NButton size="tiny" quaternary @click="showDsp = !showDsp">{{ showDsp ? '收起 DSP' : '展开 DSP' }}</NButton>
         </div>
       </div>
+      <CampaignCostNotes :products="products" />
       <div class="detail-wrap">
         <table class="detail-table">
           <thead>
