@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import FullFunnelRows from '../components/FullFunnelRows.vue'
 import { computed, onActivated, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getJson } from '../api/client'
@@ -132,6 +133,8 @@ onActivated(() => { if (data.value?.operators?.length) load(false) })
     </div>
 
     <DataSkeleton v-if="loading" variant="table" :rows="10" />
+
+    <FullFunnelRows v-if="!loading" :ledger="data.fullFunnel" />
 
     <div v-if="!loading" class="operator-scope-note">
       <strong>统一口径：</strong>{{ data.note || 'CPO 按运营姓名跨账户汇总。' }}

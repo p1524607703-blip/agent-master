@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import FullFunnelRows from '../components/FullFunnelRows.vue'
+import CampaignCostNotes from '../components/CampaignCostNotes.vue'
 import { computed, onActivated, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getJson, getJsonStrict } from '../api/client'
@@ -161,6 +163,8 @@ onActivated(() => { if (data.value?.operators?.length) load(false) })
 
     <DataSkeleton v-if="loading" variant="detail" :rows="8" />
 
+    <FullFunnelRows v-if="!loading" :ledger="data.fullFunnel" />
+
     <div v-if="!loading" class="operator-scope-note">
       <strong>统一口径：</strong>{{ data.note || '只使用业务报告 + 推广的商品 + 达成转化的商品三项完整日期。' }}
     </div>
@@ -216,6 +220,7 @@ onActivated(() => { if (data.value?.operators?.length) load(false) })
           <NButton size="tiny" quaternary @click="showDsp = !showDsp">{{ showDsp ? '收起 DSP' : '展开 DSP' }}</NButton>
         </div>
       </div>
+      <CampaignCostNotes :products="products" />
       <div class="detail-wrap">
         <table class="detail-table">
           <thead>

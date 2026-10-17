@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import FullFunnelRows from '../components/FullFunnelRows.vue'
+import { useSessionStore } from '../stores/session'
+import CampaignCostNotes from '../components/CampaignCostNotes.vue'
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getJson, getJsonStrict } from '../api/client'
@@ -12,6 +15,7 @@ type Period = 'daily'|'weekly'|'monthly'
 type PeriodOption = { value:string; label:string; start?:string; end?:string }
 type PeriodData = { daily:PeriodOption[]; weekly:PeriodOption[]; monthly:PeriodOption[]; latestDate?:string; weekRule?:string; note?:string }
 
+const session = useSessionStore()
 const route = useRoute()
 const router = useRouter()
 const operatorAliases: Record<string,string> = {
@@ -227,6 +231,8 @@ const tablePeriod = computed(() => period.value === 'weekly'
 
     <DataSkeleton v-if="loading" variant="detail" :rows="8" />
 
+    <FullFunnelRows v-if="!loading && session.user?.roleCode === 'operator'" :ledger="detail.fullFunnel" />
+
     <div v-if="!loading" class="simple-data-note">
       <strong>{{ displayPeriod }}</strong>
       <span>{{ detail.summary?.dataProducts ?? 0 }} / {{ detail.summary?.products ?? products.length }} {{ period === 'weekly' ? '周内命中' : period === 'monthly' ? '月内命中' : '有数据' }}</span>
@@ -249,6 +255,7 @@ const tablePeriod = computed(() => period.value === 'weekly'
         <NButton size="small" quaternary @click="showDsp = !showDsp">{{ showDsp ? '收起 DSP' : '展开 DSP' }}</NButton>
       </div>
 
+      <CampaignCostNotes :products="products" />
       <div class="ad-detail-table-wrap">
         <table class="operator-ad-table">
           <thead>
