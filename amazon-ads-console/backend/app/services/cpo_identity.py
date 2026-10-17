@@ -8,7 +8,7 @@ def token_match(text: str, token: str) -> bool:
 
 
 class AdIdentityResolver:
-    def __init__(self, child_mapping, business_products, ownership):
+    def __init__(self, child_mapping, business_products, ownership, registry=()):
         self.candidates = defaultdict(dict)
         self.confirmed_gender = {(r['operator_group'],r['product_code']) for r in ownership
             if r.get('confirmation_source') and r.get('gender_segment') and r.get('owner_resolution')=='parent_confirmation'}
@@ -19,6 +19,9 @@ class AdIdentityResolver:
                 self.add(scope,{'group':p['group'],'productCode':p['code'],'operatorName':p['operatorName'],
                     'parentAsin':next(iter(p['parentAsins'])) if len(p['parentAsins'])==1 else '',
                     'brand':p.get('brand',''),'mappingStatus':p.get('mappingStatus','confirmed')})
+        self.source_aliases = defaultdict(set)
+        for r in registry:
+            self.source_aliases[(r['operator_group'],r.get('source_product_code') or r['canonical_product_code'])].add(r['canonical_product_code'])
         self.period = defaultdict(dict)
         self.daily = defaultdict(dict)
 
@@ -40,12 +43,20 @@ class AdIdentityResolver:
             if ident[0]==scope: return period[ident],'campaign_same_day_unique_advertised_identity'
         gm=re.search(r'(?<![A-Z0-9])([A-Z]{2}\d+)[-_]',row['campaign_name'] or '',re.I)
         group=gm.group(1).upper() if gm else None
-        options=[m for (g,c),m in self.candidates[scope].items() if (not group or g==group) and token_match(row['campaign_name'],c)]
-        if len(options)==1: return options[0],'group_exact_unicode' if group else 'account_unique_exact_product'
+        options={(g,c):m for (g,c),m in self.candidates[scope].items() if (not group or g==group) and token_match(row['campaign_name'],c)}
+        methods={identity:'group_exact_unicode' if group else 'account_unique_exact_product' for identity in options}
+        for (g,alias),canonical in self.source_aliases.items():
+            if len(canonical)!=1 or (group and g!=group) or not token_match(row['campaign_name'],alias): continue
+            code=next(iter(canonical));identity=(g,code)
+            if identity in self.candidates[scope]:
+                options[identity]=self.candidates[scope][identity]
+                methods.setdefault(identity,'confirmed_source_product_alias')
         if group:
-            aliases=[m for (g,c),m in self.candidates[scope].items() if g==group and c.endswith(('男','女'))
-                and (g,c) in self.confirmed_gender and token_match(row['campaign_name'],c[:-1])]
-            if len(aliases)==1 and not options:return aliases[0],'confirmed_group_gender_alias'
+            for (g,c),m in self.candidates[scope].items():
+                if g==group and c.endswith(('男','女')) and (g,c) in self.confirmed_gender and token_match(row['campaign_name'],c[:-1]):
+                    options[(g,c)]=m;methods.setdefault((g,c),'confirmed_group_gender_alias')
+        if len(options)==1:
+            identity=next(iter(options));return options[identity],methods[identity]
         return None,'unresolved'
 
 

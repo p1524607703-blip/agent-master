@@ -261,10 +261,10 @@ def _data_revision() -> str:
           (SELECT md5(coalesce(string_agg(concat_ws('|',brand,product_code,parent_asin,operator_group,status),E'\n' ORDER BY parent_asin),'')) FROM ops_products.product_mapping),
           (SELECT md5(coalesce(string_agg(to_jsonb(o)::text,E'\n' ORDER BY brand,product_code,parent_asin),'')) FROM ops_products.product_ownership o),
           (SELECT md5(coalesce(string_agg(to_jsonb(r)::text,E'\n' ORDER BY roster_id),'')) FROM ops_products.product_roster r),
-          (SELECT md5(coalesce(string_agg(concat_ws('|',child_asin,operator_group,canonical_product_code,source_file_hash),E'\n' ORDER BY child_asin),'')) FROM ops_products.confirmed_sku_registry)
+          (SELECT md5(coalesce(string_agg(concat_ws('|',child_asin,operator_group,source_product_code,canonical_product_code,source_file_hash),E'\n' ORDER BY child_asin),'')) FROM ops_products.confirmed_sku_registry)
         )) revision
     """) or {}
-    revision = 'identity-v2-full-funnel-v1:' + str(row.get("revision") or 0) + ':' + str(mapping.get("revision") or '')
+    revision = 'identity-v2-full-funnel-v2:' + str(row.get("revision") or 0) + ':' + str(mapping.get("revision") or '')
     update_context(revision=revision)
     return revision
 
@@ -446,7 +446,7 @@ def _build_uncached(start: str, end: str, revision: Optional[str] = None) -> dic
     revision = revision or _data_revision()
     parent_mapping = _mapping()
     child_mapping = _child_mapping()
-    sku_registry = {r['child_asin']:r for r in query_rows("SELECT child_asin,operator_group,canonical_product_code FROM ops_products.confirmed_sku_registry")}
+    sku_registry = {r['child_asin']:r for r in query_rows("SELECT child_asin,operator_group,source_product_code,canonical_product_code FROM ops_products.confirmed_sku_registry")}
     ownership = query_rows("SELECT * FROM ops_products.product_ownership")
     blocked_child_keys = {
         (r["account_scope"], r["child_asin"])
@@ -709,7 +709,7 @@ def _build_uncached(start: str, end: str, revision: Optional[str] = None) -> dic
           AND {_date_filter("r.stat_date", complete_days)}
         GROUP BY r.stat_date,r.account_id,r.account_name,r.campaign_id,r.campaign_name,r.advertised_product_id,r.advertised_product_parent_id,r.ad_product
     """)
-    identity_resolver = AdIdentityResolver(child_mapping, products.values(), ownership)
+    identity_resolver = AdIdentityResolver(child_mapping, products.values(), ownership, sku_registry.values())
     full_funnel = FullFunnelLedger()
     ad_scopes = {}
     for evidence in ad_rows:

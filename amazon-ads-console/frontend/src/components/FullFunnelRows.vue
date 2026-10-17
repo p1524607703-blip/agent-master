@@ -17,5 +17,6 @@ const money=(v:any)=>`$${Number(v || 0).toLocaleString(undefined,{minimumFractio
   </div>
 </template>
 <style scoped>
-.full-funnel-rows{text-align:left;padding:12px;background:#f6f8fc;white-space:normal;color:#344054}.full-funnel-rows>strong{font-size:14px}.full-funnel-rows p{font-size:12px;margin:7px 0;line-height:1.6}.full-funnel-rows table{width:100%;table-layout:auto;border-collapse:collapse;min-width:700px}.full-funnel-rows th,.full-funnel-rows td{padding:7px 10px;font-size:12px;text-align:left;background:white;border-bottom:1px solid #e7ebf1;height:auto}.full-funnel-rows .campaign{white-space:normal;overflow-wrap:anywhere;min-width:220px}
+.full-funnel-rows{max-width:calc(100vw - 236px);box-sizing:border-box;text-align:left;padding:12px;background:#f6f8fc;white-space:normal;color:#344054}.full-funnel-rows>strong{font-size:14px}.full-funnel-rows p{font-size:12px;margin:7px 0;line-height:1.6}.full-funnel-rows table{width:100%;table-layout:auto;border-collapse:collapse;min-width:700px}.full-funnel-rows th,.full-funnel-rows td{padding:7px 10px;font-size:12px;text-align:left;background:white;border-bottom:1px solid #e7ebf1;height:auto}.full-funnel-rows .campaign{white-space:normal;overflow-wrap:anywhere;min-width:220px}
+@media(max-width:800px){.full-funnel-rows{max-width:calc(100vw - 60px);overflow-x:auto}}
 </style>

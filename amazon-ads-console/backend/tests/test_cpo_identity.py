@@ -47,6 +47,18 @@ class IdentityTests(unittest.TestCase):
         r.observe(row(), 'WHITIN',meta('ZJ1','W20'));r.observe(row(), 'WHITIN',meta('ZJ1','W30'))
         self.assertIsNone(r.resolve(row('全流域广告活动'),'WHITIN')[0])
 
+    def test_source_alias_requires_unique_confirmed_identity(self):
+        registry=[{'operator_group':'XM2','source_product_code':'S73','canonical_product_code':'S71女'}]
+        r=AdIdentityResolver({('BLOOMNEXT','a'):meta('XM2','S71女')},[],[],registry)
+        self.assertEqual(r.resolve(row('XM2-S73-DSP'),'BLOOMNEXT')[0]['productCode'],'S71女')
+        r.source_aliases[('XM2','S73')].add('S73男')
+        self.assertIsNone(r.resolve(row('XM2-S73-DSP'),'BLOOMNEXT')[0])
+
+    def test_multiple_named_products_including_alias_remain_unallocated(self):
+        own=[{'operator_group':'XH1','product_code':'W81女','confirmation_source':'human','gender_segment':'女','owner_resolution':'parent_confirmation'}]
+        r=AdIdentityResolver({('WHITIN','a'):meta('XH1','W81女'),('WHITIN','b'):meta('XH1','W81V2')},[],own)
+        self.assertIsNone(r.resolve(row('XH1-W81 + W81V2'),'WHITIN')[0])
+
     def test_mapping_change_invalidates_cache_without_a_new_fact_batch(self):
         with patch.object(operator_cpo,'query_one',side_effect=[{'revision':7},{'revision':'mapping-a'},{'revision':7},{'revision':'mapping-b'}]):
             self.assertNotEqual(_data_revision(),_data_revision())
