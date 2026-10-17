@@ -41,6 +41,9 @@ class AdIdentityResolver:
         if len(period)==len(daily)==1 and set(period)==set(daily):
             ident=next(iter(period))
             if ident[0]==scope: return period[ident],'campaign_same_day_unique_advertised_identity'
+        return self.resolve_name(row,scope)
+
+    def resolve_name(self,row,scope):
         gm=re.search(r'(?<![A-Z0-9])([A-Z]{2}\d+)[-_]',row['campaign_name'] or '',re.I)
         group=gm.group(1).upper() if gm else None
         options={(g,c):m for (g,c),m in self.candidates[scope].items() if (not group or g==group) and token_match(row['campaign_name'],c)}
@@ -58,6 +61,19 @@ class AdIdentityResolver:
         if len(options)==1:
             identity=next(iter(options));return options[identity],methods[identity]
         return None,'unresolved'
+
+
+    def cost_review(self, row, scope, source_meta):
+        """A name mismatch is a review signal, never permission to move costs."""
+        if row['ad_product'] != 'Sponsored Brands' or not source_meta or abs(float(row.get('spend') or 0)) <= 0.005:
+            return None
+        target, _ = self.resolve_name(row, scope)
+        if not target or (target['group'], target['productCode']) == (source_meta['group'], source_meta['productCode']):
+            return None
+        return {'date':row['stat_date'],'account':row['account_name'],'campaignId':row['campaign_id'],
+                'campaignName':row['campaign_name'],'sourceGroup':source_meta['group'],
+                'sourceProduct':source_meta['productCode'],'nameGroup':target['group'],
+                'nameProduct':target['productCode'],'spend':round(float(row.get('spend') or 0),2)}
 
 
 class CampaignOwnerRules:

@@ -1,7 +1,8 @@
 import copy
 import unittest
 
-from app.services.cpo_identity import CampaignOwnerRules
+from app.services.cpo_identity import CampaignOwnerRules, AdIdentityResolver
+from app.services.operator_cpo import _quality_reasons
 
 
 class CampaignOwnerTests(unittest.TestCase):
@@ -70,6 +71,26 @@ class CampaignOwnerTests(unittest.TestCase):
         self.parents['B000000001'] = self.target
         self.candidates.clear()
         self.assertIsNone(self.engine().resolve(self.row, 'seller-a', self.source)[0])
+
+    def test_cost_review_uses_name_without_turning_it_into_permission(self):
+        target = {**self.target, 'operatorName': 'A'}
+        source = {**self.source, 'operatorName': 'A'}
+        resolver = AdIdentityResolver({('seller-a','a'):target,('seller-a','b'):source}, [], [])
+        r = {**self.row,'spend':12.34}
+        resolver.observe(r,'seller-a',source)
+        self.assertEqual(resolver.resolve(r,'seller-a')[0]['productCode'],'P200')
+        review = resolver.cost_review(r,'seller-a',source)
+        self.assertEqual(review['nameProduct'],'P100')
+        self.assertEqual(review['sourceProduct'],'P200')
+        self.assertIsNone(resolver.cost_review({**r,'spend':0},'seller-a',source))
+        self.assertIsNone(resolver.cost_review({**r,'ad_product':'Sponsored Products'},'seller-a',source))
+        self.assertIsNone(resolver.cost_review(r,'seller-a',target))
+
+    def test_review_warning_is_separate_from_unmapped_and_scoped_to_operator(self):
+        data={'products':[{'campaignCostReviews':[{'spend':12.34}]}]}
+        source={'completeDays':1}
+        self.assertTrue(any('费用承担款待核验' in x for x in _quality_reasons(data,source,1,'daily')))
+        self.assertEqual(_quality_reasons(data,source,1,'daily',campaign_review_spend=0),[])
 
 
 if __name__ == '__main__':

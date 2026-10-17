@@ -266,7 +266,7 @@ def _data_revision() -> str:
           (SELECT md5(coalesce(string_agg(to_jsonb(c)::text,E'\n' ORDER BY rule_id),'')) FROM ops_products.cpo_campaign_cost_rules c)
         )) revision
     """) or {}
-    revision = 'identity-v2-campaign-owner-v3:' + str(row.get("revision") or 0) + ':' + str(mapping.get("revision") or '')
+    revision = 'identity-v2-campaign-owner-v4:' + str(row.get("revision") or 0) + ':' + str(mapping.get("revision") or '')
     update_context(revision=revision)
     return revision
 
@@ -440,7 +440,7 @@ def _new_product(meta: dict[str, str]) -> dict[str, Any]:
         "purchasedValidationOrders": 0.0, "purchasedValidationSales": 0.0,
         "adTypeSpend": {k: 0.0 for k in AD_TYPES},
         "adTypeOrders": {k: 0.0 for k in AD_TYPES},
-        "fullFunnelSpend": 0.0, "campaignCostAllocations": [],
+        "fullFunnelSpend": 0.0, "campaignCostAllocations": [], "campaignCostReviews": [],
     }
 
 
@@ -760,6 +760,10 @@ def _build_uncached(start: str, end: str, revision: Optional[str] = None) -> dic
             ad_audit["campaignPrefixRows"] += int(row.get("rows") or 0)
         p=bucket(meta,account_scope)
         if rule is None:
+            review = identity_resolver.cost_review(row,account_scope,meta)
+            if review:
+                p['campaignCostReviews'].append(review)
+        if rule is None:
             if child and child not in ("-1",) and not child.startswith("__"): p["childAsins"].add(child)
             if parent: p["parentAsins"].add(parent)
         else:
@@ -828,6 +832,8 @@ def _build_uncached(start: str, end: str, revision: Optional[str] = None) -> dic
         elif p.get("mappingStatus")=="confirmed_no_business": status="缺业务报告"
         elif has_ad: status="缺业务侧"
         else: status="无数据"
+        if p['campaignCostReviews'] and has_business:
+            status = "SB费用归属待核验"
         out.append({
             "code":p["code"],"group":p["group"],"operatorName":p["operatorName"],"brand":p.get("brand") or "",
             "mappingStatus":p.get("mappingStatus") or "confirmed",
@@ -843,6 +849,7 @@ def _build_uncached(start: str, end: str, revision: Optional[str] = None) -> dic
             "sessions":round(p["sessions"],2) if has_business else None,"dataStatus":status,
             "fullFunnelSpend":round(p['fullFunnelSpend'],2),
             "campaignCostAllocations":p['campaignCostAllocations'],
+            "campaignCostReviews":p['campaignCostReviews'],
             "adTypeSpend":{k:round(float(v),2) for k,v in p["adTypeSpend"].items()},
             "adTypeOrders":{k:round(float(v),2) for k,v in p["adTypeOrders"].items()},
             "purchasedValidationRows":p["purchasedRows"],"purchasedValidationOrders":round(p["purchasedValidationOrders"],2),
@@ -916,7 +923,10 @@ def _summarize(data: dict[str, Any]) -> list[dict[str, Any]]:
         else:
             status = "无当日数据"
         calculation_ok = bool(business_ps) and missing_business_spend <= 0.005
-        final_ok = calculation_ok and not missing_report_ps
+        campaign_review_spend = sum(abs(r['spend']) for p in ps for r in p.get('campaignCostReviews',[]))
+        final_ok = calculation_ok and not missing_report_ps and campaign_review_spend <= 0.005
+        if business_ps and campaign_review_spend > 0.005:
+            status = "SB费用归属待核验"
         rows.append({
             "name": name, "group": groups[0] if groups else "", "groups": groups,
             "spend": round(spend, 2), "adOrders": round(ad_orders, 2), "adSales": round(ad_sales, 2),
@@ -953,9 +963,13 @@ def _latest_complete_date() -> Optional[str]:
 
 def _quality_reasons(data: dict[str, Any], source: dict[str, Any], expected: int, period: str,
                      *, has_business: bool = True, missing_products: int = 0,
-                     unpaired_spend: float = 0) -> list[str]:
-    """Explain the existing final-CPO predicate without exposing global amounts."""
+                     unpaired_spend: float = 0, campaign_review_spend: Optional[float] = None) -> list[str]:
+    """Explain CPO readiness and campaign review needs without exposing global amounts."""
     reasons: list[str] = []
+    if campaign_review_spend is None:
+        campaign_review_spend = sum(abs(r['spend']) for p in data.get('products',[]) for r in p.get('campaignCostReviews',[]))
+    if campaign_review_spend > 0.005:
+        reasons.append('SB活动名称与费用行商品存在差异，费用承担款待核验；当前值保留现行商品口径，不按名称或成交占比自动改账。')
     complete = int(source.get("completeDays") or 0)
     if not complete:
         reasons.append("当前区间没有三项来源同时完整的可计算日期。")
@@ -1000,7 +1014,8 @@ def operator_cpo_summary(stat_date: Optional[str] = None, period: str = "daily")
     expected = (date.fromisoformat(end) - date.fromisoformat(start)).days + 1
     src = data["sourceDays"]
     complete_days = int(src.get("completeDays") or 0)
-    mapping_clean = data["unmappedAd"]["spend"] <= 0.005 and data["businessUnmappedOrders"] <= 0.005 and data['fullFunnel']['unallocatedSpend'] <= 0.005
+    campaign_review_spend = sum(abs(r['spend']) for p in data['products'] for r in p.get('campaignCostReviews',[]))
+    mapping_clean = campaign_review_spend <= 0.005 and data["unmappedAd"]["spend"] <= 0.005 and data["businessUnmappedOrders"] <= 0.005 and data['fullFunnel']['unallocatedSpend'] <= 0.005
     period_complete = complete_days == expected
     final_cpo = bool(complete_days) and mapping_clean and (period == "daily" or period_complete)
     no_source_note = "" if complete_days else " 该区间没有三项来源同时完整的日期，因此不生成最终 CPO。"
@@ -1055,6 +1070,7 @@ def _merge_detail_products(products: list[dict[str, Any]]) -> list[dict[str, Any
             row["businessAccounts"] = list(src.get("businessAccounts") or [])
             row["adAccounts"] = list(src.get("adAccounts") or [])
             row['campaignCostAllocations'] = list(src.get('campaignCostAllocations') or [])
+            row['campaignCostReviews'] = list(src.get('campaignCostReviews') or [])
             row["_has_business"] = src.get("totalOrders") is not None
             row["_has_missing_business_spend"] = (
                 src.get("totalOrders") is None and float(src.get("spend") or 0) > 0.005
@@ -1063,6 +1079,7 @@ def _merge_detail_products(products: list[dict[str, Any]]) -> list[dict[str, Any
             continue
         row = merged[key]
         row['campaignCostAllocations'].extend(src.get('campaignCostAllocations') or [])
+        row['campaignCostReviews'].extend(src.get('campaignCostReviews') or [])
         row["spend"] = round(float(row.get("spend") or 0) + float(src.get("spend") or 0), 2)
         row["adOrders"] = round(float(row.get("adOrders") or 0) + float(src.get("adOrders") or 0), 2)
         row["adSales"] = round(float(row.get("adSales") or 0) + float(src.get("adSales") or 0), 2)
@@ -1107,6 +1124,8 @@ def _merge_detail_products(products: list[dict[str, Any]]) -> list[dict[str, Any
             row["dataStatus"] = "缺业务侧"
         else:
             row["dataStatus"] = "无数据"
+        if has_business and row['campaignCostReviews']:
+            row['dataStatus'] = "SB费用归属待核验"
         row["cpo"] = round(spend / orders, 2) if has_business and not has_missing and orders > 0 else None
         row["tacos"] = round(spend / sales * 100, 2) if has_business and not has_missing and sales > 0 else None
         row["roas"] = round(float(row.get("adSales") or 0) / spend, 2) if spend > 0 else None
@@ -1150,8 +1169,10 @@ def operator_cpo_detail(name: str, stat_date: Optional[str] = None, period: str 
     src = data["sourceDays"]
     expected = (date.fromisoformat(end) - date.fromisoformat(start)).days + 1
     complete_days = int(src.get("completeDays") or 0)
+    campaign_review_spend = sum(abs(r['spend']) for p in raw_ps for r in p.get('campaignCostReviews',[]))
     final_ok = (
-        bool(business_ps_raw)
+        campaign_review_spend <= 0.005
+        and bool(business_ps_raw)
         and complete_days > 0
         and missing_business_spend <= 0.005
         and data["unmappedAd"]["spend"] <= 0.005
@@ -1168,7 +1189,7 @@ def operator_cpo_detail(name: str, stat_date: Optional[str] = None, period: str 
         "account_split": False, "final_cpo": final_ok, "allocation_status": "explicit_parent_asin_mapping",
         "qualityReasons": _quality_reasons(data, src, expected, period, has_business=bool(business_ps_raw),
              missing_products=len({(p["code"], p.get("parentAsin")) for p in missing_report_ps}),
-             unpaired_spend=missing_business_spend),
+             unpaired_spend=missing_business_spend,campaign_review_spend=campaign_review_spend),
         "summary": {
             "spend": round(spend, 2), "adOrders": round(ad_orders, 2), "adSales": round(ad_sales, 2),
             "totalOrders": round(total_orders, 2) if business_ps_raw else None,
