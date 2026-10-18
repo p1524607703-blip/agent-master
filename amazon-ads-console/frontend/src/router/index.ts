@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { nextTick } from 'vue'
 import DiagnosticsView from '../views/DiagnosticsView.vue'
+import CodexDevicesView from '../views/CodexDevicesView.vue'
 import { canViewDiagnostics } from '../diagnostics/permissions'
 import { enterPage, completePageRender } from '../diagnostics/browserTrace'
 import DashboardView from '../views/DashboardView.vue'
@@ -46,6 +47,7 @@ const router = createRouter({
     { path: '/rules', component: RulesView },
     { path: '/reports', component: ReportsView },
     { path: '/diagnostics', component: DiagnosticsView, meta: { managementOnly: true } },
+    { path: '/codex-devices', component: CodexDevicesView, meta: { managementOnly: true } },
     { path: '/operators/:operator', component: OperatorDetailView },
     // 已下架模块直达链接 → 回看板（不暴露「模块已下线」这种信息给终端用户）
     ...Object.keys(RETIRED).map(p => ({ path: p, redirect: '/dashboard' })),

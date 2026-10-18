@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from app.api.routes import router
 from app.api.auth import router as auth_router, require_session
+from app.api.codex_devices import router as codex_router
 from app.core.config import settings
 from app.services.operator_cpo import operator_cpo_summary
 from app.services.build_cache import BuildBusyError
@@ -24,6 +25,7 @@ app.add_middleware(
 )
 app.add_middleware(RequestDiagnosticsMiddleware)
 app.include_router(auth_router, prefix=settings.api_prefix)
+app.include_router(codex_router, prefix=settings.api_prefix)
 app.include_router(router, prefix=settings.api_prefix, dependencies=[Depends(require_session)])
 
 

@@ -23,6 +23,7 @@ const RETIRED_PATHS = new Set(['/products', '/ad-types'])
 
 const DEFAULT_GROUPS: NavGroup[] = [
   {title:'CPO',items:[['/operator-cpo','CPO 单双数据情况']]},
+  {title:'Codex',items:[['/codex-devices','分发人员 & 设备']]},
   {title:'概览',items:[['/dashboard','概览看板']]},
   {title:'数据处理',items:[['/cpo-jobs','CPO处理中心'],['/issues','待确认异常']]},
   {title:'规则与数据',items:[['/product-mappings','产品映射'],['/rules','规则管理'],['/reports','报告管理']]},
@@ -44,7 +45,7 @@ const cloneDefaults = (): NavGroup[] => DEFAULT_GROUPS.map(g => ({ title:g.title
 const stripRetired = (groups: NavGroup[]): NavGroup[] => {
   const allow = allowedPaths()
   return groups
-    .map(g => ({ title: g.title, items: g.items.filter(i => !RETIRED_PATHS.has(i[0]) && (!allow || allow.has(i[0])) && (i[0] !== '/diagnostics' || canViewDiagnostics(session.user?.roleCode))) }))
+    .map(g => ({ title: g.title, items: g.items.filter(i => !RETIRED_PATHS.has(i[0]) && (!allow || allow.has(i[0])) && (!['/diagnostics','/codex-devices'].includes(i[0]) || canViewDiagnostics(session.user?.roleCode))) }))
     .filter(g => g.items.length > 0)
 }
 
@@ -222,7 +223,7 @@ const dropItem = (event: DragEvent, groupIndex: number, targetIndex: number) => 
               @dragstart="startItemDrag($event, groupIndex, itemIndex)"
               @dragend="clearDragState"
             ><NIcon :size="15"><GripVertical /></NIcon></span>
-            <router-link :to="item[0]" class="nav-item">{{ item[1] }}</router-link>
+            <router-link :to="item[0]" class="nav-item" :class="{ 'codex-nav': item[0] === '/codex-devices' }">{{ item[1] }}</router-link>
           </div>
         </div>
       </section>
@@ -233,6 +234,7 @@ const dropItem = (event: DragEvent, groupIndex: number, targetIndex: number) => 
 </template>
 
 <style scoped>
+.nav-item-row .codex-nav{border:1px solid #dbe3ed;border-radius:999px;padding:8px 10px;margin:4px 0;font-size:12px}.nav-item-row .codex-nav.router-link-active{border-color:#9dc4f8;background:#eaf3ff}
 .draggable-sidebar{display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;user-select:none}
 .sidebar-layout-hint{display:flex;justify-content:space-between;align-items:center;padding:0 8px 5px;color:#a1a8b4;font-size:10px;border-bottom:1px solid rgba(231,234,240,.72)}
 .sidebar-layout-hint span:last-child{opacity:.75}.hint-drag{display:inline-flex;align-items:center;gap:2px}

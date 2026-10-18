@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     rds_database_url: Optional[str] = None
 
     auth_session_hours: int = 12
+    codex_usage_reporter_key: Optional[str] = None
     operator_warmup_enabled: bool = True
     model_config = SettingsConfigDict(env_file=ENV_FILE, extra="ignore")
 
