@@ -27,6 +27,7 @@ watch(filtered, items => { if (!items.some(m=>m.userId===selectedId.value)) sele
 const selected = computed(() => members.value.find(m=>m.userId === selectedId.value))
 const devices = computed(() => members.value.flatMap(m=>m.devices))
 const onlineCount = computed(() => devices.value.filter(isOnline).length)
+const selectedOnline = computed(() => (selected.value?.devices || []).filter(isOnline).length)
 const sum = (items:Device[], key:'todayTokens'|'totalTokens') => {
   const measured = items.map(d=>d[key]).filter((x): x is number=>x !== null)
   return measured.length ? measured.reduce((a,b)=>a+b,0) : null
@@ -50,41 +51,169 @@ async function refresh() {
 function onVisible() { now.value = Date.now(); if (!document.hidden) void refresh() }
 onMounted(() => { void refresh(); timer = setInterval(()=>{ if (!document.hidden) void refresh() },30000); clock = setInterval(()=>{now.value=Date.now()},1000); document.addEventListener('visibilitychange',onVisible) })
 onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); document.removeEventListener('visibilitychange',onVisible) })
+
 </script>
 
 <template>
   <main class="codex-page">
-    <header class="page-heading"><div><span class="eyebrow">CODEX · 团队设备</span><h1>分发人员 &amp; 设备</h1><p>按人员查看设备连接与 Token 用量</p></div><button class="refresh" :disabled="loading" @click="refresh">{{ loading ? '刷新中…' : '刷新状态' }}</button></header>
+    <header class="page-heading">
+      <div>
+        <span class="eyebrow">CODEX · 团队设备</span>
+        <h1>分发人员 &amp; 设备</h1>
+        <p>按人员查看设备连接与 Token 用量</p>
+      </div>
+      <button class="refresh" :disabled="loading" @click="refresh">{{ loading ? '刷新中…' : '刷新状态' }}</button>
+    </header>
+
     <div v-if="error" class="error" role="alert">{{ error }}。状态暂不可确认，已暂停显示在线绿点。<button @click="refresh">重试</button></div>
+
     <div class="summary-grid">
-      <div><span>分发成员</span><strong>{{ data ? members.length : '—' }}<small> 人</small></strong></div>
-      <div><span>已登记设备</span><strong>{{ data?.statisticsAvailable ? devices.length : '—' }}<small> 台</small></strong></div>
-      <div><span><i class="dot" :class="{green:data?.statisticsAvailable && onlineCount>0}"></i>在线设备</span><strong>{{ data?.statisticsAvailable && !stale ? onlineCount : '—' }}<small> 台</small></strong></div>
-      <div><span>今日已计量 Token</span><strong>{{ number(sum(devices,'todayTokens')) }}</strong></div>
+      <div class="summary-card"><span>分发成员</span><strong>{{ data ? members.length : '—' }}<small> 人</small></strong></div>
+      <div class="summary-card"><span>已登记设备</span><strong>{{ data?.statisticsAvailable ? devices.length : '—' }}<small> 台</small></strong></div>
+      <div class="summary-card"><span><i class="dot" :class="{green:data?.statisticsAvailable && onlineCount>0}"></i>在线设备</span><strong>{{ data?.statisticsAvailable && !stale ? onlineCount : '—' }}<small> 台</small></strong></div>
+      <div class="summary-card"><span>今日已计量 Token</span><strong>{{ number(sum(devices,'todayTokens')) }}</strong></div>
     </div>
-    <p class="preparing-note">筹备阶段 · 最终由日本代理服务器统一部署和分发。公司 M4 仅用于代理测试，当前尚未接入真实账户、设备及用量。</p>
-    <p class="collection-note">状态图例：绿点为在线，灰点为离线或未接入。后续接入设备心跳与代理用量后启用；“—”表示暂无计量。</p>
+
+    <div class="notes">
+      <p>筹备阶段 · 最终由日本代理服务器统一部署和分发；公司 M4 仅用于代理测试，当前尚未接入真实账户、设备及用量。</p>
+      <p class="legend">状态图例：绿点为在线，灰点为离线或未接入；“—”表示暂无计量。</p>
+    </div>
+
     <div class="workspace">
       <section class="people-panel" aria-label="分发人员">
-        <div class="panel-heading"><h2>分发人员</h2><span>{{ filtered.length }} 人</span></div>
-        <div class="people-filters"><input v-model="search" aria-label="搜索成员或设备" placeholder="搜索姓名、编码或设备" /><div class="group-tabs"><button v-for="g in [{key:'all',name:'全部'},{key:'operations',name:'运营组'},{key:'ai',name:'AI 小组'}]" :key="g.key" :class="{active:group===g.key}" @click="group=g.key">{{ g.name }}</button></div></div>
-        <div class="people-list"><button v-for="m in filtered" :key="m.userId" class="person" :class="{selected:m.userId===selectedId}" @click="selectedId=m.userId"><span class="avatar">{{ m.displayName.slice(-2) }}</span><span class="person-info"><strong>{{ m.displayName }} <small>{{ m.personCode || '管理层' }}</small></strong><span>{{ m.groupName }} · {{ data?.statisticsAvailable ? `${m.devices.length} 台设备` : '设备待接入' }}</span></span><i class="dot" :class="{green:m.devices.some(isOnline)}" :aria-label="m.devices.some(isOnline)?'在线':'离线或未接入'"></i></button><p v-if="!filtered.length" class="empty">{{ loading ? '正在读取人员名单…' : '没有匹配的成员' }}</p></div>
+        <div class="panel-heading">
+          <div class="heading-block"><h2>分发人员</h2><p>选择成员查看设备与用量</p></div>
+          <span class="count-chip">{{ filtered.length }} 人</span>
+        </div>
+        <div class="people-filters">
+          <input v-model="search" aria-label="搜索成员或设备" placeholder="搜索姓名、编码或设备" />
+          <div class="group-tabs"><button v-for="g in [{key:'all',name:'全部'},{key:'operations',name:'运营组'},{key:'ai',name:'AI 小组'}]" :key="g.key" :class="{active:group===g.key}" @click="group=g.key">{{ g.name }}</button></div>
+        </div>
+        <div class="people-list">
+          <button v-for="m in filtered" :key="m.userId" class="person" :class="{selected:m.userId===selectedId}" @click="selectedId=m.userId"><span class="avatar">{{ m.displayName.slice(-2) }}</span><span class="person-info"><strong>{{ m.displayName }} <small>{{ m.personCode || '管理层' }}</small></strong><span>{{ m.groupName }} · {{ data?.statisticsAvailable ? `${m.devices.length} 台设备` : '设备待接入' }}</span></span><i class="dot" :class="{green:m.devices.some(isOnline)}" :aria-label="m.devices.some(isOnline)?'在线':'离线或未接入'"></i></button>
+          <p v-if="!filtered.length" class="empty">{{ loading ? '正在读取人员名单…' : '没有匹配的成员' }}</p>
+        </div>
       </section>
+
       <section class="devices-panel" aria-label="人员设备与用量">
         <template v-if="selected">
-          <div class="panel-heading device-heading"><div><h2>{{ selected.displayName }}<span class="group-badge">{{ selected.groupName }}</span></h2><p>{{ selected.username }}<span v-if="selected.personCode"> · {{ selected.personCode }}</span><span v-if="selected.roleCode==='management'"> · 保留管理权限</span></p></div><span class="pending-badge">设备待分发</span></div>
-          <div class="member-totals"><div><span>今日已计量</span><strong>{{ number(sum(selected.devices,'todayTokens')) }} <small>Token</small></strong></div><div><span>累计已计量</span><strong>{{ number(sum(selected.devices,'totalTokens')) }} <small>Token</small></strong></div></div>
-          <div v-if="!selected.devices.length" class="empty-device"><div class="monitor-icon">▱</div><h3>尚未接入设备</h3><p>日本代理服务器部署并完成设备分发后，<br />这里将显示 {{ selected.displayName }} 的设备状态和实际用量。</p><span class="pending-badge">等待统一接入</span></div>
-          <div v-else class="device-list"><article v-for="d in selected.devices" :key="d.deviceId" class="device-card"><header><div><h3>{{ d.deviceName }}</h3><p>{{ d.platform || '未填写系统' }}</p></div><span class="connection"><i class="dot" :class="{green:isOnline(d)}"></i>{{ d.revoked ? '已停用' : stale ? '状态待确认' : isOnline(d) ? '在线' : d.lastHeartbeatAt ? '离线' : '未接入' }}</span></header><div class="device-stats"><div><span>今日 Token</span><strong>{{ number(d.todayTokens) }}</strong></div><div><span>累计 Token</span><strong>{{ number(d.totalTokens) }}</strong></div><div><span>累计请求</span><strong>{{ d.requests }}</strong></div></div><footer><span>最近心跳：{{ time(d.lastHeartbeatAt) }}<br />最近调用：{{ time(d.lastRequestAt) }}<br v-if="d.unknownRequests" /><span v-if="d.unknownRequests">{{ d.unknownRequests }} 次请求未返回 Token 数据，暂未计入用量</span></span></footer></article></div>
-        </template><p v-else class="empty">{{ loading ? '正在加载…' : '请选择一位成员' }}</p>
+          <div class="panel-heading">
+            <div class="heading-block"><h2>{{ selected.displayName }}<span class="group-badge">{{ selected.groupName }}</span></h2><p>{{ selected.username }}<span v-if="selected.personCode"> · {{ selected.personCode }}</span><span v-if="selected.roleCode==='management'"> · 保留管理权限</span></p></div>
+            <span class="status-chip" :class="{live:selectedOnline>0}">{{ selected.devices.length ? `${selectedOnline} / ${selected.devices.length} 在线` : '设备待分发' }}</span>
+          </div>
+          <div class="member-totals">
+            <div><span>今日已计量</span><strong>{{ number(sum(selected.devices,'todayTokens')) }} <small>Token</small></strong></div>
+            <div><span>累计已计量</span><strong>{{ number(sum(selected.devices,'totalTokens')) }} <small>Token</small></strong></div>
+          </div>
+          <div v-if="!selected.devices.length" class="empty-device">
+            <svg class="monitor-icon" viewBox="0 0 48 40" fill="none" aria-hidden="true"><rect x="2" y="2" width="44" height="29" rx="5" stroke="currentColor" stroke-width="2.4"/><path d="M17 38h14M24 31v7M10 9h10" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+            <h3>尚未接入设备</h3>
+            <p>日本代理服务器部署并完成设备分发后，<br />这里将显示 {{ selected.displayName }} 的设备状态和实际用量。</p>
+          </div>
+          <div v-else class="device-list">
+            <article v-for="d in selected.devices" :key="d.deviceId" class="device-card">
+              <header><div><h3>{{ d.deviceName }}</h3><p>{{ d.platform || '未填写系统' }}</p></div><span class="connection"><i class="dot" :class="{green:isOnline(d)}"></i>{{ d.revoked ? '已停用' : stale ? '状态待确认' : isOnline(d) ? '在线' : d.lastHeartbeatAt ? '离线' : '未接入' }}</span></header>
+              <div class="device-stats"><div><span>今日 Token</span><strong>{{ number(d.todayTokens) }}</strong></div><div><span>累计 Token</span><strong>{{ number(d.totalTokens) }}</strong></div><div><span>累计请求</span><strong>{{ d.requests }}</strong></div></div>
+              <footer><span>最近心跳：{{ time(d.lastHeartbeatAt) }}<br />最近调用：{{ time(d.lastRequestAt) }}<br v-if="d.unknownRequests" /><span v-if="d.unknownRequests">{{ d.unknownRequests }} 次请求未返回 Token 数据，暂未计入用量</span></span></footer>
+            </article>
+          </div>
+        </template>
+        <p v-else class="empty">{{ loading ? '正在加载…' : '请选择一位成员' }}</p>
       </section>
     </div>
-    <p class="updated">每 30 秒刷新 · 时间以北京时间显示<span v-if="data"> · 最近更新 {{ time(data.serverTime) }}</span></p>
 
+    <p class="updated">每 30 秒刷新 · 时间以北京时间显示<span v-if="data"> · 最近更新 {{ time(data.serverTime) }}</span></p>
   </main>
 </template>
 
 <style scoped>
-.preparing-note{padding:12px 16px;border:1px solid #dce6f4;border-radius:12px;background:#f0f5fc;color:#71849c;font-size:12px;line-height:1.8;margin:18px 0 0}.pending-badge{display:inline-block;border-radius:999px;background:#f3f6fa;border:1px solid #e2e8f1;color:#8b99ac;padding:7px 12px;font-size:11px}
-.codex-page{padding:28px 30px 36px;max-width:1600px;margin:auto;color:#233247;text-align:left}.page-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px}.eyebrow{font-size:11px;letter-spacing:1.4px;color:#8190a5}.page-heading h1{font-size:27px;letter-spacing:-.6px;margin:7px 0 6px}.page-heading p,.device-heading p{color:#7b8798;font-size:13px;margin:0}.refresh,.add{padding:9px 16px;border:1px solid #d5dfec;background:white;border-radius:999px;color:#3e5e87;cursor:pointer;font-size:12px}.add{background:#edf5ff;border-color:#c8dff9;color:#1761be}.refresh:disabled,.add:disabled{opacity:.5;cursor:default}.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.summary-grid>div{padding:18px 22px;background:white;border:1px solid #e2e8f0;border-radius:18px}.summary-grid span{font-size:12px;color:#7a899a;display:flex;align-items:center;gap:7px}.summary-grid strong{display:block;font-size:28px;line-height:1.4;margin-top:8px;font-weight:600}.summary-grid small{font-size:12px;color:#8a96a7;font-weight:400}.collection-note{font-size:12px;color:#8590a0;line-height:1.8;margin:16px 2px 20px}.workspace{display:grid;grid-template-columns:330px minmax(0,1fr);gap:20px;align-items:start}.people-panel,.devices-panel{background:#fff;border:1px solid #dfe6ef;border-radius:24px;overflow:hidden;min-width:0}.panel-heading{display:flex;align-items:center;justify-content:space-between;padding:22px 24px 17px;gap:12px}.panel-heading h2{margin:0;font-size:17px}.panel-heading>span{font-size:12px;color:#8b96a5}.people-filters{padding:0 18px 14px;border-bottom:1px solid #edf0f5}.people-filters input{border:1px solid #e1e7ee;border-radius:10px;background:#f8fafc;padding:11px 12px;width:100%;box-sizing:border-box;font-size:12px;outline:none}.people-filters input:focus{border-color:#86b6f3}.group-tabs{display:flex;gap:4px;padding-top:12px}.group-tabs button{border:0;background:transparent;color:#7a8798;cursor:pointer;padding:7px 12px;border-radius:999px;font-size:12px}.group-tabs button.active{background:#eaf3ff;color:#2568ba}.people-list{padding:8px;max-height:670px;overflow-y:auto}.person{display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:white;border:1px solid transparent;border-radius:15px;padding:13px 12px;cursor:pointer;margin:3px 0}.person:hover{background:#f6f9fd}.person.selected{background:#f0f6ff;border-color:#d3e4fc}.avatar{width:37px;height:37px;display:grid;place-items:center;border-radius:13px;background:#edf1f6;color:#60758d;font-size:12px;flex-shrink:0}.person.selected .avatar{background:#dfeaff;color:#3169b4}.person-info{flex:1;min-width:0}.person-info strong{display:block;font-size:13px;color:#34465b;font-weight:600}.person-info strong small{font-size:10px;color:#8e9aae;font-weight:400;margin-left:4px}.person-info>span{display:block;font-size:11px;color:#97a1ae;margin-top:5px}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#aeb7c3;flex-shrink:0}.dot.green{background:#34b774;box-shadow:0 0 0 3px #34b77412}.device-heading{border-bottom:1px solid #edf0f5;padding:24px}.device-heading p{margin-top:9px;font-size:11px}.group-badge{font-size:10px;font-weight:400;display:inline-block;background:#f0f4fa;color:#7689a1;border-radius:999px;padding:4px 10px;margin-left:12px;vertical-align:middle}.member-totals{display:flex;gap:55px;padding:24px;border-bottom:1px solid #edf0f5}.member-totals span,.device-stats span{display:block;font-size:11px;color:#95a0af}.member-totals strong{display:block;font-size:25px;margin-top:7px;font-weight:600}.member-totals small{font-size:10px;font-weight:400;color:#94a0af}.empty-device{min-height:310px;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:35px}.monitor-icon{height:55px;width:65px;display:grid;place-items:center;border:1px solid #e8edf5;background:#f8fafd;border-radius:18px;font-size:35px;color:#b6c4d8}.empty-device h3{font-size:15px;font-weight:500;margin:20px 0 9px;color:#66778e}.empty-device p{font-size:12px;line-height:1.9;color:#94a0b0;text-align:center;margin:0 0 21px}.device-list{padding:20px;display:grid;gap:14px}.device-card{border:1px solid #e5ebf3;border-radius:17px;padding:18px}.device-card header{display:flex;justify-content:space-between;align-items:center;gap:12px}.device-card h3{font-size:14px;margin:0}.device-card header p{font-size:11px;color:#96a0af;margin:5px 0 0}.connection{display:flex;align-items:center;gap:8px;font-size:11px;color:#7c8a9b}.device-stats{display:grid;grid-template-columns:repeat(3,1fr);padding:19px 0;gap:12px}.device-stats strong{display:block;margin-top:6px;font-size:19px;font-weight:500}.device-card footer{display:flex;justify-content:space-between;gap:12px;border-top:1px solid #f0f3f7;padding-top:12px;font-size:10px;line-height:1.9;color:#8f9aac;overflow-wrap:anywhere}.revoke{border:0;background:transparent;color:#9b6870;cursor:pointer;font-size:11px}.updated{font-size:10px;color:#a3adba;text-align:right;margin-top:16px}.error{border:1px solid #edd2bc;background:#fff9f0;border-radius:12px;font-size:12px;color:#a3773c;padding:13px 16px;margin-bottom:15px}.error button{background:none;border:0;color:#98692a;cursor:pointer;margin-left:8px}.empty{padding:35px 20px;text-align:center;color:#99a4b3;font-size:12px}@media(max-width:1050px){.workspace{grid-template-columns:280px minmax(0,1fr)}.codex-page{padding:22px 20px}.summary-grid>div{padding:16px}.summary-grid strong{font-size:23px}}@media(max-width:760px){.workspace{grid-template-columns:1fr}.people-list{max-height:290px}.summary-grid{grid-template-columns:repeat(2,1fr)}.page-heading h1{font-size:23px}.codex-page{padding:18px 12px}.member-totals{gap:25px}.device-heading{flex-wrap:wrap}.updated{text-align:left;line-height:1.8}}
+.codex-page{padding:26px 28px 34px;max-width:1600px;margin:auto;color:#233247;text-align:left}
+.page-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:20px}
+.eyebrow{font-size:11px;letter-spacing:1.2px;color:#8190a5}
+.page-heading h1{font-size:24px;letter-spacing:-.4px;margin:6px 0 5px;color:#1b2a3d}
+.page-heading p{margin:0;font-size:13px;color:#7b8798}
+.refresh{padding:9px 16px;border:1px solid #d5dfec;background:#fff;border-radius:999px;color:#3e5e87;cursor:pointer;font-size:12px;flex-shrink:0}
+.refresh:hover{border-color:#b9cde4;color:#25537f}
+.refresh:disabled{opacity:.5;cursor:default}
+
+.summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.summary-card{display:flex;flex-direction:column;justify-content:space-between;gap:12px;min-height:96px;padding:16px 18px;background:#fff;border:1px solid #e2e8f0;border-radius:14px}
+.summary-card span{display:flex;align-items:center;gap:7px;font-size:12px;color:#7a899a}
+.summary-card strong{font-size:26px;line-height:1.15;font-weight:650;font-variant-numeric:tabular-nums;color:#1b2a3d}
+.summary-card small{font-size:12px;color:#8a96a7;font-weight:400;margin-left:2px}
+
+.notes{margin-top:14px;padding:12px 16px;border:1px solid #e3eaf3;border-radius:12px;background:#f7fafd;color:#71849c;font-size:12px;line-height:1.7}
+.notes p{margin:0}
+.notes .legend{margin-top:4px;color:#8795a8;font-size:11px}
+
+.workspace{display:grid;grid-template-columns:320px minmax(0,1fr);gap:16px;align-items:stretch;margin-top:16px}
+.people-panel,.devices-panel{display:flex;flex-direction:column;min-width:0;background:#fff;border:1px solid #dfe6ef;border-radius:16px;overflow:hidden}
+.panel-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:18px 22px 16px;border-bottom:1px solid #edf0f5}
+.heading-block{min-width:0}
+.heading-block h2{margin:0;font-size:16px;line-height:22px;color:#1b2a3d}
+.heading-block p{margin:6px 0 0;font-size:11px;line-height:16px;color:#7b8798}
+.count-chip,.status-chip{flex-shrink:0;height:22px;padding:0 10px;border-radius:999px;font-size:11px;line-height:20px;border:1px solid #e3e9f1;background:#f6f9fc;color:#7d8b9d;white-space:nowrap}
+.status-chip.live{background:#effaf4;border-color:#cdeedb;color:#1d8a5b}
+.group-badge{display:inline-block;margin-left:10px;vertical-align:1px;font-size:10px;font-weight:400;line-height:16px;padding:2px 9px;border-radius:999px;background:#f0f4fa;color:#7689a1}
+
+.people-filters{padding:12px 18px 14px}
+.people-filters input{width:100%;padding:10px 12px;border:1px solid #e1e7ee;border-radius:9px;background:#f8fafc;font-size:12px;color:#34465b;outline:none}
+.people-filters input:focus{border-color:#86b6f3;background:#fff}
+.group-tabs{display:flex;gap:4px;padding-top:10px}
+.group-tabs button{border:0;background:transparent;color:#7a8798;cursor:pointer;padding:6px 11px;border-radius:999px;font-size:12px}
+.group-tabs button.active{background:#eaf3ff;color:#2568ba}
+
+.people-list{flex:1;min-height:0;overflow-y:auto;padding:8px}
+.person{display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:#fff;border:1px solid transparent;border-radius:12px;padding:11px 10px;cursor:pointer;margin:2px 0}
+.person:hover{background:#f6f9fd}
+.person.selected{background:#f0f6ff;border-color:#d3e4fc}
+.avatar{width:36px;height:36px;display:grid;place-items:center;border-radius:11px;background:#edf1f6;color:#60758d;font-size:12px;flex-shrink:0}
+.person.selected .avatar{background:#dfeaff;color:#3169b4}
+.person-info{flex:1;min-width:0}
+.person-info strong{display:block;font-size:13px;font-weight:600;color:#34465b}
+.person-info strong small{font-size:10px;font-weight:400;color:#8e9aae;margin-left:4px}
+.person-info>span{display:block;font-size:11px;color:#97a1ae;margin-top:4px}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#b6bfca;flex-shrink:0}
+.dot.green{background:#34b774;box-shadow:0 0 0 3px rgba(52,183,116,.10)}
+
+.member-totals{display:grid;grid-template-columns:repeat(2,minmax(0,240px));gap:16px;padding:18px 22px;border-bottom:1px solid #edf0f5}
+.member-totals span{display:block;font-size:11px;color:#95a0af}
+.member-totals strong{display:block;margin-top:6px;font-size:24px;font-weight:600;font-variant-numeric:tabular-nums;color:#1b2a3d}
+.member-totals small{font-size:10px;font-weight:400;color:#94a0af}
+
+.empty-device{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:300px;padding:32px 24px;text-align:center}
+.monitor-icon{width:52px;height:44px;color:#b6c4d8}
+.empty-device h3{margin:18px 0 8px;font-size:15px;font-weight:500;color:#66778e}
+.empty-device p{margin:0;font-size:12px;line-height:1.9;color:#94a0b0}
+
+.device-list{flex:1;display:grid;gap:12px;align-content:start;padding:18px 22px 22px}
+.device-card{border:1px solid #e5ebf3;border-radius:12px;padding:16px 18px}
+.device-card header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.device-card h3{margin:0;font-size:14px;color:#1b2a3d}
+.device-card header p{margin:4px 0 0;font-size:11px;color:#96a0af}
+.connection{display:flex;align-items:center;gap:8px;font-size:11px;color:#7c8a9b;flex-shrink:0}
+.device-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:15px 0}
+.device-stats span{display:block;font-size:11px;color:#95a0af}
+.device-stats strong{display:block;margin-top:6px;font-size:19px;font-weight:500;font-variant-numeric:tabular-nums;color:#1b2a3d}
+.device-card footer{border-top:1px solid #f0f3f7;padding-top:11px;font-size:10px;line-height:1.9;color:#8f9aac;overflow-wrap:anywhere}
+
+.updated{margin-top:14px;font-size:10px;color:#a3adba;text-align:right}
+.error{border:1px solid #edd2bc;background:#fff9f0;border-radius:12px;font-size:12px;color:#a3773c;padding:12px 16px;margin-bottom:14px}
+.error button{background:none;border:0;color:#98692a;cursor:pointer;margin-left:8px}
+.empty{padding:34px 20px;text-align:center;color:#99a4b3;font-size:12px}
+
+@media(max-width:1100px){
+  .summary-card{min-height:88px;padding:14px 16px}
+  .summary-card strong{font-size:22px}
+  .workspace{grid-template-columns:280px minmax(0,1fr)}
+  .codex-page{padding:22px 20px 30px}
+}
+@media(max-width:760px){
+  .workspace{grid-template-columns:1fr}
+  .people-list{max-height:320px}
+  .summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .page-heading h1{font-size:22px}
+  .codex-page{padding:16px 12px 26px}
+  .updated{text-align:left;line-height:1.8}
+}
 </style>
