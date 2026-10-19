@@ -28,7 +28,9 @@ class CodexDeviceTests(unittest.TestCase):
                 self.as_role(role)
                 self.assertEqual(self.client.get('/api/codex/overview').json(),{'members':[]})
 
-    def test_preparation_phase_has_no_provisioning_or_ingestion(self):
+    def test_preparation_phase_keeps_ingestion_disabled(self):
         self.as_role('management')
-        for path in ('/devices','/heartbeat','/usage'):
-            self.assertEqual(self.client.post('/api/codex'+path,json={}).status_code,404)
+        with patch.object(api.telemetry.settings,'codex_telemetry_enabled',False):
+            self.assertEqual(self.client.post('/api/codex/heartbeat',json={}).status_code,503)
+            self.assertEqual(self.client.get('/api/codex/v1/models').status_code,503)
+            self.assertEqual(self.client.post('/api/codex/usage',json={}).status_code,404)

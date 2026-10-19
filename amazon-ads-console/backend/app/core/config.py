@@ -22,6 +22,12 @@ class Settings(BaseSettings):
 
     auth_session_hours: int = 12
     operator_warmup_enabled: bool = True
+    # Disabled until the device migration and a separately approved release.
+    codex_telemetry_enabled: bool = False
+    codex_upstream_base_url: str = ""
+    codex_upstream_key_file: Optional[str] = None
+    codex_event_spool_dir: str = "~/.local/share/cpo-codex-events"
+    codex_deployment_target: str = "测试入口（非日本生产部署）"
     model_config = SettingsConfigDict(env_file=ENV_FILE, extra="ignore")
 
     @property

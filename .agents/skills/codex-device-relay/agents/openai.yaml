@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex 独立多开接入"
+  short_description: "保留原 Codex，配置 HTTPS 独立多开并核验模型、用量、心跳和本地工具"
+  default_prompt: "使用 $codex-device-relay，保留原 Codex，通过新增非当前供应商启动独立多开，并分别验收连接、用量和在线状态。"

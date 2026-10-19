@@ -4,7 +4,7 @@ import { getJsonStrict } from '../api/client'
 
 type Device = { deviceId:string; deviceName:string; platform:string; online:boolean; revoked:boolean; lastHeartbeatAt:string|null; lastRequestAt:string|null; totalTokens:number|null; todayTokens:number|null; inputTokens:number|null; outputTokens:number|null; requests:number; unknownRequests:number }
 type Member = { userId:number; displayName:string; username:string; groupCode:string; groupName:string; personCode:string|null; roleCode:string; devices:Device[] }
-type Overview = { members:Member[]; serverTime:string; onlineTimeoutSeconds:number; timezone:string; statisticsAvailable:boolean }
+type Overview = { members:Member[]; serverTime:string; onlineTimeoutSeconds:number; timezone:string; statisticsAvailable:boolean; integrationStage?:string; deploymentTarget?:string; pendingAccountingEvents?:number }
 const data = ref<Overview|null>(null)
 const selectedId = ref<number|null>(null)
 const search = ref('')
@@ -74,7 +74,7 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
       <div class="summary-card"><span>今日已计量 Token</span><strong>{{ number(sum(devices,'todayTokens')) }}</strong></div>
     </div>
 
-    <div class="notes">筹备阶段 · 最终由日本代理服务器统一部署分发；公司 M4 仅用于测试，尚未接入真实账户与用量。<span class="legend">绿点在线 · 灰点离线或未接入 · “—”暂无计量</span></div>
+    <div class="notes"><template v-if="data?.statisticsAvailable">测试接入 · {{ data.deploymentTarget }}。绿点须同时收到有效心跳和客户端运行状态；不代表正在执行任务。<span v-if="data.pendingAccountingEvents"> {{ data.pendingAccountingEvents }} 条用量记录正在等待入库。</span></template><template v-else>筹备阶段 · 最终由日本代理服务器统一部署分发；公司 M4 仅用于测试，尚未接入真实设备与用量。</template><span class="legend">绿点在线 · 灰点离线或未接入 · “—”暂无计量</span></div>
 
     <div class="workspace">
       <section class="people-panel" aria-label="分发人员">
