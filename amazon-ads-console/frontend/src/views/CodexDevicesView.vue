@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { getJsonStrict } from '../api/client'
+import { sumTokens, usageShare, percentLabel, type TokenField } from '../utils/codexUsage'
 
-type Device = { deviceId:string; deviceName:string; platform:string; online:boolean; revoked:boolean; lastHeartbeatAt:string|null; lastRequestAt:string|null; totalTokens:number|null; todayTokens:number|null; inputTokens:number|null; outputTokens:number|null; requests:number; unknownRequests:number }
+type Device = { deviceId:string; deviceName:string; platform:string; online:boolean; revoked:boolean; lastHeartbeatAt:string|null; lastRequestAt:string|null; totalTokens:number|string|null; todayTokens:number|string|null; inputTokens:number|null; outputTokens:number|null; requests:number; unknownRequests:number }
 type Member = { userId:number; displayName:string; username:string; groupCode:string; groupName:string; personCode:string|null; roleCode:string; devices:Device[] }
 type Overview = { members:Member[]; serverTime:string; onlineTimeoutSeconds:number; timezone:string; statisticsAvailable:boolean; integrationStage?:string; deploymentTarget?:string; pendingAccountingEvents?:number }
 const data = ref<Overview|null>(null)
@@ -28,11 +29,14 @@ const selected = computed(() => members.value.find(m=>m.userId === selectedId.va
 const devices = computed(() => members.value.flatMap(m=>m.devices))
 const onlineCount = computed(() => devices.value.filter(isOnline).length)
 const selectedOnline = computed(() => (selected.value?.devices || []).filter(isOnline).length)
-const sum = (items:Device[], key:'todayTokens'|'totalTokens') => {
-  const measured = items.map(d=>d[key]).filter((x): x is number=>x !== null)
-  return measured.length ? measured.reduce((a,b)=>a+b,0) : null
-}
-const number = (v:number|null) => v === null ? '—' : v.toLocaleString('zh-CN')
+const sum = sumTokens
+const usagePeriod = ref<TokenField>('todayTokens')
+const periodLabel = computed(() => usagePeriod.value === 'todayTokens' ? '今日' : '累计')
+// Always use every returned member, so searching or selecting a group cannot change the denominator.
+const measuredTotal = computed(() => sum(devices.value, usagePeriod.value))
+const memberShare = (m:Member) => usageShare(sum(m.devices, usagePeriod.value), measuredTotal.value)
+const unknownRequests = computed(() => devices.value.reduce((n,d) => n + d.unknownRequests, 0))
+const number = (v:number|string|null) => v === null || !Number.isFinite(Number(v)) ? '—' : Number(v).toLocaleString('zh-CN')
 const time = (v:string|null) => v ? new Date(v).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',hour12:false}) : '尚未收到'
 async function refresh() {
   if (loading.value) return
@@ -76,6 +80,12 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
 
     <div class="notes"><template v-if="data?.statisticsAvailable">测试接入 · {{ data.deploymentTarget }}。绿点须同时收到有效心跳和客户端运行状态；不代表正在执行任务。<span v-if="data.pendingAccountingEvents"> {{ data.pendingAccountingEvents }} 条用量记录正在等待入库。</span></template><template v-else>筹备阶段 · 最终由日本代理服务器统一部署分发；公司 M4 仅用于测试，尚未接入真实设备与用量。</template><span class="legend">绿点在线 · 灰点离线或未接入 · “—”暂无计量</span></div>
 
+    <div class="usage-controls" aria-label="用量占比口径">
+      <span>{{ periodLabel }}占比 = 成员已计量 Token ÷ 全部分发成员已计量 Token</span>
+      <div role="group" aria-label="占比统计周期"><button :class="{active:usagePeriod==='todayTokens'}" @click="usagePeriod='todayTokens'">今日</button><button :class="{active:usagePeriod==='totalTokens'}" @click="usagePeriod='totalTokens'">累计</button></div>
+    </div>
+    <p class="usage-disclaimer">占比仅统计本入口已记录用量，含管理员测试；旧入口和缺少用量的请求未计入，不代表 Pro 套餐总额度或剩余额度。<span v-if="unknownRequests"> {{ unknownRequests }} 次请求用量未知。</span></p>
+
     <div class="workspace">
       <section class="people-panel" aria-label="分发人员">
         <div class="panel-heading">
@@ -87,7 +97,7 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
           <div class="group-tabs"><button v-for="g in [{key:'all',name:'全部'},{key:'operations',name:'运营组'},{key:'ai',name:'AI 小组'}]" :key="g.key" :class="{active:group===g.key}" @click="group=g.key">{{ g.name }}</button></div>
         </div>
         <div class="people-list">
-          <button v-for="m in filtered" :key="m.userId" class="person" :class="{selected:m.userId===selectedId}" @click="selectedId=m.userId"><span class="avatar">{{ m.displayName.slice(-2) }}</span><span class="person-info"><strong>{{ m.displayName }} <small>{{ m.personCode || '管理层' }}</small></strong><span>{{ m.groupName }} · {{ data?.statisticsAvailable ? `${m.devices.length} 台设备` : '设备待接入' }}</span></span><i class="dot" :class="{green:m.devices.some(isOnline)}" :aria-label="m.devices.some(isOnline)?'在线':'离线或未接入'"></i></button>
+          <button v-for="m in filtered" :key="m.userId" class="person" :class="{selected:m.userId===selectedId}" @click="selectedId=m.userId"><span class="avatar">{{ m.displayName.slice(-2) }}</span><span class="person-info"><strong>{{ m.displayName }} <small>{{ m.personCode || '管理层' }}</small></strong><span>{{ m.groupName }} · {{ data?.statisticsAvailable ? `${m.devices.length} 台设备` : '设备待接入' }}</span><span v-if="data?.statisticsAvailable" class="share-line">{{ periodLabel }}占比 <b>{{ percentLabel(memberShare(m)) }}</b></span></span><i class="dot" :class="{green:m.devices.some(isOnline)}" :aria-label="m.devices.some(isOnline)?'在线':'离线或未接入'"></i></button>
           <p v-if="!filtered.length" class="empty">{{ loading ? '正在读取人员名单…' : '没有匹配的成员' }}</p>
         </div>
       </section>
@@ -101,6 +111,7 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
           <div class="member-totals">
             <div><span>今日已计量</span><strong>{{ number(sum(selected.devices,'todayTokens')) }} <small>Token</small></strong></div>
             <div><span>累计已计量</span><strong>{{ number(sum(selected.devices,'totalTokens')) }} <small>Token</small></strong></div>
+            <div class="share-total"><span>{{ periodLabel }}用量占比</span><strong>{{ percentLabel(memberShare(selected)) }}</strong><span class="share-track" aria-hidden="true"><i :style="{width:`${memberShare(selected) ?? 0}%`}"></i></span><small>全部成员同期已计量 {{ number(measuredTotal) }} Token</small></div>
           </div>
           <div v-if="!selected.devices.length" class="empty-device">
             <svg class="monitor-icon" viewBox="0 0 48 40" fill="none" aria-hidden="true"><rect x="2" y="2" width="44" height="29" rx="5" stroke="currentColor" stroke-width="2.4"/><path d="M17 38h14M24 31v7M10 9h10" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
@@ -109,8 +120,9 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
           </div>
           <div v-else class="device-list">
             <article v-for="d in selected.devices" :key="d.deviceId" class="device-card">
-              <header><div><h3>{{ d.deviceName }}</h3><p>{{ d.platform || '未填写系统' }}</p></div><span class="connection"><i class="dot" :class="{green:isOnline(d)}"></i>{{ d.revoked ? '已停用' : stale ? '状态待确认' : isOnline(d) ? '在线' : d.lastHeartbeatAt ? '离线' : '未接入' }}</span></header>
+              <header><div><h3>{{ d.deviceName }}</h3><p>{{ d.platform || '未填写系统' }}</p></div><span class="connection"><i class="dot" :class="{green:isOnline(d)}"></i>{{ d.revoked ? '已停用' : stale ? '状态待确认' : isOnline(d) ? '在线' : d.lastHeartbeatAt ? '离线' : '尚无心跳' }}</span></header>
               <div class="device-stats"><div><span>今日 Token</span><strong>{{ number(d.todayTokens) }}</strong></div><div><span>累计 Token</span><strong>{{ number(d.totalTokens) }}</strong></div><div><span>累计请求</span><strong>{{ d.requests }}</strong></div></div>
+              <p v-if="!d.lastHeartbeatAt" class="heartbeat-help">模型调用不自动上报在线；试点请单独运行设备包的在线测试程序，默认 5 分钟。</p>
               <footer><span>最近心跳：{{ time(d.lastHeartbeatAt) }}<br />最近调用：{{ time(d.lastRequestAt) }}<br v-if="d.unknownRequests" /><span v-if="d.unknownRequests">{{ d.unknownRequests }} 次请求未返回 Token 数据，暂未计入用量</span></span></footer>
             </article>
           </div>
@@ -171,7 +183,7 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
 .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#b6bfca;flex-shrink:0}
 .dot.green{background:#34b774;box-shadow:0 0 0 3px rgba(52,183,116,.10)}
 
-.member-totals{display:grid;grid-template-columns:repeat(2,minmax(0,220px));gap:14px;padding:12px 18px;border-bottom:1px solid #edf0f5}
+.member-totals{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;padding:12px 18px;border-bottom:1px solid #edf0f5}
 .member-totals span{display:block;font-size:10px;color:#95a0af}
 .member-totals strong{display:block;margin-top:4px;font-size:20px;font-weight:600;font-variant-numeric:tabular-nums;color:#1b2a3d}
 .member-totals small{font-size:10px;font-weight:400;color:#94a0af}
@@ -211,4 +223,15 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
   .notes .legend{display:block;margin-left:0}
   .updated{text-align:left;line-height:1.7}
 }
+
+.usage-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;font-size:11px;color:#63778e}
+.usage-controls>div{display:flex;gap:3px;padding:3px;border-radius:8px;background:#edf2f8;flex-shrink:0}
+.usage-controls button{border:0;border-radius:6px;padding:4px 12px;background:transparent;color:#667c94;cursor:pointer}
+.usage-controls button.active{background:#fff;color:#2568ba;box-shadow:0 1px 3px #d6dfeb}
+.usage-disclaimer{font-size:10px;line-height:1.6;color:#8a97a6;margin:5px 0 0}
+.person-info>.share-line{color:#6c829b}.share-line b{color:#376eaa;font-weight:600}
+.share-total>small{display:block;font-size:10px;color:#8999aa;margin-top:4px}
+.share-track{display:block!important;height:4px;border-radius:4px;background:#e8eff8;margin-top:6px;overflow:hidden}
+.share-track i{display:block;height:100%;background:#5b94d7;border-radius:4px}
+.heartbeat-help{font-size:10px;color:#8796a8;line-height:1.6;margin:8px 0}
 </style>
