@@ -64,9 +64,22 @@ class PermissionTests(unittest.TestCase):
         with patch.object(routes, 'operator_cpo_summary', return_value={'operators': [{'group': 'XM1'}, {'group': 'AJ1'}]}):
             self.assertEqual(self.get('/api/operator-cpo?date=2026-10-04', 'manager').status_code, 200)
         for user in ('xm', 'aj', 'unknown'):
-            for path in ('/api/operator-cpo?date=2026-10-04', '/api/dashboard/overview', '/api/product-mappings', '/api/cache/stats', '/api/health', '/api/reports', '/api/diagnostics/status', '/api/diagnostics/requests'):
+            for path in ('/api/dashboard/overview', '/api/product-mappings', '/api/cache/stats', '/api/health', '/api/reports', '/api/diagnostics/status', '/api/diagnostics/requests'):
                 with self.subTest(user=user, path=path):
                     self.assertEqual(self.get(path, user).status_code, 403)
+
+    def test_shared_summary_excludes_company_audit_and_full_funnel(self):
+        data = {'operators': [{'group': 'XM1'}, {'group': 'AJ1'}],
+                'fullFunnel': {'private': 'company detail'}, 'businessMappingConflictOrders': 99,
+                'businessUnmappedOrders': 101}
+        with patch.object(routes, 'operator_cpo_summary', return_value=data):
+            self.assertEqual(self.get('/api/operator-cpo', 'manager').status_code, 200)
+            for user in ('xm', 'aj'):
+                response = self.get('/api/operator-cpo', user)
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(response.json(), {'operators': data['operators']})
+            for user in ('unknown', 'unbound'):
+                self.assertEqual(self.get('/api/operator-cpo', user).status_code, 403)
 
     def test_management_and_admin_access_all_groups(self):
         with patch.object(routes, 'operator_cpo_detail', return_value={'products': []}) as detail:

@@ -9,6 +9,11 @@ ENV_FILE = Path(os.environ.get("CPO_ENV_FILE", str(Path(__file__).resolve().pare
 
 
 class Settings(BaseSettings):
+    cpo_allocation_enabled: bool = False
+    cpo_allocation_storage: str = 'sqlite'
+    cpo_allocation_environment: str = 'DEVELOPMENT_ACCEPTANCE'
+    cpo_allocation_can_create_run: bool = True
+    cpo_allocation_reference_available: bool = False
     app_name: str = "Amazon Ads Console API"
     api_prefix: str = "/api"
 

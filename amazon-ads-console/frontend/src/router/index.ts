@@ -14,6 +14,8 @@ import ProductMappingsView from '../views/ProductMappingsView.vue'
 import OperatorCpoView from '../views/OperatorCpoView.vue'
 import MyCpoView from '../views/MyCpoView.vue'
 import LoginView from '../views/LoginView.vue'
+import AllocationView from '../views/AllocationView.vue'
+import DataChangesView from '../views/DataChangesView.vue'
 import { useSessionStore } from '../stores/session'
 
 // 已下架模块（2026-09-15 用户要求暂时隐藏，视图文件保留以便随时恢复）：
@@ -30,7 +32,7 @@ export const ROLE_HOME: Record<string, string> = {
 export const homeFor = (role?: string | null) => ROLE_HOME[role || ''] || '/dashboard'
 
 // 运营可访问的路由白名单：只有自己的 CPO 页面
-const OPERATOR_ALLOWED = new Set(['/my-cpo'])
+const OPERATOR_ALLOWED = new Set(['/my-cpo', '/operator-cpo', '/ad-allocation', '/data-changes'])
 
 const router = createRouter({
   history: createWebHistory(),
@@ -43,6 +45,8 @@ const router = createRouter({
     { path: '/operator-cpo', component: OperatorCpoView, meta: { keepAlive: true } },
     // 运营页：只保留 CPO 单双数据情况，且只能看到自己的数据
     { path: '/my-cpo', component: MyCpoView, meta: { keepAlive: true } },
+    { path: '/ad-allocation', component: AllocationView },
+    { path: '/data-changes', component: DataChangesView },
     { path: '/product-mappings', component: ProductMappingsView },
     { path: '/rules', component: RulesView },
     { path: '/reports', component: ReportsView },

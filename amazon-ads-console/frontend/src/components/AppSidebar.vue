@@ -16,28 +16,28 @@ const isOperator = computed(() => session.user?.roleCode === 'operator')
 // v3：CPO 置顶；v2 下架「产品明细」「广告类型」两个模块（2026-09-15 用户要求暂时隐藏）。
 // 注意：布局会缓存到 localStorage，改默认值必须同时提升 STORAGE_KEY 版本，
 // 否则老用户读到的仍是带这两个入口的旧布局，等于没改。
-const STORAGE_KEY = 'adsight.sidebar.layout.v3'
+const STORAGE_KEY = 'adsight.sidebar.layout.v4.allocation-exports'
 
 // 已下架模块的路由路径：即使旧的本地布局里残留，渲染前也会被剔除
 const RETIRED_PATHS = new Set(['/products', '/ad-types'])
 
 const DEFAULT_GROUPS: NavGroup[] = [
-  {title:'CPO',items:[['/operator-cpo','CPO 单双数据情况']]},
+  {title:'CPO',items:[['/operator-cpo','CPO 单双数据情况'],['/ad-allocation','广告费用分摊']]},
   {title:'Codex',items:[['/codex-devices','分发人员 & 设备']]},
   {title:'概览',items:[['/dashboard','概览看板']]},
   {title:'数据处理',items:[['/cpo-jobs','CPO处理中心'],['/issues','待确认异常']]},
-  {title:'规则与数据',items:[['/product-mappings','产品映射'],['/rules','规则管理'],['/reports','报告管理']]},
+  {title:'规则与数据',items:[['/data-changes','数据提交与审批'],['/product-mappings','产品映射'],['/rules','规则管理'],['/reports','报告管理']]},
   {title:'系统',items:[['/diagnostics','系统诊断 / 请求追踪']]},
 ]
 
 // 运营视角的导航：只有自己的那个页面
 const OPERATOR_GROUPS: NavGroup[] = [
-  {title:'我的数据',items:[['/my-cpo','CPO 单双数据情况']]},
+  {title:'我的数据',items:[['/my-cpo','我的 CPO 明细'],['/operator-cpo','运营共用汇总'],['/ad-allocation','广告费用分摊'],['/data-changes','数据提交']]},
 ]
 
 // 各角色允许出现的导航路径（运营只准 /my-cpo）
 const allowedPaths = (): Set<string> | null =>
-  isOperator.value ? new Set(['/my-cpo']) : null
+  isOperator.value ? new Set(['/my-cpo', '/operator-cpo', '/ad-allocation', '/data-changes']) : null
 
 const cloneDefaults = (): NavGroup[] => DEFAULT_GROUPS.map(g => ({ title:g.title, items:g.items.map(i => [...i] as NavItem) }))
 

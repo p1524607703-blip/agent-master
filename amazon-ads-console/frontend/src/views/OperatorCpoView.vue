@@ -3,15 +3,38 @@ import FullFunnelRows from '../components/FullFunnelRows.vue'
 import { computed, onActivated, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getJson } from '../api/client'
+import { downloadOperatorReport } from '../api/operatorExports'
+import { useSessionStore } from '../stores/session'
 import { NButton, NDatePicker, NSelect } from 'naive-ui'
 import DataSkeleton from '../components/DataSkeleton.vue'
 import { usePageRenderTrace } from '../diagnostics/pageTrace'
 
 type Period = 'daily'|'weekly'|'monthly'
 type PeriodOption = { value:string; label:string; start?:string; end?:string }
-type PeriodData = { daily:PeriodOption[]; weekly:PeriodOption[]; monthly:PeriodOption[]; latestDate?:string; weekRule?:string; note?:string }
+type PeriodData = { daily:PeriodOption[]; weekly:PeriodOption[]; monthly:PeriodOption[]; latestDate?:string; latestCompleteDate?:string; weekRule?:string; note?:string }
 
 const router = useRouter()
+const session = useSessionStore()
+const isManager = computed(() => ['management','super_admin'].includes(session.user?.roleCode || ''))
+const ownOperatorNames:Record<string,string> = {
+  ZJ:'子娟', AJ:'爱菊', YT:'雅婷', XM:'雪敏', DD:'丹丹',
+  YS:'雨珊', LB:'丽斌', XH:'鑫华', LW:'林文', ZF:'珍凤',
+}
+const ownOperatorName = computed(() => ownOperatorNames[(session.user?.operatorCode || '').toUpperCase().slice(0,2)] || '')
+const canOpenDetail = (name:string) => isManager.value || name===ownOperatorName.value
+const downloadBusy = ref(false)
+const exportError = ref('')
+async function exportFromOverview(){
+  if (downloadBusy.value || loading.value) return
+  downloadBusy.value=true; exportError.value=''
+  try {
+    await downloadOperatorReport(isManager.value ? 'all' : 'summary',period.value,selectedDate.value)
+  } catch(e) {
+    exportError.value=e instanceof Error ? e.message : '导出失败'
+  } finally {
+    downloadBusy.value=false
+  }
+}
 const route = useRoute()
 const period = ref<Period>(['weekly','monthly'].includes(String(route.query.period)) ? route.query.period as Period : 'daily')
 const selectedDate = ref(String(route.query.date || ''))
@@ -46,6 +69,10 @@ const normalizeSelection = () => {
   if (raw) {
     const containing=opts.find(x=>x.start && x.end && raw>=x.start && raw<=x.end)
     if (containing) { selectedDate.value=containing.value; return }
+  }
+  if (period.value === 'daily' && periods.value.latestCompleteDate) {
+    const latestComplete=opts.find(x=>x.value===periods.value.latestCompleteDate)
+    if (latestComplete) { selectedDate.value=latestComplete.value; return }
   }
   selectedDate.value=opts[0].value
 }
@@ -86,10 +113,15 @@ const changeRange = async (value:string) => {
     await load(true)
   }
 }
-const openDetail = (name:string) => router.push({
-  path:`/operators/${encodeURIComponent(name)}`,
-  query:{ period:period.value, ...(selectedDate.value ? {date:selectedDate.value} : {}) },
-})
+const openDetail = (name:string) => {
+  if (!canOpenDetail(name)) return
+  if (!isManager.value) {
+    router.push({ path:'/my-cpo', query:{period:period.value,...(selectedDate.value?{date:selectedDate.value}:{})} })
+    return
+  }
+  router.push({ path:`/operators/${encodeURIComponent(name)}`,
+    query:{ period:period.value, ...(selectedDate.value ? {date:selectedDate.value} : {}) } })
+}
 const money = (v:any) => v == null ? '—' : `$${Number(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`
 const num = (v:any) => v == null ? '—' : Number(v).toLocaleString(undefined,{maximumFractionDigits:2})
 const ratio = (v:any,s='') => v == null ? '—' : `${Number(v).toFixed(2)}${s}`
@@ -141,23 +173,26 @@ onActivated(() => { if (data.value?.operators?.length) load(false) })
     </div>
 
     <div v-if="!loading" class="card panel">
-      <div class="panel-head">
+      <div class="panel-head overview-report-head">
         <div>
           <h2 v-if="period === 'weekly'">{{ data.period_start }} ~ {{ data.period_end }} · 周运营 CPO</h2>
           <h2 v-else-if="period === 'monthly'">{{ data.period_start?.slice(0,7) }} · 月运营 CPO</h2>
           <h2 v-else>{{ data.data_date || selectedDate }} · 运营 CPO</h2>
           <p v-if="period === 'weekly'">周快照（周一至周日）· 已有 {{ data.coverageDays ?? 0 }}/{{ data.expectedDays ?? 7 }} 个业务日期；点击运营姓名查看周产品明细。</p>
           <p v-else-if="period === 'monthly'">月快照 · 已有 {{ data.coverageDays ?? 0 }}/{{ data.expectedDays ?? 0 }} 个业务日期；点击运营姓名查看月产品明细。</p>
-          <p v-else>日快照 · 点击运营姓名进入产品明细；列表与详情都不会按账户拆分。</p>
+          <p v-else>日快照 · {{ isManager ? '点击运营姓名查看明细' : '共用汇总可查看所有运营；个人产品明细仅限本人' }}；不按账户拆分。</p>
         </div>
+        <NButton type="primary" :loading="downloadBusy" :disabled="!selectedDate || loading"
+          @click="exportFromOverview">{{ isManager ? '一键导出所有报表' : '导出共用汇总' }}</NButton>
       </div>
+      <p v-if="exportError" class="overview-export-error" role="alert">{{ exportError }}</p>
       <div class="table-wrap">
         <table>
           <thead>
             <tr><th>运营</th><th>产品数据（有/应）</th><th>广告花费</th><th>广告单</th><th>全部订单</th><th>综合 CPO</th><th>ROAS</th><th>TACOS</th><th>状态</th></tr>
           </thead>
           <tbody>
-            <tr v-for="r in data.operators" :key="r.name" class="clickable-row" @click="openDetail(r.name)">
+            <tr v-for="r in data.operators" :key="r.name" :class="{'clickable-row':canOpenDetail(r.name)}" @click="openDetail(r.name)">
               <td><strong>{{ r.name }}</strong></td>
               <td><strong>{{ num(r.dataProducts) }} / {{ num(r.products) }}</strong></td>
               <td>{{ money(r.spend) }}</td>
@@ -178,4 +213,6 @@ onActivated(() => { if (data.value?.operators?.length) load(false) })
 
 <style scoped>
 .operator-date-filter{display:flex;align-items:flex-end;gap:8px;flex-wrap:nowrap;min-width:max-content}.operator-date-filter label{display:flex;flex-direction:column;gap:5px;font-size:11px;color:#7b8492;flex:0 0 auto}.operator-scope-note{margin:10px 0 12px;padding:9px 12px;border-radius:8px;border:1px solid #e7ebf1;background:#f8fafc;color:#667085;font-size:12px}.operator-status{display:inline-block;padding:3px 8px;border-radius:999px;background:#edf8f1;color:#287a4b;font-size:12px}.operator-status.empty{background:#f2f4f7;color:#667085}.operator-status.warn{background:#fff3e6;color:#a45f16}@media(max-width:800px){.page-head{align-items:flex-start;flex-direction:column;gap:10px}}
+.overview-report-head{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.overview-export-error{color:#b42318;font-size:12px;margin:10px 0}
 </style>

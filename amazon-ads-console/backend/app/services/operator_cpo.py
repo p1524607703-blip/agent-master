@@ -1135,7 +1135,10 @@ def canonical_operator_name(name: Optional[str]) -> str:
     return OPERATOR_NAMES.get(prefix, raw)
 
 
-def operator_cpo_detail(name: str, stat_date: Optional[str] = None, period: str = "daily") -> dict[str, Any]:
+def operator_cpo_detail(
+    name: str, stat_date: Optional[str] = None, period: str = "daily",
+    _prebuilt: Optional[dict[str, Any]] = None,
+) -> dict[str, Any]:
     name = canonical_operator_name(name)
     period = period if period in ("daily", "weekly", "monthly") else "daily"
     anchor = stat_date or _latest_complete_date()
@@ -1147,7 +1150,7 @@ def operator_cpo_detail(name: str, stat_date: Optional[str] = None, period: str 
         }
     date.fromisoformat(anchor)
     start, end = _period_range(anchor, period)
-    data = _build(start, end)
+    data = _prebuilt if _prebuilt is not None else _build(start, end)
     raw_ps = [p for p in data["products"] if p["operatorName"] == name]
     portfolio_count = len(data["portfolio"].get(name, set()))
     business_ps_raw = [p for p in raw_ps if p["totalOrders"] is not None]

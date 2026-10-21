@@ -29,3 +29,5 @@ backend/.tmp_*
 # Per-environment credentials are private; only examples belong in Git.
 .env.*
 !.env.*.example
+
+backend/var/

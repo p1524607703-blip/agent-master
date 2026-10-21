@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 from app.services.mock_data import JOBS,ISSUES,PRODUCT_RULES,AD_TYPE_RULES
 # 业务读全部走「一份报告一张表」的新事实层（core.report_*_daily）
 from app.services.report_data import dashboard_overview, dashboard_trend, products, reports
-from app.services.operator_cpo import operator_cpo_summary, operator_cpo_detail, operator_period_options, my_cpo_summary, _data_revision
+from app.services.operator_cpo import operator_cpo_summary, operator_cpo_detail, operator_period_options, my_cpo_summary, _data_revision, operator_group_of
 # 运营页权限在读取缓存之前验证角色与运营组绑定
 from app.api.auth import require_session, require_management_session, require_operator_access, require_own_operator_session
 # 产品主数据：读取V2正式映射视图，只读直显，无控制台确认写入路径
@@ -66,11 +66,19 @@ def _full_funnel_response(data, user):
     return {**data, 'fullFunnel': ledger}
 
 
-@router.get('/operator-cpo', dependencies=[Depends(require_management_session)])
+@router.get('/operator-cpo')
 def operator_cpo(date: Optional[str] = None, period: str = Query('daily'),
-                 session: Tuple[str, Dict[str, Any]] = Depends(require_management_session)):
+                 session: Tuple[str, Dict[str, Any]] = Depends(require_session)):
+    user = session[1]
+    if user.get('roleCode') not in ('management', 'super_admin') and (
+            user.get('roleCode') != 'operator' or not operator_group_of(user.get('operatorCode'))):
+        raise HTTPException(403, 'An active operator group is required')
     period = period if period in ('daily','weekly','monthly') else 'daily'
     data = cache.get_or_set(f'operator:summary:{period}:{date or "latest"}', lambda: operator_cpo_summary(date, period), 60)
+    if session[1].get('roleCode') == 'operator':
+        # Shared totals do not include company-wide full-funnel disclosure.
+        data = {k: v for k, v in data.items() if k in {
+            'operators', 'data_date', 'period', 'period_start', 'period_end', 'final_cpo', 'period_label'}}
     return _full_funnel_response(data, session[1])
 
 @router.get('/operators/{operator}', dependencies=[Depends(require_operator_access)])

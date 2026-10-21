@@ -4,6 +4,7 @@ import CampaignCostNotes from '../components/CampaignCostNotes.vue'
 import { computed, onActivated, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getJson, getJsonStrict } from '../api/client'
+import { downloadOperatorReport } from '../api/operatorExports'
 import { useSessionStore } from '../stores/session'
 import { NButton, NDatePicker, NSelect } from 'naive-ui'
 import DataSkeleton from '../components/DataSkeleton.vue'
@@ -13,7 +14,7 @@ import { usePageRenderTrace } from '../diagnostics/pageTrace'
 
 type Period = 'daily'|'weekly'|'monthly'
 type PeriodOption = { value:string; label:string; start?:string; end?:string }
-type PeriodData = { daily:PeriodOption[]; weekly:PeriodOption[]; monthly:PeriodOption[]; latestDate?:string; weekRule?:string; note?:string }
+type PeriodData = { daily:PeriodOption[]; weekly:PeriodOption[]; monthly:PeriodOption[]; latestDate?:string; latestCompleteDate?:string; weekRule?:string; note?:string }
 
 const router = useRouter()
 const route = useRoute()
@@ -31,6 +32,21 @@ const showDsp = ref(false)
 const visibleAdTypes = computed(() => showDsp.value ? [...baseAdTypes,'DSP'] : [...baseAdTypes])
 const typeGroupColspan = computed(() => visibleAdTypes.value.length)
 const detailColumnCount = computed(() => 9 + visibleAdTypes.value.length * 2)
+const exportBusy = ref(false)
+const exportError = ref('')
+async function exportMyDetail(){
+  if (exportBusy.value || loading.value) return
+  const ownName = data.value?.me?.groupName
+  if (!ownName) { exportError.value='当前账号未绑定有效运营组'; return }
+  exportBusy.value = true; exportError.value = ''
+  try {
+    await downloadOperatorReport('detail',period.value,selectedDate.value,ownName)
+  } catch (e) {
+    exportError.value=e instanceof Error ? e.message : '导出失败'
+  } finally {
+    exportBusy.value = false
+  }
+}
 
 const reportRangeOptions = [
   { label:'每日', value:'daily' },
@@ -60,6 +76,10 @@ const normalizeSelection = () => {
   if (raw) {
     const containing=opts.find(x=>x.start && x.end && raw>=x.start && raw<=x.end)
     if (containing) { selectedDate.value=containing.value; return }
+  }
+  if (period.value === 'daily' && periods.value.latestCompleteDate) {
+    const latestComplete=opts.find(x=>x.value===periods.value.latestCompleteDate)
+    if (latestComplete) { selectedDate.value=latestComplete.value; return }
   }
   selectedDate.value=opts[0].value
 }
@@ -221,8 +241,14 @@ onActivated(() => { if (data.value?.operators?.length) load(false) })
         </div>
       </div>
       <CampaignCostNotes :products="products" />
+      <div class="own-detail-toolbar">
+        <NButton type="primary" size="small" :loading="exportBusy"
+          :disabled="loading || !selectedDate || !data.me?.groupName"
+          @click="exportMyDetail">导出表格</NButton>
+      </div>
+      <p v-if="exportError" role="alert" class="own-export-error">{{ exportError }}</p>
       <div class="detail-wrap">
-        <table class="detail-table">
+        <table class="detail-table" :style="{minWidth:showDsp?'1860px':'1660px'}">
           <thead>
             <tr class="group-head">
               <th rowspan="2" class="sticky-product">产品</th>
@@ -289,6 +315,8 @@ onActivated(() => { if (data.value?.operators?.length) load(false) })
 .detail-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 18px;border-bottom:1px solid #e8ebf0}
 .detail-head h2{margin:0 0 4px;font-size:16px;color:#2f3a4d}.detail-head p{margin:0;color:#8a93a2;font-size:11px}
 .detail-badges{display:flex;gap:7px;flex-wrap:wrap}.detail-badges span{padding:4px 8px;border-radius:6px;background:#f6f8fb;border:1px solid #edf0f4;color:#667085;font-size:10px}
+.own-detail-toolbar{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;gap:12px}
+.own-export-error{font-size:12px;color:#b42318;margin:6px 18px}
 .detail-wrap{overflow-x:auto;max-width:100%}
 .detail-table{width:100%;min-width:1660px;border-collapse:separate;border-spacing:0;table-layout:fixed}
 .detail-table th,.detail-table td{height:46px;padding:0 9px;border-right:1px solid #e9edf3;border-bottom:1px solid #e9edf3;text-align:right;white-space:nowrap;font-size:11px;color:#344054;background:#fff}

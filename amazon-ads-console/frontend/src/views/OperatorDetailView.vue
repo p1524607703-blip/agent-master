@@ -5,6 +5,7 @@ import CampaignCostNotes from '../components/CampaignCostNotes.vue'
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getJson, getJsonStrict } from '../api/client'
+import { downloadOperatorReport } from '../api/operatorExports'
 import { NButton, NDatePicker, NSelect } from 'naive-ui'
 import DataSkeleton from '../components/DataSkeleton.vue'
 import CpoDataQuality from '../components/CpoDataQuality.vue'
@@ -13,7 +14,7 @@ import { usePageRenderTrace } from '../diagnostics/pageTrace'
 
 type Period = 'daily'|'weekly'|'monthly'
 type PeriodOption = { value:string; label:string; start?:string; end?:string }
-type PeriodData = { daily:PeriodOption[]; weekly:PeriodOption[]; monthly:PeriodOption[]; latestDate?:string; weekRule?:string; note?:string }
+type PeriodData = { daily:PeriodOption[]; weekly:PeriodOption[]; monthly:PeriodOption[]; latestDate?:string; latestCompleteDate?:string; weekRule?:string; note?:string }
 
 const session = useSessionStore()
 const route = useRoute()
@@ -33,6 +34,19 @@ const showDsp = ref(false)
 const visibleAdTypes = computed(() => showDsp.value ? [...baseAdTypes, 'DSP'] : [...baseAdTypes])
 const typeGroupColspan = computed(() => visibleAdTypes.value.length)
 const detailColumnCount = computed(() => 9 + visibleAdTypes.value.length * 2)
+const exportBusy = ref(false)
+const exportError = ref('')
+async function exportCurrentTable(){
+  if (exportBusy.value || loading.value) return
+  exportBusy.value = true; exportError.value = ''
+  try {
+    await downloadOperatorReport('detail',period.value,selectedDate.value,operatorName.value)
+  } catch(e) {
+    exportError.value = e instanceof Error ? e.message : '导出失败'
+  } finally {
+    exportBusy.value = false
+  }
+}
 const selectedDate = ref(String(route.query.date || ''))
 const period = ref<Period>(['weekly','monthly'].includes(String(route.query.period)) ? route.query.period as Period : 'daily')
 const periods = ref<PeriodData>({ daily:[],weekly:[],monthly:[] })
@@ -67,6 +81,10 @@ const normalizeSelection = () => {
   if (raw) {
     const containing=opts.find(x=>x.start && x.end && raw>=x.start && raw<=x.end)
     if (containing) { selectedDate.value=containing.value; return }
+  }
+  if (period.value === 'daily' && periods.value.latestCompleteDate) {
+    const latestComplete=opts.find(x=>x.value===periods.value.latestCompleteDate)
+    if (latestComplete) { selectedDate.value=latestComplete.value; return }
   }
   selectedDate.value=opts[0].value
 }
@@ -252,12 +270,17 @@ const tablePeriod = computed(() => period.value === 'weekly'
           <h2>广告类型明细</h2>
           <p>广告费用与广告单按类型展开；总费用、全部订单、CPO、ROAS、TACOS 保留在同一行。</p>
         </div>
-        <NButton size="small" quaternary @click="showDsp = !showDsp">{{ showDsp ? '收起 DSP' : '展开 DSP' }}</NButton>
+        <div class="ad-detail-toolbar">
+          <NButton size="small" secondary @click="showDsp=!showDsp">{{ showDsp ? '收起 DSP' : '展开 DSP' }}</NButton>
+          <NButton type="primary" size="small" :loading="exportBusy" :disabled="loading || !selectedDate"
+            @click="exportCurrentTable">导出表格</NButton>
+        </div>
+        <p v-if="exportError" class="export-error" role="alert">{{ exportError }}</p>
       </div>
 
       <CampaignCostNotes :products="products" />
       <div class="ad-detail-table-wrap">
-        <table class="operator-ad-table">
+        <table class="operator-ad-table" :style="{minWidth:showDsp?'1860px':'1660px'}">
           <thead>
             <tr class="group-head">
               <th rowspan="2" class="sticky-product">产品</th>
@@ -353,6 +376,8 @@ const tablePeriod = computed(() => period.value === 'weekly'
 
 .ad-detail-card { overflow: hidden; }
 .ad-detail-title { display:flex; align-items:center; justify-content:space-between; gap:12px; padding: 16px 18px 12px; border-bottom: 1px solid #e8ebf0; }
+.ad-detail-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;margin-top:12px}
+.export-error{font-size:12px;color:#b42318;margin:8px 0 0}
 .ad-detail-title h2 { margin: 0 0 5px; font-size: 16px; color: #2f3a4d; }
 .ad-detail-title p { margin: 0; color: #8a93a2; font-size: 11px; }
 
