@@ -120,9 +120,17 @@ class UsageObserver:
         rid = response.get('id')
         if not isinstance(rid,str) or not 1 <= len(rid) <= 256:
             return
+        if self.response_id != rid:
+            self.usage = None
         self.response_id = rid
         self.completed = completed
-        self.usage = valid_usage(response.get('usage'))
+        usage = valid_usage(response.get('usage'))
+        if usage is not None:
+            self.usage = usage
+
+    def finish(self):
+        # Some upstreams end the final data line at EOF without a trailing LF.
+        self.feed(b'\n')
 
 
 def valid_usage(value):
@@ -185,6 +193,18 @@ async def flush_events(paths=None):
                     uuid.UUID(record['request_id']),uuid.UUID(record['device_id']),record.get('response_id'),
                     datetime.fromisoformat(record['finished_at']),record['http_status'],record['completed'],
                     *[usage.get(k) for k in ['input_tokens','output_tokens','total_tokens','cached_tokens','reasoning_tokens']])
+                if usage:
+                    # An unknown terminal event may be followed by a replay carrying
+                    # valid usage. Enrich that same response once, never double count
+                    # or transfer attribution to another device. First timestamps stay.
+                    await conn.execute('''UPDATE codex_ops.model_requests SET
+                        input_tokens=$4,output_tokens=$5,total_tokens=$6,
+                        cached_tokens=$7,reasoning_tokens=$8,completed=completed OR $9
+                        WHERE device_id=$1 AND total_tokens IS NULL
+                        AND (request_id=$2 OR (response_id IS NOT NULL AND response_id=$3))''',
+                        uuid.UUID(record['device_id']),uuid.UUID(record['request_id']),record.get('response_id'),
+                        *[usage.get(k) for k in ['input_tokens','output_tokens','total_tokens','cached_tokens','reasoning_tokens']],
+                        record['completed'])
                 path.unlink(missing_ok=True)
             except (OSError,ValueError):
                 log.error('codex_accounting_spool_invalid file=%s',path.name)
@@ -278,6 +298,8 @@ async def proxy_response(device, body, route='/responses',forward_headers=None):
             status = 502
             raise
         finally:
+            if is_sse and status in (200,499,502):
+                observer.finish()
             record = {'request_id':request_id,'device_id':str(device['device_id']),
                 'response_id':observer.response_id,'finished_at':datetime.now(timezone.utc).isoformat(),
                 'http_status':status,'completed':observer.completed,'usage':observer.usage}

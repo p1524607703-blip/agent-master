@@ -7,7 +7,9 @@ type Device = { deviceId:string; deviceName:string; platform:string; online:bool
 type Member = { userId:number; displayName:string; username:string; groupCode:string; groupName:string; personCode:string|null; roleCode:string; devices:Device[] }
 type QuotaWindow = { usedPercent:number; remainingPercent:number; windowDurationMins:number; resetsAt:number }
 type AccountQuota = { status:string; capturedAt?:string; primary:QuotaWindow|null; secondary:QuotaWindow|null; accountTotalTokens?:number|null; tokenTotalScope?:string }
-type Overview = { accountQuota?:AccountQuota; members:Member[]; serverTime:string; onlineTimeoutSeconds:number; timezone:string; statisticsAvailable:boolean; integrationStage?:string; deploymentTarget?:string; pendingAccountingEvents?:number }
+type LedgerSource = {deviceId:string; userId:number; deviceName:string; displayName:string; roleCode:string; revoked:boolean; requests:number; measuredRequests:number; unknownRequests:number; cachedUnknownRequests:number; reasoningUnknownRequests:number; totalTokens:number|string|null; inputTokens:number|string|null; outputTokens:number|string|null; cachedTokens:number|string|null; reasoningTokens:number|string|null}
+type Ledger = {status:string; scope:string; accountCoverage:string; startedAt:string|null; throughAt:string; totals:Omit<LedgerSource,'deviceId'|'userId'|'deviceName'|'displayName'|'roleCode'|'revoked'>; pendingAccountingEvents:number; sources:LedgerSource[]; uncoveredSources:string[]}
+type Overview = { ledger?:Ledger; accountQuota?:AccountQuota; members:Member[]; serverTime:string; onlineTimeoutSeconds:number; timezone:string; statisticsAvailable:boolean; integrationStage?:string; deploymentTarget?:string; pendingAccountingEvents?:number }
 const data = ref<Overview|null>(null)
 const selectedId = ref<number|null>(null)
 const search = ref('')
@@ -35,6 +37,21 @@ const sum = sumTokens
 // A monitored-device subtotal is never an account-wide denominator.
 const accountTotal = computed(() => data.value?.accountQuota?.tokenTotalScope === 'verified-account-global' ? data.value.accountQuota.accountTotalTokens ?? null : null)
 const accountShare = (m:Member) => usageShare(sum(m.devices, 'totalTokens'), accountTotal.value)
+const ledger = computed(() => data.value?.ledger)
+const ledgerActive = computed(() => ledger.value?.status === 'active' && !stale.value)
+const ledgerCount = (v:number|string|null|undefined):number|null => {
+  if (v === null || v === undefined || (typeof v === 'string' && !/^\d+$/.test(v))) return null
+  const n = Number(v)
+  return Number.isSafeInteger(n) && n >= 0 ? n : null
+}
+const ledgerTotal = computed(() => ledgerActive.value ? ledgerCount(ledger.value?.totals.totalTokens) : null)
+const sourceShare = (s:LedgerSource) => usageShare(ledgerCount(s.totalTokens), ledgerTotal.value)
+const selectedLedgerTokens = computed(() => {
+  const rows = (ledger.value?.sources || []).filter(s => s.userId === selectedId.value && s.totalTokens !== null)
+  if (!rows.length || rows.some(s => ledgerCount(s.totalTokens) === null)) return null
+  return ledgerCount(rows.reduce((n,s) => n+Number(s.totalTokens),0))
+})
+const selectedLedgerShare = computed(() => usageShare(selectedLedgerTokens.value, ledgerTotal.value))
 const quotaFresh = computed(() => !!data.value?.accountQuota?.capturedAt && data.value.accountQuota.status === 'available' && !stale.value && now.value - Date.parse(data.value.accountQuota.capturedAt) <= 300000)
 const quotaMessages:Record<string,string> = {unconfigured:'尚未接入',unavailable:'读取失败',stale:'数据过期'}
 const quotaState = computed(() => quotaMessages[data.value?.accountQuota?.status || 'unconfigured'] || '数据过期')
@@ -96,6 +113,23 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
     </section>
     <p class="usage-disclaimer">官方额度独立读取，不从Token反推。设备占账户总量需可信的全账户Token分母，目前无法核对，显示“—”；不会把设备小计强制归一为100%。<span v-if="unknownRequests"> {{ unknownRequests }} 次请求用量未知。</span><span v-if="data?.accountQuota?.capturedAt"> 额度采集：{{ time(data.accountQuota.capturedAt) }}</span></p>
 
+    <section class="ledger-panel" aria-label="统一入口用量账本">
+      <h2>统一入口用量账本</h2>
+      <p v-if="!ledgerActive">{{ stale ? '读取中断，暂不展示账本占比' : '尚未启用统一账本起点；历史累计保留' }}</p>
+      <template v-else-if="ledger">
+        <p>统计起点：{{ time(ledger.startedAt) }} · 截止：{{ time(ledger.throughAt) }}</p>
+        <div class="summary-grid">
+          <div class="summary-card"><span>本期已计量 Token</span><strong>{{ number(ledger.totals.totalTokens) }}</strong></div>
+          <div class="summary-card"><span>已计量 / 本期记录</span><strong>{{ ledger.totals.measuredRequests }} / {{ ledger.totals.requests }}</strong></div>
+          <div class="summary-card"><span>未知用量请求</span><strong>{{ ledger.totals.unknownRequests }}</strong></div>
+          <div class="summary-card"><span>等待补账</span><strong>{{ ledger.pendingAccountingEvents }}</strong></div>
+        </div>
+        <p>未覆盖：{{ ledger.uncoveredSources.join('、') }}。下表占比只除以本期统一入口已计量Token，包含停用设备与已离职人员历史，不随人员搜索改变；合计100%也不表示官方账户全部消耗。未知用量与待补账未纳入分母。缓存明细缺失 {{ ledger.totals.cachedUnknownRequests }} 次、推理明细缺失 {{ ledger.totals.reasoningUnknownRequests }} 次；明细已知部分单列，不重复加进总Token。</p>
+        <div class="ledger-scroll"><table><thead><tr><th>人员 / 来源</th><th>输入</th><th>输出</th><th>缓存（输入内）</th><th>推理（输出内）</th><th>总Token</th><th>占入口已计量</th><th>未知请求</th></tr></thead>
+          <tbody><tr v-for="source in ledger.sources" :key="source.deviceId"><td>{{ source.displayName }} · {{ source.deviceName }}{{ source.revoked ? '（停用）' : '' }}</td><td>{{ number(source.inputTokens) }}</td><td>{{ number(source.outputTokens) }}</td><td>{{ number(source.cachedTokens) }}</td><td>{{ number(source.reasoningTokens) }}</td><td>{{ number(source.totalTokens) }}</td><td>{{ percentLabel(sourceShare(source)) }}</td><td>{{ source.unknownRequests }}</td></tr></tbody></table></div>
+      </template>
+    </section>
+
     <div class="workspace">
       <section class="people-panel" aria-label="分发人员">
         <div class="panel-heading">
@@ -121,6 +155,7 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
           <div class="member-totals">
             <div><span>今日已计量</span><strong>{{ number(sum(selected.devices,'todayTokens')) }} <small>Token</small></strong></div>
             <div><span>累计已计量</span><strong>{{ number(sum(selected.devices,'totalTokens')) }} <small>Token</small></strong></div>
+            <div class="share-total"><span>本期占统一入口已计量</span><strong>{{ percentLabel(selectedLedgerShare) }}</strong><small>按账本起点计算；不是官方额度消耗</small></div>
             <div class="share-total"><span>占账户累计Token</span><strong>{{ percentLabel(accountShare(selected)) }}</strong><span class="share-track" aria-hidden="true"><i :style="{width:`${accountShare(selected) ?? 0}%`}"></i></span><small>{{ accountTotal === null ? '全账户Token总量尚无法核对' : `账户已用 ${number(accountTotal)} Token` }}</small></div>
           </div>
           <div v-if="!selected.devices.length" class="empty-device">
@@ -249,3 +284,5 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
 .quota-card{display:flex;flex-direction:column;gap:5px;background:#fff;border:1px solid #dce7f3;border-radius:10px;padding:11px 15px}
 .quota-card>span{font-size:11px;color:#70849a}.quota-card strong{font-size:23px;color:#285e97}.quota-card small{font-size:10px;color:#8393a5}
 </style>
+
+<style scoped>.ledger-panel{margin:14px 0;padding:14px;border:1px solid #e2e8f0;border-radius:11px;background:#fff}.ledger-panel h2{font-size:15px;margin:0 0 8px}.ledger-panel p{font-size:12px;color:#71849c;line-height:1.7}.ledger-scroll{overflow-x:auto}.ledger-scroll table{width:100%;font-size:12px;border-collapse:collapse;white-space:nowrap}.ledger-scroll td,.ledger-scroll th{padding:9px;text-align:left;border-bottom:1px solid #edf1f7}</style>

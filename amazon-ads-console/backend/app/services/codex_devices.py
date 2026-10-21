@@ -3,12 +3,16 @@ from app.services.auth import _connect
 from app.core.config import settings
 from app.services.codex_quota import snapshot as quota_snapshot
 from app.services.codex_telemetry import flush_events,spool_dir
+from app.services.codex_ledger import read_ledger, present
 
 
 async def overview():
     pending = 0
     if settings.codex_telemetry_enabled:
-        await flush_events()
+        try:
+            await flush_events()
+        except Exception:
+            pass  # Keep the last committed ledger readable, with its pending count.
         pending = len(list(spool_dir().glob('*.json')))
     conn = await _connect()
     try:
@@ -18,7 +22,9 @@ async def overview():
                 group_name, person_code, role_code FROM codex_ops.personnel_roster
                 WHERE status = 'active' ORDER BY group_code DESC, user_id''')
             devices = []
+            ledger = present([], None, now, pending)
             if settings.codex_telemetry_enabled:
+                ledger = await read_ledger(conn, now, pending)
                 devices = await conn.fetch('''SELECT d.*,
                     max(r.finished_at) AS last_request_at,count(r.request_id) AS requests,
                     count(r.request_id) FILTER (WHERE r.total_tokens IS NULL) AS unknown_requests,
@@ -48,6 +54,7 @@ async def overview():
             } for r in roster],
             'serverTime': now, 'onlineTimeoutSeconds': 120, 'timezone': 'Asia/Shanghai',
             'accountQuota': quota_snapshot(),
+            'ledger': ledger,
             'integrationStage': 'pilot' if settings.codex_telemetry_enabled else 'preparing',
             'statisticsAvailable': settings.codex_telemetry_enabled,'pendingAccountingEvents':pending,
             'deploymentTarget': settings.codex_deployment_target if settings.codex_telemetry_enabled else '日本代理服务器',

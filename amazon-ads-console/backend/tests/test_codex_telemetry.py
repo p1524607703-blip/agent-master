@@ -21,6 +21,19 @@ from app.services.auth import _connect
 
 
 class ParserTests(unittest.TestCase):
+    def test_terminal_usage_without_newline_is_read_at_eof(self):
+        observer = service.UsageObserver()
+        observer.feed(b'data: {"type":"response.incomplete","response":{"id":"eof","usage":{"input_tokens":2,"output_tokens":1,"total_tokens":3}}}')
+        observer.finish()
+        self.assertEqual(observer.usage['total_tokens'],3)
+        self.assertFalse(observer.completed)
+
+    def test_usage_from_different_response_is_not_reused(self):
+        observer = service.UsageObserver()
+        observer.observe_response({'id':'one','usage':{'input_tokens':1,'output_tokens':1,'total_tokens':2}}, True)
+        observer.observe_response({'id':'two'}, False)
+        self.assertIsNone(observer.usage)
+
     def test_chunks_utf8_and_parent_token_counts(self):
         observer = service.UsageObserver()
         value = {'type':'response.completed','response':{'id':'resp-test','usage':{
@@ -232,6 +245,77 @@ class IntegrationTests(unittest.TestCase):
         asyncio.run(service.flush_events())
         self.assertEqual(self.overview_device()['totalTokens'],5)
         self.assertFalse(list(service.spool_dir().glob('*.json')))
+
+    def test_late_usage_enriches_unknown_response_only_once(self):
+        record={'request_id':str(uuid.uuid4()),'device_id':self.device['deviceId'],
+            'response_id':'late-usage','finished_at':'2026-10-18T20:00:00+00:00',
+            'http_status':200,'completed':False,'usage':None}
+        asyncio.run(service.save_event(record))
+        record.update(request_id=str(uuid.uuid4()),completed=True,
+            usage={'input_tokens':10,'output_tokens':4,'total_tokens':14})
+        asyncio.run(service.save_event(record))
+        asyncio.run(service.save_event(record))
+        d=self.overview_device()
+        self.assertEqual((d['requests'],d['totalTokens'],d['unknownRequests']),(1,14,0))
+
+    def test_ledger_includes_inactive_and_revoked_sources_and_excludes_earlier_records(self):
+        self.query("INSERT INTO iam.users VALUES (2,'fixture_other','Synthetic Other','operator','active') ON CONFLICT DO NOTHING")
+        other=asyncio.run(service.register_device(2,'Other device','windows'))
+        def save(did,rid,total,when):
+            asyncio.run(service.save_event({'request_id':str(uuid.uuid4()),'device_id':did,
+                'response_id':rid,'finished_at':when,'http_status':200,'completed':True,
+                'usage':None if total is None else {'input_tokens':total,'output_tokens':0,'total_tokens':total}}))
+        current=datetime.now(timezone.utc).isoformat()
+        save(self.device['deviceId'],'current-one',14,current)
+        save(other['deviceId'],'current-other',6,current)
+        save(self.device['deviceId'],'unknown-current',None,current)
+        save(self.device['deviceId'],'before-period',500,'2025-01-01T00:00:00+00:00')
+        self.query("UPDATE iam.users SET status='inactive' WHERE user_id=2")
+        self.query('UPDATE codex_ops.devices SET revoked_at=now() WHERE device_id=$1',uuid.UUID(self.device['deviceId']))
+        with patch.object(settings,'codex_ledger_started_at',datetime(2026,1,1,tzinfo=timezone.utc)):
+            ledger=self.client.get('/api/codex/overview').json()['ledger']
+        self.assertEqual(ledger['totals']['totalTokens'],20)
+        self.assertEqual((ledger['totals']['requests'],ledger['totals']['measuredRequests'],ledger['totals']['unknownRequests']),(3,2,1))
+        self.assertEqual(len(ledger['sources']),2)
+        self.assertEqual(ledger['accountCoverage'],'partial')
+        self.assertTrue(next(x for x in ledger['sources'] if x['userId']==1)['revoked'])
+
+    def test_ledger_is_unstarted_without_explicit_aware_start(self):
+        for start in [None,datetime(2026,1,1)]:
+            with patch.object(settings,'codex_ledger_started_at',start):
+                ledger=self.client.get('/api/codex/overview').json()['ledger']
+            self.assertEqual(ledger['status'],'not-started')
+            self.assertIsNone(ledger['totals']['totalTokens'])
+
+    def test_pending_outbox_does_not_hide_committed_ledger(self):
+        from app.services import codex_devices
+        path=service.stage_event({'request_id':str(uuid.uuid4()),'device_id':self.device['deviceId']})
+        try:
+            with patch.object(codex_devices,'flush_events',new_callable=AsyncMock,side_effect=RuntimeError('synthetic write failure')):
+                response=self.client.get('/api/codex/overview')
+            self.assertEqual(response.status_code,200)
+            self.assertEqual(response.json()['ledger']['pendingAccountingEvents'],1)
+        finally:
+            path.unlink(missing_ok=True)
+
+    def test_usage_enrichment_grant_does_not_allow_identity_or_time_edits(self):
+        async def run():
+            import asyncpg
+            conn=await _connect()
+            try:
+                await conn.execute("DO $$ BEGIN CREATE ROLE amazon_ads_admin; EXCEPTION WHEN duplicate_object THEN NULL; END $$")
+                await conn.execute('GRANT USAGE ON SCHEMA codex_ops TO amazon_ads_admin')
+                await conn.execute('GRANT SELECT,INSERT ON codex_ops.model_requests TO amazon_ads_admin')
+                grant=Path(__file__).resolve().parents[1]/'migrations/20261020_codex_ledger_usage_grant.sql'
+                await conn.execute(grant.read_text())
+                await conn.execute('SET ROLE amazon_ads_admin')
+                await conn.execute('UPDATE codex_ops.model_requests SET completed=completed WHERE false')
+                for column in ['device_id','finished_at','response_id']:
+                    with self.assertRaises(asyncpg.InsufficientPrivilegeError):
+                        await conn.execute('UPDATE codex_ops.model_requests SET '+column+'='+column+' WHERE false')
+            finally:
+                await conn.close()
+        asyncio.run(run())
 
 
 @unittest.skipUnless(os.environ.get('CODEX_LIVE_KEY_FILE'),'requires explicit real-model opt-in')
