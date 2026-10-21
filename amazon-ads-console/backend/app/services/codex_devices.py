@@ -23,8 +23,10 @@ async def overview():
                 WHERE status = 'active' ORDER BY group_code DESC, user_id''')
             devices = []
             ledger = present([], None, now, pending)
+            recorded_history = present([], None, now, pending)
             if settings.codex_telemetry_enabled:
                 ledger = await read_ledger(conn, now, pending)
+                recorded_history = await read_ledger(conn, now, pending, recorded_history=True)
                 devices = await conn.fetch('''SELECT d.*,
                     max(r.finished_at) AS last_request_at,count(r.request_id) AS requests,
                     count(r.request_id) FILTER (WHERE r.total_tokens IS NULL) AS unknown_requests,
@@ -55,6 +57,7 @@ async def overview():
             'serverTime': now, 'onlineTimeoutSeconds': 120, 'timezone': 'Asia/Shanghai',
             'accountQuota': quota_snapshot(),
             'ledger': ledger,
+            'recordedHistory': recorded_history,
             'integrationStage': 'pilot' if settings.codex_telemetry_enabled else 'preparing',
             'statisticsAvailable': settings.codex_telemetry_enabled,'pendingAccountingEvents':pending,
             'deploymentTarget': settings.codex_deployment_target if settings.codex_telemetry_enabled else '日本代理服务器',
