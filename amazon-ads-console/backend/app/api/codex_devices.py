@@ -10,6 +10,7 @@ from app.api.auth import require_management_session
 from app.services.codex_devices import overview as read_overview
 from app.services import codex_telemetry as telemetry
 from app.services.auth import _connect
+from app.services.codex_quota import snapshot as quota_snapshot
 
 router = APIRouter(prefix='/codex', tags=['codex'])
 device_bearer = HTTPBearer(auto_error=False)
@@ -81,6 +82,11 @@ async def responses(request: Request,device=Depends(require_device)):
     status,content_type,rid,stream = await telemetry.proxy_response(device,bytes(body),route,request.headers)
     return StreamingResponse(stream,status_code=status,headers={
         'Content-Type':content_type,'Cache-Control':'no-store','X-Accel-Buffering':'no','X-Request-ID':rid})
+
+
+@router.get('/account-quota', dependencies=[Depends(require_management_session)])
+async def account_quota():
+    return quota_snapshot()
 
 
 @router.get('/overview', dependencies=[Depends(require_management_session)])
