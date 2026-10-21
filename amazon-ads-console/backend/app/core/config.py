@@ -33,6 +33,7 @@ class Settings(BaseSettings):
     codex_upstream_key_file: Optional[str] = None
     codex_event_spool_dir: str = "~/.local/share/cpo-codex-events"
     codex_deployment_target: str = "测试入口（非日本生产部署）"
+    codex_quota_snapshot_file: Optional[str] = None
     model_config = SettingsConfigDict(env_file=ENV_FILE, extra="ignore")
 
     @property
