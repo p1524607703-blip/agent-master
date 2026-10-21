@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { getJsonStrict } from '../api/client'
-import { sumTokens, usageShare, percentLabel, type TokenField } from '../utils/codexUsage'
+import { sumTokens, usageShare, percentLabel } from '../utils/codexUsage'
 
-type Device = { deviceId:string; deviceName:string; platform:string; online:boolean; revoked:boolean; lastHeartbeatAt:string|null; lastRequestAt:string|null; totalTokens:number|string|null; todayTokens:number|string|null; inputTokens:number|null; outputTokens:number|null; requests:number; unknownRequests:number }
+type Device = { deviceId:string; deviceName:string; platform:string; online:boolean; agentOnline:boolean; codexRunning:boolean; revoked:boolean; lastHeartbeatAt:string|null; lastRequestAt:string|null; totalTokens:number|string|null; todayTokens:number|string|null; inputTokens:number|null; outputTokens:number|null; requests:number; unknownRequests:number }
 type Member = { userId:number; displayName:string; username:string; groupCode:string; groupName:string; personCode:string|null; roleCode:string; devices:Device[] }
-type Overview = { members:Member[]; serverTime:string; onlineTimeoutSeconds:number; timezone:string; statisticsAvailable:boolean; integrationStage?:string; deploymentTarget?:string; pendingAccountingEvents?:number }
+type QuotaWindow = { usedPercent:number; remainingPercent:number; windowDurationMins:number; resetsAt:number }
+type AccountQuota = { status:string; capturedAt?:string; primary:QuotaWindow|null; secondary:QuotaWindow|null; accountTotalTokens?:number|null; tokenTotalScope?:string }
+type Overview = { accountQuota?:AccountQuota; members:Member[]; serverTime:string; onlineTimeoutSeconds:number; timezone:string; statisticsAvailable:boolean; integrationStage?:string; deploymentTarget?:string; pendingAccountingEvents?:number }
 const data = ref<Overview|null>(null)
 const selectedId = ref<number|null>(null)
 const search = ref('')
@@ -20,7 +22,7 @@ let stopped = false
 const stale = computed(() => !!error.value || now.value - updatedAt.value > 45000)
 // Expire green indicators locally even if a refresh fails or the tab resumes after sleep.
 const isOnline = (d:Device) => !!data.value?.statisticsAvailable && !stale.value && !d.revoked && !!d.lastHeartbeatAt &&
-  !!data.value && (Date.parse(data.value.serverTime) + now.value - updatedAt.value - Date.parse(d.lastHeartbeatAt)) <= data.value.onlineTimeoutSeconds * 1000 && d.online
+  !!data.value && (Date.parse(data.value.serverTime) + now.value - updatedAt.value - Date.parse(d.lastHeartbeatAt)) <= data.value.onlineTimeoutSeconds * 1000 && d.agentOnline
 const members = computed(() => data.value?.members || [])
 const filtered = computed(() => members.value.filter(m => (group.value === 'all' || m.groupCode === group.value) &&
   `${m.displayName} ${m.personCode || ''} ${m.username} ${m.devices.map(d=>d.deviceName).join(' ')}`.toLowerCase().includes(search.value.toLowerCase())))
@@ -30,11 +32,13 @@ const devices = computed(() => members.value.flatMap(m=>m.devices))
 const onlineCount = computed(() => devices.value.filter(isOnline).length)
 const selectedOnline = computed(() => (selected.value?.devices || []).filter(isOnline).length)
 const sum = sumTokens
-const usagePeriod = ref<TokenField>('todayTokens')
-const periodLabel = computed(() => usagePeriod.value === 'todayTokens' ? '今日' : '累计')
-// Always use every returned member, so searching or selecting a group cannot change the denominator.
-const measuredTotal = computed(() => sum(devices.value, usagePeriod.value))
-const memberShare = (m:Member) => usageShare(sum(m.devices, usagePeriod.value), measuredTotal.value)
+// A monitored-device subtotal is never an account-wide denominator.
+const accountTotal = computed(() => data.value?.accountQuota?.tokenTotalScope === 'verified-account-global' ? data.value.accountQuota.accountTotalTokens ?? null : null)
+const accountShare = (m:Member) => usageShare(sum(m.devices, 'totalTokens'), accountTotal.value)
+const quotaFresh = computed(() => !!data.value?.accountQuota?.capturedAt && data.value.accountQuota.status === 'available' && !stale.value && now.value - Date.parse(data.value.accountQuota.capturedAt) <= 300000)
+const quotaMessages:Record<string,string> = {unconfigured:'尚未接入',unavailable:'读取失败',stale:'数据过期'}
+const quotaState = computed(() => quotaMessages[data.value?.accountQuota?.status || 'unconfigured'] || '数据过期')
+const quotaTitle = (w:QuotaWindow|null|undefined, fallback:string) => w?.windowDurationMins === 300 ? '5小时额度' : w?.windowDurationMins === 10080 ? '每周额度' : w ? `${w.windowDurationMins}分钟额度` : fallback
 const unknownRequests = computed(() => devices.value.reduce((n,d) => n + d.unknownRequests, 0))
 const number = (v:number|string|null) => v === null || !Number.isFinite(Number(v)) ? '—' : Number(v).toLocaleString('zh-CN')
 const time = (v:string|null) => v ? new Date(v).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',hour12:false}) : '尚未收到'
@@ -75,16 +79,22 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
       <div class="summary-card"><span>分发成员</span><strong>{{ data ? members.length : '—' }}<small> 人</small></strong></div>
       <div class="summary-card"><span>已登记设备</span><strong>{{ data?.statisticsAvailable ? devices.length : '—' }}<small> 台</small></strong></div>
       <div class="summary-card"><span><i class="dot" :class="{green:data?.statisticsAvailable && onlineCount>0}"></i>在线设备</span><strong>{{ data?.statisticsAvailable && !stale ? onlineCount : '—' }}<small> 台</small></strong></div>
-      <div class="summary-card"><span>今日已计量 Token</span><strong>{{ number(sum(devices,'todayTokens')) }}</strong></div>
+      <div class="summary-card"><span>本入口今日已计量 Token</span><strong>{{ number(sum(devices,'todayTokens')) }}</strong></div>
     </div>
 
     <div class="notes"><template v-if="data?.statisticsAvailable">测试接入 · {{ data.deploymentTarget }}。绿点须同时收到有效心跳和客户端运行状态；不代表正在执行任务。<span v-if="data.pendingAccountingEvents"> {{ data.pendingAccountingEvents }} 条用量记录正在等待入库。</span></template><template v-else>筹备阶段 · 最终由日本代理服务器统一部署分发；公司 M4 仅用于测试，尚未接入真实设备与用量。</template><span class="legend">绿点在线 · 灰点离线或未接入 · “—”暂无计量</span></div>
 
-    <div class="usage-controls" aria-label="用量占比口径">
-      <span>{{ periodLabel }}占比 = 成员已计量 Token ÷ 全部分发成员已计量 Token</span>
-      <div role="group" aria-label="占比统计周期"><button :class="{active:usagePeriod==='todayTokens'}" @click="usagePeriod='todayTokens'">今日</button><button :class="{active:usagePeriod==='totalTokens'}" @click="usagePeriod='totalTokens'">累计</button></div>
-    </div>
-    <p class="usage-disclaimer">占比仅统计本入口已记录用量，含管理员测试；旧入口和缺少用量的请求未计入，不代表 Pro 套餐总额度或剩余额度。<span v-if="unknownRequests"> {{ unknownRequests }} 次请求用量未知。</span></p>
+    <section class="account-quota" aria-label="官方账户剩余额度">
+      <div v-for="entry in [{key:'primary',name:'5小时额度'},{key:'secondary',name:'每周额度'}]" :key="entry.key" class="quota-card">
+        <span>{{ quotaTitle(entry.key==='primary' ? data?.accountQuota?.primary : data?.accountQuota?.secondary,entry.name) }} · 官方账户剩余</span>
+        <template v-if="quotaFresh && (entry.key==='primary' ? data?.accountQuota?.primary : data?.accountQuota?.secondary)">
+          <strong>{{ percentLabel((entry.key==='primary' ? data?.accountQuota?.primary : data?.accountQuota?.secondary)?.remainingPercent ?? null) }}</strong>
+          <small>重置：{{ time(new Date(((entry.key==='primary' ? data?.accountQuota?.primary : data?.accountQuota?.secondary)?.resetsAt ?? 0)*1000).toISOString()) }}</small>
+        </template>
+        <template v-else><strong>—</strong><small>{{ quotaFresh ? '当前未返回此额度窗口' : quotaState }}</small></template>
+      </div>
+    </section>
+    <p class="usage-disclaimer">官方额度独立读取，不从Token反推。设备占账户总量需可信的全账户Token分母，目前无法核对，显示“—”；不会把设备小计强制归一为100%。<span v-if="unknownRequests"> {{ unknownRequests }} 次请求用量未知。</span><span v-if="data?.accountQuota?.capturedAt"> 额度采集：{{ time(data.accountQuota.capturedAt) }}</span></p>
 
     <div class="workspace">
       <section class="people-panel" aria-label="分发人员">
@@ -97,7 +107,7 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
           <div class="group-tabs"><button v-for="g in [{key:'all',name:'全部'},{key:'operations',name:'运营组'},{key:'ai',name:'AI 小组'}]" :key="g.key" :class="{active:group===g.key}" @click="group=g.key">{{ g.name }}</button></div>
         </div>
         <div class="people-list">
-          <button v-for="m in filtered" :key="m.userId" class="person" :class="{selected:m.userId===selectedId}" @click="selectedId=m.userId"><span class="avatar">{{ m.displayName.slice(-2) }}</span><span class="person-info"><strong>{{ m.displayName }} <small>{{ m.personCode || '管理层' }}</small></strong><span>{{ m.groupName }} · {{ data?.statisticsAvailable ? `${m.devices.length} 台设备` : '设备待接入' }}</span><span v-if="data?.statisticsAvailable" class="share-line">{{ periodLabel }}占比 <b>{{ percentLabel(memberShare(m)) }}</b></span></span><i class="dot" :class="{green:m.devices.some(isOnline)}" :aria-label="m.devices.some(isOnline)?'在线':'离线或未接入'"></i></button>
+          <button v-for="m in filtered" :key="m.userId" class="person" :class="{selected:m.userId===selectedId}" @click="selectedId=m.userId"><span class="avatar">{{ m.displayName.slice(-2) }}</span><span class="person-info"><strong>{{ m.displayName }} <small>{{ m.personCode || '管理层' }}</small></strong><span>{{ m.groupName }} · {{ data?.statisticsAvailable ? `${m.devices.length} 台设备` : '设备待接入' }}</span><span v-if="data?.statisticsAvailable" class="share-line">占账户总量 <b>{{ percentLabel(accountShare(m)) }}</b></span></span><i class="dot" :class="{green:m.devices.some(isOnline)}" :aria-label="m.devices.some(isOnline)?'在线':'离线或未接入'"></i></button>
           <p v-if="!filtered.length" class="empty">{{ loading ? '正在读取人员名单…' : '没有匹配的成员' }}</p>
         </div>
       </section>
@@ -111,7 +121,7 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
           <div class="member-totals">
             <div><span>今日已计量</span><strong>{{ number(sum(selected.devices,'todayTokens')) }} <small>Token</small></strong></div>
             <div><span>累计已计量</span><strong>{{ number(sum(selected.devices,'totalTokens')) }} <small>Token</small></strong></div>
-            <div class="share-total"><span>{{ periodLabel }}用量占比</span><strong>{{ percentLabel(memberShare(selected)) }}</strong><span class="share-track" aria-hidden="true"><i :style="{width:`${memberShare(selected) ?? 0}%`}"></i></span><small>全部成员同期已计量 {{ number(measuredTotal) }} Token</small></div>
+            <div class="share-total"><span>占账户累计Token</span><strong>{{ percentLabel(accountShare(selected)) }}</strong><span class="share-track" aria-hidden="true"><i :style="{width:`${accountShare(selected) ?? 0}%`}"></i></span><small>{{ accountTotal === null ? '全账户Token总量尚无法核对' : `账户已用 ${number(accountTotal)} Token` }}</small></div>
           </div>
           <div v-if="!selected.devices.length" class="empty-device">
             <svg class="monitor-icon" viewBox="0 0 48 40" fill="none" aria-hidden="true"><rect x="2" y="2" width="44" height="29" rx="5" stroke="currentColor" stroke-width="2.4"/><path d="M17 38h14M24 31v7M10 9h10" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
@@ -120,9 +130,9 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
           </div>
           <div v-else class="device-list">
             <article v-for="d in selected.devices" :key="d.deviceId" class="device-card">
-              <header><div><h3>{{ d.deviceName }}</h3><p>{{ d.platform || '未填写系统' }}</p></div><span class="connection"><i class="dot" :class="{green:isOnline(d)}"></i>{{ d.revoked ? '已停用' : stale ? '状态待确认' : isOnline(d) ? '在线' : d.lastHeartbeatAt ? '离线' : '尚无心跳' }}</span></header>
+              <header><div><h3>{{ d.deviceName }}</h3><p>{{ d.platform || '未填写系统' }}</p></div><span class="connection"><i class="dot" :class="{green:isOnline(d)}"></i>{{ d.revoked ? '已停用' : stale ? '状态待确认' : isOnline(d) ? (d.codexRunning ? '在线 · Codex运行中' : '设备在线 · Codex未运行') : d.lastHeartbeatAt ? '离线' : '尚无心跳' }}</span></header>
               <div class="device-stats"><div><span>今日 Token</span><strong>{{ number(d.todayTokens) }}</strong></div><div><span>累计 Token</span><strong>{{ number(d.totalTokens) }}</strong></div><div><span>累计请求</span><strong>{{ d.requests }}</strong></div></div>
-              <p v-if="!d.lastHeartbeatAt" class="heartbeat-help">模型调用不自动上报在线；试点请单独运行设备包的在线测试程序，默认 5 分钟。</p>
+              <p v-if="!d.lastHeartbeatAt" class="heartbeat-help">模型调用不自动上报在线；限时测试仅5分钟；需要持续在线时，请安装新包的持续在线检测组件。</p>
               <footer><span>最近心跳：{{ time(d.lastHeartbeatAt) }}<br />最近调用：{{ time(d.lastRequestAt) }}<br v-if="d.unknownRequests" /><span v-if="d.unknownRequests">{{ d.unknownRequests }} 次请求未返回 Token 数据，暂未计入用量</span></span></footer>
             </article>
           </div>
@@ -234,4 +244,8 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
 .share-track{display:block!important;height:4px;border-radius:4px;background:#e8eff8;margin-top:6px;overflow:hidden}
 .share-track i{display:block;height:100%;background:#5b94d7;border-radius:4px}
 .heartbeat-help{font-size:10px;color:#8796a8;line-height:1.6;margin:8px 0}
+
+.account-quota{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
+.quota-card{display:flex;flex-direction:column;gap:5px;background:#fff;border:1px solid #dce7f3;border-radius:10px;padding:11px 15px}
+.quota-card>span{font-size:11px;color:#70849a}.quota-card strong{font-size:23px;color:#285e97}.quota-card small{font-size:10px;color:#8393a5}
 </style>

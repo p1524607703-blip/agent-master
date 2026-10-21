@@ -1,6 +1,7 @@
 """Read-only member overview. Device telemetry is opt-in after explicit activation."""
 from app.services.auth import _connect
 from app.core.config import settings
+from app.services.codex_quota import snapshot as quota_snapshot
 from app.services.codex_telemetry import flush_events,spool_dir
 
 
@@ -46,6 +47,7 @@ async def overview():
                 'personCode': r['person_code'], 'roleCode': r['role_code'], 'devices': grouped.get(r['user_id'],[]),
             } for r in roster],
             'serverTime': now, 'onlineTimeoutSeconds': 120, 'timezone': 'Asia/Shanghai',
+            'accountQuota': quota_snapshot(),
             'integrationStage': 'pilot' if settings.codex_telemetry_enabled else 'preparing',
             'statisticsAvailable': settings.codex_telemetry_enabled,'pendingAccountingEvents':pending,
             'deploymentTarget': settings.codex_deployment_target if settings.codex_telemetry_enabled else '日本代理服务器',
