@@ -273,12 +273,19 @@ class IntegrationTests(unittest.TestCase):
         self.query("UPDATE iam.users SET status='inactive' WHERE user_id=2")
         self.query('UPDATE codex_ops.devices SET revoked_at=now() WHERE device_id=$1',uuid.UUID(self.device['deviceId']))
         with patch.object(settings,'codex_ledger_started_at',datetime(2026,1,1,tzinfo=timezone.utc)):
-            ledger=self.client.get('/api/codex/overview').json()['ledger']
+            view=self.client.get('/api/codex/overview').json()
+            ledger=view['ledger']
         self.assertEqual(ledger['totals']['totalTokens'],20)
         self.assertEqual((ledger['totals']['requests'],ledger['totals']['measuredRequests'],ledger['totals']['unknownRequests']),(3,2,1))
         self.assertEqual(len(ledger['sources']),2)
         self.assertEqual(ledger['accountCoverage'],'partial')
         self.assertTrue(next(x for x in ledger['sources'] if x['userId']==1)['revoked'])
+        history=view['recordedHistory']
+        self.assertEqual(history['totals']['totalTokens'],520)
+        self.assertEqual(history['scope'],'recorded-unified-entry')
+        self.assertEqual(history['startSource'],'first-stored-record')
+        self.assertEqual(history['accountCoverage'],'partial')
+        self.assertEqual(len(history['sources']),2)
 
     def test_ledger_is_unstarted_without_explicit_aware_start(self):
         for start in [None,datetime(2026,1,1)]:
@@ -286,6 +293,17 @@ class IntegrationTests(unittest.TestCase):
                 ledger=self.client.get('/api/codex/overview').json()['ledger']
             self.assertEqual(ledger['status'],'not-started')
             self.assertIsNone(ledger['totals']['totalTokens'])
+
+    def test_history_is_available_when_no_requests_exist_after_activation(self):
+        record={'request_id':str(uuid.uuid4()),'device_id':self.device['deviceId'],
+            'response_id':'old-history','finished_at':'2025-01-01T00:00:00+00:00',
+            'http_status':200,'completed':True,'usage':{'input_tokens':20,'output_tokens':2,'total_tokens':22}}
+        asyncio.run(service.save_event(record))
+        with patch.object(settings,'codex_ledger_started_at',datetime(2026,1,1,tzinfo=timezone.utc)):
+            view=self.client.get('/api/codex/overview').json()
+        self.assertIsNone(view['ledger']['totals']['totalTokens'])
+        self.assertEqual(view['recordedHistory']['totals']['totalTokens'],22)
+        self.assertEqual(view['recordedHistory']['totals']['measuredRequests'],1)
 
     def test_pending_outbox_does_not_hide_committed_ledger(self):
         from app.services import codex_devices

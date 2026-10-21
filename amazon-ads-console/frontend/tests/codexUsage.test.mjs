@@ -38,3 +38,10 @@ test('a small but nonzero usage is not displayed as zero', () => {
   assert.equal(percentLabel(usageShare(1, 100000)), '<0.1%')
   assert.equal(percentLabel(usageShare(42, 118)), '35.6%')
 })
+
+// Keep cumulative percentages meaningful even before the activation window has new traffic.
+test('recorded-history share is not divided by today or the empty activation window', () => {
+  assert.equal(percentLabel(usageShare(279566, 688610)), '40.6%')
+  assert.notEqual(percentLabel(usageShare(279566, 469345)), '40.6%')
+  assert.equal(percentLabel(usageShare(null, null)), '—')
+})

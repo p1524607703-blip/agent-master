@@ -28,8 +28,8 @@ def present(rows, start, end, pending):
             'totals': totals, 'sources': sources}
 
 
-async def read_ledger(conn, end, pending):
-    start = start_time()
+async def read_ledger(conn, end, pending, *, recorded_history=False):
+    start = await conn.fetchval('SELECT min(finished_at) FROM codex_ops.model_requests WHERE finished_at <= $1', end) if recorded_history else start_time()
     rows = []
     if start is not None and start <= end:
         rows = await conn.fetch('''SELECT d.device_id AS "deviceId",d.user_id AS "userId",
@@ -47,4 +47,7 @@ async def read_ledger(conn, end, pending):
             LEFT JOIN codex_ops.personnel_roster p ON p.user_id=d.user_id
             WHERE r.finished_at >= $1 AND r.finished_at <= $2
             GROUP BY d.device_id,p.display_name,p.role_code ORDER BY d.created_at''', start, end)
-    return present(rows, start, end, pending)
+    result = present(rows, start, end, pending)
+    if recorded_history:
+        result.update(scope='recorded-unified-entry', startSource='first-stored-record')
+    return result
