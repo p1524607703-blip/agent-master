@@ -2,10 +2,21 @@
 
 适用已收到管理员私有试点包的设备。普通 Codex 保持原账户工作；试点用 Codex++ 的独立多开。软件来源为 [BigPizzaV3/CodexPlusPlus v1.9.0](https://github.com/BigPizzaV3/CodexPlusPlus/releases/tag/v1.9.0)，Windows x64 安装包为 `CodexPlusPlus-1.9.0-windows-x64-setup.exe`。已有兼容安装不强制升级。官方桌面应用和 Python 3.9+ 按目标机需要安装；32 位、ARM64、WSL 或不同版本另行检查，未在本次 Mac 环境实测。
 
+## 第一步-先检查是否已安装Codex++
+
+**未安装Codex++：先下载安装，再新增供应商；本配置包不包含Codex++安装器。** 已有兼容版本直接使用，不强制升级、重装或重新登录。只认官方主项目[BigPizzaV3/CodexPlusPlus正式发布页](https://github.com/BigPizzaV3/CodexPlusPlus/releases/tag/v1.9.0)，本包按v1.9.0菜单编写。
+
+1. 先查开始菜单、已安装应用、快捷方式目标和常规安装目录，记录实际版本及Windows系统架构；命令行找不到不代表没安装。
+2. 确认Windows x64且未安装时，从上述正式发布页下载`CodexPlusPlus-1.9.0-windows-x64-setup.exe`并完成安装。ARM64/32位不能直接套x64包，先核对兼容性。
+安装器SHA-256应为`c5362c38df603b7fab77a50d5994b50a25f1e46a06927fb7cbc9e976304ba7c7`（仅对应上述v1.9.0 x64资产）；不同版本不能套用此校验值。
+
+3. 保留原Codex账户和窗口。官方Codex桌面运行环境若缺少，按官方来源补齐；Codex++不会替代它。安装器需要本人交互时由本人完成，不伪报已安装。
+4. 运行本包脚本还需要Python3.9+；持续后台心跳另需同一安装中的pythonw.exe。环境齐备后再运行1-准备配置.cmd。
+
 ## 给设备上的 AI
 
 ```text
-使用 $codex-device-relay，按 references/windows-pilot.md 配置管理员交付的私有 device.json。
+使用 $codex-device-relay，先按 references/windows-pilot.md 核对Codex++安装；未安装先从官方主项目下载并安装，再配置私有device.json。
 只新增非当前的纯API/Responses供应商，并由 Codex++ 的 Codex多开启动。
 先记录并保护原 Codex 窗口、供应商和配置；不要设新供应商为当前、重启主 Codex、改默认认证文件或全局环境变量。
 配置值从本机私有包读取，不把 Key 输出到聊天、命令参数、日志或 Git。
@@ -24,7 +35,7 @@
 ## 二、人工新增供应商
 
 1. 打开 Codex++ →「供应商配置 → 添加供应商 → 自定义配置」。**新增一项**，保留原来的当前供应商。
-2. 名称、Base URL、设备 Key、模型从私有 `device.json` 读取。XT 包的标签为 `XT-Windows-试点`；名称只是供应商标签。
+2. 名称、Base URL、设备 Key、模型从私有 `device.json` 读取。名称完整使用本包providerName；名称只是供应商标签，不是认证依据。
 3. 接入方式选「纯 API」，上游协议选「Responses API」；Base URL 完整使用包内值，保留协议、端口与 `/v1`。新计量入口与早期直接模型入口的路径可能不同，不能自行缩短路径。
 4. 「配置模型」填包内模型；在「模型列表」点「从上游获取」并确认模型存在。「更多选项 → 测试模型」也填包内模型，避免使用管理器的默认测试模型。
 5. 点「保存供应商」。核对原供应商仍显示「使用中」，新项保持非当前。**不点新项的「设为当前」，不点顶部全局「重启 Codex」。** 若弹窗要求重启原 Codex，取消并报告。
@@ -52,6 +63,10 @@
 2. 管理员在「分发人员 & 设备」选择该成员，刷新后核对设备、最近心跳和在线状态。只有心跳未超过 120 秒且报告有 Codex/ChatGPT 进程时显示在线；绿点不是“正在工作”、真人在场或某个特定多开任务运行的证明。
 3. 关闭心跳窗口或按 Ctrl+C，等超过 120 秒再刷新，设备应转离线。客户端只读报告本机是否存在 Codex/ChatGPT 进程，不上传进程列表、文件内容或窗口标题。测试程序不设置开机任务。
 4. 恢复原使用方式：在「Codex多开 → 当前运行实例」只结束本次试点实例，停止心跳，回到原 Codex 窗口。不退出主账户、不恢复旧 auth.json、不终止所有 Codex。
+
+## 持续在线-空闲时也上报
+
+3-在线测试仅5分钟。需要持续在线时，运行4-开启持续在线检测.cmd；它建立当前用户登录启动并用已有pythonw后台每30秒发心跳，不依赖是否聊天、不调用模型。运行5可停止当前进程，6停止并移除登录启动；详见[presence-quota.md](presence-quota.md)。休眠/断网/关机后120秒超时离线是正常情况。未在目标Windows执行前，不宣称已安装常驻组件。
 
 ## 六、回传与验收边界
 

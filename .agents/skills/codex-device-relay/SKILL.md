@@ -7,6 +7,10 @@ description: 为已授权的 Windows 或 Mac 设备配置已有 Codex++ HTTPS �
 
 沿用管理员已授权并部署的模型入口，给设备新增非当前的纯 API 供应商，再从 Codex++「Codex多开」启动独立测试实例。设备只持独立 Key，保留原主管窗口与官方账户。v0.2 试点按已核对的 BigPizzaV3/CodexPlusPlus v1.9.0 菜单执行；软件、桌面与 Windows 原生兼容性以目标机检查为准。
 
+## 安装前置检查
+
+先核对实际Codex++路径、版本及Windows架构，不能因PATH缺少命令就判未安装。确实未安装时，先从BigPizzaV3/CodexPlusPlus官方正式发布安装，再配置供应商；本Skill及设备包不包含安装器。已有兼容安装直接复用，保留原Codex窗口。具体下载来源和顺序见[Windows指南](references/windows-pilot.md)。
+
 ## Windows 控制台试点（含 XT）
 
 收到私有 `device.json` 和 Windows 试点包时，优先读 [Windows 多开试点与人工操作](references/windows-pilot.md)，使用随包或 [scripts/windows_pilot.py](scripts/windows_pilot.py)。这是统一 HTTPS 接入，不要求 Tailscale。只有旧私网部署才读下方旧版 references/windows.md。
@@ -18,6 +22,12 @@ description: 为已授权的 Windows 或 Mac 设备配置已有 Codex++ HTTPS �
 从新供应商卡片多开后，核对独立 CODEX_HOME、会话数据库和用户数据目录；和原窗口共用任一目录时不继续测试。把主窗口仍存活、配置未被接入流程改写作为单独验收项。官方认证文件发生变化也可能是正常 Token 刷新，不能因此盲目回滚旧登录文件。
 
 测试失败时只结束本次多开和心跳程序，回到原窗口；不退出所有 Codex。模型通、桌面通、文件工具通、Token 已计量、设备在线分别记录。模型请求或 GET /models 不产生在线绿点。`Work browser` 要求账户身份时，仅在新实例停用不兼容的浏览器能力或改做本地任务；不绕过身份检查、不修改主窗口全局插件。
+
+## 持续在线与官方额度
+
+限时心跳只用于测试。需要设备空闲时也在线时，读 [持续心跳与额度口径](references/presence-quota.md)，在用户已要求持续在线的设备执行新包的4-开启持续在线检测；仅当前用户登录启动，可用5停止、6移除，不修改主Codex。未在Windows实机执行前不能宣称已安装。
+
+设备已记录Token之和仅为中转小计，不能冒充账户总Token。官方5小时/每周剩余与设备Token分列；账户全量Token无法核对时，设备占账户总量显示不可计算，不把两设备强制归一为100%，不拿本地会话库累计冒充跨设备总账。
 
 ## 选择本次角色
 
