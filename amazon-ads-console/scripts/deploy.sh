@@ -18,6 +18,19 @@ python3 - "$approval" "$commit" <<'PY'
 import json,sys
 assert json.load(open(sys.argv[1]))['commit'] == sys.argv[2]
 PY
+# Check under the same deployment lock used by activation, so concurrent tasks
+# cannot publish over a newer release after their preparation completed.
+if [ "$mode" != --prepare-only ]; then
+  python3 - "$approval" "$base/current/release.json" <<'PY'
+import json,sys
+approval=json.load(open(sys.argv[1]))
+expected=approval.get('expected_current_commit')
+if expected:
+ current=json.load(open(sys.argv[2]))['commit']
+ if current != expected:
+  raise SystemExit('Production changed during preparation; integrate the current release before activating.')
+PY
+fi
 [ "$(git --git-dir="$repo" rev-parse "$commit^{commit}")" = "$commit" ]
 # The orchestrator may be newer than an application rollback target. Verify both
 # helper files against its approved Git commit before any preparation/activation.
