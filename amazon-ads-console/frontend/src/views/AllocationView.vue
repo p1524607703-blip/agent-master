@@ -97,6 +97,7 @@ const visibleRows = computed(() => {
 })
 const loadedCount = computed(() => productRows.value.length)
 const loadedTotal = computed(() => productRows.value.reduce((sum, row) => sum + (num(row.final_cost) ?? 0), 0))
+const hasLoadedCost = computed(() => productRows.value.some(row => num(row.final_cost) !== null))
 const rowsComplete = computed(() => rowTotal.value != null && productRows.value.length >= rowTotal.value)
 const composition = computed(() => {
   const parts = [
@@ -124,7 +125,7 @@ const kpi = computed(() => {
   if (finalCost !== null || sourceSpend !== null || products !== null) {
     return { mode: 'summary' as const, finalCost, sourceSpend, delta, products: products ?? (loadedCount.value || null), campaigns }
   }
-  return { mode: 'rows' as const, finalCost: loadedTotal.value, sourceSpend: null, delta: null, products: loadedCount.value || null, campaigns: null }
+  return { mode: 'rows' as const, finalCost: hasLoadedCost.value ? loadedTotal.value : null, sourceSpend: null, delta: null, products: loadedCount.value || null, campaigns: null }
 })
 const deltaOk = computed(() => kpi.value.delta !== null && Math.abs(kpi.value.delta) < 0.005)
 
@@ -298,7 +299,7 @@ onMounted(load)
               </div>
             </div>
 
-            <p v-if="kpi.mode === 'rows'" class="muted scope-note">当前版本没有返回汇总，以上为已加载 {{ loadedCount }} 款的可见合计{{ rowsComplete ? '' : '（尚未加载完）' }}。</p>
+            <p v-if="kpi.mode === 'rows'" class="muted scope-note">{{ kpi.finalCost === null ? `当前版本没有返回汇总，且金额尚不能确定（待核实）；以下是已加载 ${loadedCount} 款的件数明细。` : `当前版本没有返回汇总，以上为已加载 ${loadedCount} 款的可见合计${rowsComplete ? '' : '（尚未加载完）'}。` }}</p>
             <p v-if="currentIsReference" class="reference-note">运营确认历史参考：保留原文件与原确认口径，未按当前事实或新规则重算，不代表新增财务签核。</p>
             <p v-else-if="current.calculation_status === 'PARTIAL' || current.status === 'PARTIAL'" class="warning-note">本次试算存在待核实项：未知价格、映射或销量不会被估算补齐，相关金额保持为空。</p>
 
@@ -319,7 +320,7 @@ onMounted(load)
                 <li v-for="part in composition" :key="part.key"><i :style="{ background: part.color }"></i><span>{{ part.name }}</span><strong>{{ money(part.amount) }}</strong><em>{{ (part.share * 100).toFixed(1) }}%</em><small>{{ part.hint }}</small></li>
               </ul>
             </div>
-            <p v-else class="muted">这个版本没有可用的费用构成数据。</p>
+            <p v-else class="muted">本版本金额尚未确定或没有费用构成数据，暂不展示拆解。</p>
           </section>
 
           <section v-if="report === 'products'" class="card panel">
