@@ -96,6 +96,24 @@ class AutomaticTests(unittest.TestCase):
         self.assertEqual(value['members'][0]['usedPercent'],5);self.assertEqual(value['deviceShares'][0]['usedPercent'],5)
         self.assertEqual(value['remainingPercent']+value['confirmedPercent']+value['unattributedPercent'],100)
 
+    def test_second_scale_reset_jitter_never_bootstraps_a_new_period(self):
+        doc=advance(self.doc,self.sample())
+        sample=self.sample(5,120,11,1);sample['window']['resetsAt']-=1
+        doc=advance(doc,sample)
+        self.assertEqual(sum(row['usedPercent'] for row in doc['automatic']),1)
+        sample=self.sample(5,240,12,2);sample['window']['resetsAt']+=1
+        doc=advance(doc,sample)
+        self.assertEqual(sum(row['usedPercent'] for row in doc['automatic']),1)
+        self.assertEqual(doc['autoState']['window'][0],self.reset)
+
+    def test_explicit_rejection_does_not_wait_forever_for_nonexistent_model_usage(self):
+        doc=advance(self.doc,self.sample());sample=self.sample(5,120,11,0)
+        sample['sources'][1].update(events=1,unknown=1,activityEvents=0,activityUnknown=0,recentActivity=True)
+        doc=advance(doc,sample)
+        self.assertEqual(doc['monitor']['pendingSettlementPercent'],0)
+        self.assertEqual(doc['automatic'][0]['deviceId'],'main')
+        self.assertEqual(doc['automatic'][0]['usedPercent'],1)
+
     def test_twenty_continuously_busy_devices_get_small_shares_of_account_capacity(self):
         first=self.sample();first['userIds']=list(range(1,21))
         first['sources']=[dict(deviceId=f'device-{n:02}',userId=n,tokens=0,events=0,unknown=0,lastActivityAt=None) for n in range(1,21)]

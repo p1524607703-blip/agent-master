@@ -72,7 +72,7 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
       <div>
         <span class="eyebrow">CODEX · 团队设备</span>
         <h1>分发人员 &amp; 设备</h1>
-        <p>账户总额度100% · 人员消耗归属 · rc.7</p>
+        <p>账户总额度100% · 人员消耗归属 · rc.7.1</p>
       </div>
       <button class="refresh" :disabled="loading" @click="refresh">{{ loading ? '刷新中…' : '刷新状态' }}</button>
     </header>
@@ -178,7 +178,7 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
       </section>
     </div>
 
-    <p class="updated">账户归属版 rc.7 · 每 30 秒刷新 · 时间以北京时间显示<span v-if="data"> · 最近更新 {{ time(data.serverTime) }}</span></p>
+    <p class="updated">账户归属版 rc.7.1 · 每 30 秒刷新 · 时间以北京时间显示<span v-if="data"> · 最近更新 {{ time(data.serverTime) }}</span></p>
   </main>
 </template>
 

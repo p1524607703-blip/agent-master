@@ -70,6 +70,17 @@ class AttributionTests(unittest.TestCase):
             self.write(confirmations)
             self.assertEqual(service.account_attribution(self.quota(),[17])['status'],'invalid-configuration')
 
+    def test_small_reset_jitter_matches_confirmations_but_real_new_period_does_not(self):
+        self.assertEqual(service.account_attribution(self.quota(3,self.reset+1),[17])['confirmedPercent'],3)
+        self.assertEqual(service.account_attribution(self.quota(3,self.reset+604800),[17])['confirmedPercent'],0)
+
+    def test_superseded_jitter_duplicate_is_not_merged_into_current_account_total(self):
+        duplicate=dict(self.confirmation,confirmationId='duplicate-jitter',method='observed-exclusive-period',usedPercent=7,resetsAt=self.reset-1,superseded=True)
+        self.path.write_text(json.dumps(dict(schemaVersion=1,confirmations=[self.confirmation],automatic=[duplicate])))
+        result=service.account_attribution(self.quota(4),[17])
+        self.assertEqual(result['confirmedPercent'],3)
+        self.assertEqual(result['unattributedPercent'],1)
+
     def test_public_file_permissions_are_rejected(self):
         self.path.chmod(0o644)
         self.assertEqual(service.account_attribution(self.quota(),[17])['status'],'invalid-configuration')
@@ -104,6 +115,16 @@ class LocalLogTests(unittest.TestCase):
             self.assertEqual(value['unknownSegments'],0)
             self.assertNotIn('private conversation',json.dumps(value))
             self.assertNotIn(tmp,json.dumps(value))
+
+    def test_local_counter_window_remains_stable_across_second_scale_reset_jitter(self):
+        now=datetime.now(timezone.utc);reset=int(now.timestamp())+604000
+        with tempfile.TemporaryDirectory() as tmp:
+            directory=Path(tmp);(directory/'sessions').mkdir();prior=directory/'host.json'
+            prior.write_text(json.dumps(dict(planType='fixture',resetsAt=reset,windowDurationMins=10080)));prior.chmod(0o600)
+            quota=dict(status='available',planType='fixture',primary=dict(resetsAt=reset-1,windowDurationMins=10080))
+            with patch.object(host,'main_running',return_value=True):
+                value=host.collect_host(dict(codexHome=tmp,deviceId='host',userId=17,mainExecutable='fixture',localSnapshot=str(prior)),quota)
+            self.assertEqual(value['resetsAt'],reset)
 
     def test_fork_preserves_first_metadata_and_never_merges_parent_counters(self):
         now=datetime.now(timezone.utc);start=now-timedelta(minutes=10)
