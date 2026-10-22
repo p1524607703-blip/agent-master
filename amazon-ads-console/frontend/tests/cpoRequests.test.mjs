@@ -50,7 +50,7 @@ function mountView(filename, initial, options={}) {
     '../diagnostics/cpoQuality':{qualityLabel:()=>''},
     'naive-ui':{NButton:{},NDatePicker:{},NSelect:{}},
   }
-  for(const name of ['FullFunnelRows','CampaignCostNotes','DataSkeleton','CpoDataQuality','SbAttributionToggle']) imports[`../components/${name}.vue`]={default:{}}
+  for(const name of ['FullFunnelRows','CampaignCostNotes','DataSkeleton','CpoDataQuality','SbAttributionToggle','PendingGroupExpenses']) imports[`../components/${name}.vue`]={default:{}}
   const source=readFileSync(resolve('src/views',filename),'utf8')
   const descriptor=parse(source).descriptor
   const script=compileScript(descriptor,{id:filename}).content

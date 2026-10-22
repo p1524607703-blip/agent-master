@@ -2,6 +2,7 @@
 import SbAttributionToggle from '../components/SbAttributionToggle.vue'
 import { CpoRequestGate, normalizeSbMode, sbModeLabel, type SbAttributionMode } from '../api/cpoReport'
 import FullFunnelRows from '../components/FullFunnelRows.vue'
+import PendingGroupExpenses from '../components/PendingGroupExpenses.vue'
 import CampaignCostNotes from '../components/CampaignCostNotes.vue'
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -244,6 +245,8 @@ const tablePeriod = computed(() => period.value==='weekly'
     <p v-if="loadError && !loading" class="load-error" role="alert">{{ loadError }}。本次数据未读取成功，请重试后确认口径。</p>
 
     <CpoDataQuality v-if="!loading" :data="data" />
+    <PendingGroupExpenses v-if="!loading" :entries="data.groupPendingExpenses"
+      :total="detailSummary.operatorPendingSpend" :operator-name="data.me?.groupName" />
 
     <div v-if="!loading" class="card panel">
       <div class="panel-head">
@@ -264,7 +267,7 @@ const tablePeriod = computed(() => period.value==='weekly'
             <tr v-for="r in data.operators" :key="r.group || r.name">
               <td><strong>{{ data.me?.group || r.group }}</strong></td>
               <td><strong>{{ num(r.dataProducts) }} / {{ num(r.products) }}</strong></td>
-              <td>{{ money(r.spend) }}</td>
+              <td>{{ money(r.spend) }}<small v-if="Number(r.pendingProductSpend) > 0" class="pending-expense-hint">含组内待分摊费用 {{ money(r.pendingProductSpend) }}</small></td>
               <td>{{ num(r.adOrders) }}</td>
               <td>{{ num(r.totalOrders) }}</td>
               <td><strong>{{ money(r.cpo) }}</strong></td>
@@ -357,6 +360,7 @@ const tablePeriod = computed(() => period.value==='weekly'
 
 <style scoped>
 .load-error{padding:10px 12px;border:1px solid #f2d6b5;background:#fff6ef;color:#a45f16;border-radius:8px;font-size:12px}
+.pending-expense-hint{display:block;color:#a45f16;font-size:11px;margin-top:3px}
 .operator-date-filter{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap}
 .operator-date-filter label{display:flex;flex-direction:column;gap:5px;font-size:11px;color:#7b8492;flex:0 0 auto}
 .operator-scope-note{margin:10px 0 12px;padding:9px 12px;border-radius:8px;border:1px solid #e7ebf1;background:#f8fafc;color:#667085;font-size:12px;line-height:1.65}

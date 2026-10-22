@@ -2,6 +2,7 @@
 import SbAttributionToggle from '../components/SbAttributionToggle.vue'
 import { CpoRequestGate, normalizeSbMode, sbModeLabel, type SbAttributionMode } from '../api/cpoReport'
 import FullFunnelRows from '../components/FullFunnelRows.vue'
+import PendingGroupExpenses from '../components/PendingGroupExpenses.vue'
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getJson, getJsonStrict } from '../api/client'
@@ -232,6 +233,8 @@ const ratio = (v:any,s='') => v == null ? '—' : `${Number(v).toFixed(2)}${s}`
     <p v-if="loadError && !loading" class="overview-export-error" role="alert">{{ loadError }}。本次数据未读取成功，请重试。</p>
 
     <FullFunnelRows v-if="!loading" :ledger="data.fullFunnel" />
+    <PendingGroupExpenses v-if="!loading && isManager" :entries="data.groupPendingExpenses"
+      :total="data.operatorPendingSpend" :all-groups="true" />
 
     <div v-if="!loading" class="operator-scope-note">
       <strong>{{ sbModeLabel(sbAttributionMode) }} · 统一口径：</strong>{{ data.note || 'CPO 按运营姓名跨账户汇总。' }}
@@ -260,7 +263,7 @@ const ratio = (v:any,s='') => v == null ? '—' : `${Number(v).toFixed(2)}${s}`
             <tr v-for="r in data.operators" :key="r.name" :class="{'clickable-row':canOpenDetail(r.name)}" @click="openDetail(r.name)">
               <td><strong>{{ r.name }}</strong></td>
               <td><strong>{{ num(r.dataProducts) }} / {{ num(r.products) }}</strong></td>
-              <td>{{ money(r.spend) }}</td>
+              <td>{{ money(r.spend) }}<small v-if="Number(r.pendingProductSpend) > 0 && canOpenDetail(r.name)" class="pending-expense-hint">含组内待分摊费用 {{ money(r.pendingProductSpend) }}</small></td>
               <td>{{ num(r.adOrders) }}</td>
               <td>{{ num(r.totalOrders) }}</td>
               <td><strong>{{ money(r.cpo) }}</strong></td>
@@ -280,4 +283,5 @@ const ratio = (v:any,s='') => v == null ? '—' : `${Number(v).toFixed(2)}${s}`
 .operator-date-filter{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap}.operator-date-filter label{display:flex;flex-direction:column;gap:5px;font-size:11px;color:#7b8492;flex:0 0 auto}.operator-scope-note{margin:10px 0 12px;padding:9px 12px;border-radius:8px;border:1px solid #e7ebf1;background:#f8fafc;color:#667085;font-size:12px}.operator-status{display:inline-block;padding:3px 8px;border-radius:999px;background:#edf8f1;color:#287a4b;font-size:12px}.operator-status.empty{background:#f2f4f7;color:#667085}.operator-status.warn{background:#fff3e6;color:#a45f16}@media(max-width:800px){.page-head{align-items:flex-start;flex-direction:column;gap:10px}}
 .overview-report-head{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
 .overview-export-error{color:#b42318;font-size:12px;margin:10px 0}
+.pending-expense-hint{display:block;color:#a45f16;font-size:11px;margin-top:3px}
 </style>

@@ -85,6 +85,13 @@ def download_shared_summary(period:Literal["daily","weekly","monthly"]="daily",
         raise HTTPException(403, 'An active operator group is required')
     _valid_date(date)
     data=_load_summary(date,period,sb_attribution_mode)
+    if not _manager(user):
+        own = operator_group_of(user.get('operatorCode') or user.get('operator_code'))
+        data = {**data, 'operators': [
+            dict(row) if any(str(g or '').upper()[:2] == own for g in (row.get('groups') or [row.get('group')]))
+            else {k: v for k, v in row.items() if k != 'pendingProductSpend'}
+            for row in data.get('operators', [])
+        ]}
     name=f"all_operators_{(data.get('data_date') or date or 'latest')}_sb-{sb_attribution_mode}.xlsx"
     return _download(summary_xlsx(data),name,
                      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")

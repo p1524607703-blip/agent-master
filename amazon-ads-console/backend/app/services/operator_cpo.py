@@ -21,6 +21,7 @@ from fastapi import HTTPException
 from app.core.observability import increment, update_context
 
 from .cpo_identity import AdIdentityResolver, CampaignOwnerRules, FullFunnelLedger, resolve_sb_accounting
+from .cpo_group_pending import pending_group_expense, pending_expenses, pending_total, merge_pending_expenses
 from .full_funnel_visibility import full_funnel_for_viewer
 
 # All product identities are read through the V2 mapping interface.
@@ -274,7 +275,7 @@ def _data_revision() -> str:
           (SELECT md5(coalesce(string_agg(to_jsonb(c)::text,E'\n' ORDER BY rule_id),'')) FROM ops_products.cpo_campaign_cost_rules c)
         )) revision
     """) or {}
-    revision = 'identity-v2-brand-disclosure-v5:' + str(row.get("revision") or 0) + ':' + str(mapping.get("revision") or '')
+    revision = 'identity-v2-brand-disclosure-v6-group-pending:' + str(row.get("revision") or 0) + ':' + str(mapping.get("revision") or '')
     update_context(revision=revision)
     return revision
 
@@ -728,6 +729,7 @@ def _build_uncached(start: str, end: str, revision: Optional[str] = None,
             evidence_meta,_=resolve_meta(evidence_scope,evidence.get('child_asin') or '',evidence.get('parent_asin') or '')
             identity_resolver.observe(evidence,evidence_scope,evidence_meta)
     unmapped_ad = {"spend":0.0,"orders":0.0,"sales":0.0,"parents":set(),"rows":0}
+    group_pending_expenses = []
     unknown_ad_types: set[str] = set()
     ad_audit={"childExactRows":0,"parentFallbackRows":0,"campaignPrefixRows":0,"unmappedRows":0,"ambiguousScopeRows":0,"confirmedCampaignRows":0,"campaignRuleReviewRows":0,"sbNameRows":0,"sbPendingRows":0}
     for row in ad_rows:
@@ -759,6 +761,12 @@ def _build_uncached(start: str, end: str, revision: Optional[str] = None,
         if not is_sb and not meta and (account_scope,child) not in blocked_child_keys:
             meta,method=identity_resolver.resolve(row,account_scope)
         if not meta:
+            pending = (pending_group_expense(row, account_scope, source_meta, identity_resolver.candidates,
+                       blocked=(account_scope,child) in blocked_child_keys, rule=rule)
+                       if is_sb and sb_attribution_mode == 'name' else None)
+            if pending:
+                group_pending_expenses.append(pending)
+                continue
             if row['ad_product']=='Full-Funnel':
                 full_funnel.add(row,None)
                 continue
@@ -877,6 +885,7 @@ def _build_uncached(start: str, end: str, revision: Optional[str] = None,
     business_source = "child_asin_daily" if complete_days and not parent_days else ("mixed_child_parent_fallback" if child_days else "legacy_parent_asin_daily")
     return {
         "products":out,"portfolio":portfolio,"unmappedAd":unmapped_ad,"fullFunnel":full_funnel.result(),
+        "groupPendingExpenses":merge_pending_expenses(group_pending_expenses),
         # Backward-compatible blocker field: only true mapping conflicts.
         "businessUnmappedOrders":round(business_mapping_conflict_orders,2),
         "businessUnmappedParents":sorted(business_mapping_conflict_parents),
@@ -913,21 +922,23 @@ def _summarize(data: dict[str, Any]) -> list[dict[str, Any]]:
     by_name: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for p in data["products"]:
         by_name[p["operatorName"]].append(p)
-    names = sorted(set(data["portfolio"]) | set(by_name))
+    names = sorted(set(data["portfolio"]) | set(by_name) | {r['operatorName'] for r in pending_expenses(data)})
     rows = []
     for name in names:
         ps = by_name.get(name, [])
-        if not ps:
+        pending = pending_expenses(data, name)
+        pending_spend = pending_total(data, name)
+        if not ps and not pending:
             continue
         business_ps = [p for p in ps if p["totalOrders"] is not None]
         missing_report_ps = [p for p in ps if p.get("mappingStatus") == "confirmed_no_business"]
         missing_business_spend = sum(p["spend"] for p in ps if p["totalOrders"] is None)
-        spend = sum(p["spend"] for p in ps)
-        ad_orders = sum(p["adOrders"] for p in ps)
-        ad_sales = sum(p["adSales"] for p in ps)
+        spend = sum(p["spend"] for p in ps) + pending_spend
+        ad_orders = sum(p["adOrders"] for p in ps) + pending_total(data, name, 'adOrders')
+        ad_sales = sum(p["adSales"] for p in ps) + pending_total(data, name, 'adSales')
         total_orders = sum(float(p["totalOrders"] or 0) for p in business_ps)
         total_sales = sum(float(p["totalSales"] or 0) for p in business_ps)
-        groups = sorted({p["group"] for p in ps})
+        groups = sorted({p["group"] for p in ps} | {r['group'] for r in pending})
         if business_ps and missing_report_ps:
             status = "部分缺业务报告"
         elif business_ps and missing_business_spend > 0.005:
@@ -940,11 +951,13 @@ def _summarize(data: dict[str, Any]) -> list[dict[str, Any]]:
             status = "缺业务侧"
         else:
             status = "无当日数据"
-        calculation_ok = bool(business_ps) and missing_business_spend <= 0.005
+        calculation_ok = bool(business_ps) and missing_business_spend <= 0.005 and not pending
         campaign_review_spend = sum(abs(r['spend']) for p in ps for r in p.get('campaignCostReviews',[]))
         final_ok = calculation_ok and not missing_report_ps and campaign_review_spend <= 0.005
         if business_ps and campaign_review_spend > 0.005:
             status = "SB费用归属待核验"
+        if pending:
+            status = "组内费用待分摊"
         rows.append({
             "name": name, "group": groups[0] if groups else "", "groups": groups,
             "spend": round(spend, 2), "adOrders": round(ad_orders, 2), "adSales": round(ad_sales, 2),
@@ -956,6 +969,7 @@ def _summarize(data: dict[str, Any]) -> list[dict[str, Any]]:
             "dataProducts": len({p["code"] for p in business_ps}),
             "missingBusinessProducts": len({(p["code"], p.get("parentAsin")) for p in missing_report_ps}),
             "status": status, "finalCpo": final_ok, "unpairedAdSpend": round(missing_business_spend, 2),
+            "pendingProductSpend": round(pending_spend, 2),
             "purchasedValidationOrders": round(sum(p["purchasedValidationOrders"] for p in ps), 2),
             "scope": ("SB按活动命名确定费用归属；其他广告按推广商品归属；账户边界保留。" if data.get('sbAttributionMode') == 'name'
                       else "推广ASIN→产品代号→运营；SB不应用命名费用覆盖；账户边界保留。"),
@@ -983,7 +997,8 @@ def _latest_complete_date() -> Optional[str]:
 
 def _quality_reasons(data: dict[str, Any], source: dict[str, Any], expected: int, period: str,
                      *, has_business: bool = True, missing_products: int = 0,
-                     unpaired_spend: float = 0, campaign_review_spend: Optional[float] = None) -> list[str]:
+                     unpaired_spend: float = 0, campaign_review_spend: Optional[float] = None,
+                     group_pending: bool = False) -> list[str]:
     """Explain CPO readiness and campaign review needs without exposing global amounts."""
     reasons: list[str] = []
     if campaign_review_spend is None:
@@ -1001,6 +1016,10 @@ def _quality_reasons(data: dict[str, Any], source: dict[str, Any], expected: int
         reasons.append(f"有 {missing_products} 个本组已确认产品缺业务侧记录，请核对产品清单。")
     if unpaired_spend > 0.005:
         reasons.append("本组部分广告花费尚未配对到业务侧订单，当前 CPO 不能认定为完整。")
+    if group_pending:
+        reasons.append("本组部分SB费用已确定运营组、尚未确定承担款式；已计入本组总费用，产品未分配，最终CPO待确认。")
+    elif pending_expenses(data):
+        reasons.append("公司仍有已确定运营组但尚未落到款式的SB费用，完整口径待核验。")
     if float(data.get("unmappedAd", {}).get("spend") or 0) > 0.005:
         reasons.append("公司级广告产品归属尚未完成，最终 CPO 暂未确认；请由管理层核查未归属广告。")
     if float(data.get("businessUnmappedOrders") or 0) > 0.005:
@@ -1031,7 +1050,7 @@ def operator_cpo_summary(stat_date: Optional[str] = None, period: str = "daily",
     src = data["sourceDays"]
     complete_days = int(src.get("completeDays") or 0)
     campaign_review_spend = sum(abs(r['spend']) for p in data['products'] for r in p.get('campaignCostReviews',[]))
-    mapping_clean = campaign_review_spend <= 0.005 and data["unmappedAd"]["spend"] <= 0.005 and data["businessUnmappedOrders"] <= 0.005 and data['fullFunnel']['unallocatedSpend'] <= 0.005
+    mapping_clean = campaign_review_spend <= 0.005 and data["unmappedAd"]["spend"] <= 0.005 and data["businessUnmappedOrders"] <= 0.005 and data['fullFunnel']['unallocatedSpend'] <= 0.005 and not pending_expenses(data)
     period_complete = complete_days == expected
     final_cpo = bool(complete_days) and mapping_clean and (period == "daily" or period_complete)
     no_source_note = "" if complete_days else " 该区间没有三项来源同时完整的日期，因此不生成最终 CPO。"
@@ -1059,8 +1078,10 @@ def operator_cpo_summary(stat_date: Optional[str] = None, period: str = "daily",
         "businessOutOfScopeOrders": data.get("businessOutOfScopeOrders", 0),
         "businessOutOfScopeParents": data.get("businessOutOfScopeParents", []),
         "unmappedAdSpend": round(data["unmappedAd"]["spend"], 2),
+        "operatorPendingSpend": round(pending_total(data), 2),
+        "groupPendingExpenses": pending_expenses(data),
         "fullFunnel": data['fullFunnel'],
-        "companyTotalSpend": round(sum(p['spend'] for p in data['products']) + data['unmappedAd']['spend'] + data['fullFunnel']['unallocatedSpend'],2),
+        "companyTotalSpend": round(sum(p['spend'] for p in data['products']) + pending_total(data) + data['unmappedAd']['spend'] + data['fullFunnel']['unallocatedSpend'],2),
         "excludedAdAccounts": [],
         "note": (
             f"{start}~{end}：只使用三项来源同时完整的日期。业务分母优先子ASIN日报，整日缺child才回退旧Parent报告；"
@@ -1069,6 +1090,7 @@ def operator_cpo_summary(stat_date: Optional[str] = None, period: str = "daily",
             + " 已确认活动规则的生效日期、名称及来源商品限制继续生效，条件不满足仍待核验。"
             + " 其余广告保留推广商品归属规则；达成转化商品作为独立校验，业务分母不随SB模式改变。"
             + no_source_note + mapping_note + whitelist_note
+            + (f" 另有${pending_total(data):.2f}已确定运营组但尚未落款的SB费用，已计入该组总费用，未分配给任何产品。" if pending_expenses(data) else '')
             + (f" 全流域广告活动另列行首，其中${data['fullFunnel']['unallocatedSpend']:.2f}为混合活动待分摊费用。" if data['fullFunnel']['spend']>0 else '')
         ),
         "qualityFlags": [
@@ -1182,15 +1204,17 @@ def operator_cpo_detail(
     if data.get('sbAttributionMode', sb_attribution_mode) != sb_attribution_mode:
         raise ValueError('Prebuilt CPO attribution mode does not match the requested mode')
     raw_ps = [p for p in data["products"] if p["operatorName"] == name]
+    group_pending = pending_expenses(data, name)
+    operator_pending_spend = pending_total(data, name)
     portfolio_count = len(data["portfolio"].get(name, set()))
     business_ps_raw = [p for p in raw_ps if p["totalOrders"] is not None]
     missing_business_spend = sum(p["spend"] for p in raw_ps if p["totalOrders"] is None)
     ps = _merge_detail_products(raw_ps)
     business_ps = [p for p in ps if p["totalOrders"] is not None]
     missing_report_ps = [p for p in ps if p.get("mappingStatus") == "confirmed_no_business"]
-    spend = sum(p["spend"] for p in raw_ps)
-    ad_orders = sum(p["adOrders"] for p in raw_ps)
-    ad_sales = sum(p["adSales"] for p in raw_ps)
+    spend = sum(p["spend"] for p in raw_ps) + operator_pending_spend
+    ad_orders = sum(p["adOrders"] for p in raw_ps) + pending_total(data, name, 'adOrders')
+    ad_sales = sum(p["adSales"] for p in raw_ps) + pending_total(data, name, 'adSales')
     total_orders = sum(float(p["totalOrders"] or 0) for p in business_ps_raw)
     total_sales = sum(float(p["totalSales"] or 0) for p in business_ps_raw)
     src = data["sourceDays"]
@@ -1206,31 +1230,35 @@ def operator_cpo_detail(
         and data["businessUnmappedOrders"] <= 0.005
         and data['fullFunnel']['unallocatedSpend'] <= 0.005
         and not missing_report_ps
+        and not pending_expenses(data)
         and (period == "daily" or complete_days == expected)
     )
     return {
         "data_source": "explicit_parent_mapping_three_report_cpo", "operator": name,
         "sbAttributionMode":sb_attribution_mode,
-        "groups": sorted({p["group"] for p in raw_ps}), "account": "已配对业务/广告账户合并",
+        "groups": sorted({p["group"] for p in raw_ps} | {r['group'] for r in group_pending}), "account": "已配对业务/广告账户合并",
         "range": anchor if period == "daily" else f"{start}~{end}", "data_date": anchor, "period": period,
         "period_start": start, "period_end": end, "coverageDays": complete_days, "expectedDays": expected,
         "account_split": False, "final_cpo": final_ok, "allocation_status": "explicit_parent_asin_mapping",
         "qualityReasons": _quality_reasons(data, src, expected, period, has_business=bool(business_ps_raw),
              missing_products=len({(p["code"], p.get("parentAsin")) for p in missing_report_ps}),
-             unpaired_spend=missing_business_spend,campaign_review_spend=campaign_review_spend),
+             unpaired_spend=missing_business_spend,campaign_review_spend=campaign_review_spend,
+             group_pending=bool(group_pending)),
         "summary": {
             "spend": round(spend, 2), "adOrders": round(ad_orders, 2), "adSales": round(ad_sales, 2),
             "totalOrders": round(total_orders, 2) if business_ps_raw else None,
             "totalSales": round(total_sales, 2) if business_ps_raw else None,
-            "cpo": round(spend / total_orders, 2) if business_ps_raw and missing_business_spend <= 0.005 and total_orders > 0 else None,
+            "cpo": round(spend / total_orders, 2) if business_ps_raw and missing_business_spend <= 0.005 and total_orders > 0 and not group_pending else None,
             "roas": round(ad_sales / spend, 2) if spend > 0 else None,
-            "tacos": round(spend / total_sales * 100, 2) if business_ps_raw and missing_business_spend <= 0.005 and total_sales > 0 else None,
+            "tacos": round(spend / total_sales * 100, 2) if business_ps_raw and missing_business_spend <= 0.005 and total_sales > 0 and not group_pending else None,
             "products": portfolio_count, "dataProducts": len({p["code"] for p in business_ps}),
             "missingBusinessProducts": len({(p["code"], p.get("parentAsin")) for p in missing_report_ps}),
             "unpairedAdSpend": round(missing_business_spend, 2),
+            "operatorPendingSpend": round(operator_pending_spend, 2),
             "purchasedValidationOrders": round(sum(p["purchasedValidationOrders"] for p in raw_ps), 2),
         },
         "products": ps, "sourceCompleteness": src, "fullFunnel":data['fullFunnel'],
+        "groupPendingExpenses": group_pending,
         "businessMappingConflictOrders": data.get("businessMappingConflictOrders", 0),
         "businessOutOfScopeOrders": data.get("businessOutOfScopeOrders", 0),
         "warning": (
@@ -1283,6 +1311,7 @@ def my_cpo_summary(
         "operators": rows,
         "me": me,
         "products": detail.get("products", []),
+        "groupPendingExpenses": detail.get("groupPendingExpenses", []),
         "detailSummary": detail.get("summary", {}),
         "fullFunnel": full_funnel_for_viewer(data['fullFunnel'],'operator',operator_code) if 'fullFunnel' in data else {},
         "final_cpo": bool(detail.get("final_cpo")),

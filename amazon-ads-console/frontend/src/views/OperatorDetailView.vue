@@ -2,6 +2,7 @@
 import SbAttributionToggle from '../components/SbAttributionToggle.vue'
 import { CpoRequestGate, normalizeSbMode, sbModeLabel, type SbAttributionMode } from '../api/cpoReport'
 import FullFunnelRows from '../components/FullFunnelRows.vue'
+import PendingGroupExpenses from '../components/PendingGroupExpenses.vue'
 import { useSessionStore } from '../stores/session'
 import CampaignCostNotes from '../components/CampaignCostNotes.vue'
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
@@ -285,6 +286,8 @@ const tablePeriod = computed(() => period.value === 'weekly'
     <p v-if="loadError && !loading" class="load-error" role="alert">{{ loadError }}。本次数据未读取成功，请重试后确认口径。</p>
 
     <CpoDataQuality v-if="!loading" :data="detail" />
+    <PendingGroupExpenses v-if="!loading" :entries="detail.groupPendingExpenses"
+      :total="detail.summary?.operatorPendingSpend" :operator-name="detail.operator" />
 
     <div v-if="!loading" class="card ad-detail-card">
       <div class="ad-detail-title">

@@ -13,7 +13,7 @@ MAX_ROWS = 5000
 MAX_OPERATORS = 100
 MAX_ARCHIVE_BYTES = 25 * 1024 * 1024
 AD_TYPES = ("SP", "SB", "SD", "STV", "DSP")
-_SUMMARY_COLUMNS = ("运营", "有数据产品", "应有产品", "广告花费", "广告单", "全部订单", "综合CPO", "ROAS", "TACOS(%)", "状态")
+_SUMMARY_COLUMNS = ("运营", "有数据产品", "应有产品", "广告花费", "广告单", "全部订单", "综合CPO", "ROAS", "TACOS(%)", "状态", "其中组内待分摊")
 _DETAIL_COLUMNS = (
     "产品", "报告日期/区间", "数据状态",
     *(f"{t}花费" for t in AD_TYPES),
@@ -52,7 +52,7 @@ def _cell(value, addr, style=0):
     return f'<c r="{addr}" s="{style}" t="inlineStr"><is><t xml:space="preserve">{escape(value)}</t></is></c>'
 
 
-def workbook(rows, *, money_columns=(), numeric_columns=()):
+def workbook(rows, *, money_columns=(), numeric_columns=(), row_styles=None):
     """Create a one-sheet XLSX with frozen headers and Excel numbers."""
     if not 1 <= len(rows) <= MAX_ROWS:
         raise ValueError("export row limit exceeded")
@@ -64,6 +64,8 @@ def workbook(rows, *, money_columns=(), numeric_columns=()):
         cells = []
         for i, value in enumerate(row, 1):
             style = 1 if n == 4 else 4 if n == 1 else 2 if i in money_columns else 3 if i in numeric_columns else 0
+            if row_styles and n in row_styles:
+                style = row_styles[n].get(i, 0)
             cells.append(_cell(value, f"{_column(i)}{n}", style))
         content.append(f'<row r="{n}">{"".join(cells)}</row>')
     sheet = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
@@ -135,8 +137,8 @@ def summary_xlsx(payload):
     for r in payload.get("operators") or []:
         rows.append([r.get("name"),r.get("dataProducts"),r.get("products"),r.get("spend"),
                      r.get("adOrders"),r.get("totalOrders"),r.get("cpo"),r.get("roas"),
-                     r.get("tacos"),r.get("status")])
-    return workbook(rows,money_columns=(4,7),numeric_columns=(2,3,5,6,8,9))
+                     r.get("tacos"),r.get("status"),r.get('pendingProductSpend')])
+    return workbook(rows,money_columns=(4,7,11),numeric_columns=(2,3,5,6,8,9))
 
 
 def _type_sum(products, field, typ):
@@ -153,10 +155,20 @@ def detail_xlsx(payload):
     period=payload.get("period","daily")
     label=payload.get("data_date") if period=="daily" else f"{payload.get('period_start','')}~{payload.get('period_end','')}"
     summary=payload.get("summary") or {}
+    pending=payload.get('groupPendingExpenses') or []
+    if len(ps)+len(pending)>MAX_ROWS-8:
+        raise ValueError('too many detail rows')
+    def type_total(field, typ):
+        value = _type_sum(ps,field,typ)
+        if typ == 'SB' and pending:
+            source_field = 'spend' if field == 'adTypeSpend' else 'adOrders'
+            return round((value or 0) + sum(float(row.get(source_field) or 0) for row in pending), 2)
+        return value
     rows=_meta(payload,name+"产品广告明细")+[list(_DETAIL_COLUMNS)]
+    row_styles={}
     rows.append(["综合情况",label,"非完整口径" if payload.get("final_cpo") is False else "完整口径",
-                 *(_type_sum(ps,"adTypeSpend",t) for t in AD_TYPES),
-                 *(_type_sum(ps,"adTypeOrders",t) for t in AD_TYPES),
+                 *(type_total("adTypeSpend",t) for t in AD_TYPES),
+                 *(type_total("adTypeOrders",t) for t in AD_TYPES),
                  summary.get("spend"),summary.get("adOrders"),summary.get("totalOrders"),
                  summary.get("cpo"),summary.get("roas"),summary.get("tacos")])
     for p in ps:
@@ -165,4 +177,17 @@ def detail_xlsx(payload):
                      *((p.get("adTypeOrders") or {}).get(t) for t in AD_TYPES),
                      p.get("spend"),p.get("adOrders"),p.get("totalOrders"),
                      p.get("cpo"),p.get("roas"),p.get("tacos")])
-    return workbook(rows,money_columns=(4,5,6,7,8,14,17),numeric_columns=(9,10,11,12,13,15,16,18,19))
+    if pending:
+        rows.append(['组内待分摊费用（独立台账，已含综合费用；尚未分配给产品，不重复相加）'])
+        row_styles[len(rows)]={1:4}
+        rows.append(['运营组','日期','账户','活动ID','活动名称','花费','广告单','广告销售额','待办原因','已识别候选款式'])
+        row_styles[len(rows)]={index:1 for index in range(1,11)}
+        reasons={'MULTIPLE_NAMED_PRODUCTS':'多款命名，待确认分配规则',
+                 'CONFIRMED_ALIAS_REQUIRED':'组合名称待确认款式映射'}
+        for item in pending:
+            rows.append([item.get('group'),item.get('date'),item.get('account'),item.get('campaignId'),
+                         item.get('campaignName'),item.get('spend'),item.get('adOrders'),item.get('adSales'),
+                         reasons.get(item.get('reason'),'款式待确认'),
+                         ' / '.join(str(candidate.get('productCode') or '') for candidate in item.get('knownNameCandidates',[]))])
+            row_styles[len(rows)]={6:2,7:3,8:2}
+    return workbook(rows,money_columns=(4,5,6,7,8,14,17),numeric_columns=(9,10,11,12,13,15,16,18,19),row_styles=row_styles)

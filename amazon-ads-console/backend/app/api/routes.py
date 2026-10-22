@@ -80,6 +80,12 @@ def operator_cpo(date: Optional[str] = None, period: str = Query('daily'),
         # Shared totals do not include company-wide full-funnel disclosure.
         data = {k: v for k, v in data.items() if k in {
             'operators', 'data_date', 'period', 'period_start', 'period_end', 'final_cpo', 'period_label', 'sbAttributionMode'}}
+        own = operator_group_of(user.get('operatorCode') or user.get('operator_code'))
+        data['operators'] = [
+            dict(row) if any(str(g or '').upper()[:2] == own for g in (row.get('groups') or [row.get('group')]))
+            else {k: v for k, v in row.items() if k != 'pendingProductSpend'}
+            for row in data.get('operators', [])
+        ]
     return _full_funnel_response(data, session[1])
 
 @router.get('/operators/{operator}', dependencies=[Depends(require_operator_access)])
