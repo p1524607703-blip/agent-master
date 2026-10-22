@@ -1,4 +1,4 @@
-"""Confirmed percentage points of an official account window, never token weighting."""
+"""Official account percentages with distinct confirmations and explicit usage estimates."""
 import json
 import math
 from datetime import datetime, timezone
@@ -47,6 +47,8 @@ def account_attribution(quota, user_ids):
         evidence = {int(uid): [] for uid in user_ids}
         ids = set()
         manual_total = Decimal(0)
+        weighted_total = Decimal(0)
+        partial_estimate = False
         device_amounts = {}
         for entry, is_auto in [(entry,False) for entry in confirmations] + [(entry,True) for entry in automatic]:
             if (entry.get('resetsAt'), entry.get('windowDurationMins'), entry.get('planType')) != (w['resetsAt'], w['windowDurationMins'], quota.get('planType')):
@@ -60,8 +62,11 @@ def account_attribution(quota, user_ids):
             ids.add(key)
             amounts[uid] += Decimal(str(percent))
             method = entry.get('method') if is_auto else 'owner-confirmed'
-            if is_auto and method not in ('observed-exclusive-period', 'observed-exclusive-interval'):
+            if is_auto and method not in ('observed-exclusive-period', 'observed-exclusive-interval', 'observed-token-weighted-interval'):
                 raise ValueError('invalid automatic evidence')
+            if method == 'observed-token-weighted-interval':
+                weighted_total += Decimal(str(percent))
+                partial_estimate = partial_estimate or entry.get('partialMeasurement', False)
             if not is_auto:
                 manual_total += Decimal(str(percent))
             device_id = entry.get('deviceId')
@@ -70,7 +75,8 @@ def account_attribution(quota, user_ids):
                     raise ValueError('invalid device identity')
                 device_amounts[(uid, device_id)] = device_amounts.get((uid, device_id), Decimal(0)) + Decimal(str(percent))
             evidence[uid].append({'confirmationId': key, 'confirmedAt': at.isoformat(), 'method': method,
-                                  'deviceId': device_id, 'usedPercent': percent})
+                                  'deviceId': device_id, 'usedPercent': percent,
+                                  'partialMeasurement': entry.get('partialMeasurement', False)})
         confirmed = sum(amounts.values())
         used = Decimal(str(w['usedPercent']))
         if confirmed > used:
@@ -78,6 +84,7 @@ def account_attribution(quota, user_ids):
         return {**result, 'status': 'available', 'confirmedPercent': float(confirmed),
                 'unattributedPercent': float(used-confirmed),
                 'ownerConfirmedPercent': float(manual_total), 'automaticPercent': float(confirmed-manual_total),
+                'concurrentEstimatedPercent': float(weighted_total), 'partialConcurrentEstimate': partial_estimate,
                 'automaticMonitor': document.get('monitor'),
                 'deviceShares': [{'userId': uid, 'deviceId': did, 'usedPercent': float(amount)} for (uid,did),amount in device_amounts.items()],
                 'members': [{'userId': uid, 'usedPercent': float(amount), 'evidence': evidence[uid]}

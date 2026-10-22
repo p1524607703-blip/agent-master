@@ -1,8 +1,8 @@
-"""Conservative device attribution inferred from monitored activity, never official billing.
+"""Observed activity attribution with explicitly estimated concurrent quota allocation.
 
 A quota counter is rounded and account-wide. Carry all candidate sources until it
-moves and retain a 30-minute overlap guard for delayed reporting. Mixed sources,
-gaps and corrections are left unallocated. This cannot cover unmonitored clients.
+moves, retaining a 30-minute overlap warning for delayed reporting. Concurrent
+sources use observed interval Token weights; gaps and corrections remain unallocated. This cannot cover unmonitored clients.
 """
 import asyncio
 import fcntl
@@ -51,86 +51,158 @@ def atomic(path, value):
             os.unlink(tmp)
 
 
+def proportional_points(points, weights):
+    """Allocate integer micro-percentage points with deterministic largest remainders."""
+    unit = Decimal('0.000001')
+    micros = int((points/unit).to_integral_value(rounding='ROUND_DOWN'))
+    total = sum(weights.values())
+    base = {did:micros*weight//total for did,weight in weights.items()}
+    remainder = micros-sum(base.values())
+    order = sorted(weights, key=lambda did: (-(micros*weights[did] % total), did))
+    for did in order[:remainder]:
+        base[did] += 1
+    return {did:Decimal(amount)*unit for did,amount in base.items()}
+
+
 def advance(document, sample):
-    """Pure transition. Replay safe: automatic entries and cursor share one atomic file."""
+    """Observed Tokens remain exact; concurrent quota shares are explicitly estimated.
+
+    Consume only new official points and new counter differences. Previously
+    confirmed/inferred history is never redistributed. A pending batch waits for an active
+    source's first measurable result, independently of later quota changes.
+    """
     document = json.loads(json.dumps(document))
     window, plan = sample['window'], sample['planType']
     at, used = sample['capturedAt'], Decimal(str(window['usedPercent']))
-    sources = sample['sources']
     identity = [window['resetsAt'], window['windowDurationMins'], plan]
-    state = document.get('autoState')
-    same = bool(state and state.get('window') == identity)
+    state = document.get('autoState') or {}
+    same = state.get('window') == identity
     if same and state.get('capturedAt') and stamp(at) <= stamp(state['capturedAt']):
         return document
     if not same:
-        # Preserve old automatic history in the same bounded audit document.
-        state = {'window':identity, 'candidates':[], 'blocked':False, 'usedPercent':float(used), 'boundaryAt':sample['startedAt']}
+        state = {'window':identity, 'usedPercent':float(used), 'boundaryAt':sample['startedAt'],
+                 'sources':{}, 'candidates':[], 'blocked':False}
     if not sample['healthy']:
-        # Do not consume a quota boundary while any required source is unavailable.
         state['blocked'] = True
-        state['healthFailureAt'] = at
         document['autoState'] = state
-        document['monitor'] = {'status':'paused', 'capturedAt':at, 'reason':sample.get('reason', 'coverage-unavailable'),
-                               'scope':'monitored-sources-only', 'reportingGuardSeconds':REPORTING_GUARD}
+        document['monitor'] = {'status':'paused', 'capturedAt':at,
+                               'reason':sample.get('reason','coverage-unavailable'),
+                               'scope':'monitored-sources-only', 'allocationVersion':2}
         return document
-    previous_sources = state.get('sources', {}) if same else {}
-    by_id = {row['deviceId']:row for row in sources}
+    by_id = {row['deviceId']:row for row in sample['sources']}
+    previous = state.get('sources', {}) if same else {}
+    # Upgrade takes the last old sample as a new measurement baseline; it never
+    # redistributes points allocated by a previous version.
+    baseline = state.get('weightBaseline', previous) if same else {}
     candidates = set(state.get('candidates', []))
-    blocked = state.get('blocked', False)
     recent = set()
-    if same and 'capturedAt' in state and stamp(at)-stamp(state['capturedAt']) > MAX_GAP:
+    blocked = bool(state.get('blocked'))
+    if same and state.get('capturedAt') and stamp(at)-stamp(state['capturedAt']) > MAX_GAP:
         blocked = True
-    for did, row in by_id.items():
-        old = previous_sources.get(did)
-        active = row['events'] > 0 if not same else row['events'] > (old or {}).get('events', 0)
-        if old and any(row[k] < old[k] for k in ('events','tokens','unknown')):
+    for did,row in by_id.items():
+        old = previous.get(did, {})
+        if any(row[k] < old.get(k,0) for k in ('events','tokens')):
             blocked = True
-        # Unknown Token quantities still have a known device identity. They
-        # count as source activity, not as an unidentified account client.
-        active = active or row['unknown'] > (old or {}).get('unknown', 0)
-        if active or row.get('inFlight'):
+        if row['events'] > old.get('events',0) or row['unknown'] > old.get('unknown',0) or row.get('inFlight'):
             candidates.add(did)
         if row.get('recentActivity') or (row.get('lastActivityAt') and stamp(at)-stamp(row['lastActivityAt']) <= REPORTING_GUARD):
             recent.add(did)
-    if set(previous_sources)-set(by_id):
+    if set(previous)-set(by_id):
         blocked = True
-    records = document.get('confirmations', []) + document.get('automatic', [])
-    allocated = sum((Decimal(str(e['usedPercent'])) for e in records if matches(e, window, plan)), Decimal(0))
-    before = Decimal(str(state['usedPercent']))
-    correction = same and used < before
-    blocked = blocked or state.get('correction', False) or correction
-    delta = max(Decimal(0), used-before) if same else max(Decimal(0), used-allocated)
-    assignable = min(delta, max(Decimal(0), used-allocated))
-    # An initial complete period has a stricter sole-source test than later intervals.
-    if not same:
-        candidates = {did for did,row in by_id.items() if row['events'] or row['unknown'] or row.get('inFlight') or row.get('recentActivity')}
-    boundary_sources = candidates | recent
-    eligible = next(iter(boundary_sources)) if len(boundary_sources) == 1 else None
-    owner = by_id.get(eligible, {})
+    records = document.get('confirmations',[]) + document.get('automatic',[])
+    allocated = sum((Decimal(str(row['usedPercent'])) for row in records if matches(row,window,plan)),Decimal(0))
+    if not same and used == allocated and allocated > 0:
+        # Owner-confirmed history is a closed baseline, not future estimation weight.
+        baseline, candidates = by_id, set()
+        state['boundaryAt'] = at
+    correction = bool(state.get('correction')) or (same and used < Decimal(str(state['usedPercent'])))
+    blocked = blocked or correction
+    delta = max(Decimal(0),used-Decimal(str(state['usedPercent']))) if same else max(Decimal(0),used-allocated)
+    pending = min(max(Decimal(0),used-allocated),Decimal(str(state.get('pendingPoints',0)))+delta)
     reason = 'no-new-quota'
-    if delta > 0:
-        reason = 'coverage-gap-or-counter-correction' if blocked else 'multiple-or-unknown-sources'
-        if eligible and (owner.get('events') or owner.get('unknown') or owner.get('inFlight') or owner.get('recentActivity')) and not blocked and type(owner.get('userId')) is int and owner['userId'] in sample['userIds'] and assignable > 0:
-            digest = hashlib.sha256(json.dumps([identity,at,float(used),eligible],separators=(',',':')).encode()).hexdigest()[:24]
-            entry = {'confirmationId':'auto-'+digest, 'userId':owner['userId'], 'deviceId':eligible,
-                     'usedPercent':float(assignable), 'planType':plan, 'resetsAt':window['resetsAt'],
-                     'windowDurationMins':window['windowDurationMins'], 'confirmedAt':at,
-                     'method':'observed-exclusive-interval' if same else 'observed-exclusive-period',
-                     'intervalStartedAt':state.get('boundaryAt', sample['startedAt']),
-                     'scope':'monitored-sources-only', 'officialDeviceBilling':False}
-            document.setdefault('automatic', []).append(entry)
+    status = 'active'
+    weights = {did:row['tokens']-baseline.get(did,{}).get('tokens',0) for did,row in by_id.items()
+               if row['tokens'] > baseline.get(did,{}).get('tokens',0)}
+    waiting = sorted(did for did in candidates if did not in weights)
+    boundary_sources = candidates | recent
+    sole = next(iter(boundary_sources)) if len(boundary_sources)==1 else None
+    entries = []
+    settled = False
+    if blocked:
+        reason = 'coverage-gap-or-counter-correction'
+        # The gap's points stay unallocated; subsequent clean intervals start fresh.
+        pending = Decimal(0)
+        baseline, candidates = by_id, set()
+    elif pending > 0:
+        if sole and sole in by_id and by_id[sole]['userId'] in sample['userIds'] and (by_id[sole]['events'] or by_id[sole]['unknown'] or by_id[sole].get('inFlight')):
+            shares = {sole:pending}
+            method = 'observed-exclusive-interval' if same else 'observed-exclusive-period'
             reason = 'exclusive-source-inferred'
-        # A mixed/failed boundary stays unallocated; never silently backfill it later.
-        candidates = set()
-        blocked = bool(correction or state.get('correction', False))
-    document['autoState'] = {'window':identity, 'capturedAt':at, 'usedPercent':float(used),
-                             'sources':by_id, 'candidates':sorted(candidates), 'blocked':blocked,
-                             'boundaryAt':at if delta > 0 else state.get('boundaryAt', sample['startedAt']),
-                             'correction':bool(correction or state.get('correction', False))}
-    document['monitor'] = {'status':'reconciliation-required' if allocated > used or correction else 'active',
-                           'capturedAt':at, 'reason':reason, 'scope':'monitored-sources-only',
-                           'reportingGuardSeconds':REPORTING_GUARD}
+        elif weights and not waiting:
+            shares = proportional_points(pending,weights)
+            method = 'observed-token-weighted-interval'
+            reason = 'concurrent-token-estimate'
+        else:
+            shares = {}
+            method = None
+            reason = 'awaiting-device-measurement' if waiting else 'no-measurable-activity'
+        if shares:
+            key = hashlib.sha256(json.dumps([identity,at,str(pending),sorted(weights.items()),method],separators=(',',':')).encode()).hexdigest()[:24]
+            incomplete = any(row['unknown'] > baseline.get(did,{}).get('unknown',0) or row.get('inFlight')
+                             for did,row in by_id.items() if did in candidates) or (method=='observed-token-weighted-interval' and bool(boundary_sources-set(weights)))
+            for did,amount in shares.items():
+                owner=by_id[did]
+                if owner['userId'] not in sample['userIds'] or amount<=0:
+                    continue  # Its weight stays in denominator; its share stays unassigned.
+                record_key='auto-'+hashlib.sha256(json.dumps([identity,did,method],separators=(',',':')).encode()).hexdigest()[:24]
+                existing=next((row for row in document.get('automatic',[]) if row['confirmationId']==record_key),None)
+                if existing:
+                    existing['usedPercent']=float(Decimal(str(existing['usedPercent']))+amount)
+                    existing['confirmedAt']=at
+                    existing['batches']=existing.get('batches',1)+1
+                    existing['partialMeasurement']=existing.get('partialMeasurement',False) or incomplete
+                else:
+                    document.setdefault('automatic',[]).append({
+                        'confirmationId':record_key,'userId':owner['userId'],'deviceId':did,
+                        'usedPercent':float(amount),'planType':plan,'resetsAt':window['resetsAt'],
+                        'windowDurationMins':window['windowDurationMins'],'confirmedAt':at,
+                        'method':method,'scope':'monitored-sources-only','officialDeviceBilling':False,
+                        'firstConfirmedAt':at,'batches':1,'partialMeasurement':incomplete})
+                entries.append({'deviceId':did,'userId':owner['userId'],'usedPercent':float(amount)})
+            document.setdefault('pendingAudit',[]).append({
+                'schemaVersion':1,'decisionId':key,'window':identity,'quotaUsedPercent':float(used),
+                'points':float(pending),'startedAt':state.get('boundaryAt',sample['startedAt']),
+                'endedAt':at,'method':method,'basis':'observed-total-token-deltas',
+                'weights':weights,'allocations':entries,'partialMeasurement':incomplete,
+                'missingMeasurementSources':waiting})
+            baseline, candidates, pending = by_id,set(),Decimal(0)
+            settled = True
+    if correction or allocated>used:
+        status='reconciliation-required'
+    new_boundary = at if settled or blocked else state.get('boundaryAt',sample['startedAt'])
+    document['autoState']={'allocationVersion':2,'window':identity,'capturedAt':at,'usedPercent':float(used),
+                           'sources':by_id,'weightBaseline':baseline,'candidates':sorted(candidates),
+                           'pendingPoints':float(pending),'blocked':bool(correction),
+                           'correction':correction,'boundaryAt':new_boundary}
+    document['monitor']={'status':status,'capturedAt':at,'reason':reason,'scope':'monitored-sources-only',
+                         'allocationVersion':2,'pendingSettlementPercent':float(pending),
+                         'waitingDeviceIds':waiting if pending>0 else [],
+                         'weightBasis':'observed-total-token-deltas', 'reportingGuardSeconds':REPORTING_GUARD}
     return document
+
+
+def drain_audit(path, document):
+    """Outbox is committed with allocations. Journal replay may repeat IDs, never quota."""
+    for decision in document.get('pendingAudit',[]):
+        reset=decision['window'][0]
+        journal=path.with_name(path.stem+'.audit.'+str(reset)+'.jsonl')
+        with os.fdopen(os.open(journal,os.O_WRONLY|os.O_APPEND|os.O_CREAT,0o600),'a') as stream:
+            os.chmod(journal,0o600)
+            stream.write(json.dumps(decision,separators=(',',':'))+'\n')
+            stream.flush();os.fsync(stream.fileno())
+    if document.get('pendingAudit'):
+        document['pendingAudit']=[]
+        atomic(path,document)
 
 
 async def activity_sample():
@@ -192,6 +264,7 @@ async def reconcile():
         os.chmod(lock.name,0o600)
         fcntl.flock(lock,fcntl.LOCK_EX)
         document = private_json(path)
+        drain_audit(path, document)
         try:
             sample = await asyncio.wait_for(activity_sample(), 20)
             document = advance(document, sample)
@@ -201,4 +274,5 @@ async def reconcile():
             document['monitor'] = {'status':'paused', 'capturedAt':datetime.now(timezone.utc).isoformat(),
                                    'reason':'source-sampling-unavailable', 'scope':'monitored-sources-only'}
         atomic(path, document)
+        drain_audit(path, document)
         return document['monitor']

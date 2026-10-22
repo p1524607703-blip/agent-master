@@ -1,10 +1,10 @@
 export type Attribution = {
   status:string; capturedAt?:string; startedAt?:string; resetsAt?:number; windowDurationMins?:number;
   usedPercent:number|null; remainingPercent:number|null; confirmedPercent:number|null; unattributedPercent:number|null;
-  ownerConfirmedPercent?:number; automaticPercent?:number;
-  automaticMonitor?:{status:string; capturedAt:string; reason:string};
+  ownerConfirmedPercent?:number; automaticPercent?:number; concurrentEstimatedPercent?:number; partialConcurrentEstimate?:boolean;
+  automaticMonitor?:{status:string; capturedAt:string; reason:string; pendingSettlementPercent?:number; waitingDeviceIds?:string[]};
   deviceShares?:{userId:number; deviceId:string; usedPercent:number}[];
-  members:{userId:number; usedPercent:number; evidence:{method:string; confirmedAt:string}[]}[];
+  members:{userId:number; usedPercent:number; evidence:{method:string; confirmedAt:string; partialMeasurement?:boolean}[]}[];
 }
 
 export function confirmedShare(value:Attribution|undefined, userId:number, fresh:boolean):number|null {
@@ -17,5 +17,13 @@ export function attributionMethod(value:Attribution|undefined, userId:number):st
   const evidence = value?.members.find(row=>row.userId===userId)?.evidence || []
   const manual = evidence.some(e=>e.method==='owner-confirmed')
   const automatic = evidence.some(e=>e.method.startsWith('observed-exclusive-'))
+  const weighted = evidence.some(e=>e.method==='observed-token-weighted-interval')
+  if (weighted) return [manual ? '本人确认' : '', automatic ? '单一来源推定' : '', '并发用量估算'].filter(Boolean).join('＋')
   return manual && automatic ? '本人确认＋自动推定' : automatic ? '单一来源自动推定' : manual ? '本人确认归属' : '暂无已归属消耗'
+}
+
+export function allocationLabel(value:number|null):string {
+  if (value===null || !Number.isFinite(value) || value<0 || value>100) return '—'
+  if (value>0 && value<0.0001) return '<0.0001%'
+  return `${value.toLocaleString('zh-CN',{minimumFractionDigits:1,maximumFractionDigits:4})}%`
 }
