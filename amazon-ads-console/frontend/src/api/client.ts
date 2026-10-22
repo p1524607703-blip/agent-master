@@ -8,8 +8,8 @@ function authHeaders(): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {}
 }
 
-export async function getJsonStrict<T>(path: string): Promise<T> {
-  const response = await tracedFetch(`${API_BASE}${path}`, { headers: authHeaders() })
+export async function getJsonStrict<T>(path: string, options: { signal?: AbortSignal } = {}): Promise<T> {
+  const response = await tracedFetch(`${API_BASE}${path}`, { headers: authHeaders(), signal: options.signal })
   if (!response.ok) throw new Error(`数据读取失败（${response.status}）`)
   return await response.json() as T
 }

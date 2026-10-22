@@ -35,6 +35,7 @@ from typing import Any, Optional
 
 from .app_db import query_rows as app_query_rows
 from .rds_query import query_one, query_rows
+from .build_cache import build_cache
 
 # 运营组前缀（campaign_name 首段）→ 运营姓名
 OPERATOR_NAMES = {
@@ -369,13 +370,23 @@ REPORT_SPECS = [
 
 
 def reports():
+    # Import counts include replacements and are NOT the current fact row count.
+    # Use them only to invalidate the shared exact-coverage snapshot.
+    tables = ",".join("'" + table + "'" for _, table, _ in REPORT_SPECS)
+    revision = query_one(f"""
+        SELECT COALESCE(max(batch_id),0)::bigint AS revision
+        FROM core.import_batches WHERE target_table IN ({tables})
+    """) or {}
+    return build_cache.get_or_set_report_catalog(str(revision.get("revision") or 0), _reports_uncached)
+
+
+def _reports_uncached():
     out = []
-    for label, table, metric in REPORT_SPECS:
-        metric_sql = f"COALESCE(sum({metric}),0)::float8" if metric else "NULL::float8"
+    for label, table, _ in REPORT_SPECS:
         for r in query_rows(f"""
             SELECT account_id, max(account_name) AS account_name,
                    min(stat_date)::text AS min_date, max(stat_date)::text AS max_date,
-                   count(*)::int AS rows, {metric_sql} AS metric_sum,
+                   count(*)::int AS rows,
                    count(source_file_name)::int AS lineage_rows
             FROM {table} GROUP BY account_id ORDER BY account_name
         """):

@@ -120,9 +120,11 @@ def workbook(rows, *, money_columns=(), numeric_columns=()):
 
 
 def _meta(payload, subject):
+    mode = payload.get('sbAttributionMode')
+    mode_label = {'name':'按活动命名', 'asin':'按推广ASIN'}.get(mode, '历史快照原口径')
     return [
         [f"AdSight · {subject}"],
-        [f"报告周期：{payload.get('period','daily')}  日期：{payload.get('data_date','')}  来源：CPO控制台同口径快照"],
+        [f"报告周期：{payload.get('period','daily')}  日期：{payload.get('data_date','')}  SB费用归属：{mode_label}  来源：CPO控制台同口径快照"],
         ["数据完整性：" + ("待核验 / 非最终口径" if payload.get("final_cpo") is False else "按页面数据状态判定") +
          "；DSP暂无正式并入口径时留空，不参与总花费；任何缺失值保留为空。"],
     ]

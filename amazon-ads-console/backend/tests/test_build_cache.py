@@ -124,6 +124,17 @@ class RedisBuildCacheTests(unittest.TestCase):
         self.assertEqual(cache.get_or_set("2026-10-04", "2026-10-04", "581", loader), {"n": 1})
         self.assertEqual(cache.get_or_set("2026-10-04", "2026-10-04", "581", loader), {"n": 2})
 
+    def test_report_catalog_reuses_snapshot_until_import_revision_changes(self):
+        fake = _FakeRedis()
+        cache = RedisBuildCache(client=fake, enabled=True)
+        load = Mock(side_effect=[[{"rows": 20}], [{"rows": 23}]])
+        self.assertEqual(cache.get_or_set_report_catalog("1", load), [{"rows": 20}])
+        self.assertEqual(cache.get_or_set_report_catalog("1", load), [{"rows": 20}])
+        self.assertEqual(cache.get_or_set_report_catalog("2", load), [{"rows": 23}])
+        self.assertEqual(load.call_count, 2)
+        self.assertEqual(cache.clear(), 2)
+        self.assertEqual(fake.data, {})
+
     def test_clear_removes_build_keys(self):
         fake = _FakeRedis()
         cache = RedisBuildCache(client=fake, enabled=True)

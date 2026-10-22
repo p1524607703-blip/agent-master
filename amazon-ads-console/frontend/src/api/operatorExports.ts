@@ -1,15 +1,16 @@
 import { API_BASE, AUTH_TOKEN_KEY } from './client'
+import { sbModeLabel, type SbAttributionMode } from './cpoReport'
 
 type Period = 'daily' | 'weekly' | 'monthly'
 type Kind = 'summary' | 'all' | 'detail'
 
 /** Download binary from the server, never from a cached/filtered UI table. */
 export async function downloadOperatorReport(
-  kind: Kind, period: Period, date: string, operator?: string
+  kind: Kind, period: Period, date: string, operator?: string, sbAttributionMode: SbAttributionMode = 'name'
 ): Promise<void> {
   const token = localStorage.getItem(AUTH_TOKEN_KEY)
   if (!token) throw new Error('登录已失效，请重新登录')
-  const params = new URLSearchParams({ period })
+  const params = new URLSearchParams({ period, sb_attribution_mode: sbAttributionMode })
   if (date) params.set('date', date)
   let path = '/operator-reports/summary.xlsx'
   if (kind === 'all') path = '/operator-reports/all.zip'
@@ -39,7 +40,7 @@ export async function downloadOperatorReport(
     const name = kind === 'all' ? '全部运营报表' : kind === 'detail' ? (operator + '_运营明细') : '所有成员概览'
     const link = document.createElement('a')
     link.href = ref
-    link.download = name + '_' + (date || '最新') + (kind === 'all' ? '.zip' : '.xlsx')
+    link.download = name + '_' + (date || '最新') + '_' + sbModeLabel(sbAttributionMode).replaceAll(' ', '') + (kind === 'all' ? '.zip' : '.xlsx')
     document.body.appendChild(link)
     link.click()
     link.remove()

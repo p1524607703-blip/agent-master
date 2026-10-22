@@ -1,8 +1,9 @@
 """Operator CPO service based on explicit product mappings and the new one-report-one-table facts.
 
 Hard rules enforced here:
-- confirmed account/campaign accounting rules precede child/parent identity for SB mixed campaigns;
-- child/parent mappings are primary; exact operator-product campaign prefix is an ad-only identity fallback when Amazon omits usable advertised ASIN detail.
+- SB financial ownership is explicitly selectable: unique scoped campaign naming (default),
+  or actual advertised ASIN evidence. Confirmed financial-owner rules only apply in name mode.
+- other ad types retain child/parent identity and scoped exact-name fallback.
 - product codes are exact identities; suffixes such as S71W/W81女/W823男 are never stripped.
 - daily eligibility is the explicit mapped product intersected with the business-report parent ASINs present that day.
 - spend/orders from advertised-product facts; purchased-product facts are a separate attribution validation source and are never added to spend.
@@ -19,7 +20,7 @@ from typing import Any, Optional
 from fastapi import HTTPException
 from app.core.observability import increment, update_context
 
-from .cpo_identity import AdIdentityResolver, CampaignOwnerRules, FullFunnelLedger
+from .cpo_identity import AdIdentityResolver, CampaignOwnerRules, FullFunnelLedger, resolve_sb_accounting
 from .full_funnel_visibility import full_funnel_for_viewer
 
 # All product identities are read through the V2 mapping interface.
@@ -50,6 +51,12 @@ AD_PRODUCT_TYPE_MAP = {
 def _classify_ad_type(ad_product: str) -> str:
     """Latest CPO rule: classify directly by Amazon ad product, never infer from campaign names."""
     return AD_PRODUCT_TYPE_MAP.get((ad_product or "").strip(), "")
+
+
+def _sb_mode(value: str) -> str:
+    if value not in ('name', 'asin'):
+        raise HTTPException(status_code=422, detail='Invalid SB attribution mode')
+    return value
 
 
 def _operator_name(group: str) -> str:
@@ -445,7 +452,9 @@ def _new_product(meta: dict[str, str]) -> dict[str, Any]:
     }
 
 
-def _build_uncached(start: str, end: str, revision: Optional[str] = None) -> dict[str, Any]:
+def _build_uncached(start: str, end: str, revision: Optional[str] = None,
+                    sb_attribution_mode: str = 'name') -> dict[str, Any]:
+    sb_attribution_mode = _sb_mode(sb_attribution_mode)
     revision = revision or _data_revision()
     parent_mapping = _mapping()
     child_mapping = _child_mapping()
@@ -724,7 +733,7 @@ def _build_uncached(start: str, end: str, revision: Optional[str] = None) -> dic
             identity_resolver.observe(evidence,evidence_scope,evidence_meta)
     unmapped_ad = {"spend":0.0,"orders":0.0,"sales":0.0,"parents":set(),"rows":0}
     unknown_ad_types: set[str] = set()
-    ad_audit={"childExactRows":0,"parentFallbackRows":0,"campaignPrefixRows":0,"unmappedRows":0,"ambiguousScopeRows":0,"confirmedCampaignRows":0,"campaignRuleReviewRows":0}
+    ad_audit={"childExactRows":0,"parentFallbackRows":0,"campaignPrefixRows":0,"unmappedRows":0,"ambiguousScopeRows":0,"confirmedCampaignRows":0,"campaignRuleReviewRows":0,"sbNameRows":0,"sbPendingRows":0}
     for row in ad_rows:
         parent=row.get("parent_asin") or ""; child=row.get("child_asin") or ""
         ad_account=row.get("account_name") or ""
@@ -739,11 +748,19 @@ def _build_uncached(start: str, end: str, revision: Optional[str] = None) -> dic
             continue
         meta,method=resolve_meta(account_scope,child,parent)
         source_meta = meta
-        rule_meta, rule_method, rule = campaign_rules.resolve(row,account_scope,source_meta)
+        is_sb = _classify_ad_type(row.get('ad_product') or '') == 'SB'
+        rule = None
+        if is_sb:
+            meta, method, rule = resolve_sb_accounting(
+                row, account_scope, source_meta, method, identity_resolver, campaign_rules,
+                sb_attribution_mode, blocked_source=(account_scope,child) in blocked_child_keys)
+            if meta and sb_attribution_mode == 'name':
+                ad_audit['sbNameRows'] += int(row.get('rows') or 0)
+            elif not meta:
+                ad_audit['sbPendingRows'] += int(row.get('rows') or 0)
         if rule is not None:
-            meta,method = rule_meta,rule_method
             ad_audit['confirmedCampaignRows' if meta else 'campaignRuleReviewRows'] += int(row.get('rows') or 0)
-        if not meta and rule is None and (account_scope,child) not in blocked_child_keys:
+        if not is_sb and not meta and (account_scope,child) not in blocked_child_keys:
             meta,method=identity_resolver.resolve(row,account_scope)
         if not meta:
             if row['ad_product']=='Full-Funnel':
@@ -760,22 +777,24 @@ def _build_uncached(start: str, end: str, revision: Optional[str] = None) -> dic
         else:
             ad_audit["campaignPrefixRows"] += int(row.get("rows") or 0)
         p=bucket(meta,account_scope)
-        if rule is None:
+        if not is_sb and rule is None:
             review = identity_resolver.cost_review(row,account_scope,meta)
             if review:
                 p['campaignCostReviews'].append(review)
-        if rule is None:
+        if not (is_sb and sb_attribution_mode == 'name'):
             if child and child not in ("-1",) and not child.startswith("__"): p["childAsins"].add(child)
             if parent: p["parentAsins"].add(parent)
         else:
             # The budget owner must not inherit another product's ASIN relationship.
-            p['parentAsins'].add(meta['parentAsin'])
+            if meta.get('parentAsin'):
+                p['parentAsins'].add(meta['parentAsin'])
             p['campaignCostAllocations'].append({
-                'ruleId':rule['rule_id'],'date':row['stat_date'],'account':ad_account,
+                'ruleId':rule['rule_id'] if rule else None,'date':row['stat_date'],'account':ad_account,
                 'campaignId':row['campaign_id'],'campaignName':row['campaign_name'],
-                'adProduct':row['ad_product'],'sourceProduct':source_meta['productCode'],
+                'adProduct':row['ad_product'],'sourceProduct':(source_meta or {}).get('productCode'),
                 'targetProduct':meta['productCode'],'spend':round(float(row.get('spend') or 0),2),
                 'adOrders':float(row.get('ad_orders') or 0),
+                'attributionMode':sb_attribution_mode,'method':method,
             })
         p["allocationMethods"].add(method)
         p["adAccounts"].add(ad_account or row.get("account_id") or "")
@@ -810,10 +829,10 @@ def _build_uncached(start: str, end: str, revision: Optional[str] = None) -> dic
         scope=resolve_ad_scope(ad_account,child,parent,row.get("stat_date") or "",row.get("campaign_name") or "")
         if not scope or scope.startswith("__AMS_"):
             purchased_unmapped_rows += int(row.get("rows") or 0); continue
-        meta,_=resolve_meta(scope,child,parent)
-        rule_meta,_,rule=campaign_rules.resolve(row,scope,meta)
-        if rule is not None:
-            meta=rule_meta
+        meta,method=resolve_meta(scope,child,parent)
+        if _classify_ad_type(row.get('ad_product') or '') == 'SB':
+            meta,_,_=resolve_sb_accounting(row,scope,meta,method,identity_resolver,campaign_rules,
+                sb_attribution_mode,blocked_source=(scope,child) in blocked_child_keys)
         if not meta:
             purchased_unmapped_rows += int(row.get("rows") or 0); continue
         p=bucket(meta,scope)
@@ -873,21 +892,23 @@ def _build_uncached(start: str, end: str, revision: Optional[str] = None) -> dic
         "mappingCount":len(parent_mapping),"childMappingCount":len(child_mapping),"sourceDays":_source_days(start,end,revision),
         "businessSource":business_source,"businessAudit":business_audit,"adMappingAudit":ad_audit,
         "amsScopeAudit":ams_scope_audit,"canonicalAdLineage":True,
+        "sbAttributionMode":sb_attribution_mode,
     }
 
 
-def _build(start: str, end: str) -> dict[str, Any]:
+def _build(start: str, end: str, sb_attribution_mode: str = 'name') -> dict[str, Any]:
+    sb_attribution_mode = _sb_mode(sb_attribution_mode)
     revision = _data_revision()
     def loader():
         started = time.perf_counter()
         try:
-            return _build_uncached(start, end, revision)
+            return _build_uncached(start, end, revision, sb_attribution_mode)
         finally:
             increment('build_ms', (time.perf_counter() - started) * 1000)
     return build_cache.get_or_set(
         start,
         end,
-        revision,
+        revision + ':sb-attribution-v1:' + sb_attribution_mode,
         loader,
     )
 
@@ -940,7 +961,8 @@ def _summarize(data: dict[str, Any]) -> list[dict[str, Any]]:
             "missingBusinessProducts": len({(p["code"], p.get("parentAsin")) for p in missing_report_ps}),
             "status": status, "finalCpo": final_ok, "unpairedAdSpend": round(missing_business_spend, 2),
             "purchasedValidationOrders": round(sum(p["purchasedValidationOrders"] for p in ps), 2),
-            "scope": "Child ASIN优先→产品代号→运营；缺Child映射时才安全回退Parent；账户边界保留。",
+            "scope": ("SB按活动命名确定费用归属；其他广告按推广商品归属；账户边界保留。" if data.get('sbAttributionMode') == 'name'
+                      else "推广ASIN→产品代号→运营；SB不应用命名费用覆盖；账户边界保留。"),
         })
     rows.sort(key=lambda r: -float(r["spend"] or 0))
     unmapped = data["unmappedAd"]
@@ -951,8 +973,9 @@ def _summarize(data: dict[str, Any]) -> list[dict[str, Any]]:
             "adSales": round(unmapped["sales"], 2), "totalOrders": None, "totalSales": None,
             "cpo": None, "roas": round(unmapped["sales"] / unmapped["spend"], 2) if unmapped["spend"] else None,
             "tacos": None, "products": len(unmapped["parents"]), "dataProducts": None,
-            "status": "缺产品映射", "unpairedAdSpend": round(unmapped["spend"], 2),
-            "scope": "无明确Child/Parent映射的数据不猜测归属，不进入任何运营CPO。",
+            "status": "广告归属待核验", "unpairedAdSpend": round(unmapped["spend"], 2),
+            "scope": ("SB命名或已确认活动规则待核验，或其他广告商品/账户归属不明确；不猜测、不进入任何运营CPO。"
+                      if data.get('sbAttributionMode') == 'name' else "推广商品或账户归属不明确的数据单独保留，不猜测归属、不进入任何运营CPO。"),
         })
     return rows
 
@@ -991,7 +1014,9 @@ def _quality_reasons(data: dict[str, Any], source: dict[str, Any], expected: int
     return reasons
 
 
-def operator_cpo_summary(stat_date: Optional[str] = None, period: str = "daily") -> dict[str, Any]:
+def operator_cpo_summary(stat_date: Optional[str] = None, period: str = "daily",
+                         sb_attribution_mode: str = 'name') -> dict[str, Any]:
+    sb_attribution_mode = _sb_mode(sb_attribution_mode)
     period = period if period in ("daily", "weekly", "monthly") else "daily"
     anchor = stat_date or _latest_complete_date()
     update_context(date=anchor, period=period)
@@ -1000,10 +1025,11 @@ def operator_cpo_summary(stat_date: Optional[str] = None, period: str = "daily")
             "data_source": "child_asin_first_three_report_cpo", "period": period,
             "operators": [], "coverageDays": 0, "expectedDays": 0, "account_split": False,
             "final_cpo": False, "note": "没有业务报告 + 推广的商品 + 达成转化的商品三项同时完整的日期。",
+            "sbAttributionMode":sb_attribution_mode,
         }
     date.fromisoformat(anchor)
     start, end = _period_range(anchor, period)
-    data = _build(start, end)
+    data = _build(start, end, sb_attribution_mode)
     rows = _summarize(data)
     expected = (date.fromisoformat(end) - date.fromisoformat(start)).days + 1
     src = data["sourceDays"]
@@ -1025,6 +1051,7 @@ def operator_cpo_summary(stat_date: Optional[str] = None, period: str = "daily")
     )
     return {
         "data_source": "child_asin_first_three_report_cpo", "data_date": anchor, "period": period,
+        "sbAttributionMode":sb_attribution_mode,
         "period_start": start, "period_end": end, "coverageDays": complete_days, "expectedDays": expected,
         "account_split": True, "operators": rows, "sourceCompleteness": src, "final_cpo": final_cpo,
         "qualityReasons": _quality_reasons(data, src, expected, period),
@@ -1042,14 +1069,16 @@ def operator_cpo_summary(stat_date: Optional[str] = None, period: str = "daily")
         "note": (
             f"{start}~{end}：只使用三项来源同时完整的日期。业务分母优先子ASIN日报，整日缺child才回退旧Parent报告；"
             f"BLOOMNEXT/JOOMRA DIRECT按同名业务账户配对；AMS/anac1973按广告活动前缀与大账户唯一匹配；无前缀匹配时才按同日Child/Parent业务账户唯一回退，冲突不猜。"
-            f" 推广商品优先Child ASIN归属花费/广告单；达成转化商品当前仍作为独立校验，SB集合特殊分摊另行实现。"
+            + (" SB费用按活动命名唯一匹配的运营、款号归属；缺失或歧义单独待核验。" if sb_attribution_mode == 'name' else " SB费用按实际推广ASIN归属，不应用命名财务覆盖；缺失证据单独待核验。")
+            + " 已确认活动规则的生效日期、名称及来源商品限制继续生效，条件不满足仍待核验。"
+            + " 其余广告保留推广商品归属规则；达成转化商品作为独立校验，业务分母不随SB模式改变。"
             + no_source_note + mapping_note + whitelist_note
             + (f" 全流域广告活动另列行首，其中${data['fullFunnel']['unallocatedSpend']:.2f}为混合活动待分摊费用。" if data['fullFunnel']['spend']>0 else '')
         ),
         "qualityFlags": [
             "three_source_complete_dates_only", "business_ad_account_pairing",
             "child_asin_mapping_first", "parent_mapping_fallback", "account_scoped_mapping", "ams_campaign_prefix_scope", "canonical_ad_lineage_only", "exact_product_code_no_suffix_stripping",
-            "purchased_product_validation_separate", "business_whitelist_intersection", "out_of_scope_business_audited", "no_campaign_name_inference",
+            "purchased_product_validation_separate", "business_whitelist_intersection", "out_of_scope_business_audited", "sb_financial_owner_" + sb_attribution_mode,
         ],
     }
 
@@ -1138,7 +1167,9 @@ def canonical_operator_name(name: Optional[str]) -> str:
 def operator_cpo_detail(
     name: str, stat_date: Optional[str] = None, period: str = "daily",
     _prebuilt: Optional[dict[str, Any]] = None,
+    sb_attribution_mode: str = 'name',
 ) -> dict[str, Any]:
+    sb_attribution_mode = _sb_mode(sb_attribution_mode)
     name = canonical_operator_name(name)
     period = period if period in ("daily", "weekly", "monthly") else "daily"
     anchor = stat_date or _latest_complete_date()
@@ -1147,10 +1178,13 @@ def operator_cpo_detail(
         return {
             "data_source": "explicit_parent_mapping_three_report_cpo", "operator": name,
             "products": [], "summary": {}, "account_split": False, "final_cpo": False,
+            "sbAttributionMode":sb_attribution_mode,
         }
     date.fromisoformat(anchor)
     start, end = _period_range(anchor, period)
-    data = _prebuilt if _prebuilt is not None else _build(start, end)
+    data = _prebuilt if _prebuilt is not None else _build(start, end, sb_attribution_mode)
+    if data.get('sbAttributionMode', sb_attribution_mode) != sb_attribution_mode:
+        raise ValueError('Prebuilt CPO attribution mode does not match the requested mode')
     raw_ps = [p for p in data["products"] if p["operatorName"] == name]
     portfolio_count = len(data["portfolio"].get(name, set()))
     business_ps_raw = [p for p in raw_ps if p["totalOrders"] is not None]
@@ -1180,6 +1214,7 @@ def operator_cpo_detail(
     )
     return {
         "data_source": "explicit_parent_mapping_three_report_cpo", "operator": name,
+        "sbAttributionMode":sb_attribution_mode,
         "groups": sorted({p["group"] for p in raw_ps}), "account": "已配对业务/广告账户合并",
         "range": anchor if period == "daily" else f"{start}~{end}", "data_date": anchor, "period": period,
         "period_start": start, "period_end": end, "coverageDays": complete_days, "expectedDays": expected,
@@ -1206,11 +1241,13 @@ def operator_cpo_detail(
             "只使用三项来源同时完整的日期；业务侧按已确认产品白名单与当日Child业务报告取交集，"
             "无确认身份的业务商品不猜运营、不进入CPO分母，但保留质量审计。"
             "广告侧未归属花费或明确映射冲突仍会阻断最终CPO。"
+            + (" SB按活动命名确定费用归属；已确认活动规则条件不满足仍待核验。" if sb_attribution_mode == 'name'
+               else " SB按实际推广ASIN确定归属，不使用命名费用覆盖。")
         ),
         "qualityFlags": [
             "three_source_complete_dates_only", "business_ad_account_pairing",
             "child_asin_mapping_first", "parent_mapping_fallback", "account_scoped_mapping", "ams_campaign_prefix_scope", "canonical_ad_lineage_only", "exact_product_code_no_suffix_stripping",
-            "purchased_product_validation_separate", "business_whitelist_intersection", "out_of_scope_business_audited", "no_campaign_name_inference",
+            "purchased_product_validation_separate", "business_whitelist_intersection", "out_of_scope_business_audited", "sb_financial_owner_" + sb_attribution_mode,
         ],
     }
 
@@ -1225,18 +1262,20 @@ def my_cpo_summary(
     stat_date: Optional[str] = None,
     period: str = "daily",
     display_name: Optional[str] = None,
+    sb_attribution_mode: str = 'name',
 ) -> dict[str, Any]:
     """Operator view reuses the same management CPO service, filtered only by group."""
     prefix = operator_group_of(operator_code)
     if not prefix:
         raise HTTPException(status_code=403, detail='An active operator group is required')
-    data = operator_cpo_summary(stat_date, period)
+    data = operator_cpo_summary(stat_date, period, sb_attribution_mode)
     group_name = OPERATOR_NAMES.get(prefix, prefix)
     rows = [
         r for r in data.get("operators", [])
         if any(str(g or "").upper()[:2] == prefix for g in (r.get("groups") or [r.get("group")]))
     ]
-    detail = operator_cpo_detail(group_name, data.get("data_date") or stat_date, period)
+    detail = operator_cpo_detail(group_name, data.get("data_date") or stat_date, period,
+                               sb_attribution_mode=sb_attribution_mode)
     me = {
         "operatorCode": (operator_code or "").strip().upper(),
         "group": prefix, "groupName": group_name,
@@ -1244,7 +1283,7 @@ def my_cpo_summary(
     }
     return {
         **{key: data[key] for key in ('data_source', 'data_date', 'period', 'period_start', 'period_end',
-           'coverageDays', 'expectedDays', 'account_split', 'sourceCompleteness', 'qualityFlags') if key in data},
+           'coverageDays', 'expectedDays', 'account_split', 'sourceCompleteness', 'qualityFlags', 'sbAttributionMode') if key in data},
         "operators": rows,
         "me": me,
         "products": detail.get("products", []),

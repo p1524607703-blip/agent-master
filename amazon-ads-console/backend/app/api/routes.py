@@ -1,5 +1,5 @@
 from urllib.parse import unquote
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple, Literal
 from fastapi import APIRouter, Depends, Query, Header, Request, HTTPException
 from fastapi.responses import JSONResponse
 from app.services.mock_data import JOBS,ISSUES,PRODUCT_RULES,AD_TYPE_RULES
@@ -68,24 +68,26 @@ def _full_funnel_response(data, user):
 
 @router.get('/operator-cpo')
 def operator_cpo(date: Optional[str] = None, period: str = Query('daily'),
+                 sb_attribution_mode: Literal['name','asin'] = 'name',
                  session: Tuple[str, Dict[str, Any]] = Depends(require_session)):
     user = session[1]
     if user.get('roleCode') not in ('management', 'super_admin') and (
             user.get('roleCode') != 'operator' or not operator_group_of(user.get('operatorCode'))):
         raise HTTPException(403, 'An active operator group is required')
     period = period if period in ('daily','weekly','monthly') else 'daily'
-    data = cache.get_or_set(f'operator:summary:{period}:{date or "latest"}', lambda: operator_cpo_summary(date, period), 60)
+    data = cache.get_or_set(f'operator:summary:{sb_attribution_mode}:{period}:{date or "latest"}', lambda: operator_cpo_summary(date, period, sb_attribution_mode), 60)
     if session[1].get('roleCode') == 'operator':
         # Shared totals do not include company-wide full-funnel disclosure.
         data = {k: v for k, v in data.items() if k in {
-            'operators', 'data_date', 'period', 'period_start', 'period_end', 'final_cpo', 'period_label'}}
+            'operators', 'data_date', 'period', 'period_start', 'period_end', 'final_cpo', 'period_label', 'sbAttributionMode'}}
     return _full_funnel_response(data, session[1])
 
 @router.get('/operators/{operator}', dependencies=[Depends(require_operator_access)])
 def operator_view(operator: str, date: Optional[str] = None, period: str = Query('daily'),
+                  sb_attribution_mode: Literal['name','asin'] = 'name',
                   session: Tuple[str, Dict[str, Any]] = Depends(require_operator_access)):
     period = period if period in ('daily','weekly','monthly') else 'daily'
-    data = cache.get_or_set(f'operator:detail:{operator}:{period}:{date or "latest"}', lambda: operator_cpo_detail(operator,date,period), 60)
+    data = cache.get_or_set(f'operator:detail:{operator}:{sb_attribution_mode}:{period}:{date or "latest"}', lambda: operator_cpo_detail(operator,date,period,sb_attribution_mode=sb_attribution_mode), 60)
     if session[1].get('roleCode') != 'operator':
         # Management uses the aggregate disclosure panel, never an operator detail panel.
         return {key: value for key, value in data.items() if key != 'fullFunnel'}
@@ -102,13 +104,14 @@ def operator_view(operator: str, date: Optional[str] = None, period: str = Query
 #   2) 跨全部广告账户汇总（管理页只取单账户），否则运营自己的量分散在多个账户里看不到。
 @router.get('/my-cpo')
 def my_cpo(date: Optional[str] = None, period: str = Query('daily'),
+           sb_attribution_mode: Literal['name','asin'] = 'name',
            session: Tuple[str, Dict[str, Any]] = Depends(require_own_operator_session)):
     period = period if period in ('daily','weekly','monthly') else 'daily'
     user = session[1] or {}
     code = user.get('operatorCode') or user.get('operator_code') or ''
     display_name = user.get('displayName') or user.get('display_name') or ''
-    data = cache.get_or_set(f'my-cpo:{code or "none"}:{display_name}:{period}:{date or "latest"}',
-                            lambda: my_cpo_summary(code, date, period, display_name), 60)
+    data = cache.get_or_set(f'my-cpo:{code or "none"}:{display_name}:{sb_attribution_mode}:{period}:{date or "latest"}',
+                            lambda: my_cpo_summary(code, date, period, display_name, sb_attribution_mode), 60)
     return _full_funnel_response(data, user)
 
 @router.get('/products', dependencies=[Depends(require_management_session)])

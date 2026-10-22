@@ -1,22 +1,23 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { nextTick } from 'vue'
-import DiagnosticsView from '../views/DiagnosticsView.vue'
-import CodexDevicesView from '../views/CodexDevicesView.vue'
 import { canViewDiagnostics } from '../diagnostics/permissions'
 import { enterPage, completePageRender } from '../diagnostics/browserTrace'
-import DashboardView from '../views/DashboardView.vue'
-import CpoJobsView from '../views/CpoJobsView.vue'
-import IssuesView from '../views/IssuesView.vue'
-import RulesView from '../views/RulesView.vue'
-import ReportsView from '../views/ReportsView.vue'
-import OperatorDetailView from '../views/OperatorDetailView.vue'
-import ProductMappingsView from '../views/ProductMappingsView.vue'
-import OperatorCpoView from '../views/OperatorCpoView.vue'
-import MyCpoView from '../views/MyCpoView.vue'
-import LoginView from '../views/LoginView.vue'
-import AllocationView from '../views/AllocationView.vue'
-import DataChangesView from '../views/DataChangesView.vue'
 import { useSessionStore } from '../stores/session'
+
+const DiagnosticsView = () => import('../views/DiagnosticsView.vue')
+const CodexDevicesView = () => import('../views/CodexDevicesView.vue')
+const DashboardView = () => import('../views/DashboardView.vue')
+const CpoJobsView = () => import('../views/CpoJobsView.vue')
+const IssuesView = () => import('../views/IssuesView.vue')
+const RulesView = () => import('../views/RulesView.vue')
+const ReportsView = () => import('../views/ReportsView.vue')
+const OperatorDetailView = () => import('../views/OperatorDetailView.vue')
+const ProductMappingsView = () => import('../views/ProductMappingsView.vue')
+const OperatorCpoView = () => import('../views/OperatorCpoView.vue')
+const MyCpoView = () => import('../views/MyCpoView.vue')
+const LoginView = () => import('../views/LoginView.vue')
+const AllocationView = () => import('../views/AllocationView.vue')
+const DataChangesView = () => import('../views/DataChangesView.vue')
 
 // 已下架模块（2026-09-15 用户要求暂时隐藏，视图文件保留以便随时恢复）：
 //   /products   产品明细 → ProductsView.vue

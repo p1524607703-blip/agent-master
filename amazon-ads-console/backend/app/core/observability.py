@@ -26,7 +26,7 @@ from starlette.responses import JSONResponse
 request_context: ContextVar[Optional[dict[str, Any]]] = ContextVar("cpo_request_context", default=None)
 COUNTERS = ("l1_hit", "l1_miss", "l1_stale", "l2_hit", "l2_miss", "l2_error", "lock_acquired", "lock_timeout", "psql_calls")
 TIMINGS = ("lock_wait_ms", "db_wall_ms", "build_ms", "total_ms")
-CONTEXT_FIELDS = ("user_id", "username", "role", "operator_group", "target_operator", "date", "period", "period_start", "period_end", "revision", "quality")
+CONTEXT_FIELDS = ("user_id", "username", "role", "operator_group", "target_operator", "date", "period", "period_start", "period_end", "revision", "quality", "sb_attribution_mode")
 _REQUEST_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}\Z")
 
 
@@ -56,6 +56,17 @@ def increment(field: str, amount: float = 1) -> None:
     context = request_context.get()
     if context is not None and field in COUNTERS + TIMINGS:
         context[field] += amount
+
+
+def record_query_timing(label: str, elapsed_ms: float, status: str) -> None:
+    """Keep only the 12 slowest queries; labels contain static source names only."""
+    context = request_context.get()
+    if context is None:
+        return
+    timings = context.setdefault("query_timings", [])
+    timings.append({"source": label, "elapsed_ms": round(elapsed_ms, 3), "status": status})
+    timings.sort(key=lambda item: item["elapsed_ms"], reverse=True)
+    del timings[12:]
 
 
 def context_metadata() -> dict[str, Any]:
@@ -201,6 +212,8 @@ class RequestDiagnosticsMiddleware:
             pass
         period = query.get("period", ["daily"])[0]
         context["period"] = period if period in ("daily", "weekly", "monthly") else None
+        mode = query.get("sb_attribution_mode", ["name"])[0]
+        context["sb_attribution_mode"] = mode if mode in ("name", "asin") else None
         token = request_context.set(context)
         response_started = False
 

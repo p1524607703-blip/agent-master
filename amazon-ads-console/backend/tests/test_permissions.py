@@ -101,7 +101,8 @@ class PermissionTests(unittest.TestCase):
 
     def test_my_cpo_ignores_frontend_group_and_omits_global_audit(self):
         data = {'operators': [{'groups': ['XM1'], 'name': '雪敏'}, {'groups': ['AJ1'], 'name': '爱菊'}], 'data_date': '2026-10-04', 'period': 'daily', 'businessUnmappedOrders': 999, 'businessOutOfScopeParents': ['private'], 'note': 'company-wide $999'}
-        def detail(name, *args):
+        def detail(name, *args, **kwargs):
+            self.assertEqual(kwargs.get('sb_attribution_mode'), 'name')
             group = 'XM1' if name == '雪敏' else 'AJ1'
             return {'products': [{'group': group}], 'summary': {}, 'final_cpo': True}
         with patch.object(operator_cpo, 'operator_cpo_summary', return_value=data), patch.object(operator_cpo, 'operator_cpo_detail', side_effect=detail):

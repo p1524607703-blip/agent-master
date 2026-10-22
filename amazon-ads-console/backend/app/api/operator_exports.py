@@ -14,16 +14,16 @@ from app.services.operator_cpo import OPERATOR_NAMES, canonical_operator_name, o
 from app.services.cache import cache
 
 
-def cached_summary(day):
+def cached_summary(day,sb_attribution_mode='name'):
     if day is None:
         return None
-    return cache.get(f"operator:summary:daily:{day}")
+    return cache.get(f"operator:summary:{sb_attribution_mode}:daily:{day}")
 
 
-def cached_detail(name,day):
+def cached_detail(name,day,sb_attribution_mode='name'):
     if day is None:
         return None
-    return cache.get(f"operator:detail:{name}:daily:{day}")
+    return cache.get(f"operator:detail:{name}:{sb_attribution_mode}:daily:{day}")
 from app.services.operator_export_workbooks import (
     summary_xlsx,detail_xlsx,MAX_OPERATORS,MAX_ARCHIVE_BYTES,
 )
@@ -58,14 +58,14 @@ def _valid_date(value):
     return value
 
 
-def _load_summary(day,period):
-    result=cached_summary(day) if period=="daily" else None
-    return result if result is not None else operator_cpo_summary(day,period)
+def _load_summary(day,period,sb_attribution_mode):
+    result=cached_summary(day,sb_attribution_mode) if period=="daily" else None
+    return result if result is not None else operator_cpo_summary(day,period,sb_attribution_mode)
 
 
-def _load_detail(name,day,period):
-    result=cached_detail(name,day) if period=="daily" else None
-    return result if result is not None else operator_cpo_detail(name,day,period)
+def _load_detail(name,day,period,sb_attribution_mode):
+    result=cached_detail(name,day,sb_attribution_mode) if period=="daily" else None
+    return result if result is not None else operator_cpo_detail(name,day,period,sb_attribution_mode=sb_attribution_mode)
 
 
 def _download(content, filename, media_type):
@@ -78,36 +78,39 @@ def _download(content, filename, media_type):
 
 @router.get("/summary.xlsx")
 def download_shared_summary(period:Literal["daily","weekly","monthly"]="daily",
+                            sb_attribution_mode:Literal['name','asin']='name',
                             date:Optional[str]=None, session=Depends(require_session)):
     user = _who(session)
     if not _manager(user) and (user.get('roleCode') != 'operator' or not operator_group_of(user.get('operatorCode'))):
         raise HTTPException(403, 'An active operator group is required')
     _valid_date(date)
-    data=_load_summary(date,period)
-    name=f"all_operators_{(data.get('data_date') or date or 'latest')}.xlsx"
+    data=_load_summary(date,period,sb_attribution_mode)
+    name=f"all_operators_{(data.get('data_date') or date or 'latest')}_sb-{sb_attribution_mode}.xlsx"
     return _download(summary_xlsx(data),name,
                      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 
 @router.get("/operators/{operator}.xlsx")
 def download_operator(operator:str,period:Literal["daily","weekly","monthly"]="daily",
+                      sb_attribution_mode:Literal['name','asin']='name',
                       date:Optional[str]=None,session=Depends(require_session)):
     who=_who(session)
     canonical=_authorized_detail(who,operator)
     _valid_date(date)
-    data=_load_detail(canonical,date,period)
-    name=f"operator_{(data.get('data_date') or date or 'latest')}.xlsx"
+    data=_load_detail(canonical,date,period,sb_attribution_mode)
+    name=f"operator_{(data.get('data_date') or date or 'latest')}_sb-{sb_attribution_mode}.xlsx"
     return _download(detail_xlsx(data),name,
                      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 
 @router.get("/all.zip")
 def download_all_reports(period:Literal["daily","weekly","monthly"]="daily",
+                         sb_attribution_mode:Literal['name','asin']='name',
                          date:Optional[str]=None,session=Depends(require_session)):
     if not _manager(_who(session)):
         raise HTTPException(403,"Only management can export all operator reports")
     _valid_date(date)
-    summary=_load_summary(date,period)
+    summary=_load_summary(date,period,sb_attribution_mode)
     names=[canonical_operator_name(str(x.get("name") or "").strip())
            for x in (summary.get("operators") or []) if x.get("name")]
     names=list(dict.fromkeys(n for n in names if n and n != "未归属"))
@@ -121,14 +124,14 @@ def download_all_reports(period:Literal["daily","weekly","monthly"]="daily",
     with ZipFile(out,"w",ZIP_DEFLATED,compresslevel=5) as archive:
         archive.writestr(f"00_全部运营汇总_{stamp}.xlsx",summary_xlsx(summary))
         for index,name in enumerate(names,1):
-            detail=cached_detail(name,anchor) if period=="daily" else None
+            detail=cached_detail(name,anchor,sb_attribution_mode) if period=="daily" else None
             if detail is None:
                 if prebuilt is None:
                     if not anchor:
                         raise HTTPException(422,"No report date available")
                     start,end=_period_range(anchor,period)
-                    prebuilt=_build(start,end)
-                detail=operator_cpo_detail(name,anchor,period,_prebuilt=prebuilt)
+                    prebuilt=_build(start,end,sb_attribution_mode)
+                detail=operator_cpo_detail(name,anchor,period,_prebuilt=prebuilt,sb_attribution_mode=sb_attribution_mode)
             total_rows+=len(detail.get("products") or [])
             if total_rows>20000:
                 raise HTTPException(413,"Too many rows for one-click export")
@@ -138,4 +141,4 @@ def download_all_reports(period:Literal["daily","weekly","monthly"]="daily",
                 raise HTTPException(413,"CPO report archive exceeds size limit")
     if len(out.getvalue())>MAX_ARCHIVE_BYTES:
         raise HTTPException(413,"CPO report archive exceeds size limit")
-    return _download(out.getvalue(),f"all_operator_reports_{stamp}.zip","application/zip")
+    return _download(out.getvalue(),f"all_operator_reports_{stamp}_sb-{sb_attribution_mode}.zip","application/zip")

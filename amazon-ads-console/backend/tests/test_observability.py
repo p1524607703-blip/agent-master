@@ -71,6 +71,21 @@ class ObservabilityTests(unittest.TestCase):
         self.assertNotIn('secret-query', json.dumps(self.records))
         self.assertEqual(self.records[0]['date'], '2026-10-04')
 
+    def test_query_timings_are_bounded_and_exclude_sql_values(self):
+        context = {}
+        token = trace.request_context.set(context)
+        try:
+            label = rds_query._query_label("SELECT * FROM core.report_campaign_daily WHERE campaign_name='private-value'")
+            for elapsed in range(20):
+                trace.record_query_timing(label, elapsed, 'ok')
+        finally:
+            trace.request_context.reset(token)
+        self.assertEqual(len(context['query_timings']), 12)
+        self.assertEqual(context['query_timings'][0]['elapsed_ms'], 19)
+        self.assertEqual(context['query_timings'][-1]['elapsed_ms'], 8)
+        self.assertEqual(label, 'core.report_campaign_daily')
+        self.assertNotIn('private-value', json.dumps(context))
+
     def test_exception_returns_id_and_safe_stack(self):
         @self.app.get('/explode/{token}')
         def explode(token: str):

@@ -36,16 +36,23 @@ class AdIdentityResolver:
         self.daily[(row['stat_date'],)+key][ident]=meta
 
     def resolve(self,row,scope):
+        meta, method = self.resolve_observed(row, scope)
+        return (meta, method) if meta else self.resolve_name(row,scope)
+
+    def resolve_observed(self,row,scope):
+        """Only actual same-day advertised identities; never consult the name."""
         key=(row['account_name'],row['campaign_id'])
         period=self.period[key];daily=self.daily[(row['stat_date'],)+key]
         if len(period)==len(daily)==1 and set(period)==set(daily):
             ident=next(iter(period))
             if ident[0]==scope: return period[ident],'campaign_same_day_unique_advertised_identity'
-        return self.resolve_name(row,scope)
+        return None, 'unresolved_advertised_identity'
 
-    def resolve_name(self,row,scope):
-        gm=re.search(r'(?<![A-Z0-9])([A-Z]{2}\d+)[-_]',row['campaign_name'] or '',re.I)
-        group=gm.group(1).upper() if gm else None
+    def resolve_name(self,row,scope, *, reject_multiple_groups=False):
+        groups = [g.upper() for g in re.findall(r'(?<![A-Z0-9])([A-Z]{2}\d+)[-_]',row['campaign_name'] or '',re.I)]
+        if reject_multiple_groups and len(set(groups)) > 1:
+            return None, 'ambiguous_operator_name'
+        group=groups[0] if groups else None
         options={(g,c):m for (g,c),m in self.candidates[scope].items() if (not group or g==group) and token_match(row['campaign_name'],c)}
         methods={identity:'group_exact_unicode' if group else 'account_unique_exact_product' for identity in options}
         for (g,alias),canonical in self.source_aliases.items():
@@ -114,6 +121,33 @@ class CampaignOwnerRules:
         if not valid:
             return None, 'campaign_owner_rule_needs_review', rule
         return dict(target), 'campaign_owner_confirmed', rule
+
+
+def resolve_sb_accounting(row, scope, source_meta, source_method, resolver, rules, mode,
+                          *, blocked_source=False):
+    """Select a financial owner without modifying the actual ASIN identity.
+
+    Explicit ASIN comparison bypasses financial-name overrides. Name comparison
+    honours confirmed rules (including their review blockers), then requires one
+    exact scoped mapped name. Missing evidence stays unallocated in either mode.
+    """
+    if mode == 'asin':
+        if source_meta:
+            return source_meta, source_method, None
+        if blocked_source:
+            return None, 'blocked_conflict', None
+        # An explicit but unrecognised ASIN may be another product. A known
+        # sibling in the same campaign is not evidence that the unknown is it.
+        identifiers = (row.get('child_asin'), row.get('parent_asin'))
+        if any(value and value != '-1' and not value.startswith('__') for value in identifiers):
+            return None, 'unmapped_explicit_advertised_identity', None
+        meta, method = resolver.resolve_observed(row, scope)
+        return meta, method, None
+    meta, method, rule = rules.resolve(row, scope, source_meta)
+    if rule is not None:
+        return meta, method, rule
+    meta, method = resolver.resolve_name(row, scope, reject_multiple_groups=True)
+    return meta, 'sb_name_' + method, None
 
 
 class FullFunnelLedger:
