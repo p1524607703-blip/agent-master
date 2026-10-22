@@ -27,7 +27,9 @@ class WhitinAccountScopeTests(unittest.TestCase):
 
         sql = captured["sql"]
         self.assertIn("WHITIN", sql)
-        self.assertEqual(sql.count("HAVING count(DISTINCT r.account_name) = 4"), 2)
+        self.assertIn("ib.target_table='core.report_advertised_product_daily'", sql)
+        self.assertIn("ib.target_table='core.report_purchased_product_daily'", sql)
+        self.assertIn("r.report_start_date=d.d AND r.report_end_date=d.d", sql)
 
 
 if __name__ == "__main__":

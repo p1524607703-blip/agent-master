@@ -18,6 +18,15 @@ class DatabaseQueryError(RuntimeError):
     """Sanitized SQL subprocess failure; query and stderr stay private."""
 
 _PREFIX = "RDS_PG"
+STATEMENT_TIMEOUT_MS = 28000
+
+
+def bounded_query_env(env):
+    """Cancel in PostgreSQL before the 30s subprocess deadline closes its socket."""
+    result = dict(env)
+    result['PGOPTIONS'] = (result.get('PGOPTIONS', '') +
+                           f' -c statement_timeout={STATEMENT_TIMEOUT_MS}').strip()
+    return result
 
 
 def _pg_setting(name: str) -> str:
@@ -29,7 +38,7 @@ def _pg_setting(name: str) -> str:
 
 
 def _run(sql: str) -> str:
-    env = os.environ.copy()
+    env = bounded_query_env(os.environ)
     for key in ('PASSWORD', 'SSLMODE', 'SSLROOTCERT'):
         value = env.get(f'RDS_PG{key}')
         if value is not None:
