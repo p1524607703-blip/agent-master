@@ -16,7 +16,7 @@ from fastapi import HTTPException
 
 from app.core.config import settings
 from app.services.auth import _connect
-from app.services import codex_activity
+from app.services import codex_activity, codex_control
 
 log = logging.getLogger(__name__)
 
@@ -41,6 +41,7 @@ async def authenticate(key):
             WHERE d.key_hash=$1 AND d.revoked_at IS NULL AND r.status='active' ''', key_hash(key))
         if row is None:
             raise HTTPException(401, 'Invalid device credential')
+        codex_control.require_device_enabled(row['device_id'])
         return dict(row)
     finally:
         await conn.close()
@@ -277,6 +278,17 @@ async def model_catalog():
 
 
 async def proxy_response(device, body, route='/responses',forward_headers=None, observer=None, response_headers=None):
+    lease = await codex_control.acquire(device['device_id'])
+    try:
+        status, content_type, request_id, stream = await _proxy_response(
+            device, body, route, forward_headers, observer, response_headers)
+        return status, content_type, request_id, codex_control.ControlledStream(stream, lease)
+    except BaseException:
+        lease.close()
+        raise
+
+
+async def _proxy_response(device, body, route='/responses',forward_headers=None, observer=None, response_headers=None):
     base,headers = upstream()
     request_id = str(uuid.uuid4())
     activity = start_activity(request_id, device['device_id'])

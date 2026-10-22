@@ -6,6 +6,7 @@ import { quotaDisplay, type AccountQuota } from '../utils/codexQuota'
 import { confirmedShare, attributionMethod, allocationLabel, type Attribution } from '../utils/codexAttribution'
 import { activityState, activityLabels, type ActivityDevice } from '../utils/codexActivity'
 import CodexAccessPanel from '../components/CodexAccessPanel.vue'
+import CodexControlPanel from '../components/CodexControlPanel.vue'
 
 type Device = ActivityDevice & { sourceKind?:string; currentWindowTokens?:number|string|null; currentWindowUnknownRequests?:number; deviceId:string; deviceName:string; platform:string; online:boolean; agentOnline:boolean; codexRunning:boolean; revoked:boolean; lastHeartbeatAt:string|null; lastRequestAt:string|null; totalTokens:number|string|null; todayTokens:number|string|null; inputTokens:number|null; outputTokens:number|null; requests:number; unknownRequests:number }
 type Member = { userId:number; displayName:string; username:string; groupCode:string; groupName:string; personCode:string|null; roleCode:string; devices:Device[] }
@@ -94,6 +95,7 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
 
     <div class="notes"><template v-if="data?.statisticsAvailable">按实际请求识别使用状态：正在处理为“正在使用”，近5分钟有请求为“最近活跃”，其余显示“暂无近期请求”。子设备无需运行心跳程序；暂无请求不表示电脑关机。<span v-if="data.pendingAccountingEvents"> {{ data.pendingAccountingEvents }} 条用量记录正在等待入库。</span></template><template v-else>尚未接入真实设备与用量。</template><span class="legend">绿点使用中或最近活跃 · 灰点暂无近期请求 · “—”暂无计量</span></div>
 
+    <CodexControlPanel :refresh-key="updatedAt" @changed="refresh" />
     <CodexAccessPanel :members="members" :selected-id="selectedId" @changed="refresh" />
 
     <section class="account-quota" aria-label="官方账户剩余额度">

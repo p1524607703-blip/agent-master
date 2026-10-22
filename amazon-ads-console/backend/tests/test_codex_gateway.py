@@ -18,7 +18,7 @@ spec.loader.exec_module(gateway)
 
 class GatewayTests(unittest.TestCase):
     @contextmanager
-    def fixture(self, *, limit=2, queued=4, timeout=2, upstream_status=200):
+    def fixture(self, *, limit=2, queued=4, timeout=2, upstream_status=200, externally_managed=False):
         release = threading.Event()
         count_lock = threading.Lock()
         state = {'active': 0, 'maximum': 0, 'calls': 0, 'credentialForwarded': False}
@@ -44,7 +44,9 @@ class GatewayTests(unittest.TestCase):
         relay = gateway.Gateway({'listenHost':'127.0.0.1','listenPort':0,
             'upstreamHost':'127.0.0.1','upstreamPort':source.server_port,
             'maxConcurrent':limit,'maxQueued':queued,'maxConnections':16,
-            'queueWaitSeconds':timeout,'deviceKeys':{'fixture':'fixture-private-key'},'verifiedModels':['fixture']})
+            'queueWaitSeconds':timeout,'deviceKeys':{'fixture':'fixture-private-key'},'verifiedModels':['fixture'],
+            'externallyManagedDevices':['fixture'] if externally_managed else [],
+            **({'maxConnections':None} if externally_managed else {})})
         threads = [threading.Thread(target=s.serve_forever,daemon=True) for s in (source,relay)]
         for t in threads: t.start()
         def call():
@@ -110,6 +112,15 @@ class GatewayTests(unittest.TestCase):
             self.assertEqual(result.headers['x-relay-limit-origin'],'upstream')
             self.assertEqual(result.json()['error']['code'],'upstream_fixture_limit')
             self.assertEqual(state['calls'],1)
+
+    def test_console_owned_admission_has_no_second_hidden_capacity_limit(self):
+        with self.fixture(limit=1,queued=1,externally_managed=True) as (relay,release,state,call), concurrent.futures.ThreadPoolExecutor(3) as pool:
+            jobs=[pool.submit(call) for _ in range(3)]
+            self.wait_for(lambda:state['active']==3)
+            self.assertEqual(relay.capacity.snapshot(),(0,0))
+            release.set()
+            self.assertEqual([job.result().status_code for job in jobs],[200]*3)
+            self.assertEqual(state['maximum'],3)
 
     def test_fifo_prevents_new_requests_jumping_existing_waiters(self):
         admission=gateway.Admission(1,4)

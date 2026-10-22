@@ -68,11 +68,12 @@ class Gateway(ThreadingHTTPServer):
     def __init__(self, settings):
         self.settings = settings
         self.capacity = Admission(settings.get('maxConcurrent', 6), settings.get('maxQueued', 24))
-        self.connections = threading.BoundedSemaphore(settings.get('maxConnections', 32))
+        maximum = settings.get('maxConnections', 32)
+        self.connections = threading.BoundedSemaphore(maximum) if maximum is not None else None
         super().__init__((settings['listenHost'], settings['listenPort']), Handler)
 
     def process_request(self, request, address):
-        if not self.connections.acquire(blocking=False):
+        if self.connections is not None and not self.connections.acquire(blocking=False):
             try:
                 request.sendall(b'HTTP/1.1 503 Service Unavailable\r\nContent-Length: 0\r\nRetry-After: 2\r\nConnection: close\r\n\r\n')
             finally:
@@ -81,14 +82,16 @@ class Gateway(ThreadingHTTPServer):
         try:
             super().process_request(request, address)
         except Exception:
-            self.connections.release()
+            if self.connections is not None:
+                self.connections.release()
             raise
 
     def process_request_thread(self, request, address):
         try:
             super().process_request_thread(request, address)
         finally:
-            self.connections.release()
+            if self.connections is not None:
+                self.connections.release()
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -164,7 +167,11 @@ class Handler(BaseHTTPRequestHandler):
             self.reply(400, {'error': {'message': 'Model has not been enabled'}})
             return
         queued_at = time.monotonic()
-        admission = self.server.capacity.acquire(timeout=self.server.settings.get('queueWaitSeconds', 120))
+        # The console authenticates individual devices and owns their admission leases.
+        # This exception is selected by the private credential, never a caller header.
+        externally_managed = device in self.server.settings.get('externallyManagedDevices', [])
+        admission = 'accepted' if externally_managed else self.server.capacity.acquire(
+            timeout=self.server.settings.get('queueWaitSeconds', 120))
         waited = time.monotonic() - queued_at
         if admission != 'accepted':
             active, queued = self.server.capacity.snapshot()
@@ -218,7 +225,8 @@ class Handler(BaseHTTPRequestHandler):
         finally:
             if connection:
                 connection.close()
-            self.server.capacity.release()
+            if not externally_managed:
+                self.server.capacity.release()
             logging.info('device=%s route=%s status=%s origin=upstream wait=%.2f elapsed=%.2f',
                          device, path, status, waited, time.monotonic() - start)
 
@@ -238,9 +246,14 @@ def main():
     for name, default, maximum in [('maxConcurrent', 6, 32), ('maxQueued', 24, 128),
                                     ('maxConnections', 32, 192), ('queueWaitSeconds', 120, 240)]:
         value = settings.get(name, default)
+        if name == 'maxConnections' and value is None:
+            continue
         if type(value) is not int or value < 1 or value > maximum:
             raise ValueError('Invalid relay capacity setting: ' + name)
-    if settings.get('maxConnections', 32) < settings.get('maxConcurrent', 6) + settings.get('maxQueued', 24) + 2:
+    external = settings.get('externallyManagedDevices', [])
+    if not isinstance(external, list) or any(not isinstance(name, str) or name not in settings['deviceKeys'] for name in external):
+        raise ValueError('External admission requires registered private credentials')
+    if settings.get('maxConnections', 32) is not None and settings.get('maxConnections', 32) < settings.get('maxConcurrent', 6) + settings.get('maxQueued', 24) + 2:
         raise ValueError('Reserve two connections for local health checks')
     # Initial acceptance is strictly local; LAN publication is a separate step.
     if settings['listenHost'] != '127.0.0.1':

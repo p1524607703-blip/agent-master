@@ -20,7 +20,8 @@ export async function mutateJsonStrict<T>(path: string, method: 'POST'|'PATCH'|'
     headers: { ...authHeaders(), ...(body === undefined ? {} : {'Content-Type':'application/json'}) },
     ...(body === undefined ? {} : {body:JSON.stringify(body)}),
   })
-  if (!response.ok) throw new Error(response.status === 403 ? '仅管理层可以管理 API Key' : `操作失败（${response.status}）`)
+  if (!response.ok) throw new Error(response.status === 403 ? '仅管理层可以修改接入设置' : response.status === 409
+    ? '设置已被其他管理员更新，请刷新后重试。' : `操作失败（${response.status}），请刷新核对状态。`)
   return await response.json() as T
 }
 

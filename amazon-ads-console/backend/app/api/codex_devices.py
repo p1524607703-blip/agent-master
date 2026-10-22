@@ -1,16 +1,18 @@
 import json
 import uuid
 from urllib.parse import urlsplit
+from typing import Literal, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, field_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, field_validator, model_validator
+from starlette.background import BackgroundTask
 
 from app.api.auth import require_management_session
 from app.services.codex_devices import overview as read_overview
 from app.services import codex_telemetry as telemetry
-from app.services import codex_responses
+from app.services import codex_responses, codex_control
 from app.core.config import settings
 from app.services.auth import _connect
 from app.services.codex_quota import snapshot as quota_snapshot
@@ -45,6 +47,97 @@ class Heartbeat(BaseModel):
     model_config = ConfigDict(extra='forbid')
     codexRunning: StrictBool
     clientVersion: str = Field(default='',max_length=64)
+
+
+class ControlRevision(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    revision: StrictInt = Field(ge=0)
+
+
+class TotalConcurrency(ControlRevision):
+    maxConcurrent: Optional[StrictInt] = Field(...,ge=1,le=100000)
+
+
+class DeviceControl(ControlRevision):
+    enabled: Optional[StrictBool] = None
+    maxConcurrent: Optional[StrictInt] = Field(default=None,ge=1,le=100000)
+
+    @model_validator(mode='after')
+    def changed(self):
+        if not ({'enabled','maxConcurrent'} & self.model_fields_set) or ('enabled' in self.model_fields_set and self.enabled is None):
+            raise ValueError('An enabled state or concurrency setting is required')
+        return self
+
+
+class BulkStatus(ControlRevision):
+    scope: Literal['all','selected']
+    enabled: StrictBool
+    deviceIds: list[uuid.UUID] = Field(default_factory=list,max_length=1000)
+
+    @model_validator(mode='after')
+    def selection(self):
+        if (self.scope=='selected' and not self.deviceIds) or (self.scope=='all' and self.deviceIds):
+            raise ValueError('Select device IDs or use the all scope')
+        return self
+
+
+async def control_devices():
+    conn = await _connect()
+    try:
+        return await conn.fetch('''SELECT d.device_id,d.device_name,d.platform,d.user_id,d.revoked_at,
+            r.display_name,r.status FROM codex_ops.devices d
+            JOIN codex_ops.personnel_roster r ON r.user_id=d.user_id ORDER BY d.created_at''')
+    finally:
+        await conn.close()
+
+
+async def control_state():
+    rows = await control_devices()
+    policy, counts = codex_control.snapshot()
+    return {'revision':policy['revision'],'globalMaxConcurrent':policy['globalMaxConcurrent'],
+            'updatedAt':policy['updatedAt'],'queueLimit':codex_control.QUEUE_LIMIT,'queueWaitSeconds':codex_control.QUEUE_SECONDS,
+            'activeRequests':sum(r['activeRequests'] for r in counts.values()),
+            'queuedRequests':sum(r['queuedRequests'] for r in counts.values()),
+            'devices':[{'deviceId':str(r['device_id']),'deviceName':r['device_name'],'platform':r['platform'],
+                'userId':r['user_id'],'displayName':r['display_name'],'revoked':bool(r['revoked_at']),
+                'memberActive':r['status']=='active',**codex_control.device_policy(policy,r['device_id']),
+                **counts.get(str(r['device_id']),{'activeRequests':0,'queuedRequests':0})} for r in rows]}
+
+
+@router.get('/access-control',dependencies=[Depends(require_management_session)])
+async def access_control():
+    telemetry.require_enabled()
+    return JSONResponse(await control_state(),headers={'Cache-Control':'no-store'})
+
+
+@router.patch('/access-control')
+async def total_concurrency(payload: TotalConcurrency, actor=Depends(require_management_session)):
+    telemetry.require_enabled()
+    codex_control.update(revision=payload.revision,actor=actor[1]['userId'],max_concurrent=payload.maxConcurrent)
+    return JSONResponse(await control_state(),headers={'Cache-Control':'no-store'})
+
+
+@router.post('/devices/status')
+async def bulk_status(payload: BulkStatus, actor=Depends(require_management_session)):
+    telemetry.require_enabled()
+    rows = await control_devices()
+    valid = {r['device_id'] for r in rows if not r['revoked_at']}
+    ids = valid if payload.scope=='all' else set(payload.deviceIds)
+    if not ids <= valid:
+        raise HTTPException(404,'Device is missing or revoked; refresh before saving')
+    codex_control.update(revision=payload.revision,actor=actor[1]['userId'],device_ids=ids,enabled=payload.enabled)
+    return JSONResponse(await control_state(),headers={'Cache-Control':'no-store'})
+
+
+@router.patch('/devices/{device_id}/control')
+async def device_control(device_id: uuid.UUID,payload: DeviceControl,actor=Depends(require_management_session)):
+    telemetry.require_enabled()
+    rows = await control_devices()
+    if not any(r['device_id']==device_id and not r['revoked_at'] for r in rows):
+        raise HTTPException(404,'Device is missing or revoked')
+    codex_control.update(revision=payload.revision,actor=actor[1]['userId'],device_ids=[device_id],enabled=payload.enabled,
+                         device_limit='maxConcurrent' in payload.model_fields_set,max_concurrent=payload.maxConcurrent)
+    return JSONResponse(await control_state(),headers={'Cache-Control':'no-store'})
 
 
 @router.post('/devices',dependencies=[Depends(require_management_session)])
@@ -139,7 +232,7 @@ async def responses(request: Request,device=Depends(require_device)):
     headers['X-Request-ID'] = rid
     if not stream_requested:
         return await codex_responses.collect(status,content_type,stream,observer,headers)
-    return StreamingResponse(stream,status_code=status,headers={
+    return StreamingResponse(stream,status_code=status,background=BackgroundTask(stream.aclose),headers={
         **headers,'Content-Type':content_type,'X-Accel-Buffering':'no'})
 
 
