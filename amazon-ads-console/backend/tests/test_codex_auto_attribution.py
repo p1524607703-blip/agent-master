@@ -30,17 +30,22 @@ class AutomaticTests(unittest.TestCase):
         second=advance(first,sample);self.assertEqual(len(second['automatic']),1)
         self.assertEqual(second,advance(second,sample))
         self.assertEqual(len(advance(second,self.sample(5,240,12))['automatic']),1)
-    def test_mixed_never_token_weighted(self):
+    def test_mixed_is_explicitly_estimated_against_total_capacity(self):
         mixed=advance(self.doc,self.sample(5,child=1,main=100000))
-        self.assertFalse(mixed.get('automatic'))
-        self.assertFalse(advance(mixed,self.sample(6,120,child=1,main=100001)).get('automatic'))
+        self.assertAlmostEqual(sum(row['usedPercent'] for row in mixed['automatic']),1)
+        self.assertTrue(all(row['method']=='observed-token-weighted-interval' for row in mixed['automatic']))
+        self.assertEqual(mixed['confirmations'],self.doc['confirmations'])
     def test_fractional_activity_carried_until_boundary(self):
         doc=advance(self.doc,self.sample());doc=advance(doc,self.sample(4,120,child=1))
-        self.assertFalse(advance(doc,self.sample(5,240,main=11,child=1)).get('automatic'))
+        result=advance(doc,self.sample(5,240,main=11,child=1))
+        self.assertEqual({row['deviceId']:row['usedPercent'] for row in result['automatic']},{'main':0.5,'child':0.5})
     def test_delayed_change_considers_overlap(self):
         doc=advance(self.doc,self.sample());doc=advance(doc,self.sample(5,120,11))
         sample=self.sample(6,240,11,1);sample['sources'][0]['lastActivityAt']=(self.now+timedelta(seconds=120)).isoformat()
-        self.assertEqual(len(advance(doc,sample)['automatic']),1)
+        result=advance(doc,sample)
+        self.assertEqual(result['automatic'][0]['usedPercent'],1)
+        self.assertEqual(result['automatic'][-1]['method'],'observed-token-weighted-interval')
+        self.assertTrue(result['automatic'][-1]['partialMeasurement'])
     def test_unknown_missing_owner_and_unhealthy(self):
         variants=[self.sample(5),self.sample(5,healthy=False),self.sample(5,main=0)]
         variants[0]['userIds']=[]
@@ -69,15 +74,18 @@ class AutomaticTests(unittest.TestCase):
     def test_inflight_child_blocks_before_db_terminal(self):
         sample=self.sample(5);sample['sources'][1]['inFlight']=True
         self.assertFalse(advance(self.doc,sample).get('automatic'))
-    def test_child_exclusive_later_interval_does_not_backfill_mixed_percent(self):
-        doc=advance(self.doc,self.sample(5,child=1))
+    def test_later_interval_preserves_prior_estimates_and_manual_history(self):
+        doc=advance(self.doc,self.sample(5,child=1));prior=copy.deepcopy(doc['automatic'])
         for t in range(120,REPORTING_GUARD+241,120):
             sample=self.sample(5,t,main=10,child=1)
             for source in sample['sources']:source['lastActivityAt']=self.now.isoformat()
             doc=advance(doc,sample)
         sample=self.sample(6,REPORTING_GUARD+360,10,2);sample['sources'][0]['lastActivityAt']=self.now.isoformat()
         rows=advance(doc,sample)['automatic'];self.assertEqual(rows[-1]['deviceId'],'child')
-        self.assertEqual(sum(r['usedPercent'] for r in rows),1)
+        self.assertAlmostEqual(sum(r['usedPercent'] for r in rows),2)
+        for before in prior:
+            after=next(row for row in rows if row['confirmationId']==before['confirmationId'])
+            self.assertEqual(after,before)
     def test_account_math_and_separate_evidence(self):
         doc=advance(self.doc,self.sample(5))
         with tempfile.TemporaryDirectory() as tmp:
@@ -87,6 +95,102 @@ class AutomaticTests(unittest.TestCase):
         self.assertEqual(value['ownerConfirmedPercent'],4);self.assertEqual(value['automaticPercent'],1)
         self.assertEqual(value['members'][0]['usedPercent'],5);self.assertEqual(value['deviceShares'][0]['usedPercent'],5)
         self.assertEqual(value['remainingPercent']+value['confirmedPercent']+value['unattributedPercent'],100)
+
+    def test_twenty_continuously_busy_devices_get_small_shares_of_account_capacity(self):
+        first=self.sample();first['userIds']=list(range(1,21))
+        first['sources']=[dict(deviceId=f'device-{n:02}',userId=n,tokens=0,events=0,unknown=0,lastActivityAt=None) for n in range(1,21)]
+        doc=advance(self.doc,first)
+        sample=copy.deepcopy(first);sample['window']['usedPercent']=5;sample['window']['remainingPercent']=95
+        sample['capturedAt']=(self.now+timedelta(seconds=120)).isoformat()
+        for source in sample['sources']:
+            source.update(tokens=1000,events=1,inFlight=True,lastActivityAt=sample['capturedAt'])
+        doc=advance(doc,sample)
+        self.assertEqual(len(doc['automatic']),20)
+        self.assertEqual({row['usedPercent'] for row in doc['automatic']},{0.05})
+        self.assertTrue(all(row['partialMeasurement'] for row in doc['automatic']))
+        self.assertEqual(doc['monitor']['pendingSettlementPercent'],0)
+
+    def test_unequal_interval_weights_leave_confirmed_history_untouched(self):
+        doc=advance(self.doc,self.sample())
+        doc=advance(doc,self.sample(5,120,main=16,child=4))
+        self.assertEqual({row['deviceId']:row['usedPercent'] for row in doc['automatic']},{'main':0.6,'child':0.4})
+        self.assertEqual(doc['confirmations'],self.doc['confirmations'])
+        self.assertEqual(doc['pendingAudit'][-1]['weights'],{'main':600,'child':400})
+
+    def test_first_result_waits_then_automatically_settles_without_new_quota(self):
+        doc=advance(self.doc,self.sample())
+        sample=self.sample(5,120,main=11,child=0);sample['sources'][1]['inFlight']=True
+        doc=advance(doc,sample)
+        self.assertFalse(doc.get('automatic'));self.assertEqual(doc['monitor']['pendingSettlementPercent'],1)
+        sample=self.sample(5,240,main=12,child=2)
+        doc=advance(doc,sample)
+        self.assertEqual({row['deviceId']:row['usedPercent'] for row in doc['automatic']},{'main':0.5,'child':0.5})
+        self.assertEqual(doc['monitor']['pendingSettlementPercent'],0)
+
+    def test_prior_weight_is_never_reused_in_next_interval(self):
+        doc=advance(self.doc,self.sample())
+        doc=advance(doc,self.sample(5,120,main=16,child=4))
+        doc=advance(doc,self.sample(6,240,main=17,child=13))
+        self.assertEqual({row['deviceId']:round(row['usedPercent'],6) for row in doc['automatic']},{'main':0.7,'child':1.3})
+        self.assertEqual(doc['pendingAudit'][-1]['weights'],{'main':100,'child':900})
+
+    def test_unknown_quantity_with_measured_work_is_explicit_low_confidence_estimate(self):
+        doc=advance(self.doc,self.sample());sample=self.sample(5,120,11,1)
+        sample['sources'][1]['unknown']=1
+        doc=advance(doc,sample)
+        self.assertTrue(all(row['partialMeasurement'] for row in doc['automatic']))
+        self.assertEqual(doc['pendingAudit'][-1]['partialMeasurement'],True)
+
+    def test_unregistered_owner_weight_leaves_only_its_share_unattributed(self):
+        doc=advance(self.doc,self.sample());sample=self.sample(5,120,11,1);sample['userIds']=[17]
+        doc=advance(doc,sample)
+        self.assertEqual(len(doc['automatic']),1);self.assertEqual(doc['automatic'][0]['usedPercent'],0.5)
+
+    def test_late_usage_enrichment_does_not_count_as_counter_regression(self):
+        doc=advance(self.doc,self.sample());sample=self.sample(5,120,11,0)
+        sample['sources'][1].update(events=1,unknown=1)
+        doc=advance(doc,sample);self.assertEqual(doc['autoState']['pendingPoints'],1)
+        sample=self.sample(5,240,11,1)
+        doc=advance(doc,sample)
+        self.assertEqual(sum(row['usedPercent'] for row in doc['automatic']),1)
+
+    def test_rounding_has_no_lost_percentage_points(self):
+        from decimal import Decimal
+        from app.services.codex_auto_attribution import proportional_points
+        result=proportional_points(Decimal(1),{'a':1,'b':1,'c':1})
+        self.assertEqual(sum(result.values()),Decimal(1))
+        self.assertEqual(result,{'a':Decimal('0.333334'),'b':Decimal('0.333333'),'c':Decimal('0.333333')})
+
+    def test_busy_twenty_device_window_is_bounded_and_journalled_without_losing_history(self):
+        from app.services.codex_auto_attribution import drain_audit
+        first=self.sample();first['userIds']=list(range(1,21))
+        first['sources']=[dict(deviceId=f'device-{n:02}',userId=n,tokens=0,events=0,unknown=0,lastActivityAt=None) for n in range(1,21)]
+        doc=advance(self.doc,first)
+        with tempfile.TemporaryDirectory() as tmp:
+            path=Path(tmp)/'attribution.json'
+            for tick in range(1,97):
+                sample=copy.deepcopy(first);sample['window'].update(usedPercent=4+tick,remainingPercent=96-tick)
+                sample['capturedAt']=(self.now+timedelta(seconds=120*tick)).isoformat()
+                for row in sample['sources']:row.update(tokens=1000*tick,events=tick,inFlight=True)
+                doc=advance(doc,sample);atomic(path,doc);drain_audit(path,doc)
+            self.assertEqual(len(doc['automatic']),20)
+            self.assertLess(path.stat().st_size,65536)
+            self.assertAlmostEqual(sum(row['usedPercent'] for row in doc['automatic']),96)
+            rows=[json.loads(line) for line in next(Path(tmp).glob('*.jsonl')).read_text().splitlines()]
+            self.assertEqual(len({row['decisionId'] for row in rows}),96)
+            self.assertEqual(sum(row['points'] for row in rows),96)
+            self.assertEqual(next(Path(tmp).glob('*.jsonl')).stat().st_mode & 0o777,0o600)
+
+    def test_journal_replay_does_not_allocate_quota_again(self):
+        from app.services.codex_auto_attribution import drain_audit
+        sample=self.sample(5);doc=advance(self.doc,sample);committed=copy.deepcopy(doc)
+        with tempfile.TemporaryDirectory() as tmp:
+            path=Path(tmp)/'quota.json';atomic(path,doc);drain_audit(path,doc)
+            drain_audit(path,committed) # Simulate crash after append before clearing outbox.
+            self.assertEqual(doc['automatic'],committed['automatic'])
+            rows=[json.loads(line) for line in next(Path(tmp).glob('*.jsonl')).read_text().splitlines()]
+            self.assertEqual(len(rows),2);self.assertEqual(rows[0]['decisionId'],rows[1]['decisionId'])
+
 
 class SamplingFailureTests(unittest.IsolatedAsyncioTestCase):
     async def test_real_sample_shape_decimal_tokens_and_active_marker_are_serializable(self):

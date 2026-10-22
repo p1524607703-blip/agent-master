@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import {readFileSync} from 'node:fs'
 import ts from 'typescript'
 const code=ts.transpileModule(readFileSync(new URL('../src/utils/codexAttribution.ts',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.ESNext}}).outputText
-const {confirmedShare,attributionMethod}=await import(`data:text/javascript;base64,${Buffer.from(code).toString('base64')}`)
+const {confirmedShare,attributionMethod,allocationLabel}=await import(`data:text/javascript;base64,${Buffer.from(code).toString('base64')}`)
 const value={status:'available',usedPercent:3,remainingPercent:97,confirmedPercent:3,unattributedPercent:0,members:[{userId:17,usedPercent:3,evidence:[]},{userId:18,usedPercent:0,evidence:[]}]}
 test('Pan gets three percentage points of total capacity, not 100 percent of users',()=>{
   assert.equal(confirmedShare(value,17,true),3)
@@ -24,4 +24,19 @@ test('automatic inference is labelled separately from owner confirmation',()=>{
   automatic.members[0].evidence.push({method:'owner-confirmed'})
   assert.equal(attributionMethod(automatic,17),'本人确认＋自动推定')
   assert.equal(attributionMethod(automatic,18),'暂无已归属消耗')
+})
+
+test('concurrent quota shares are labelled as estimates with preserved manual evidence',()=>{
+  const mixed={...value,members:[{userId:17,usedPercent:4.6,evidence:[{method:'owner-confirmed'},{method:'observed-token-weighted-interval'}]},{userId:18,usedPercent:0.4,evidence:[{method:'observed-token-weighted-interval'}]}]}
+  assert.equal(confirmedShare(mixed,17,true),4.6)
+  assert.equal(attributionMethod(mixed,17),'本人确认＋并发用量估算')
+  assert.equal(attributionMethod(mixed,18),'并发用量估算')
+})
+test('twenty device fractional shares do not disappear into rounded zero',()=>{
+  assert.equal(allocationLabel(0.05),'0.05%')
+  assert.equal(allocationLabel(0.333333),'0.3333%')
+  assert.equal(allocationLabel(0.000001),'<0.0001%')
+  assert.equal(allocationLabel(7),'7.0%')
+  assert.equal(allocationLabel(null),'—')
+  assert.equal(allocationLabel(-1),'—')
 })
