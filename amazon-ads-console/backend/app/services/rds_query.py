@@ -31,7 +31,7 @@ def bounded_query_env(env):
 
 
 _QUERY_SOURCES = frozenset({
-    "core.import_batches", "core.report_campaign_daily", "core.report_placement_daily",
+    "core.import_batches", "core.report_coverage_snapshots", "core.report_campaign_daily", "core.report_placement_daily",
     "core.report_targeting_daily", "core.report_advertised_product_daily",
     "core.report_purchased_product_daily", "core.report_search_term_daily",
     "core.report_business_child_asin_daily", "core.report_business_parent_asin_period",
