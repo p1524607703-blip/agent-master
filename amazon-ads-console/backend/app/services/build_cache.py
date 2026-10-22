@@ -223,7 +223,7 @@ class RedisBuildCache:
 
     def get_or_set_report_catalog(self, revision: str, loader: Callable[[], Any]) -> Any:
         """Coalesce the exact, expensive coverage scan across all workers."""
-        return self._get_or_set_key(f"cpo:report-catalog:v1:{revision}", self.recent_ttl, loader)
+        return self._get_or_set_key(f"cpo:report-catalog:v2:{revision}", self.recent_ttl, loader)
 
     def clear(self) -> int:
         with self._client_lock:
@@ -234,7 +234,7 @@ class RedisBuildCache:
         try:
             keys = list(client.scan_iter(match="cpo:build:v1:*"))
             keys.extend(client.scan_iter(match="cpo:complete-days:v1:*"))
-            keys.extend(client.scan_iter(match="cpo:report-catalog:v1:*"))
+            keys.extend(client.scan_iter(match="cpo:report-catalog:*"))
             unique_keys = [key for key in dict.fromkeys(keys) if not (key.decode() if isinstance(key, bytes) else key).endswith(":lock")]
             return int(client.delete(*unique_keys)) if unique_keys else 0
         except Exception:

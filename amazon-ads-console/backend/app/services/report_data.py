@@ -381,14 +381,34 @@ def reports():
 
 
 def _reports_uncached():
+    tables = ",".join("'" + table.split('.', 1)[1] + "'" for _, table, _ in REPORT_SPECS)
+    constraints = {row['table_name']: row['source_name_not_null'] for row in query_rows(f"""
+        SELECT c.relname AS table_name,a.attnotnull AS source_name_not_null
+        FROM pg_catalog.pg_attribute a
+        JOIN pg_catalog.pg_class c ON c.oid=a.attrelid
+        JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace
+        WHERE n.nspname='core' AND c.relname IN ({tables})
+          AND a.attname='source_file_name' AND NOT a.attisdropped
+    """)}
     out = []
     for label, table, _ in REPORT_SPECS:
+        # A verified NOT NULL constraint makes lineage count exactly count(*).
+        # This permits the existing narrow (account_id,stat_date) index-only
+        # scan instead of fetching millions of wide fact rows. Nullable legacy
+        # schemas keep the exact original lineage aggregation.
+        constrained = constraints.get(table.split('.', 1)[1], False) is True
+        lineage = "count(*)::bigint" if constrained else "count(source_file_name)::bigint"
         for r in query_rows(f"""
-            SELECT account_id, max(account_name) AS account_name,
-                   min(stat_date)::text AS min_date, max(stat_date)::text AS max_date,
-                   count(*)::int AS rows,
-                   count(source_file_name)::int AS lineage_rows
-            FROM {table} GROUP BY account_id ORDER BY account_name
+            WITH coverage AS (
+                SELECT account_id,min(stat_date)::text AS min_date,max(stat_date)::text AS max_date,
+                       count(*)::bigint AS rows,{lineage} AS lineage_rows
+                FROM {table} GROUP BY account_id
+            )
+            SELECT coverage.*,latest.account_name FROM coverage
+            LEFT JOIN LATERAL (
+                SELECT account_name FROM {table} r
+                WHERE r.account_id=coverage.account_id ORDER BY stat_date DESC LIMIT 1
+            ) latest ON true ORDER BY latest.account_name
         """):
             out.append({
                 "account": r["account_name"], "account_id": r["account_id"],

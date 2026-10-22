@@ -12,7 +12,7 @@ import time
 import re
 from typing import Any, Optional
 
-from app.core.observability import increment, record_query_timing
+from app.core.observability import increment, record_query_timing, request_context
 
 
 class DatabaseQueryError(RuntimeError):
@@ -47,6 +47,10 @@ def _pg_setting(name: str) -> str:
 
 def _run(sql: str) -> str:
     env = os.environ.copy()
+    # Killing psql at 30s alone does not guarantee its server query stops.
+    # PostgreSQL must cancel first, leaving time for the client to receive it.
+    env['PGOPTIONS'] = (env.get('PGOPTIONS', '') + ' -c statement_timeout=25000').strip()
+    env['PGAPPNAME'] = 'cpo-query:' + str((request_context.get() or {}).get('request_id') or 'maintenance')[:48]
     for key in ('PASSWORD', 'SSLMODE', 'SSLROOTCERT'):
         value = env.get(f'RDS_PG{key}')
         if value is not None:
@@ -63,7 +67,8 @@ def _run(sql: str) -> str:
              '-X', '-q', '-t', '-A', '-v', 'ON_ERROR_STOP=1', '-c', sql],
             env=env, capture_output=True, text=True, timeout=30,
         )
-        status = 'ok' if proc.returncode == 0 else 'failed'
+        status = ('ok' if proc.returncode == 0 else
+                  'timeout' if 'statement timeout' in proc.stderr.lower() else 'failed')
     except subprocess.TimeoutExpired:
         status = 'timeout'
         raise DatabaseQueryError('Database query timed out') from None

@@ -86,6 +86,20 @@ class ObservabilityTests(unittest.TestCase):
         self.assertEqual(label, 'core.report_campaign_daily')
         self.assertNotIn('private-value', json.dumps(context))
 
+    def test_server_query_deadline_precedes_client_deadline(self):
+        env = {'RDS_PGHOST':'host','RDS_PGPORT':'5432','RDS_PGUSER':'user','RDS_PGDATABASE':'db',
+               'PGOPTIONS':'-c application_name=existing -c statement_timeout=0'}
+        token = trace.request_context.set({'request_id':'safe-request', **{field:0 for field in trace.COUNTERS + trace.TIMINGS}})
+        try:
+            with patch.dict(os.environ, env), patch.object(rds_query.subprocess, 'run', return_value=Mock(returncode=0,stdout='1',stderr='')) as run:
+                self.assertEqual(rds_query._run('SELECT 1'), '1')
+            supplied = run.call_args.kwargs
+            self.assertTrue(supplied['env']['PGOPTIONS'].endswith('statement_timeout=25000'))
+            self.assertEqual(supplied['env']['PGAPPNAME'], 'cpo-query:safe-request')
+            self.assertEqual(supplied['timeout'], 30)
+        finally:
+            trace.request_context.reset(token)
+
     def test_exception_returns_id_and_safe_stack(self):
         @self.app.get('/explode/{token}')
         def explode(token: str):
