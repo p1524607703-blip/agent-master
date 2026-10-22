@@ -276,7 +276,7 @@ async def model_catalog():
         raise HTTPException(502,'Model catalog is unavailable')
 
 
-async def proxy_response(device, body, route='/responses',forward_headers=None, observer=None):
+async def proxy_response(device, body, route='/responses',forward_headers=None, observer=None, response_headers=None):
     base,headers = upstream()
     request_id = str(uuid.uuid4())
     activity = start_activity(request_id, device['device_id'])
@@ -314,6 +314,12 @@ async def proxy_response(device, body, route='/responses',forward_headers=None, 
         finally:
             finish_activity(activity)
         raise HTTPException(502,'Model upstream is unavailable')
+    if response_headers is not None:
+        # Preserve bounded retry guidance without exposing arbitrary source headers.
+        for name in ('Retry-After', 'X-Relay-Limit-Origin'):
+            value = response.headers.get(name)
+            if value and len(value) <= 256 and all(32 <= ord(ch) < 127 for ch in value):
+                response_headers[name] = value
     observer = observer or UsageObserver()
     async def generate():
         status = response.status_code

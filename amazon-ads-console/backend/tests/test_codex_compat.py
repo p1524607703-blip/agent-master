@@ -96,6 +96,8 @@ class CompatibilityAndAccessTests(unittest.TestCase):
             self.assertIs(payload['stream'],True);self.assertIs(payload['store'],False)
             self.assertEqual(payload['max_output_tokens'],16)
             if kind=='error':return httpx.Response(400,json={'error':{'message':'fixture upstream rejection'}})
+            if kind=='busy':return httpx.Response(429,headers={'Retry-After':'2','X-Relay-Limit-Origin':'local'},
+                json={'error':{'code':'relay_queue_timeout'}})
             created = {'type':'response.created','response':{'id':'response-doctor','status':'in_progress'}}
             wire = 'data: '+json.dumps(created)+'\n\n'
             if kind!='truncated':wire += 'data: '+json.dumps({'type':'response.completed','response':self.final})
@@ -134,6 +136,17 @@ class CompatibilityAndAccessTests(unittest.TestCase):
         rows=self.query('SELECT completed,total_tokens FROM codex_ops.model_requests')
         self.assertEqual(len(rows),2)
         self.assertTrue(all(not row['completed'] and row['total_tokens'] is None for row in rows))
+
+    def test_retry_guidance_survives_json_and_streaming_entry_without_replay(self):
+        for stream in (False,True):
+            with self.upstream('busy'):result = self.doctor(stream=stream)
+            self.assertEqual(result.status_code,429)
+            self.assertEqual(result.headers['retry-after'],'2')
+            self.assertEqual(result.headers['x-relay-limit-origin'],'local')
+            self.assertEqual(result.json()['error']['code'],'relay_queue_timeout')
+        rows=self.query('SELECT http_status,total_tokens FROM codex_ops.model_requests')
+        self.assertEqual(len(rows),2)
+        self.assertTrue(all(row['http_status']==429 and row['total_tokens'] is None for row in rows))
 
     def test_named_key_create_rename_and_revoke_preserve_identity_and_history(self):
         self.assertTrue(self.device['apiKey'].startswith('sk-cpo-'))

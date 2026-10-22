@@ -133,8 +133,10 @@ async def responses(request: Request,device=Depends(require_device)):
     if len(wire_body)>16*1024*1024:
         raise HTTPException(413,'Model request too large')
     observer = telemetry.UsageObserver(capture_response=True) if not stream_requested else None
-    status,content_type,rid,stream = await telemetry.proxy_response(device,wire_body,route,request.headers,observer=observer)
-    headers={'Cache-Control':'no-store','X-Request-ID':rid}
+    headers = {'Cache-Control':'no-store'}
+    status,content_type,rid,stream = await telemetry.proxy_response(device,wire_body,route,request.headers,
+                                                                  observer=observer,response_headers=headers)
+    headers['X-Request-ID'] = rid
     if not stream_requested:
         return await codex_responses.collect(status,content_type,stream,observer,headers)
     return StreamingResponse(stream,status_code=status,headers={
