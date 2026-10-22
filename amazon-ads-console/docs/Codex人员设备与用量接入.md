@@ -137,3 +137,12 @@ python backend/scripts/test_codex_isolated.py --pg-bin /path/to/postgresql/bin
 官方额度百分比、入口已计量Token占比、订阅账单是三种不同口径；API价目不能反推个人Pro订阅的实际费用或总Token容量。本修正不新增账单采集、不更改已有Token账本起点或凭据。
 
 参考：[官方定价与额度](https://learn.chatgpt.com/docs/pricing)、[账户额度接口](https://learn.chatgpt.com/docs/app-server#account-endpoints)。升级后完整刷新页面，Mac使用⌘⇧R，Windows使用Ctrl+F5。
+
+
+## 业务预热修复与整合候选 rc.4.4
+
+rc.4.3第一次发布因CPO完整日期查询超过30秒自动回退。确认客户端退出后同一只读SQL仍在数据库运行数分钟，放大并发压力。rc.4.4保留rc.4.3窗口显示，完整日期改为从业务数据日期边界生成候选日，对各账户通过现有索引读取首条有效报告；仍要求所有业务账户在同一子报告或父日报告来源齐全，且四广告账户的推广/转化报告都有正确目标表的批次。缺失不补齐、重复不增算，不改变统计日期与业务分母。
+
+两条psql查询通道增加会话级28秒statement_timeout，早于原30秒客户端截止，避免客户端消失后继续查询；保留其他连接选项，不修改数据库全局设置、表数据或导入任务。独立PostgreSQL回归验证随机75天缺失/重复/错批次/日期边界，以及真实pg_sleep被两条通道取消后无活动残留。线上仍以标准发布的日/月预热、版本与两库健康为验收；不跳过检查。
+
+技术依据：[PostgreSQL会话查询超时](https://www.postgresql.org/docs/18/runtime-config-client.html#GUC-STATEMENT-TIMEOUT)。
