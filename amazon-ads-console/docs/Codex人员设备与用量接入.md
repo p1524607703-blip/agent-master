@@ -126,3 +126,14 @@ python backend/scripts/test_codex_isolated.py --pg-bin /path/to/postgresql/bin
 最终 Codex 主账户将统一部署至日本代理服务器，随后再实施分发和实际计量。公司 M4 只是代理测试节点，不能作为最终生产主账户位置。当前版本不修改现有腾讯云与M4的模型代理链路。
 
 后续接入需绑定独立设备ID与人员ID，在代理最终响应中记录实际Token并按响应ID去重，设备通过心跳确定在线状态；缓存和推理Token属于父计数子集，避免重复累加。暂定30秒心跳、120秒超时，届时根据部署情况确认。
+
+
+## Pro 套餐窗口兼容修正 rc.4.3
+
+官方已说明 Pro 当前没有五小时限制，仍须按账户实时返回的额度窗口和重置时间展示。不能固定认为 primary 是五小时、secondary 是每周：本次实测升级后每周窗口在 primary，secondary 为 null，采集状态仍为 available。
+
+页面按 windowDurationMins 动态命名并只展示实际窗口，另列采集状态；缺失窗口、读取失败、过期分别处理。现有120秒采集、300秒过期、源账户身份校验继续保留，不以关闭校验处理套餐升级。超过有效期不保留旧百分比，不将未返回窗口补成0%或无限额度。
+
+官方额度百分比、入口已计量Token占比、订阅账单是三种不同口径；API价目不能反推个人Pro订阅的实际费用或总Token容量。本修正不新增账单采集、不更改已有Token账本起点或凭据。
+
+参考：[官方定价与额度](https://learn.chatgpt.com/docs/pricing)、[账户额度接口](https://learn.chatgpt.com/docs/app-server#account-endpoints)。升级后完整刷新页面，Mac使用⌘⇧R，Windows使用Ctrl+F5。

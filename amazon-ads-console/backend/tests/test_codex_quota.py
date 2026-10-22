@@ -42,6 +42,24 @@ class QuotaTests(unittest.TestCase):
             self.assertNotEqual(value['status'],'available')
             self.assertIsNone(value['primary'])
 
+    def test_pro_weekly_primary_without_secondary_is_available(self):
+        data=self.fixture();data['primary']=data['secondary'];data['secondary']=None
+        data['planType']='prolite'
+        identity='fixture-account';digest=hashlib.sha256(identity.encode()).hexdigest()
+        sanitized=collector.sanitize({'accountId':identity,'rateLimitsByLimitId':{'codex':data}},digest)
+        value=self.read(sanitized)
+        self.assertEqual(value['status'],'available')
+        self.assertEqual(value['planType'],'prolite')
+        self.assertEqual(value['primary']['windowDurationMins'],10080)
+        self.assertEqual(value['primary']['remainingPercent'],41)
+        self.assertIsNone(value['secondary'])
+
+    def test_no_windows_cannot_be_inferred_as_unlimited(self):
+        data=dict(self.fixture(),primary=None,secondary=None)
+        self.assertEqual(self.read(data)['status'],'unavailable')
+        with self.assertRaises(ValueError):
+            collector.sanitize({'accountId':'fixture-account','rateLimits':data},hashlib.sha256(b'fixture-account').hexdigest())
+
     def test_world_readable_or_invalid_counters_are_rejected(self):
         self.assertEqual(self.read(self.fixture(),0o644)['status'],'unavailable')
         data=self.fixture();data['primary']['usedPercent']=101
