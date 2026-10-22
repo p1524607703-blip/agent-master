@@ -70,6 +70,17 @@ class AttributionTests(unittest.TestCase):
             self.write(confirmations)
             self.assertEqual(service.account_attribution(self.quota(),[17])['status'],'invalid-configuration')
 
+    def test_small_reset_jitter_matches_confirmations_but_real_new_period_does_not(self):
+        self.assertEqual(service.account_attribution(self.quota(3,self.reset+1),[17])['confirmedPercent'],3)
+        self.assertEqual(service.account_attribution(self.quota(3,self.reset+604800),[17])['confirmedPercent'],0)
+
+    def test_superseded_jitter_duplicate_is_not_merged_into_current_account_total(self):
+        duplicate=dict(self.confirmation,confirmationId='duplicate-jitter',method='observed-exclusive-period',usedPercent=7,resetsAt=self.reset-1,superseded=True)
+        self.path.write_text(json.dumps(dict(schemaVersion=1,confirmations=[self.confirmation],automatic=[duplicate])))
+        result=service.account_attribution(self.quota(4),[17])
+        self.assertEqual(result['confirmedPercent'],3)
+        self.assertEqual(result['unattributedPercent'],1)
+
     def test_public_file_permissions_are_rejected(self):
         self.path.chmod(0o644)
         self.assertEqual(service.account_attribution(self.quota(),[17])['status'],'invalid-configuration')
@@ -104,6 +115,33 @@ class LocalLogTests(unittest.TestCase):
             self.assertEqual(value['unknownSegments'],0)
             self.assertNotIn('private conversation',json.dumps(value))
             self.assertNotIn(tmp,json.dumps(value))
+
+    def test_local_counter_window_remains_stable_across_second_scale_reset_jitter(self):
+        now=datetime.now(timezone.utc);reset=int(now.timestamp())+604000
+        with tempfile.TemporaryDirectory() as tmp:
+            directory=Path(tmp);(directory/'sessions').mkdir();prior=directory/'host.json'
+            prior.write_text(json.dumps(dict(planType='fixture',resetsAt=reset,windowDurationMins=10080)));prior.chmod(0o600)
+            quota=dict(status='available',planType='fixture',primary=dict(resetsAt=reset-1,windowDurationMins=10080))
+            with patch.object(host,'main_running',return_value=True):
+                value=host.collect_host(dict(codexHome=tmp,deviceId='host',userId=17,mainExecutable='fixture',localSnapshot=str(prior)),quota)
+            self.assertEqual(value['resetsAt'],reset)
+
+    def test_fork_preserves_first_metadata_and_never_merges_parent_counters(self):
+        now=datetime.now(timezone.utc);start=now-timedelta(minutes=10)
+        parent={'type':'session_meta','payload':{'id':'parent','timestamp':(start-timedelta(days=1)).isoformat()}}
+        fork={'type':'session_meta','payload':{'id':'child','timestamp':(start+timedelta(seconds=1)).isoformat(),'forked_from_id':'parent'}}
+        with tempfile.TemporaryDirectory() as tmp:
+            home=Path(tmp);(home/'sessions').mkdir()
+            rows=[parent,event(start-timedelta(seconds=1),100,100),event(start+timedelta(seconds=3),160,60)]
+            (home/'sessions/parent.jsonl').write_text(''.join(json.dumps(v)+'\n' for v in rows))
+            rows=[fork,parent,event(start+timedelta(seconds=2),1000,10),event(start+timedelta(seconds=4),1010,10)]
+            (home/'sessions/child.jsonl').write_text(''.join(json.dumps(v)+'\n' for v in rows))
+            quota={'status':'available','planType':'fixture','primary':{'resetsAt':int(start.timestamp())+604800,'windowDurationMins':10080}}
+            with patch.object(host,'main_running',return_value=True):
+                value=host.collect_host(dict(codexHome=tmp,deviceId='host',userId=17,mainExecutable='fixture'),quota)
+            self.assertEqual(value['scannedSessions'],2)
+            self.assertEqual(value['totalTokens'],70)
+            self.assertEqual(value['unknownSegments'],1)
 
     def test_missing_baseline_and_counter_regression_are_not_invented_usage(self):
         now=datetime.now(timezone.utc);start=now-timedelta(minutes=10)
@@ -140,6 +178,7 @@ class OverviewTests(unittest.IsolatedAsyncioTestCase):
         reset=int(datetime.now(timezone.utc).timestamp())+604000
         quota={'status':'available','planType':'fixture','primary':{'usedPercent':3,'remainingPercent':97,'windowDurationMins':10080,'resetsAt':reset},'secondary':None}
         host_value={'userId':17,'deviceId':'host','capturedAt':datetime.now(timezone.utc).isoformat(),
+                    'lastActivityAt':datetime.now(timezone.utc).isoformat(),
                     'fresh':True,'codexRunning':True,'resetsAt':reset,'windowDurationMins':10080,'planType':'fixture',
                     'totalTokens':1234,'todayTokens':1234,'inputTokens':1200,'outputTokens':34,'usageEvents':2,'unknownSegments':0}
         with patch.object(codex_devices,'_connect',new=AsyncMock(return_value=Connection())), patch.object(codex_devices,'quota_snapshot',return_value=quota), patch.object(codex_devices,'host_usage',return_value=host_value), patch.object(codex_devices.settings,'codex_telemetry_enabled',False), patch.object(service.settings,'codex_quota_attribution_file',None):

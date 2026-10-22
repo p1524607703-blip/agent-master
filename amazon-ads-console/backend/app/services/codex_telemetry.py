@@ -16,6 +16,7 @@ from fastapi import HTTPException
 
 from app.core.config import settings
 from app.services.auth import _connect
+from app.services import codex_activity
 
 log = logging.getLogger(__name__)
 
@@ -47,7 +48,7 @@ async def authenticate(key):
 
 async def register_device(user_id, device_name, platform, key=None, device_id=None):
     require_enabled()
-    key = key or secrets.token_urlsafe(32)
+    key = key or ('sk-cpo-' + secrets.token_urlsafe(32))
     if not 40 <= len(key) <= 256:
         raise ValueError('Invalid generated credential length')
     device_id = uuid.UUID(str(device_id)) if device_id else uuid.uuid4()
@@ -85,14 +86,17 @@ async def heartbeat(device, codex_running, client_version):
 
 
 class UsageObserver:
-    """Bounded SSE observer. Forwarded bytes and model output are never rewritten or stored."""
-    def __init__(self):
+    """Bounded accounting parser; optionally retain terminal JSON in memory, never on disk."""
+    def __init__(self, capture_response=False):
         self.decoder = codecs.getincrementaldecoder('utf-8')('replace')
         self.buffer = ''
         self.skipping = False
         self.response_id = None
         self.usage = None
         self.completed = False
+        self.capture_response = capture_response
+        self.response = None
+        self.max_event_size = 16*1024*1024 if capture_response else 1024*1024
 
     def feed(self, chunk):
         self.buffer += self.decoder.decode(chunk)
@@ -101,7 +105,7 @@ class UsageObserver:
             if self.skipping:
                 self.skipping = False
                 continue
-            if len(line) > 1024*1024 or not line.startswith('data:'):
+            if len(line) > self.max_event_size or not line.startswith('data:'):
                 continue
             try:
                 event = json.loads(line[5:].strip())
@@ -110,7 +114,7 @@ class UsageObserver:
             if not isinstance(event,dict) or event.get('type') not in ('response.completed','response.incomplete','response.failed'):
                 continue
             self.observe_response(event.get('response'),event['type'] == 'response.completed')
-        if len(self.buffer) > 1024*1024:
+        if len(self.buffer) > self.max_event_size:
             self.buffer = ''
             self.skipping = True
 
@@ -122,8 +126,11 @@ class UsageObserver:
             return
         if self.response_id != rid:
             self.usage = None
+            self.response = None
         self.response_id = rid
         self.completed = completed
+        if self.capture_response:
+            self.response = response
         usage = valid_usage(response.get('usage'))
         if usage is not None:
             self.usage = usage
@@ -169,6 +176,32 @@ def stage_event(record):
         os.fsync(stream.fileno())
     os.replace(temporary,path)
     return path
+
+
+def start_activity(request_id, device_id):
+    # Separate from the terminal outbox: a running request is evidence of activity
+    # even before its first token or terminal accounting event reaches the DB.
+    directory = spool_dir()/'active'
+    directory.mkdir(mode=0o700, exist_ok=True)
+    path = directory/(request_id+'.json')
+    codex_activity.begin(path, device_id)
+    return path
+
+
+def finish_activity(path):
+    # Keep a short overlap journal so a DB-snapshot/completion race cannot hide
+    # another device while a quota sample is being reconciled.
+    try:
+        value = json.loads(path.read_text())
+        value['finishedAt'] = datetime.now(timezone.utc).isoformat()
+        temporary = path.with_suffix('.tmp')
+        with os.fdopen(os.open(temporary, os.O_WRONLY|os.O_CREAT|os.O_TRUNC, 0o600), 'w') as stream:
+            json.dump(value, stream)
+        os.replace(temporary, path)
+    except (OSError, ValueError):
+        log.error('codex_activity_finish_failed')
+    finally:
+        codex_activity.release(path)
 
 
 async def save_event(record):
@@ -243,9 +276,10 @@ async def model_catalog():
         raise HTTPException(502,'Model catalog is unavailable')
 
 
-async def proxy_response(device, body, route='/responses',forward_headers=None):
+async def proxy_response(device, body, route='/responses',forward_headers=None, observer=None, response_headers=None):
     base,headers = upstream()
     request_id = str(uuid.uuid4())
+    activity = start_activity(request_id, device['device_id'])
     # Preserve supported Codex session metadata without forwarding device auth,
     # cookies, arbitrary proxy headers or caller-selected upstream destinations.
     if forward_headers:
@@ -258,6 +292,17 @@ async def proxy_response(device, body, route='/responses',forward_headers=None):
         timeout=httpx.Timeout(300,connect=10,pool=10))
     try:
         response = await client.send(client.build_request('POST',base+route,headers=headers,content=body),stream=True)
+    except asyncio.CancelledError:
+        try:
+            stage_event({'request_id':request_id,'device_id':str(device['device_id']),
+                'response_id':None,'finished_at':datetime.now(timezone.utc).isoformat(),
+                'http_status':499,'completed':False,'usage':None})
+        except Exception:
+            log.error('codex_accounting_pending request_id=%s',request_id)
+        finally:
+            finish_activity(activity)
+            await asyncio.shield(client.aclose())
+        raise
     except httpx.HTTPError:
         await client.aclose()
         try:
@@ -266,8 +311,16 @@ async def proxy_response(device, body, route='/responses',forward_headers=None):
                 'http_status':502,'completed':False,'usage':None})
         except Exception:
             log.error('codex_accounting_pending request_id=%s',request_id)
+        finally:
+            finish_activity(activity)
         raise HTTPException(502,'Model upstream is unavailable')
-    observer = UsageObserver()
+    if response_headers is not None:
+        # Preserve bounded retry guidance without exposing arbitrary source headers.
+        for name in ('Retry-After', 'X-Relay-Limit-Origin'):
+            value = response.headers.get(name)
+            if value and len(value) <= 256 and all(32 <= ord(ch) < 127 for ch in value):
+                response_headers[name] = value
+    observer = observer or UsageObserver()
     async def generate():
         status = response.status_code
         is_sse = 'text/event-stream' in response.headers.get('content-type','')
@@ -309,6 +362,8 @@ async def proxy_response(device, body, route='/responses',forward_headers=None):
             except Exception:
                 path = None
                 log.error('codex_accounting_pending request_id=%s',request_id)
+            finally:
+                finish_activity(activity)
             async def cleanup():
                 try:
                     await response.aclose()

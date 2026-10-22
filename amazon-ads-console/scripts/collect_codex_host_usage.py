@@ -68,6 +68,19 @@ def collect_host(config, quota):
     w = next((w for w in windows if w['windowDurationMins'] == 10080), windows[0] if windows else None)
     if quota.get('status') != 'available' or not w:
         raise ValueError('official period unavailable')
+    # Preserve the prior period boundary when the official epoch jitters by seconds.
+    prior_path = config.get('localSnapshot')
+    if prior_path:
+        try:
+            p=Path(prior_path)
+            if p.stat().st_mode & 0o077 or p.stat().st_size>65536:
+                raise ValueError('private prior snapshot required')
+            prior=json.loads(p.read_text())
+            if (prior.get('planType')==quota.get('planType') and prior.get('windowDurationMins')==w['windowDurationMins']
+                    and type(prior.get('resetsAt')) is int and abs(prior['resetsAt']-w['resetsAt'])<=5):
+                w={**w,'resetsAt':prior['resetsAt']}
+        except (OSError,ValueError,TypeError,KeyError):
+            pass
     now = datetime.now(timezone.utc)
     start = datetime.fromtimestamp(w['resetsAt']-w['windowDurationMins']*60, timezone.utc)
     today = now.astimezone(ZoneInfo('Asia/Shanghai')).replace(hour=0,minute=0,second=0,microsecond=0).astimezone(timezone.utc)
@@ -91,7 +104,7 @@ def collect_host(config, quota):
                 try:
                     value = json.loads(line)
                     payload = value.get('payload') or {}
-                    if value.get('type') == 'session_meta':
+                    if value.get('type') == 'session_meta' and meta is None:
                         meta = {'id': payload['id'], 'created': datetime.fromisoformat(payload['timestamp'].replace('Z','+00:00')),
                                 'forked': bool(payload.get('forked_from_id'))}
                     elif value.get('type') == 'event_msg' and payload.get('type') == 'token_count':
@@ -110,6 +123,7 @@ def collect_host(config, quota):
             key = meta['id']
             bucket = sessions.setdefault(key, {'meta':meta,'events':[]})
             bucket['events'].extend(events)
+    last_activity = max((at for session in sessions.values() for at,_,_ in session['events'] if at >= start), default=None)
     window_totals = {k: 0 for k in FIELDS}
     daily_total = count = unknown = 0
     for session in sessions.values():
@@ -127,4 +141,5 @@ def collect_host(config, quota):
             'windowDurationMins':w['windowDurationMins'], 'planType':quota.get('planType'),
             **window_totals, 'todayTokens':daily_total, 'usageEvents':count,
             'unknownSegments':unknown+invalid, 'scannedSessions':len(sessions),
+            'lastActivityAt':last_activity.isoformat() if last_activity else None,
             'scope':'local-log-events', 'coverage':'local-files-only'}

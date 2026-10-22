@@ -14,6 +14,16 @@ export async function getJsonStrict<T>(path: string, options: { signal?: AbortSi
   return await response.json() as T
 }
 
+export async function mutateJsonStrict<T>(path: string, method: 'POST'|'PATCH'|'DELETE', body?: unknown): Promise<T> {
+  const response = await tracedFetch(`${API_BASE}${path}`, {
+    method,
+    headers: { ...authHeaders(), ...(body === undefined ? {} : {'Content-Type':'application/json'}) },
+    ...(body === undefined ? {} : {body:JSON.stringify(body)}),
+  })
+  if (!response.ok) throw new Error(response.status === 403 ? '仅管理层可以管理 API Key' : `操作失败（${response.status}）`)
+  return await response.json() as T
+}
+
 export async function getJson<T>(path: string, fallback: T): Promise<T> {
   try {
     return await getJsonStrict<T>(path)

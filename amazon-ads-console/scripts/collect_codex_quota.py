@@ -128,6 +128,13 @@ def collect(config):
             config['sshHost'],'python3 -c '+shlex.quote(REMOTE_WRITER)],
             input=json.dumps({'destination':host_config['remoteSnapshot'],'snapshot':host}),text=True,
             stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,timeout=20,check=True)
+    if config.get('reconcileAttribution') is True:
+        # Fixed server entrypoint, using only code from the active published release.
+        command = ('CPO_ENV_FILE=/opt/agent/cpo/shared/backend.env '
+                   '/opt/agent/cpo/current/.venv/bin/python '
+                   '/opt/agent/cpo/current/amazon-ads-console/scripts/reconcile_codex_attribution.py')
+        subprocess.run(['ssh','-o','BatchMode=yes','-o','StrictHostKeyChecking=yes','-o','ConnectTimeout=8',
+            config['sshHost'],command], stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,timeout=30,check=True)
     return value
 
 

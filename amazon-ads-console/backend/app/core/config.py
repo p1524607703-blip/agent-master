@@ -31,6 +31,7 @@ class Settings(BaseSettings):
     # Disabled until the device migration and a separately approved release.
     codex_telemetry_enabled: bool = False
     codex_upstream_base_url: str = ""
+    codex_public_base_url: str = ""
     codex_upstream_key_file: Optional[str] = None
     codex_event_spool_dir: str = "~/.local/share/cpo-codex-events"
     codex_deployment_target: str = "测试入口（非日本生产部署）"
