@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { getJsonStrict } from '../api/client'
-import { sumTokens, usageShare, percentLabel } from '../utils/codexUsage'
+import { sumTokens, percentLabel } from '../utils/codexUsage'
 import { quotaDisplay, type AccountQuota } from '../utils/codexQuota'
+import { confirmedShare, type Attribution } from '../utils/codexAttribution'
 
-type Device = { deviceId:string; deviceName:string; platform:string; online:boolean; agentOnline:boolean; codexRunning:boolean; revoked:boolean; lastHeartbeatAt:string|null; lastRequestAt:string|null; totalTokens:number|string|null; todayTokens:number|string|null; inputTokens:number|null; outputTokens:number|null; requests:number; unknownRequests:number }
+type Device = { sourceKind?:string; currentWindowTokens?:number|string|null; currentWindowUnknownRequests?:number; deviceId:string; deviceName:string; platform:string; online:boolean; agentOnline:boolean; codexRunning:boolean; revoked:boolean; lastHeartbeatAt:string|null; lastRequestAt:string|null; totalTokens:number|string|null; todayTokens:number|string|null; inputTokens:number|null; outputTokens:number|null; requests:number; unknownRequests:number }
 type Member = { userId:number; displayName:string; username:string; groupCode:string; groupName:string; personCode:string|null; roleCode:string; devices:Device[] }
 type LedgerSource = {deviceId:string; userId:number; deviceName:string; displayName:string; roleCode:string; revoked:boolean; requests:number; measuredRequests:number; unknownRequests:number; cachedUnknownRequests:number; reasoningUnknownRequests:number; totalTokens:number|string|null; inputTokens:number|string|null; outputTokens:number|string|null; cachedTokens:number|string|null; reasoningTokens:number|string|null}
 type Ledger = {status:string; scope:string; accountCoverage:string; startedAt:string|null; throughAt:string; totals:Omit<LedgerSource,'deviceId'|'userId'|'deviceName'|'displayName'|'roleCode'|'revoked'>; pendingAccountingEvents:number; sources:LedgerSource[]; uncoveredSources:string[]}
-type Overview = { recordedHistory?:Ledger; ledger?:Ledger; accountQuota?:AccountQuota; members:Member[]; serverTime:string; onlineTimeoutSeconds:number; timezone:string; statisticsAvailable:boolean; integrationStage?:string; deploymentTarget?:string; pendingAccountingEvents?:number }
+type Overview = { accountAttribution?:Attribution; recordedHistory?:Ledger; ledger?:Ledger; accountQuota?:AccountQuota; members:Member[]; serverTime:string; onlineTimeoutSeconds:number; timezone:string; statisticsAvailable:boolean; integrationStage?:string; deploymentTarget?:string; pendingAccountingEvents?:number }
 const data = ref<Overview|null>(null)
 const selectedId = ref<number|null>(null)
 const search = ref('')
@@ -23,7 +24,7 @@ let stopped = false
 const stale = computed(() => !!error.value || now.value - updatedAt.value > 45000)
 // Expire green indicators locally even if a refresh fails or the tab resumes after sleep.
 const isOnline = (d:Device) => !!data.value?.statisticsAvailable && !stale.value && !d.revoked && !!d.lastHeartbeatAt &&
-  !!data.value && (Date.parse(data.value.serverTime) + now.value - updatedAt.value - Date.parse(d.lastHeartbeatAt)) <= data.value.onlineTimeoutSeconds * 1000 && d.agentOnline
+  !!data.value && (Date.parse(data.value.serverTime) + now.value - updatedAt.value - Date.parse(d.lastHeartbeatAt)) <= data.value.onlineTimeoutSeconds * 1000 && d.agentOnline && d.codexRunning
 const members = computed(() => data.value?.members || [])
 const filtered = computed(() => members.value.filter(m => (group.value === 'all' || m.groupCode === group.value) &&
   `${m.displayName} ${m.personCode || ''} ${m.username} ${m.devices.map(d=>d.deviceName).join(' ')}`.toLowerCase().includes(search.value.toLowerCase())))
@@ -36,20 +37,11 @@ const sum = sumTokens
 const ledgerScope = ref<'recorded'|'current'>('recorded')
 const ledger = computed(() => ledgerScope.value === 'recorded' ? data.value?.recordedHistory : data.value?.ledger)
 const ledgerActive = computed(() => ledger.value?.status === 'active' && !stale.value)
-const ledgerCount = (v:number|string|null|undefined):number|null => {
-  if (v === null || v === undefined || (typeof v === 'string' && !/^\d+$/.test(v))) return null
-  const n = Number(v)
-  return Number.isSafeInteger(n) && n >= 0 ? n : null
-}
-const ledgerTotal = computed(() => ledgerActive.value ? ledgerCount(ledger.value?.totals.totalTokens) : null)
-const sourceShare = (s:LedgerSource) => usageShare(ledgerCount(s.totalTokens), ledgerTotal.value)
-const recordedTotal = computed(() => !stale.value && data.value?.recordedHistory?.status === 'active' ? ledgerCount(data.value.recordedHistory.totals.totalTokens) : null)
-const recordedShare = (member:Member) => {
-  const rows = (data.value?.recordedHistory?.sources || []).filter(s => s.userId === member.userId && s.totalTokens !== null)
-  if (!rows.length || rows.some(s => ledgerCount(s.totalTokens) === null)) return null
-  return usageShare(ledgerCount(rows.reduce((n,s) => n+Number(s.totalTokens),0)), recordedTotal.value)
-}
 const quotaView = computed(() => quotaDisplay(data.value?.accountQuota, now.value, stale.value))
+const accountFresh = computed(() => quotaView.value.fresh && data.value?.accountAttribution?.status === 'available')
+const memberShare = (m:Member) => confirmedShare(data.value?.accountAttribution,m.userId,accountFresh.value)
+const isHost = (m:Member) => m.devices.some(d=>d.sourceKind==='local-host')
+const accountPercent = (field:'usedPercent'|'remainingPercent'|'confirmedPercent'|'unattributedPercent') => accountFresh.value ? data.value?.accountAttribution?.[field] ?? null : null
 const unknownRequests = computed(() => devices.value.reduce((n,d) => n + d.unknownRequests, 0))
 const number = (v:number|string|null) => v === null || !Number.isFinite(Number(v)) ? '—' : Number(v).toLocaleString('zh-CN')
 const time = (v:string|null) => v ? new Date(v).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',hour12:false}) : '尚未收到'
@@ -60,7 +52,7 @@ async function refresh() {
     const next = await getJsonStrict<Overview>('/codex/overview')
     if (stopped) return
     data.value = next
-    if (!next.members.some(m=>m.userId === selectedId.value)) selectedId.value = next.members[0]?.userId ?? null
+    if (!next.members.some(m=>m.userId === selectedId.value)) selectedId.value = next.members.find(m=>m.devices.some(d=>d.sourceKind==='local-host'))?.userId ?? next.members[0]?.userId ?? null
     updatedAt.value = Date.now()
     now.value = updatedAt.value
     error.value = ''
@@ -79,7 +71,7 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
       <div>
         <span class="eyebrow">CODEX · 团队设备</span>
         <h1>分发人员 &amp; 设备</h1>
-        <p>按人员查看设备连接与 Token 用量</p>
+        <p>账户总额度100% · 人员消耗归属 · rc.5</p>
       </div>
       <button class="refresh" :disabled="loading" @click="refresh">{{ loading ? '刷新中…' : '刷新状态' }}</button>
     </header>
@@ -90,7 +82,7 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
       <div class="summary-card"><span>分发成员</span><strong>{{ data ? members.length : '—' }}<small> 人</small></strong></div>
       <div class="summary-card"><span>已登记设备</span><strong>{{ data?.statisticsAvailable ? devices.length : '—' }}<small> 台</small></strong></div>
       <div class="summary-card"><span><i class="dot" :class="{green:data?.statisticsAvailable && onlineCount>0}"></i>在线设备</span><strong>{{ data?.statisticsAvailable && !stale ? onlineCount : '—' }}<small> 台</small></strong></div>
-      <div class="summary-card"><span>本入口今日已计量 Token</span><strong>{{ number(sum(devices,'todayTokens')) }}</strong></div>
+      <div class="summary-card"><span>今日已计量 Token（可见来源）</span><strong>{{ number(sum(devices,'todayTokens')) }}</strong></div>
     </div>
 
     <div class="notes"><template v-if="data?.statisticsAvailable">测试接入 · {{ data.deploymentTarget }}。绿点须同时收到有效心跳和客户端运行状态；不代表正在执行任务。<span v-if="data.pendingAccountingEvents"> {{ data.pendingAccountingEvents }} 条用量记录正在等待入库。</span></template><template v-else>筹备阶段 · 最终由日本代理服务器统一部署分发；公司 M4 仅用于测试，尚未接入真实设备与用量。</template><span class="legend">绿点在线 · 灰点离线或未接入 · “—”暂无计量</span></div>
@@ -106,11 +98,20 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
         <small>按官方实际返回的窗口展示；未返回的窗口不补成0%或无限额度。</small>
       </div>
     </section>
-    <p class="usage-disclaimer">官方剩余额度独立读取，不从Token反推；这里不是订阅账单或按Token计费金额。成员百分比为入口累计已计量Token占比；官方全账户Token总量未取得，不能据此计算成员占官方额度的比例。<span v-if="unknownRequests"> {{ unknownRequests }} 次请求用量未知。</span><span v-if="data?.accountQuota?.capturedAt"> 额度采集：{{ time(data.accountQuota.capturedAt) }}</span></p>
+    <section class="summary-grid account-allocation" aria-label="本期账户额度归属">
+      <div class="summary-card"><span>账户已用 · 总额度为100%</span><strong>{{ percentLabel(accountPercent('usedPercent')) }}</strong></div>
+      <div class="summary-card"><span>账户剩余</span><strong>{{ percentLabel(accountPercent('remainingPercent')) }}</strong></div>
+      <div class="summary-card"><span>已确认人员消耗</span><strong>{{ percentLabel(accountPercent('confirmedPercent')) }}</strong></div>
+      <div class="summary-card"><span>待归属消耗</span><strong>{{ percentLabel(accountPercent('unattributedPercent')) }}</strong></div>
+    </section>
+    <p v-if="data?.accountAttribution?.status==='reconciliation-required'" class="error">官方额度回调后与已确认记录不一致，归属待复核；暂不展示人员比例。</p>
+    <p v-else-if="!accountFresh" class="notes">账户额度归属暂不可确认，请等待有效采集或核对归属配置。</p>
+    <p v-if="data?.accountAttribution?.startedAt" class="usage-disclaimer">本期：{{ time(data.accountAttribution.startedAt) }} 至 {{ time(new Date((data.accountAttribution.resetsAt || 0)*1000).toISOString()) }}。0%表示暂无已确认额度归属，不表示从未使用过模型。</p>
+    <p class="usage-disclaimer">账户总额度为100%；人员已确认消耗＋待归属＝账户已用，另加账户剩余＝100%。依据明确确认记录归属；后续未确认的增量单列待归属。具体Token独立计量，不按历史Token拆分额度，也不将Token换算为账单金额。<span v-if="unknownRequests"> {{ unknownRequests }} 条请求或日志计量待核对。</span><span v-if="data?.accountQuota?.capturedAt"> 额度采集：{{ time(data.accountQuota.capturedAt) }}</span></p>
 
-    <section class="ledger-panel" aria-label="统一入口用量账本">
-      <h2>统一入口用量账本</h2>
-      <div class="group-tabs ledger-tabs"><button :class="{active:ledgerScope==='recorded'}" @click="ledgerScope='recorded'">入口累计</button><button :class="{active:ledgerScope==='current'}" @click="ledgerScope='current'">启用后本期</button></div>
+    <details class="ledger-panel" aria-label="统一入口用量账本">
+      <summary>入口Token历史明细（不参与账户额度分摊）</summary>
+      <div class="group-tabs ledger-tabs"><button :class="{active:ledgerScope==='recorded'}" @click="ledgerScope='recorded'">入口累计</button><button :class="{active:ledgerScope==='current'}" @click="ledgerScope='current'">入口账本启用后</button></div>
       <p v-if="!ledgerActive">{{ stale ? '读取中断，暂不展示账本占比' : ledgerScope === 'recorded' ? '尚无入口历史记录' : '尚未启用本期账本起点' }}</p>
       <template v-else-if="ledger">
         <p>{{ ledgerScope === 'recorded' ? '首次记录' : '统计起点' }}：{{ time(ledger.startedAt) }} · 截止：{{ time(ledger.throughAt) }}</p>
@@ -120,12 +121,12 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
           <div class="summary-card"><span>未知用量请求</span><strong>{{ ledger.totals.unknownRequests }}</strong></div>
           <div class="summary-card"><span>等待补账</span><strong>{{ ledger.pendingAccountingEvents }}</strong></div>
         </div>
-        <p>未覆盖：{{ ledger.uncoveredSources.join('、') }}。下表占比只除以所选范围的统一入口已计量Token，包含停用设备与已离职人员历史，不随人员搜索改变；合计100%也不表示官方账户全部消耗。未知用量与待补账未纳入分母。缓存明细缺失 {{ ledger.totals.cachedUnknownRequests }} 次、推理明细缺失 {{ ledger.totals.reasoningUnknownRequests }} 次；明细已知部分单列，不重复加进总Token。</p>
-        <p v-if="!ledger.totals.requests && ledgerScope==='current'">启用后尚无新请求，可切到“入口累计”查看已记录消耗与占比。</p>
-        <div class="ledger-scroll"><table><thead><tr><th>人员 / 来源</th><th>输入</th><th>输出</th><th>缓存（输入内）</th><th>推理（输出内）</th><th>总Token</th><th>占入口已计量</th><th>未知请求</th></tr></thead>
-          <tbody><tr v-for="source in ledger.sources" :key="source.deviceId"><td>{{ source.displayName }} · {{ source.deviceName }}{{ source.revoked ? '（停用）' : '' }}</td><td>{{ number(source.inputTokens) }}</td><td>{{ number(source.outputTokens) }}</td><td>{{ number(source.cachedTokens) }}</td><td>{{ number(source.reasoningTokens) }}</td><td>{{ number(source.totalTokens) }}</td><td>{{ percentLabel(sourceShare(source)) }}</td><td>{{ source.unknownRequests }}</td></tr></tbody></table></div>
+        <p>未覆盖：{{ ledger.uncoveredSources.join('、') }}。下表保留全部已记录入口Token，包含停用设备与已离职人员历史，不随人员搜索改变；不用于账户额度归属。未知用量与待补账单列。缓存明细缺失 {{ ledger.totals.cachedUnknownRequests }} 次、推理明细缺失 {{ ledger.totals.reasoningUnknownRequests }} 次；明细已知部分单列，不重复加进总Token。</p>
+        <p v-if="!ledger.totals.requests && ledgerScope==='current'">启用后尚无新请求，可切到“入口累计”查看已记录Token消耗。</p>
+        <div class="ledger-scroll"><table><thead><tr><th>人员 / 来源</th><th>输入</th><th>输出</th><th>缓存（输入内）</th><th>推理（输出内）</th><th>总Token</th><th>未知请求</th></tr></thead>
+          <tbody><tr v-for="source in ledger.sources" :key="source.deviceId"><td>{{ source.displayName }} · {{ source.deviceName }}{{ source.revoked ? '（停用）' : '' }}</td><td>{{ number(source.inputTokens) }}</td><td>{{ number(source.outputTokens) }}</td><td>{{ number(source.cachedTokens) }}</td><td>{{ number(source.reasoningTokens) }}</td><td>{{ number(source.totalTokens) }}</td><td>{{ source.unknownRequests }}</td></tr></tbody></table></div>
       </template>
-    </section>
+    </details>
 
     <div class="workspace">
       <section class="people-panel" aria-label="分发人员">
@@ -138,7 +139,7 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
           <div class="group-tabs"><button v-for="g in [{key:'all',name:'全部'},{key:'operations',name:'运营组'},{key:'ai',name:'AI 小组'}]" :key="g.key" :class="{active:group===g.key}" @click="group=g.key">{{ g.name }}</button></div>
         </div>
         <div class="people-list">
-          <button v-for="m in filtered" :key="m.userId" class="person" :class="{selected:m.userId===selectedId}" @click="selectedId=m.userId"><span class="avatar">{{ m.displayName.slice(-2) }}</span><span class="person-info"><strong>{{ m.displayName }} <small>{{ m.personCode || '管理层' }}</small></strong><span>{{ m.groupName }} · {{ data?.statisticsAvailable ? `${m.devices.length} 台设备` : '设备待接入' }}</span><span v-if="data?.statisticsAvailable" class="share-line">入口累计占比 <b>{{ percentLabel(recordedShare(m)) }}</b></span></span><i class="dot" :class="{green:m.devices.some(isOnline)}" :aria-label="m.devices.some(isOnline)?'在线':'离线或未接入'"></i></button>
+          <button v-for="m in filtered" :key="m.userId" class="person" :class="{selected:m.userId===selectedId}" @click="selectedId=m.userId"><span class="avatar">{{ m.displayName.slice(-2) }}</span><span class="person-info"><strong>{{ m.displayName }} <small>{{ m.personCode || '管理层' }}</small></strong><span>{{ m.groupName }} · {{ data?.statisticsAvailable ? `${m.devices.length} 台设备` : '设备待接入' }}</span><span v-if="data?.statisticsAvailable" class="share-line">已确认占账户额度 <b>{{ percentLabel(memberShare(m)) }}</b></span></span><i class="dot" :class="{green:m.devices.some(isOnline)}" :aria-label="m.devices.some(isOnline)?'在线':'离线或未接入'"></i></button>
           <p v-if="!filtered.length" class="empty">{{ loading ? '正在读取人员名单…' : '没有匹配的成员' }}</p>
         </div>
       </section>
@@ -151,8 +152,8 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
           </div>
           <div class="member-totals">
             <div><span>今日已计量</span><strong>{{ number(sum(selected.devices,'todayTokens')) }} <small>Token</small></strong></div>
-            <div><span>累计已计量</span><strong>{{ number(sum(selected.devices,'totalTokens')) }} <small>Token</small></strong></div>
-            <div class="share-total"><span>占入口累计已计量</span><strong>{{ percentLabel(recordedShare(selected)) }}</strong><span class="share-track" aria-hidden="true"><i :style="{width:`${recordedShare(selected) ?? 0}%`}"></i></span><small>分母：{{ number(recordedTotal) }} Token · 全部已记录来源；不是官方账户总额度</small></div>
+            <div><span>{{ isHost(selected) ? '本期本机已计量' : '历史累计已计量' }}</span><strong>{{ number(sum(selected.devices,'totalTokens')) }} <small>Token</small></strong></div>
+            <div class="share-total"><span>已确认占账户总额度</span><strong>{{ percentLabel(memberShare(selected)) }}</strong><span class="share-track" aria-hidden="true"><i :style="{width:`${memberShare(selected) ?? 0}%`}"></i></span><small>分母：本期官方账户额度100% · {{ (memberShare(selected) || 0)>0 ? '本人确认归属' : '暂无已确认归属' }}</small></div>
           </div>
           <div v-if="!selected.devices.length" class="empty-device">
             <svg class="monitor-icon" viewBox="0 0 48 40" fill="none" aria-hidden="true"><rect x="2" y="2" width="44" height="29" rx="5" stroke="currentColor" stroke-width="2.4"/><path d="M17 38h14M24 31v7M10 9h10" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
@@ -162,9 +163,10 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
           <div v-else class="device-list">
             <article v-for="d in selected.devices" :key="d.deviceId" class="device-card">
               <header><div><h3>{{ d.deviceName }}</h3><p>{{ d.platform || '未填写系统' }}</p></div><span class="connection"><i class="dot" :class="{green:isOnline(d)}"></i>{{ d.revoked ? '已停用' : stale ? '状态待确认' : isOnline(d) ? (d.codexRunning ? '在线 · Codex运行中' : '设备在线 · Codex未运行') : d.lastHeartbeatAt ? '离线' : '尚无心跳' }}</span></header>
-              <div class="device-stats"><div><span>今日 Token</span><strong>{{ number(d.todayTokens) }}</strong></div><div><span>累计 Token</span><strong>{{ number(d.totalTokens) }}</strong></div><div><span>累计请求</span><strong>{{ d.requests }}</strong></div></div>
+              <div class="device-stats"><div><span>今日 Token</span><strong>{{ number(d.todayTokens) }}</strong></div><div><span>{{ d.sourceKind==='local-host' ? '本期本机 Token' : '累计入口 Token' }}</span><strong>{{ number(d.totalTokens) }}</strong></div><div><span>{{ d.sourceKind==='local-host' ? '本期计量事件' : '累计请求' }}</span><strong>{{ d.requests }}</strong></div></div>
+              <p class="heartbeat-help">本期已计量Token：{{ number(d.currentWindowTokens ?? null) }}<span v-if="d.sourceKind==='local-host'"> · 按本机日志事件计量，仅覆盖已扫描本机会话</span><span v-if="d.currentWindowUnknownRequests"> · 本期{{ d.currentWindowUnknownRequests }}处用量待核对</span></p>
               <p v-if="!d.lastHeartbeatAt" class="heartbeat-help">模型调用不自动上报在线；限时测试仅5分钟；需要持续在线时，请安装新包的持续在线检测组件。</p>
-              <footer><span>最近心跳：{{ time(d.lastHeartbeatAt) }}<br />最近调用：{{ time(d.lastRequestAt) }}<br v-if="d.unknownRequests" /><span v-if="d.unknownRequests">{{ d.unknownRequests }} 次请求未返回 Token 数据，暂未计入用量</span></span></footer>
+              <footer><span>{{ d.sourceKind==='local-host' ? '本机采集' : '最近心跳' }}：{{ time(d.lastHeartbeatAt) }}<br /><template v-if="d.sourceKind!=='local-host'">最近调用：{{ time(d.lastRequestAt) }}</template><br v-if="d.unknownRequests" /><span v-if="d.unknownRequests">{{ d.unknownRequests }} {{ d.sourceKind==='local-host' ? '处日志用量边界待核对' : '次请求未返回Token，暂未计入用量' }}</span></span></footer>
             </article>
           </div>
         </template>
@@ -172,7 +174,7 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
       </section>
     </div>
 
-    <p class="updated">每 30 秒刷新 · 时间以北京时间显示<span v-if="data"> · 最近更新 {{ time(data.serverTime) }}</span></p>
+    <p class="updated">账户归属版 rc.5 · 每 30 秒刷新 · 时间以北京时间显示<span v-if="data"> · 最近更新 {{ time(data.serverTime) }}</span></p>
   </main>
 </template>
 
@@ -284,3 +286,5 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
 <style scoped>.ledger-panel{margin:14px 0;padding:14px;border:1px solid #e2e8f0;border-radius:11px;background:#fff}.ledger-panel h2{font-size:15px;margin:0 0 8px}.ledger-panel p{font-size:12px;color:#71849c;line-height:1.7}.ledger-scroll{overflow-x:auto}.ledger-scroll table{width:100%;font-size:12px;border-collapse:collapse;white-space:nowrap}.ledger-scroll td,.ledger-scroll th{padding:9px;text-align:left;border-bottom:1px solid #edf1f7}</style>
 
 <style scoped>.ledger-tabs{max-width:260px;margin:8px 0}</style>
+
+<style scoped>.account-allocation{margin-top:10px}.ledger-panel summary{cursor:pointer;font-size:13px;color:#647b96}.account-allocation .summary-card strong{color:#285f98}</style>

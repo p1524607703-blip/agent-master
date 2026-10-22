@@ -4,9 +4,13 @@ from app.core.config import settings
 from app.services.codex_quota import snapshot as quota_snapshot
 from app.services.codex_telemetry import flush_events,spool_dir
 from app.services.codex_ledger import read_ledger, present
+from app.services.codex_attribution import account_attribution, current_window, host_usage
 
 
 async def overview():
+    quota = quota_snapshot()
+    host = host_usage()
+    window = current_window(quota) if quota.get('status') == 'available' else None
     pending = 0
     if settings.codex_telemetry_enabled:
         try:
@@ -48,6 +52,38 @@ async def overview():
                 'inputTokens':d['input_tokens'],'outputTokens':d['output_tokens'],
                 'cachedTokens':d['cached_tokens'],'reasoningTokens':d['reasoning_tokens'],
                 'requests':d['requests'],'unknownRequests':d['unknown_requests']})
+        attribution = account_attribution(quota, [r['user_id'] for r in roster])
+        # Reconcile gateway tokens to this exact official window, independently of percentages.
+        if window:
+            from datetime import datetime, timezone
+            start = datetime.fromtimestamp(window['resetsAt']-window['windowDurationMins']*60,timezone.utc)
+            async with conn.transaction(readonly=True):
+                period_rows = await conn.fetch('''SELECT device_id,sum(total_tokens) total_tokens,
+                    count(*) FILTER (WHERE total_tokens IS NULL) unknown_requests
+                    FROM codex_ops.model_requests WHERE finished_at >= $1 AND finished_at <= $2
+                    GROUP BY device_id''',start,now) if settings.codex_telemetry_enabled else []
+            period_map = {str(r['device_id']):r for r in period_rows}
+            for items in grouped.values():
+                for d in items:
+                    row = period_map.get(d['deviceId'])
+                    d.update(currentWindowTokens=row['total_tokens'] if row else 0,
+                             currentWindowUnknownRequests=row['unknown_requests'] if row else 0)
+        if host and any(r['user_id'] == host['userId'] for r in roster):
+            same_period = window and (host['resetsAt'],host['windowDurationMins'],host['planType']) == (window['resetsAt'],window['windowDurationMins'],quota.get('planType'))
+            usable = host['fresh'] and same_period
+            grouped.setdefault(host['userId'],[]).append({
+                'deviceId':host['deviceId'],'deviceName':'潘锦龙主设备（本机）','platform':'macOS',
+                'sourceKind':'local-host','online':host['fresh'] and host['codexRunning'],
+                'agentOnline':host['fresh'],'codexRunning':host['codexRunning'],'revoked':False,
+                'lastHeartbeatAt':host['capturedAt'],'lastRequestAt':None,
+                'totalTokens':host['totalTokens'] if usable else None,
+                'todayTokens':host['todayTokens'] if host['fresh'] else None,
+                'inputTokens':host['inputTokens'] if usable else None,
+                'outputTokens':host['outputTokens'] if usable else None,
+                'currentWindowTokens':host['totalTokens'] if usable else None,
+                'currentWindowUnknownRequests':host['unknownSegments'],
+                'requests':host['usageEvents'] or 0,'unknownRequests':host['unknownSegments'],
+                'tokenScope':'official-window-local-log-events','usageCapturedAt':host['capturedAt']})
         return {
             'members': [{
                 'userId': r['user_id'], 'displayName': r['display_name'], 'username': r['username'],
@@ -55,7 +91,9 @@ async def overview():
                 'personCode': r['person_code'], 'roleCode': r['role_code'], 'devices': grouped.get(r['user_id'],[]),
             } for r in roster],
             'serverTime': now, 'onlineTimeoutSeconds': 120, 'timezone': 'Asia/Shanghai',
-            'accountQuota': quota_snapshot(),
+            'accountQuota': quota,
+            'accountAttribution': attribution,
+            'hostUsage':host,
             'ledger': ledger,
             'recordedHistory': recorded_history,
             'integrationStage': 'pilot' if settings.codex_telemetry_enabled else 'preparing',

@@ -115,6 +115,19 @@ def collect(config):
     subprocess.run(['ssh', '-o', 'BatchMode=yes', '-o', 'StrictHostKeyChecking=yes', '-o', 'ConnectTimeout=8',
         config['sshHost'], 'python3 -c '+shlex.quote(REMOTE_WRITER)], input=payload, text=True,
         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=20, check=True)
+    if config.get('hostUsage'):
+        from collect_codex_host_usage import collect_host
+        host_config = config['hostUsage']
+        try:
+            host = collect_host(host_config, value)
+        except Exception:
+            host = {'schemaVersion':1,'status':'unavailable','capturedAt':datetime.now(timezone.utc).isoformat(),
+                    'userId':host_config['userId'],'deviceId':host_config['deviceId']}
+        atomic(host_config['localSnapshot'], host)
+        subprocess.run(['ssh','-o','BatchMode=yes','-o','StrictHostKeyChecking=yes','-o','ConnectTimeout=8',
+            config['sshHost'],'python3 -c '+shlex.quote(REMOTE_WRITER)],
+            input=json.dumps({'destination':host_config['remoteSnapshot'],'snapshot':host}),text=True,
+            stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,timeout=20,check=True)
     return value
 
 
