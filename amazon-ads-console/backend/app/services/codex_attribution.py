@@ -38,13 +38,17 @@ def account_attribution(quota, user_ids):
                   startedAt=datetime.fromtimestamp(start, timezone.utc).isoformat(),
                   usedPercent=w['usedPercent'], remainingPercent=w['remainingPercent'])
     try:
-        confirmations = private_json(settings.codex_quota_attribution_file).get('confirmations', []) if settings.codex_quota_attribution_file else []
-        if not isinstance(confirmations, list):
+        document = private_json(settings.codex_quota_attribution_file) if settings.codex_quota_attribution_file else {}
+        confirmations = document.get('confirmations', [])
+        automatic = document.get('automatic', [])
+        if not isinstance(confirmations, list) or not isinstance(automatic, list):
             raise ValueError('invalid confirmations')
         amounts = {int(uid): Decimal(0) for uid in user_ids}
         evidence = {int(uid): [] for uid in user_ids}
         ids = set()
-        for entry in confirmations:
+        manual_total = Decimal(0)
+        device_amounts = {}
+        for entry, is_auto in [(entry,False) for entry in confirmations] + [(entry,True) for entry in automatic]:
             if (entry.get('resetsAt'), entry.get('windowDurationMins'), entry.get('planType')) != (w['resetsAt'], w['windowDurationMins'], quota.get('planType')):
                 continue
             uid, percent, key = entry['userId'], entry['usedPercent'], entry['confirmationId']
@@ -55,13 +59,27 @@ def account_attribution(quota, user_ids):
                 raise ValueError('confirmation outside its official period')
             ids.add(key)
             amounts[uid] += Decimal(str(percent))
-            evidence[uid].append({'confirmationId': key, 'confirmedAt': at.isoformat(), 'method': 'owner-confirmed'})
+            method = entry.get('method') if is_auto else 'owner-confirmed'
+            if is_auto and method not in ('observed-exclusive-period', 'observed-exclusive-interval'):
+                raise ValueError('invalid automatic evidence')
+            if not is_auto:
+                manual_total += Decimal(str(percent))
+            device_id = entry.get('deviceId')
+            if device_id:
+                if not isinstance(device_id, str) or len(device_id) > 128:
+                    raise ValueError('invalid device identity')
+                device_amounts[(uid, device_id)] = device_amounts.get((uid, device_id), Decimal(0)) + Decimal(str(percent))
+            evidence[uid].append({'confirmationId': key, 'confirmedAt': at.isoformat(), 'method': method,
+                                  'deviceId': device_id, 'usedPercent': percent})
         confirmed = sum(amounts.values())
         used = Decimal(str(w['usedPercent']))
         if confirmed > used:
             return {**result, 'status': 'reconciliation-required', 'recordedConfirmedPercent': float(confirmed)}
         return {**result, 'status': 'available', 'confirmedPercent': float(confirmed),
                 'unattributedPercent': float(used-confirmed),
+                'ownerConfirmedPercent': float(manual_total), 'automaticPercent': float(confirmed-manual_total),
+                'automaticMonitor': document.get('monitor'),
+                'deviceShares': [{'userId': uid, 'deviceId': did, 'usedPercent': float(amount)} for (uid,did),amount in device_amounts.items()],
                 'members': [{'userId': uid, 'usedPercent': float(amount), 'evidence': evidence[uid]}
                             for uid, amount in amounts.items()]}
     except (OSError, ValueError, TypeError, KeyError, AttributeError):
@@ -84,6 +102,7 @@ def host_usage():
                   'codexRunning': value.get('codexRunning') is True,
                   'periodStartedAt': value.get('periodStartedAt'), 'resetsAt': value.get('resetsAt'),
                   'windowDurationMins': value.get('windowDurationMins'), 'planType': value.get('planType'),
+                  'lastActivityAt': value.get('lastActivityAt'),
                   'scope': 'local-log-events', 'unknownSegments': value.get('unknownSegments', 0)}
         for field in ('totalTokens','todayTokens','inputTokens','outputTokens','cachedTokens','reasoningTokens','usageEvents'):
             count = value.get(field)

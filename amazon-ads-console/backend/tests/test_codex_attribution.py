@@ -105,6 +105,23 @@ class LocalLogTests(unittest.TestCase):
             self.assertNotIn('private conversation',json.dumps(value))
             self.assertNotIn(tmp,json.dumps(value))
 
+    def test_fork_preserves_first_metadata_and_never_merges_parent_counters(self):
+        now=datetime.now(timezone.utc);start=now-timedelta(minutes=10)
+        parent={'type':'session_meta','payload':{'id':'parent','timestamp':(start-timedelta(days=1)).isoformat()}}
+        fork={'type':'session_meta','payload':{'id':'child','timestamp':(start+timedelta(seconds=1)).isoformat(),'forked_from_id':'parent'}}
+        with tempfile.TemporaryDirectory() as tmp:
+            home=Path(tmp);(home/'sessions').mkdir()
+            rows=[parent,event(start-timedelta(seconds=1),100,100),event(start+timedelta(seconds=3),160,60)]
+            (home/'sessions/parent.jsonl').write_text(''.join(json.dumps(v)+'\n' for v in rows))
+            rows=[fork,parent,event(start+timedelta(seconds=2),1000,10),event(start+timedelta(seconds=4),1010,10)]
+            (home/'sessions/child.jsonl').write_text(''.join(json.dumps(v)+'\n' for v in rows))
+            quota={'status':'available','planType':'fixture','primary':{'resetsAt':int(start.timestamp())+604800,'windowDurationMins':10080}}
+            with patch.object(host,'main_running',return_value=True):
+                value=host.collect_host(dict(codexHome=tmp,deviceId='host',userId=17,mainExecutable='fixture'),quota)
+            self.assertEqual(value['scannedSessions'],2)
+            self.assertEqual(value['totalTokens'],70)
+            self.assertEqual(value['unknownSegments'],1)
+
     def test_missing_baseline_and_counter_regression_are_not_invented_usage(self):
         now=datetime.now(timezone.utc);start=now-timedelta(minutes=10)
         def row(at,n):

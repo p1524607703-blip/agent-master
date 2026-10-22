@@ -171,6 +171,29 @@ def stage_event(record):
     return path
 
 
+def start_activity(request_id, device_id):
+    # Separate from the terminal outbox: a running request is evidence of activity
+    # even before its first token or terminal accounting event reaches the DB.
+    directory = spool_dir()/'active'
+    directory.mkdir(mode=0o700, exist_ok=True)
+    path = directory/(request_id+'.json')
+    with os.fdopen(os.open(path, os.O_WRONLY|os.O_CREAT|os.O_EXCL, 0o600), 'w') as stream:
+        json.dump({'schemaVersion':1, 'deviceId':str(device_id),
+                   'startedAt':datetime.now(timezone.utc).isoformat()}, stream)
+    return path
+
+
+def finish_activity(path):
+    # Keep a short overlap journal so a DB-snapshot/completion race cannot hide
+    # another device while a quota sample is being reconciled.
+    value = json.loads(path.read_text())
+    value['finishedAt'] = datetime.now(timezone.utc).isoformat()
+    temporary = path.with_suffix('.tmp')
+    with os.fdopen(os.open(temporary, os.O_WRONLY|os.O_CREAT|os.O_TRUNC, 0o600), 'w') as stream:
+        json.dump(value, stream)
+    os.replace(temporary, path)
+
+
 async def save_event(record):
     path = stage_event(record)
     await flush_events([path])
@@ -246,6 +269,7 @@ async def model_catalog():
 async def proxy_response(device, body, route='/responses',forward_headers=None):
     base,headers = upstream()
     request_id = str(uuid.uuid4())
+    activity = start_activity(request_id, device['device_id'])
     # Preserve supported Codex session metadata without forwarding device auth,
     # cookies, arbitrary proxy headers or caller-selected upstream destinations.
     if forward_headers:
@@ -264,6 +288,7 @@ async def proxy_response(device, body, route='/responses',forward_headers=None):
             await save_event({'request_id':request_id,'device_id':str(device['device_id']),
                 'response_id':None,'finished_at':datetime.now(timezone.utc).isoformat(),
                 'http_status':502,'completed':False,'usage':None})
+            finish_activity(activity)
         except Exception:
             log.error('codex_accounting_pending request_id=%s',request_id)
         raise HTTPException(502,'Model upstream is unavailable')
@@ -306,6 +331,7 @@ async def proxy_response(device, body, route='/responses',forward_headers=None):
             # Stage synchronously before any cancellation point, even on client disconnect.
             try:
                 path = stage_event(record)
+                finish_activity(activity)
             except Exception:
                 path = None
                 log.error('codex_accounting_pending request_id=%s',request_id)

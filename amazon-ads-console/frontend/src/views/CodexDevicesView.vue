@@ -3,7 +3,7 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { getJsonStrict } from '../api/client'
 import { sumTokens, percentLabel } from '../utils/codexUsage'
 import { quotaDisplay, type AccountQuota } from '../utils/codexQuota'
-import { confirmedShare, type Attribution } from '../utils/codexAttribution'
+import { confirmedShare, attributionMethod, type Attribution } from '../utils/codexAttribution'
 
 type Device = { sourceKind?:string; currentWindowTokens?:number|string|null; currentWindowUnknownRequests?:number; deviceId:string; deviceName:string; platform:string; online:boolean; agentOnline:boolean; codexRunning:boolean; revoked:boolean; lastHeartbeatAt:string|null; lastRequestAt:string|null; totalTokens:number|string|null; todayTokens:number|string|null; inputTokens:number|null; outputTokens:number|null; requests:number; unknownRequests:number }
 type Member = { userId:number; displayName:string; username:string; groupCode:string; groupName:string; personCode:string|null; roleCode:string; devices:Device[] }
@@ -40,6 +40,7 @@ const ledgerActive = computed(() => ledger.value?.status === 'active' && !stale.
 const quotaView = computed(() => quotaDisplay(data.value?.accountQuota, now.value, stale.value))
 const accountFresh = computed(() => quotaView.value.fresh && data.value?.accountAttribution?.status === 'available')
 const memberShare = (m:Member) => confirmedShare(data.value?.accountAttribution,m.userId,accountFresh.value)
+const deviceShare = (d:Device) => accountFresh.value ? data.value?.accountAttribution?.deviceShares?.find(row=>row.deviceId===d.deviceId)?.usedPercent ?? 0 : null
 const isHost = (m:Member) => m.devices.some(d=>d.sourceKind==='local-host')
 const accountPercent = (field:'usedPercent'|'remainingPercent'|'confirmedPercent'|'unattributedPercent') => accountFresh.value ? data.value?.accountAttribution?.[field] ?? null : null
 const unknownRequests = computed(() => devices.value.reduce((n,d) => n + d.unknownRequests, 0))
@@ -71,7 +72,7 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
       <div>
         <span class="eyebrow">CODEX · 团队设备</span>
         <h1>分发人员 &amp; 设备</h1>
-        <p>账户总额度100% · 人员消耗归属 · rc.5</p>
+        <p>账户总额度100% · 人员消耗归属 · rc.6</p>
       </div>
       <button class="refresh" :disabled="loading" @click="refresh">{{ loading ? '刷新中…' : '刷新状态' }}</button>
     </header>
@@ -101,13 +102,15 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
     <section class="summary-grid account-allocation" aria-label="本期账户额度归属">
       <div class="summary-card"><span>账户已用 · 总额度为100%</span><strong>{{ percentLabel(accountPercent('usedPercent')) }}</strong></div>
       <div class="summary-card"><span>账户剩余</span><strong>{{ percentLabel(accountPercent('remainingPercent')) }}</strong></div>
-      <div class="summary-card"><span>已确认人员消耗</span><strong>{{ percentLabel(accountPercent('confirmedPercent')) }}</strong></div>
+      <div class="summary-card"><span>已归属人员消耗</span><strong>{{ percentLabel(accountPercent('confirmedPercent')) }}</strong></div>
       <div class="summary-card"><span>待归属消耗</span><strong>{{ percentLabel(accountPercent('unattributedPercent')) }}</strong></div>
     </section>
     <p v-if="data?.accountAttribution?.status==='reconciliation-required'" class="error">官方额度回调后与已确认记录不一致，归属待复核；暂不展示人员比例。</p>
     <p v-else-if="!accountFresh" class="notes">账户额度归属暂不可确认，请等待有效采集或核对归属配置。</p>
-    <p v-if="data?.accountAttribution?.startedAt" class="usage-disclaimer">本期：{{ time(data.accountAttribution.startedAt) }} 至 {{ time(new Date((data.accountAttribution.resetsAt || 0)*1000).toISOString()) }}。0%表示暂无已确认额度归属，不表示从未使用过模型。</p>
-    <p class="usage-disclaimer">账户总额度为100%；人员已确认消耗＋待归属＝账户已用，另加账户剩余＝100%。依据明确确认记录归属；后续未确认的增量单列待归属。具体Token独立计量，不按历史Token拆分额度，也不将Token换算为账单金额。<span v-if="unknownRequests"> {{ unknownRequests }} 条请求或日志计量待核对。</span><span v-if="data?.accountQuota?.capturedAt"> 额度采集：{{ time(data.accountQuota.capturedAt) }}</span></p>
+    <p v-if="data?.accountAttribution?.startedAt" class="usage-disclaimer">本期：{{ time(data.accountAttribution.startedAt) }} 至 {{ time(new Date((data.accountAttribution.resetsAt || 0)*1000).toISOString()) }}。0%表示暂无已归属额度消耗，不表示从未使用过模型。</p>
+    <p class="usage-disclaimer">账户总额度为100%；人员已归属消耗＋待归属＝账户已用，另加账户剩余＝100%。后台每约2分钟自动核对：单一可见来源的额度增量自动推定归属，保留本人确认记录；并发、采集中断或来源不明的部分单列待归属。自动推定只覆盖已监测来源，包含额度取整及延迟的不确定性，不是官方逐设备账单。具体Token独立计量，不按历史Token拆分额度，也不将Token换算为账单金额。<span v-if="unknownRequests"> {{ unknownRequests }} 条请求或日志计量待核对。</span><span v-if="data?.accountQuota?.capturedAt"> 额度采集：{{ time(data.accountQuota.capturedAt) }}</span></p>
+
+    <p v-if="data?.accountAttribution?.automaticMonitor" class="usage-disclaimer">自动归属：{{ data.accountAttribution.automaticMonitor.status==='active' && now-Date.parse(data.accountAttribution.automaticMonitor.capturedAt)<=300000 ? '运行中' : '已暂停或待核对' }} · 最近核对 {{ time(data.accountAttribution.automaticMonitor.capturedAt) }} · 本人确认 {{ percentLabel(data.accountAttribution.ownerConfirmedPercent ?? null) }} · 自动推定 {{ percentLabel(data.accountAttribution.automaticPercent ?? null) }}。</p>
 
     <details class="ledger-panel" aria-label="统一入口用量账本">
       <summary>入口Token历史明细（不参与账户额度分摊）</summary>
@@ -139,7 +142,7 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
           <div class="group-tabs"><button v-for="g in [{key:'all',name:'全部'},{key:'operations',name:'运营组'},{key:'ai',name:'AI 小组'}]" :key="g.key" :class="{active:group===g.key}" @click="group=g.key">{{ g.name }}</button></div>
         </div>
         <div class="people-list">
-          <button v-for="m in filtered" :key="m.userId" class="person" :class="{selected:m.userId===selectedId}" @click="selectedId=m.userId"><span class="avatar">{{ m.displayName.slice(-2) }}</span><span class="person-info"><strong>{{ m.displayName }} <small>{{ m.personCode || '管理层' }}</small></strong><span>{{ m.groupName }} · {{ data?.statisticsAvailable ? `${m.devices.length} 台设备` : '设备待接入' }}</span><span v-if="data?.statisticsAvailable" class="share-line">已确认占账户额度 <b>{{ percentLabel(memberShare(m)) }}</b></span></span><i class="dot" :class="{green:m.devices.some(isOnline)}" :aria-label="m.devices.some(isOnline)?'在线':'离线或未接入'"></i></button>
+          <button v-for="m in filtered" :key="m.userId" class="person" :class="{selected:m.userId===selectedId}" @click="selectedId=m.userId"><span class="avatar">{{ m.displayName.slice(-2) }}</span><span class="person-info"><strong>{{ m.displayName }} <small>{{ m.personCode || '管理层' }}</small></strong><span>{{ m.groupName }} · {{ data?.statisticsAvailable ? `${m.devices.length} 台设备` : '设备待接入' }}</span><span v-if="data?.statisticsAvailable" class="share-line">已归属占账户额度 <b>{{ percentLabel(memberShare(m)) }}</b></span></span><i class="dot" :class="{green:m.devices.some(isOnline)}" :aria-label="m.devices.some(isOnline)?'在线':'离线或未接入'"></i></button>
           <p v-if="!filtered.length" class="empty">{{ loading ? '正在读取人员名单…' : '没有匹配的成员' }}</p>
         </div>
       </section>
@@ -153,7 +156,7 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
           <div class="member-totals">
             <div><span>今日已计量</span><strong>{{ number(sum(selected.devices,'todayTokens')) }} <small>Token</small></strong></div>
             <div><span>{{ isHost(selected) ? '本期本机已计量' : '历史累计已计量' }}</span><strong>{{ number(sum(selected.devices,'totalTokens')) }} <small>Token</small></strong></div>
-            <div class="share-total"><span>已确认占账户总额度</span><strong>{{ percentLabel(memberShare(selected)) }}</strong><span class="share-track" aria-hidden="true"><i :style="{width:`${memberShare(selected) ?? 0}%`}"></i></span><small>分母：本期官方账户额度100% · {{ (memberShare(selected) || 0)>0 ? '本人确认归属' : '暂无已确认归属' }}</small></div>
+            <div class="share-total"><span>已归属占账户总额度</span><strong>{{ percentLabel(memberShare(selected)) }}</strong><span class="share-track" aria-hidden="true"><i :style="{width:`${memberShare(selected) ?? 0}%`}"></i></span><small>分母：本期官方账户额度100% · {{ attributionMethod(data?.accountAttribution, selected.userId) }}</small></div>
           </div>
           <div v-if="!selected.devices.length" class="empty-device">
             <svg class="monitor-icon" viewBox="0 0 48 40" fill="none" aria-hidden="true"><rect x="2" y="2" width="44" height="29" rx="5" stroke="currentColor" stroke-width="2.4"/><path d="M17 38h14M24 31v7M10 9h10" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
@@ -164,6 +167,7 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
             <article v-for="d in selected.devices" :key="d.deviceId" class="device-card">
               <header><div><h3>{{ d.deviceName }}</h3><p>{{ d.platform || '未填写系统' }}</p></div><span class="connection"><i class="dot" :class="{green:isOnline(d)}"></i>{{ d.revoked ? '已停用' : stale ? '状态待确认' : isOnline(d) ? (d.codexRunning ? '在线 · Codex运行中' : '设备在线 · Codex未运行') : d.lastHeartbeatAt ? '离线' : '尚无心跳' }}</span></header>
               <div class="device-stats"><div><span>今日 Token</span><strong>{{ number(d.todayTokens) }}</strong></div><div><span>{{ d.sourceKind==='local-host' ? '本期本机 Token' : '累计入口 Token' }}</span><strong>{{ number(d.totalTokens) }}</strong></div><div><span>{{ d.sourceKind==='local-host' ? '本期计量事件' : '累计请求' }}</span><strong>{{ d.requests }}</strong></div></div>
+              <p class="heartbeat-help">本期已归属占账户总额度：{{ percentLabel(deviceShare(d)) }}（含自动推定，详情见人员归属依据）</p>
               <p class="heartbeat-help">本期已计量Token：{{ number(d.currentWindowTokens ?? null) }}<span v-if="d.sourceKind==='local-host'"> · 按本机日志事件计量，仅覆盖已扫描本机会话</span><span v-if="d.currentWindowUnknownRequests"> · 本期{{ d.currentWindowUnknownRequests }}处用量待核对</span></p>
               <p v-if="!d.lastHeartbeatAt" class="heartbeat-help">模型调用不自动上报在线；限时测试仅5分钟；需要持续在线时，请安装新包的持续在线检测组件。</p>
               <footer><span>{{ d.sourceKind==='local-host' ? '本机采集' : '最近心跳' }}：{{ time(d.lastHeartbeatAt) }}<br /><template v-if="d.sourceKind!=='local-host'">最近调用：{{ time(d.lastRequestAt) }}</template><br v-if="d.unknownRequests" /><span v-if="d.unknownRequests">{{ d.unknownRequests }} {{ d.sourceKind==='local-host' ? '处日志用量边界待核对' : '次请求未返回Token，暂未计入用量' }}</span></span></footer>
@@ -174,7 +178,7 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
       </section>
     </div>
 
-    <p class="updated">账户归属版 rc.5 · 每 30 秒刷新 · 时间以北京时间显示<span v-if="data"> · 最近更新 {{ time(data.serverTime) }}</span></p>
+    <p class="updated">账户归属版 rc.6 · 每 30 秒刷新 · 时间以北京时间显示<span v-if="data"> · 最近更新 {{ time(data.serverTime) }}</span></p>
   </main>
 </template>
 

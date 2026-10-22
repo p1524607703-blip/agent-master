@@ -21,6 +21,16 @@ from app.services.auth import _connect
 
 
 class ParserTests(unittest.TestCase):
+    def test_active_request_journal_is_private_and_separate_from_terminal_outbox(self):
+        with tempfile.TemporaryDirectory() as tmp, patch.object(settings,'codex_event_spool_dir',tmp):
+            path=service.start_activity(str(uuid.uuid4()),'fixture-device')
+            self.assertEqual(path.stat().st_mode & 0o777,0o600)
+            self.assertEqual(list(service.spool_dir().glob('*.json')),[])
+            self.assertEqual(set(json.loads(path.read_text())),{'schemaVersion','deviceId','startedAt'})
+            service.finish_activity(path)
+            self.assertIn('finishedAt',json.loads(path.read_text()))
+            self.assertEqual(path.stat().st_mode & 0o777,0o600)
+
     def test_terminal_usage_without_newline_is_read_at_eof(self):
         observer = service.UsageObserver()
         observer.feed(b'data: {"type":"response.incomplete","response":{"id":"eof","usage":{"input_tokens":2,"output_tokens":1,"total_tokens":3}}}')
