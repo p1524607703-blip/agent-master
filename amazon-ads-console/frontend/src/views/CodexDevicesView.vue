@@ -4,12 +4,13 @@ import { getJsonStrict } from '../api/client'
 import { sumTokens, percentLabel } from '../utils/codexUsage'
 import { quotaDisplay, type AccountQuota } from '../utils/codexQuota'
 import { confirmedShare, attributionMethod, allocationLabel, type Attribution } from '../utils/codexAttribution'
+import { activityState, activityLabels, type ActivityDevice } from '../utils/codexActivity'
 
-type Device = { sourceKind?:string; currentWindowTokens?:number|string|null; currentWindowUnknownRequests?:number; deviceId:string; deviceName:string; platform:string; online:boolean; agentOnline:boolean; codexRunning:boolean; revoked:boolean; lastHeartbeatAt:string|null; lastRequestAt:string|null; totalTokens:number|string|null; todayTokens:number|string|null; inputTokens:number|null; outputTokens:number|null; requests:number; unknownRequests:number }
+type Device = ActivityDevice & { sourceKind?:string; currentWindowTokens?:number|string|null; currentWindowUnknownRequests?:number; deviceId:string; deviceName:string; platform:string; online:boolean; agentOnline:boolean; codexRunning:boolean; revoked:boolean; lastHeartbeatAt:string|null; lastRequestAt:string|null; totalTokens:number|string|null; todayTokens:number|string|null; inputTokens:number|null; outputTokens:number|null; requests:number; unknownRequests:number }
 type Member = { userId:number; displayName:string; username:string; groupCode:string; groupName:string; personCode:string|null; roleCode:string; devices:Device[] }
 type LedgerSource = {deviceId:string; userId:number; deviceName:string; displayName:string; roleCode:string; revoked:boolean; requests:number; measuredRequests:number; unknownRequests:number; cachedUnknownRequests:number; reasoningUnknownRequests:number; totalTokens:number|string|null; inputTokens:number|string|null; outputTokens:number|string|null; cachedTokens:number|string|null; reasoningTokens:number|string|null}
 type Ledger = {status:string; scope:string; accountCoverage:string; startedAt:string|null; throughAt:string; totals:Omit<LedgerSource,'deviceId'|'userId'|'deviceName'|'displayName'|'roleCode'|'revoked'>; pendingAccountingEvents:number; sources:LedgerSource[]; uncoveredSources:string[]}
-type Overview = { accountAttribution?:Attribution; recordedHistory?:Ledger; ledger?:Ledger; accountQuota?:AccountQuota; members:Member[]; serverTime:string; onlineTimeoutSeconds:number; timezone:string; statisticsAvailable:boolean; integrationStage?:string; deploymentTarget?:string; pendingAccountingEvents?:number }
+type Overview = { activityRecentSeconds:number; accountAttribution?:Attribution; recordedHistory?:Ledger; ledger?:Ledger; accountQuota?:AccountQuota; members:Member[]; serverTime:string; onlineTimeoutSeconds:number; timezone:string; statisticsAvailable:boolean; integrationStage?:string; deploymentTarget?:string; pendingAccountingEvents?:number }
 const data = ref<Overview|null>(null)
 const selectedId = ref<number|null>(null)
 const search = ref('')
@@ -22,17 +23,20 @@ let timer: ReturnType<typeof setInterval>|undefined
 let clock: ReturnType<typeof setInterval>|undefined
 let stopped = false
 const stale = computed(() => !!error.value || now.value - updatedAt.value > 45000)
-// Expire green indicators locally even if a refresh fails or the tab resumes after sleep.
-const isOnline = (d:Device) => !!data.value?.statisticsAvailable && !stale.value && !d.revoked && !!d.lastHeartbeatAt &&
-  !!data.value && (Date.parse(data.value.serverTime) + now.value - updatedAt.value - Date.parse(d.lastHeartbeatAt)) <= data.value.onlineTimeoutSeconds * 1000 && d.agentOnline && d.codexRunning
+// Use elapsed client time against the server clock; expire indicators on failed refreshes.
+const deviceState = (d:Device) => activityState(d, Date.parse(data.value?.serverTime || '') + now.value - updatedAt.value,
+  !!data.value?.statisticsAvailable && !stale.value, data.value?.activityRecentSeconds)
+const isActive = (d:Device) => ['active','recent'].includes(deviceState(d))
+const memberState = (m:Member) => m.devices.some(d=>deviceState(d)==='active') ? '正在使用' :
+  m.devices.some(d=>deviceState(d)==='recent') ? '最近活跃' : stale.value || m.devices.some(d=>deviceState(d)==='unknown') ? '状态待确认' : m.devices.length ? '暂无近期请求' : '设备待接入'
 const members = computed(() => data.value?.members || [])
 const filtered = computed(() => members.value.filter(m => (group.value === 'all' || m.groupCode === group.value) &&
   `${m.displayName} ${m.personCode || ''} ${m.username} ${m.devices.map(d=>d.deviceName).join(' ')}`.toLowerCase().includes(search.value.toLowerCase())))
 watch(filtered, items => { if (!items.some(m=>m.userId===selectedId.value)) selectedId.value = items[0]?.userId ?? null })
 const selected = computed(() => members.value.find(m=>m.userId === selectedId.value))
 const devices = computed(() => members.value.flatMap(m=>m.devices))
-const onlineCount = computed(() => devices.value.filter(isOnline).length)
-const selectedOnline = computed(() => (selected.value?.devices || []).filter(isOnline).length)
+const activeCount = computed(() => devices.value.filter(isActive).length)
+const selectedActive = computed(() => (selected.value?.devices || []).filter(isActive).length)
 const sum = sumTokens
 const ledgerScope = ref<'recorded'|'current'>('recorded')
 const ledger = computed(() => ledgerScope.value === 'recorded' ? data.value?.recordedHistory : data.value?.ledger)
@@ -61,7 +65,7 @@ async function refresh() {
   finally { loading.value = false }
 }
 function onVisible() { now.value = Date.now(); if (!document.hidden) void refresh() }
-onMounted(() => { void refresh(); timer = setInterval(()=>{ if (!document.hidden) void refresh() },30000); clock = setInterval(()=>{now.value=Date.now()},1000); document.addEventListener('visibilitychange',onVisible) })
+onMounted(() => { void refresh(); timer = setInterval(()=>{ if (!document.hidden) void refresh() },15000); clock = setInterval(()=>{now.value=Date.now()},1000); document.addEventListener('visibilitychange',onVisible) })
 onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); document.removeEventListener('visibilitychange',onVisible) })
 
 </script>
@@ -72,21 +76,22 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
       <div>
         <span class="eyebrow">CODEX · 团队设备</span>
         <h1>分发人员 &amp; 设备</h1>
-        <p>账户总额度100% · 人员消耗归属 · rc.7.1</p>
+        <p>账户总额度100% · 人员消耗归属 · rc.7.2 · 请求活动状态</p>
+
       </div>
       <button class="refresh" :disabled="loading" @click="refresh">{{ loading ? '刷新中…' : '刷新状态' }}</button>
     </header>
 
-    <div v-if="error" class="error" role="alert">{{ error }}。状态暂不可确认，已暂停显示在线绿点。<button @click="refresh">重试</button></div>
+    <div v-if="error" class="error" role="alert">{{ error }}。使用状态暂不可确认。<button @click="refresh">重试</button></div>
 
     <div class="summary-grid">
       <div class="summary-card"><span>分发成员</span><strong>{{ data ? members.length : '—' }}<small> 人</small></strong></div>
       <div class="summary-card"><span>已登记设备</span><strong>{{ data?.statisticsAvailable ? devices.length : '—' }}<small> 台</small></strong></div>
-      <div class="summary-card"><span><i class="dot" :class="{green:data?.statisticsAvailable && onlineCount>0}"></i>在线设备</span><strong>{{ data?.statisticsAvailable && !stale ? onlineCount : '—' }}<small> 台</small></strong></div>
+      <div class="summary-card"><span><i class="dot" :class="{green:data?.statisticsAvailable && activeCount>0}"></i>活跃设备（近5分钟）</span><strong>{{ data?.statisticsAvailable && !stale ? activeCount : '—' }}<small> 台</small></strong></div>
       <div class="summary-card"><span>今日已计量 Token（可见来源）</span><strong>{{ number(sum(devices,'todayTokens')) }}</strong></div>
     </div>
 
-    <div class="notes"><template v-if="data?.statisticsAvailable">测试接入 · {{ data.deploymentTarget }}。绿点须同时收到有效心跳和客户端运行状态；不代表正在执行任务。<span v-if="data.pendingAccountingEvents"> {{ data.pendingAccountingEvents }} 条用量记录正在等待入库。</span></template><template v-else>筹备阶段 · 最终由日本代理服务器统一部署分发；公司 M4 仅用于测试，尚未接入真实设备与用量。</template><span class="legend">绿点在线 · 灰点离线或未接入 · “—”暂无计量</span></div>
+    <div class="notes"><template v-if="data?.statisticsAvailable">按实际请求识别使用状态：正在处理为“正在使用”，近5分钟有请求为“最近活跃”，其余显示“暂无近期请求”。子设备无需运行心跳程序；暂无请求不表示电脑关机。<span v-if="data.pendingAccountingEvents"> {{ data.pendingAccountingEvents }} 条用量记录正在等待入库。</span></template><template v-else>尚未接入真实设备与用量。</template><span class="legend">绿点使用中或最近活跃 · 灰点暂无近期请求 · “—”暂无计量</span></div>
 
     <section class="account-quota" aria-label="官方账户剩余额度">
       <div v-for="entry in quotaView.windows" :key="entry.key" class="quota-card">
@@ -142,7 +147,7 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
           <div class="group-tabs"><button v-for="g in [{key:'all',name:'全部'},{key:'operations',name:'运营组'},{key:'ai',name:'AI 小组'}]" :key="g.key" :class="{active:group===g.key}" @click="group=g.key">{{ g.name }}</button></div>
         </div>
         <div class="people-list">
-          <button v-for="m in filtered" :key="m.userId" class="person" :class="{selected:m.userId===selectedId}" @click="selectedId=m.userId"><span class="avatar">{{ m.displayName.slice(-2) }}</span><span class="person-info"><strong>{{ m.displayName }} <small>{{ m.personCode || '管理层' }}</small></strong><span>{{ m.groupName }} · {{ data?.statisticsAvailable ? `${m.devices.length} 台设备` : '设备待接入' }}</span><span v-if="data?.statisticsAvailable" class="share-line">已归属占账户额度 <b>{{ allocationLabel(memberShare(m)) }}</b></span></span><i class="dot" :class="{green:m.devices.some(isOnline)}" :aria-label="m.devices.some(isOnline)?'在线':'离线或未接入'"></i></button>
+          <button v-for="m in filtered" :key="m.userId" class="person" :class="{selected:m.userId===selectedId}" @click="selectedId=m.userId"><span class="avatar">{{ m.displayName.slice(-2) }}</span><span class="person-info"><strong>{{ m.displayName }} <small>{{ m.personCode || '管理层' }}</small></strong><span>{{ m.groupName }} · {{ data?.statisticsAvailable ? `${m.devices.length} 台设备 · ${memberState(m)}` : '设备待接入' }}</span><span v-if="data?.statisticsAvailable" class="share-line">已归属占账户额度 <b>{{ allocationLabel(memberShare(m)) }}</b></span></span><i class="dot" :class="{green:m.devices.some(isActive)}" :aria-label="memberState(m)"></i></button>
           <p v-if="!filtered.length" class="empty">{{ loading ? '正在读取人员名单…' : '没有匹配的成员' }}</p>
         </div>
       </section>
@@ -151,7 +156,7 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
         <template v-if="selected">
           <div class="panel-heading">
             <div class="heading-block"><h2>{{ selected.displayName }}<span class="group-badge">{{ selected.groupName }}</span></h2><p>{{ selected.username }}<span v-if="selected.personCode"> · {{ selected.personCode }}</span><span v-if="selected.roleCode==='management'"> · 保留管理权限</span></p></div>
-            <span class="status-chip" :class="{live:selectedOnline>0}">{{ selected.devices.length ? `${selectedOnline} / ${selected.devices.length} 在线` : '设备待分发' }}</span>
+            <span class="status-chip" :class="{live:selectedActive>0}">{{ stale ? '状态待确认' : selected.devices.length ? `${selectedActive} / ${selected.devices.length} 活跃` : '设备待分发' }}</span>
           </div>
           <div class="member-totals">
             <div><span>今日已计量</span><strong>{{ number(sum(selected.devices,'todayTokens')) }} <small>Token</small></strong></div>
@@ -165,12 +170,12 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
           </div>
           <div v-else class="device-list">
             <article v-for="d in selected.devices" :key="d.deviceId" class="device-card">
-              <header><div><h3>{{ d.deviceName }}</h3><p>{{ d.platform || '未填写系统' }}</p></div><span class="connection"><i class="dot" :class="{green:isOnline(d)}"></i>{{ d.revoked ? '已停用' : stale ? '状态待确认' : isOnline(d) ? (d.codexRunning ? '在线 · Codex运行中' : '设备在线 · Codex未运行') : d.lastHeartbeatAt ? '离线' : '尚无心跳' }}</span></header>
+              <header><div><h3>{{ d.deviceName }}</h3><p>{{ d.platform || '未填写系统' }}</p></div><span class="connection"><i class="dot" :class="{green:isActive(d)}"></i>{{ activityLabels[deviceState(d)] }}<template v-if="deviceState(d)==='active'"> · {{ d.activeRequests }} 个请求</template></span></header>
               <div class="device-stats"><div><span>今日 Token</span><strong>{{ number(d.todayTokens) }}</strong></div><div><span>{{ d.sourceKind==='local-host' ? '本期本机 Token' : '累计入口 Token' }}</span><strong>{{ number(d.totalTokens) }}</strong></div><div><span>{{ d.sourceKind==='local-host' ? '本期计量事件' : '累计请求' }}</span><strong>{{ d.requests }}</strong></div></div>
               <p class="heartbeat-help">本期已归属占账户总额度：{{ allocationLabel(deviceShare(d)) }}（含自动推定／并发估算，详情见人员归属依据）</p>
               <p class="heartbeat-help">本期已计量Token：{{ number(d.currentWindowTokens ?? null) }}<span v-if="d.sourceKind==='local-host'"> · 按本机日志事件计量，仅覆盖已扫描本机会话</span><span v-if="d.currentWindowUnknownRequests"> · 本期{{ d.currentWindowUnknownRequests }}处用量待核对</span></p>
-              <p v-if="!d.lastHeartbeatAt" class="heartbeat-help">模型调用不自动上报在线；限时测试仅5分钟；需要持续在线时，请安装新包的持续在线检测组件。</p>
-              <footer><span>{{ d.sourceKind==='local-host' ? '本机采集' : '最近心跳' }}：{{ time(d.lastHeartbeatAt) }}<br /><template v-if="d.sourceKind!=='local-host'">最近调用：{{ time(d.lastRequestAt) }}</template><br v-if="d.unknownRequests" /><span v-if="d.unknownRequests">{{ d.unknownRequests }} {{ d.sourceKind==='local-host' ? '处日志用量边界待核对' : '次请求未返回Token，暂未计入用量' }}</span></span></footer>
+              <p class="heartbeat-help">{{ d.sourceKind==='local-host' ? '主设备按已有本机采集的模型用量事件判断最近活跃。' : '服务器按设备独立 Key 识别请求，结束后自动记录实际 Token；重启电脑后继续使用即可。' }}</p>
+              <footer><span>{{ d.sourceKind==='local-host' ? '最后用量事件' : '最后使用时间' }}：{{ time(d.lastActivityAt ?? null) }}<br /><template v-if="d.sourceKind==='local-host'">本机采集：{{ time(d.lastHeartbeatAt) }}</template><template v-else>最近请求结束：{{ time(d.lastRequestAt) }}</template><br v-if="d.unknownRequests" /><span v-if="d.unknownRequests">{{ d.unknownRequests }} {{ d.sourceKind==='local-host' ? '处日志用量边界待核对' : '次请求未返回Token，暂未计入用量' }}</span></span></footer>
             </article>
           </div>
         </template>
@@ -178,7 +183,8 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
       </section>
     </div>
 
-    <p class="updated">账户归属版 rc.7.1 · 每 30 秒刷新 · 时间以北京时间显示<span v-if="data"> · 最近更新 {{ time(data.serverTime) }}</span></p>
+    <p class="updated">额度归属 rc.7.2 · 请求活动状态 · 每 15 秒刷新 · 时间以北京时间显示<span v-if="data"> · 最近更新 {{ time(data.serverTime) }}</span></p>
+
   </main>
 </template>
 
