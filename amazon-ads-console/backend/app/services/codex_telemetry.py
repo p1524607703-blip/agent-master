@@ -16,6 +16,7 @@ from fastapi import HTTPException
 
 from app.core.config import settings
 from app.services.auth import _connect
+from app.services import codex_activity
 
 log = logging.getLogger(__name__)
 
@@ -177,21 +178,24 @@ def start_activity(request_id, device_id):
     directory = spool_dir()/'active'
     directory.mkdir(mode=0o700, exist_ok=True)
     path = directory/(request_id+'.json')
-    with os.fdopen(os.open(path, os.O_WRONLY|os.O_CREAT|os.O_EXCL, 0o600), 'w') as stream:
-        json.dump({'schemaVersion':1, 'deviceId':str(device_id),
-                   'startedAt':datetime.now(timezone.utc).isoformat()}, stream)
+    codex_activity.begin(path, device_id)
     return path
 
 
 def finish_activity(path):
     # Keep a short overlap journal so a DB-snapshot/completion race cannot hide
     # another device while a quota sample is being reconciled.
-    value = json.loads(path.read_text())
-    value['finishedAt'] = datetime.now(timezone.utc).isoformat()
-    temporary = path.with_suffix('.tmp')
-    with os.fdopen(os.open(temporary, os.O_WRONLY|os.O_CREAT|os.O_TRUNC, 0o600), 'w') as stream:
-        json.dump(value, stream)
-    os.replace(temporary, path)
+    try:
+        value = json.loads(path.read_text())
+        value['finishedAt'] = datetime.now(timezone.utc).isoformat()
+        temporary = path.with_suffix('.tmp')
+        with os.fdopen(os.open(temporary, os.O_WRONLY|os.O_CREAT|os.O_TRUNC, 0o600), 'w') as stream:
+            json.dump(value, stream)
+        os.replace(temporary, path)
+    except (OSError, ValueError):
+        log.error('codex_activity_finish_failed')
+    finally:
+        codex_activity.release(path)
 
 
 async def save_event(record):
@@ -282,15 +286,27 @@ async def proxy_response(device, body, route='/responses',forward_headers=None):
         timeout=httpx.Timeout(300,connect=10,pool=10))
     try:
         response = await client.send(client.build_request('POST',base+route,headers=headers,content=body),stream=True)
+    except asyncio.CancelledError:
+        try:
+            stage_event({'request_id':request_id,'device_id':str(device['device_id']),
+                'response_id':None,'finished_at':datetime.now(timezone.utc).isoformat(),
+                'http_status':499,'completed':False,'usage':None})
+        except Exception:
+            log.error('codex_accounting_pending request_id=%s',request_id)
+        finally:
+            finish_activity(activity)
+            await asyncio.shield(client.aclose())
+        raise
     except httpx.HTTPError:
         await client.aclose()
         try:
             await save_event({'request_id':request_id,'device_id':str(device['device_id']),
                 'response_id':None,'finished_at':datetime.now(timezone.utc).isoformat(),
                 'http_status':502,'completed':False,'usage':None})
-            finish_activity(activity)
         except Exception:
             log.error('codex_accounting_pending request_id=%s',request_id)
+        finally:
+            finish_activity(activity)
         raise HTTPException(502,'Model upstream is unavailable')
     observer = UsageObserver()
     async def generate():
@@ -331,10 +347,11 @@ async def proxy_response(device, body, route='/responses',forward_headers=None):
             # Stage synchronously before any cancellation point, even on client disconnect.
             try:
                 path = stage_event(record)
-                finish_activity(activity)
             except Exception:
                 path = None
                 log.error('codex_accounting_pending request_id=%s',request_id)
+            finally:
+                finish_activity(activity)
             async def cleanup():
                 try:
                     await response.aclose()

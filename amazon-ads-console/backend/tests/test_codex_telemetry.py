@@ -150,18 +150,20 @@ class IntegrationTests(unittest.TestCase):
             self.assertEqual(response.status_code,422)
         self.assertEqual(self.client.post('/api/codex/usage',headers=self.headers,json={'totalTokens':100}).status_code,404)
 
-    def test_only_live_heartbeat_with_running_client_is_online(self):
+    def test_heartbeat_and_catalog_do_not_claim_model_activity(self):
         self.assertFalse(self.overview_device()['online'])
         with self.fake_upstream():self.assertEqual(self.client.get('/api/codex/v1/models',headers=self.headers).status_code,200)
         self.assertFalse(self.overview_device()['online'])
         self.assertEqual(self.client.post('/api/codex/heartbeat',headers=self.headers,json={'codexRunning':True}).status_code,200)
-        self.assertTrue(self.overview_device()['online'])
+        self.assertFalse(self.overview_device()['online'])
+        self.assertTrue(self.overview_device()['agentOnline'])
         self.query("UPDATE codex_ops.devices SET last_heartbeat_at=now()-interval '121 seconds'")
         self.assertFalse(self.overview_device()['online'])
         self.client.post('/api/codex/heartbeat',headers=self.headers,json={'codexRunning':False})
         d=self.overview_device()
         self.assertTrue(d['agentOnline'])
         self.assertFalse(d['online'])
+        self.assertEqual(d['activityStatus'], 'idle')
 
     def test_real_usage_deduplicated_cached_and_reasoning_not_added(self):
         with self.fake_upstream():
@@ -174,7 +176,10 @@ class IntegrationTests(unittest.TestCase):
         self.assertEqual(d['outputTokens'],4)
         self.assertEqual(d['cachedTokens'],6)
         self.assertEqual(d['reasoningTokens'],3)
-        self.assertFalse(d['online'])
+        self.assertTrue(d['online'])
+        self.assertFalse(d['agentOnline'])
+        self.assertEqual(d['activityStatus'], 'recent')
+        self.assertEqual(d['activeRequests'], 0)
 
     def test_missing_usage_and_error_are_unknown_not_zero(self):
         with self.fake_upstream('missing'):self.call_model()
@@ -381,7 +386,8 @@ class LiveProxyTests(unittest.TestCase):
                 self.assertEqual(item['inputTokens'],observer.usage['input_tokens'])
                 self.assertEqual(item['outputTokens'],observer.usage['output_tokens'])
                 self.assertEqual(item['requests'],1)
-                self.assertFalse(item['online'])
+                self.assertTrue(item['online'])
+                self.assertEqual(item['activityStatus'], 'recent')
                 receipt={'testedAt':datetime.now(timezone.utc).isoformat(),
                     'source':'administrator candidate acceptance, synthetic isolated DB identity',
                     'status':response.status_code,'completed':observer.completed,'markerMatched':True,

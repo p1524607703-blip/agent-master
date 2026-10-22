@@ -157,6 +157,7 @@ class OverviewTests(unittest.IsolatedAsyncioTestCase):
         reset=int(datetime.now(timezone.utc).timestamp())+604000
         quota={'status':'available','planType':'fixture','primary':{'usedPercent':3,'remainingPercent':97,'windowDurationMins':10080,'resetsAt':reset},'secondary':None}
         host_value={'userId':17,'deviceId':'host','capturedAt':datetime.now(timezone.utc).isoformat(),
+                    'lastActivityAt':datetime.now(timezone.utc).isoformat(),
                     'fresh':True,'codexRunning':True,'resetsAt':reset,'windowDurationMins':10080,'planType':'fixture',
                     'totalTokens':1234,'todayTokens':1234,'inputTokens':1200,'outputTokens':34,'usageEvents':2,'unknownSegments':0}
         with patch.object(codex_devices,'_connect',new=AsyncMock(return_value=Connection())), patch.object(codex_devices,'quota_snapshot',return_value=quota), patch.object(codex_devices,'host_usage',return_value=host_value), patch.object(codex_devices.settings,'codex_telemetry_enabled',False), patch.object(service.settings,'codex_quota_attribution_file',None):

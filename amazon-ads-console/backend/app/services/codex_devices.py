@@ -5,6 +5,7 @@ from app.services.codex_quota import snapshot as quota_snapshot
 from app.services.codex_telemetry import flush_events,spool_dir
 from app.services.codex_ledger import read_ledger, present
 from app.services.codex_attribution import account_attribution, current_window, host_usage
+from app.services import codex_activity
 
 
 async def overview():
@@ -42,11 +43,14 @@ async def overview():
                     FROM codex_ops.devices d LEFT JOIN codex_ops.model_requests r USING(device_id)
                     GROUP BY d.device_id ORDER BY d.created_at''')
         grouped = {}
+        activity, activity_available = codex_activity.observe(spool_dir()/'active') if settings.codex_telemetry_enabled else ({}, False)
         for d in devices:
             alive = bool(d['last_heartbeat_at'] and (now-d['last_heartbeat_at']).total_seconds() <= 120 and not d['revoked_at'])
             grouped.setdefault(d['user_id'],[]).append({
                 'deviceId':str(d['device_id']),'deviceName':d['device_name'],'platform':d['platform'],
-                'online':alive and d['codex_running'],'agentOnline':alive,'codexRunning':d['codex_running'],
+                **codex_activity.present(now, d['last_request_at'], activity.get(str(d['device_id'])),
+                                         revoked=bool(d['revoked_at']), available=activity_available),
+                'agentOnline':alive,'codexRunning':d['codex_running'],
                 'revoked':bool(d['revoked_at']),'lastHeartbeatAt':d['last_heartbeat_at'],
                 'lastRequestAt':d['last_request_at'],'totalTokens':d['total_tokens'],'todayTokens':d['today_tokens'],
                 'inputTokens':d['input_tokens'],'outputTokens':d['output_tokens'],
@@ -73,7 +77,8 @@ async def overview():
             usable = host['fresh'] and same_period
             grouped.setdefault(host['userId'],[]).append({
                 'deviceId':host['deviceId'],'deviceName':'潘锦龙主设备（本机）','platform':'macOS',
-                'sourceKind':'local-host','online':host['fresh'] and host['codexRunning'],
+                'sourceKind':'local-host',
+                **codex_activity.present(now, host.get('lastActivityAt'), available=host['fresh']),
                 'agentOnline':host['fresh'],'codexRunning':host['codexRunning'],'revoked':False,
                 'lastHeartbeatAt':host['capturedAt'],'lastRequestAt':None,
                 'totalTokens':host['totalTokens'] if usable else None,
@@ -91,6 +96,7 @@ async def overview():
                 'personCode': r['person_code'], 'roleCode': r['role_code'], 'devices': grouped.get(r['user_id'],[]),
             } for r in roster],
             'serverTime': now, 'onlineTimeoutSeconds': 120, 'timezone': 'Asia/Shanghai',
+            'activityRecentSeconds': codex_activity.RECENT_SECONDS,
             'accountQuota': quota,
             'accountAttribution': attribution,
             'hostUsage':host,
