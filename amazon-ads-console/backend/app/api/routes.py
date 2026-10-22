@@ -158,7 +158,7 @@ def ad_type_rules():
     # 已下架：广告类型模块。原实现返回 app.services.mock_data.AD_TYPE_RULES
     return _retired('ad_type_rule')
 @router.get('/reports', dependencies=[Depends(require_management_session)])
-def report_list(): return cache.get_or_set('reports:all', reports, 60)
+def report_list(): return reports()
 
 @router.get('/cache/stats', dependencies=[Depends(require_management_session)])
 def cache_stats(): return cache.stats()

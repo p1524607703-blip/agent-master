@@ -35,7 +35,7 @@ from typing import Any, Optional
 
 from .app_db import query_rows as app_query_rows
 from .rds_query import query_one, query_rows
-from .build_cache import build_cache
+from .report_coverage import coverage_catalog
 
 # 运营组前缀（campaign_name 首段）→ 运营姓名
 OPERATOR_NAMES = {
@@ -359,66 +359,10 @@ def dashboard_trend(account_id: Optional[str] = None, end_date: Optional[str] = 
 
 # ---------------------------------------------------------------- 报告覆盖
 
-REPORT_SPECS = [
-    ("广告活动", "core.report_campaign_daily", "spend"),
-    ("广告位", "core.report_placement_daily", "spend"),
-    ("投放", "core.report_targeting_daily", "spend"),
-    ("推广的商品", "core.report_advertised_product_daily", "spend"),
-    ("达成转化的商品", "core.report_purchased_product_daily", None),
-    ("搜索词", "core.report_search_term_daily", "spend"),
-]
-
-
 def reports():
-    # Import counts include replacements and are NOT the current fact row count.
-    # Use them only to invalidate the shared exact-coverage snapshot.
-    tables = ",".join("'" + table + "'" for _, table, _ in REPORT_SPECS)
-    revision = query_one(f"""
-        SELECT COALESCE(max(batch_id),0)::bigint AS revision
-        FROM core.import_batches WHERE target_table IN ({tables})
-    """) or {}
-    return build_cache.get_or_set_report_catalog(str(revision.get("revision") or 0), _reports_uncached)
-
-
-def _reports_uncached():
-    tables = ",".join("'" + table.split('.', 1)[1] + "'" for _, table, _ in REPORT_SPECS)
-    constraints = {row['table_name']: row['source_name_not_null'] for row in query_rows(f"""
-        SELECT c.relname AS table_name,a.attnotnull AS source_name_not_null
-        FROM pg_catalog.pg_attribute a
-        JOIN pg_catalog.pg_class c ON c.oid=a.attrelid
-        JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace
-        WHERE n.nspname='core' AND c.relname IN ({tables})
-          AND a.attname='source_file_name' AND NOT a.attisdropped
-    """)}
-    out = []
-    for label, table, _ in REPORT_SPECS:
-        # A verified NOT NULL constraint makes lineage count exactly count(*).
-        # This permits the existing narrow (account_id,stat_date) index-only
-        # scan instead of fetching millions of wide fact rows. Nullable legacy
-        # schemas keep the exact original lineage aggregation.
-        constrained = constraints.get(table.split('.', 1)[1], False) is True
-        lineage = "count(*)::bigint" if constrained else "count(source_file_name)::bigint"
-        for r in query_rows(f"""
-            WITH coverage AS (
-                SELECT account_id,min(stat_date)::text AS min_date,max(stat_date)::text AS max_date,
-                       count(*)::bigint AS rows,{lineage} AS lineage_rows
-                FROM {table} GROUP BY account_id
-            )
-            SELECT coverage.*,latest.account_name FROM coverage
-            LEFT JOIN LATERAL (
-                SELECT account_name FROM {table} r
-                WHERE r.account_id=coverage.account_id ORDER BY stat_date DESC LIMIT 1
-            ) latest ON true ORDER BY latest.account_name
-        """):
-            out.append({
-                "account": r["account_name"], "account_id": r["account_id"],
-                "type": label, "table": table,
-                "date": r["max_date"], "min_date": r["min_date"], "rows": r["rows"],
-                "status": "READY", "source": "rds",
-                "lineage": "完整（source_file_name 已回填）"
-                           if r["lineage_rows"] == r["rows"] else "缺失",
-            })
-    return out
+    # The reader only touches the persisted catalog and import revision ledger.
+    # Expensive exact fact counts run in the independent maintenance process.
+    return coverage_catalog()
 
 
 # ---------------------------------------------------------------- 产品维度
