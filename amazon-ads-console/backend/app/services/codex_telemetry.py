@@ -48,7 +48,7 @@ async def authenticate(key):
 
 async def register_device(user_id, device_name, platform, key=None, device_id=None):
     require_enabled()
-    key = key or secrets.token_urlsafe(32)
+    key = key or ('sk-cpo-' + secrets.token_urlsafe(32))
     if not 40 <= len(key) <= 256:
         raise ValueError('Invalid generated credential length')
     device_id = uuid.UUID(str(device_id)) if device_id else uuid.uuid4()
@@ -86,14 +86,17 @@ async def heartbeat(device, codex_running, client_version):
 
 
 class UsageObserver:
-    """Bounded SSE observer. Forwarded bytes and model output are never rewritten or stored."""
-    def __init__(self):
+    """Bounded accounting parser; optionally retain terminal JSON in memory, never on disk."""
+    def __init__(self, capture_response=False):
         self.decoder = codecs.getincrementaldecoder('utf-8')('replace')
         self.buffer = ''
         self.skipping = False
         self.response_id = None
         self.usage = None
         self.completed = False
+        self.capture_response = capture_response
+        self.response = None
+        self.max_event_size = 16*1024*1024 if capture_response else 1024*1024
 
     def feed(self, chunk):
         self.buffer += self.decoder.decode(chunk)
@@ -102,7 +105,7 @@ class UsageObserver:
             if self.skipping:
                 self.skipping = False
                 continue
-            if len(line) > 1024*1024 or not line.startswith('data:'):
+            if len(line) > self.max_event_size or not line.startswith('data:'):
                 continue
             try:
                 event = json.loads(line[5:].strip())
@@ -111,7 +114,7 @@ class UsageObserver:
             if not isinstance(event,dict) or event.get('type') not in ('response.completed','response.incomplete','response.failed'):
                 continue
             self.observe_response(event.get('response'),event['type'] == 'response.completed')
-        if len(self.buffer) > 1024*1024:
+        if len(self.buffer) > self.max_event_size:
             self.buffer = ''
             self.skipping = True
 
@@ -123,8 +126,11 @@ class UsageObserver:
             return
         if self.response_id != rid:
             self.usage = None
+            self.response = None
         self.response_id = rid
         self.completed = completed
+        if self.capture_response:
+            self.response = response
         usage = valid_usage(response.get('usage'))
         if usage is not None:
             self.usage = usage
@@ -270,7 +276,7 @@ async def model_catalog():
         raise HTTPException(502,'Model catalog is unavailable')
 
 
-async def proxy_response(device, body, route='/responses',forward_headers=None):
+async def proxy_response(device, body, route='/responses',forward_headers=None, observer=None):
     base,headers = upstream()
     request_id = str(uuid.uuid4())
     activity = start_activity(request_id, device['device_id'])
@@ -308,7 +314,7 @@ async def proxy_response(device, body, route='/responses',forward_headers=None):
         finally:
             finish_activity(activity)
         raise HTTPException(502,'Model upstream is unavailable')
-    observer = UsageObserver()
+    observer = observer or UsageObserver()
     async def generate():
         status = response.status_code
         is_sse = 'text/event-stream' in response.headers.get('content-type','')

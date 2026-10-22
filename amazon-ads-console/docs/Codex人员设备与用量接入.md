@@ -1,5 +1,15 @@
 # Codex 人员、设备与用量接入
 
+## 统一 API Key 分发与 Codex++ 内置联通测试
+
+管理层可在“分发人员 & 设备 → API 接入与密钥”选择人员、填写接入名称和系统，创建独立API Key；同一HTTPS Base URL和模型用于全部接入。创建后仅在当前弹窗显示一次完整Key，可复制Key和地址，关闭后无法再次查看。列表只展示名称、归属和状态；支持改名与撤销。改名不变更Key、人员或历史用量，撤销阻止新请求且保留历史。新Key使用`sk-cpo-`前缀，已有YE/XT及其他已登记Key继续有效；数据库仍只保存哈希，未新增表或扩展普通人员权限。
+
+私有后端配置`CODEX_PUBLIC_BASE_URL`指定已部署并通过TLS验证的HTTPS地址，包含`/api/codex/v1`。接口不根据请求Host头生成Key交付地址；修改域名须先完成真实DNS、TLS和路由验收。`GET /api/codex/access-config`与创建、改名、撤销接口仅管理层/超级管理员可用。
+
+Responses入口支持字符串input和输入项数组，支持普通JSON响应与原有流式响应。普通请求在服务器转换为当前上游所需的数组input、`stream=true`及`store=false`，等待真正的最终模型响应后返回JSON；保留模型、`max_output_tokens`、工具、指令、推理等其他参数，成功、失败及未知用量仍由真实响应计量。不支持持久保存响应，因此显式`store=true`会返回明确错误。
+
+Codex++内置Provider Doctor的原始请求`{"model":"...","input":"hi","max_output_tokens":16}`可直接使用现有HTTPS地址和设备Key，无需客户端额外脚本。不会用固定成功报文替代模型请求；上游拒绝、流中断或未收到最终响应继续返回失败。该兼容覆盖Responses接入，不新增Chat Completions、文件上传或其他未实现的OpenAI接口。
+
 ## 当前设备使用状态：由服务器请求判断
 
 设备页不再依赖客户端心跳显示使用状态。服务器按独立设备Key绑定人员与设备，响应结束后继续从上游最终usage记录输入、输出、缓存及总Token；未知用量仍单列，历史账目不变。
