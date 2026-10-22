@@ -19,6 +19,16 @@ class DatabaseQueryError(RuntimeError):
     """Sanitized SQL subprocess failure; query and stderr stay private."""
 
 _PREFIX = "RDS_PG"
+STATEMENT_TIMEOUT_MS = 28000
+
+def bounded_query_env(env):
+    """Cancel in PostgreSQL before the 30s subprocess deadline closes its socket."""
+    result = dict(env)
+    result['PGOPTIONS'] = (result.get('PGOPTIONS', '') +
+                           f' -c statement_timeout={STATEMENT_TIMEOUT_MS}').strip()
+    return result
+
+
 
 _QUERY_SOURCES = frozenset({
     "core.import_batches", "core.report_campaign_daily", "core.report_placement_daily",
@@ -46,10 +56,7 @@ def _pg_setting(name: str) -> str:
 
 
 def _run(sql: str) -> str:
-    env = os.environ.copy()
-    # Killing psql at 30s alone does not guarantee its server query stops.
-    # PostgreSQL must cancel first, leaving time for the client to receive it.
-    env['PGOPTIONS'] = (env.get('PGOPTIONS', '') + ' -c statement_timeout=25000').strip()
+    env = bounded_query_env(os.environ)
     env['PGAPPNAME'] = 'cpo-query:' + str((request_context.get() or {}).get('request_id') or 'maintenance')[:48]
     for key in ('PASSWORD', 'SSLMODE', 'SSLROOTCERT'):
         value = env.get(f'RDS_PG{key}')

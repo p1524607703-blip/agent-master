@@ -94,7 +94,7 @@ class ObservabilityTests(unittest.TestCase):
             with patch.dict(os.environ, env), patch.object(rds_query.subprocess, 'run', return_value=Mock(returncode=0,stdout='1',stderr='')) as run:
                 self.assertEqual(rds_query._run('SELECT 1'), '1')
             supplied = run.call_args.kwargs
-            self.assertTrue(supplied['env']['PGOPTIONS'].endswith('statement_timeout=25000'))
+            self.assertTrue(supplied['env']['PGOPTIONS'].endswith('statement_timeout=28000'))
             self.assertEqual(supplied['env']['PGAPPNAME'], 'cpo-query:safe-request')
             self.assertEqual(supplied['timeout'], 30)
         finally:

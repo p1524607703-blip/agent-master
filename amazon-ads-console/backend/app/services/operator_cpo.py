@@ -280,9 +280,8 @@ def _data_revision() -> str:
 
 
 def _complete_days_uncached(start: Optional[str] = None, end: Optional[str] = None) -> list[str]:
-    """Probe source presence per account/day without sorting all fact rows."""
-    child_range = ""
-    parent_range = ""
+    """Require every account, probing indexed dates instead of sorting all fact rows."""
+    child_range = parent_range = ""
     if start:
         child_range += f" AND stat_date >= DATE '{start}'"
         parent_range += f" AND report_start_date >= DATE '{start}'"
@@ -290,37 +289,44 @@ def _complete_days_uncached(start: Optional[str] = None, end: Optional[str] = No
         child_range += f" AND stat_date <= DATE '{end}'"
         parent_range += f" AND report_start_date <= DATE '{end}'"
 
-    def present(table, account, column='stat_date', canonical=False, same_day=False):
-        batch = (f" JOIN core.import_batches ib ON ib.batch_id=r.batch_id AND ib.target_table='{table}'"
-                 if canonical else "")
-        extra = " AND r.report_start_date=r.report_end_date" if same_day else ""
-        # OFFSET 0 retains a correlated presence probe, rather than allowing a
-        # full-history hash/merge semi-join. Existing account/date indexes stop
-        # after the first canonical row; report rows are never counted as orders.
-        return (f"EXISTS (SELECT 1 FROM {table} r{batch} "
-                f"WHERE r.account_name={_sql_names((account,))} AND r.{column}=c.d{extra} LIMIT 1 OFFSET 0)")
+    def every_account(table, accounts, date_predicate, *, batch=False):
+        required = ",".join("('" + name.replace("'", "''") + "')" for name in accounts)
+        batch_join = (f"JOIN core.import_batches ib ON ib.batch_id=r.batch_id "
+                      f"AND ib.target_table='core.{table}'") if batch else ""
+        # LIMIT makes each correlated probe stop at the first valid report row.
+        # Counting required accounts, not report rows, keeps duplicates harmless.
+        return f"""(SELECT count(*) FROM (VALUES {required}) required(account_name)
+          CROSS JOIN LATERAL (
+            SELECT 1 FROM core.{table} r {batch_join}
+            WHERE {date_predicate} AND r.account_name=required.account_name LIMIT 1
+          ) found) = {len(accounts)}"""
 
-    child = " AND ".join(present('core.report_business_child_asin_daily', account) for account in BUSINESS_ACCOUNTS)
-    parent = " AND ".join(present('core.report_business_parent_asin_period', account,
-                                'report_start_date', same_day=True) for account in BUSINESS_ACCOUNTS)
-    advertised = " AND ".join(present('core.report_advertised_product_daily', account, canonical=True) for account in AD_ACCOUNTS)
-    purchased = " AND ".join(present('core.report_purchased_product_daily', account, canonical=True) for account in AD_ACCOUNTS)
-    first = _sql_names((BUSINESS_ACCOUNTS[0],))
-    # Any complete business source must include the first required account.
-    # Candidate days are only keys; child and parent coverage remain separate.
+    names = _sql_names(BUSINESS_ACCOUNTS)
+    child = every_account('report_business_child_asin_daily', BUSINESS_ACCOUNTS, 'r.stat_date=d.d')
+    parent = every_account('report_business_parent_asin_period', BUSINESS_ACCOUNTS,
+                           'r.report_start_date=d.d AND r.report_end_date=d.d')
+    advertised = every_account('report_advertised_product_daily', AD_ACCOUNTS, 'r.stat_date=d.d', batch=True)
+    purchased = every_account('report_purchased_product_daily', AD_ACCOUNTS, 'r.stat_date=d.d', batch=True)
     rows = query_rows(f"""
-        WITH candidates AS (
-            SELECT DISTINCT stat_date AS d FROM core.report_business_child_asin_daily
-            WHERE account_name={first}{child_range}
-            UNION
-            SELECT DISTINCT report_start_date AS d FROM core.report_business_parent_asin_period
-            WHERE account_name={first} AND report_start_date=report_end_date{parent_range}
+        WITH bounds AS (
+          SELECT min(d) first_day,max(d) last_day FROM (
+            SELECT min(stat_date) d FROM core.report_business_child_asin_daily
+              WHERE account_name IN ({names}){child_range}
+            UNION ALL SELECT max(stat_date) FROM core.report_business_child_asin_daily
+              WHERE account_name IN ({names}){child_range}
+            UNION ALL SELECT min(report_start_date) FROM core.report_business_parent_asin_period
+              WHERE report_start_date=report_end_date AND account_name IN ({names}){parent_range}
+            UNION ALL SELECT max(report_start_date) FROM core.report_business_parent_asin_period
+              WHERE report_start_date=report_end_date AND account_name IN ({names}){parent_range}
+          ) limits
+        ), days AS (
+          SELECT generate_series(first_day::timestamp,last_day::timestamp,interval '1 day')::date d FROM bounds
         )
-        SELECT c.d::text AS d FROM candidates c
-        WHERE (({child}) OR ({parent})) AND ({advertised}) AND ({purchased})
-        ORDER BY c.d
+        SELECT d.d::text d FROM days d
+        WHERE ({child} OR {parent}) AND {advertised} AND {purchased}
+        ORDER BY d.d
     """)
-    return [row['d'] for row in rows]
+    return [r["d"] for r in rows]
 
 
 def _complete_days(

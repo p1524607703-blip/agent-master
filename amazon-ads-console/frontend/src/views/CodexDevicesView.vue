@@ -2,11 +2,10 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { getJsonStrict } from '../api/client'
 import { sumTokens, usageShare, percentLabel } from '../utils/codexUsage'
+import { quotaDisplay, type AccountQuota } from '../utils/codexQuota'
 
 type Device = { deviceId:string; deviceName:string; platform:string; online:boolean; agentOnline:boolean; codexRunning:boolean; revoked:boolean; lastHeartbeatAt:string|null; lastRequestAt:string|null; totalTokens:number|string|null; todayTokens:number|string|null; inputTokens:number|null; outputTokens:number|null; requests:number; unknownRequests:number }
 type Member = { userId:number; displayName:string; username:string; groupCode:string; groupName:string; personCode:string|null; roleCode:string; devices:Device[] }
-type QuotaWindow = { usedPercent:number; remainingPercent:number; windowDurationMins:number; resetsAt:number }
-type AccountQuota = { status:string; capturedAt?:string; primary:QuotaWindow|null; secondary:QuotaWindow|null; accountTotalTokens?:number|null; tokenTotalScope?:string }
 type LedgerSource = {deviceId:string; userId:number; deviceName:string; displayName:string; roleCode:string; revoked:boolean; requests:number; measuredRequests:number; unknownRequests:number; cachedUnknownRequests:number; reasoningUnknownRequests:number; totalTokens:number|string|null; inputTokens:number|string|null; outputTokens:number|string|null; cachedTokens:number|string|null; reasoningTokens:number|string|null}
 type Ledger = {status:string; scope:string; accountCoverage:string; startedAt:string|null; throughAt:string; totals:Omit<LedgerSource,'deviceId'|'userId'|'deviceName'|'displayName'|'roleCode'|'revoked'>; pendingAccountingEvents:number; sources:LedgerSource[]; uncoveredSources:string[]}
 type Overview = { recordedHistory?:Ledger; ledger?:Ledger; accountQuota?:AccountQuota; members:Member[]; serverTime:string; onlineTimeoutSeconds:number; timezone:string; statisticsAvailable:boolean; integrationStage?:string; deploymentTarget?:string; pendingAccountingEvents?:number }
@@ -50,10 +49,7 @@ const recordedShare = (member:Member) => {
   if (!rows.length || rows.some(s => ledgerCount(s.totalTokens) === null)) return null
   return usageShare(ledgerCount(rows.reduce((n,s) => n+Number(s.totalTokens),0)), recordedTotal.value)
 }
-const quotaFresh = computed(() => !!data.value?.accountQuota?.capturedAt && data.value.accountQuota.status === 'available' && !stale.value && now.value - Date.parse(data.value.accountQuota.capturedAt) <= 300000)
-const quotaMessages:Record<string,string> = {unconfigured:'尚未接入',unavailable:'读取失败',stale:'数据过期'}
-const quotaState = computed(() => quotaMessages[data.value?.accountQuota?.status || 'unconfigured'] || '数据过期')
-const quotaTitle = (w:QuotaWindow|null|undefined, fallback:string) => w?.windowDurationMins === 300 ? '5小时额度' : w?.windowDurationMins === 10080 ? '每周额度' : w ? `${w.windowDurationMins}分钟额度` : fallback
+const quotaView = computed(() => quotaDisplay(data.value?.accountQuota, now.value, stale.value))
 const unknownRequests = computed(() => devices.value.reduce((n,d) => n + d.unknownRequests, 0))
 const number = (v:number|string|null) => v === null || !Number.isFinite(Number(v)) ? '—' : Number(v).toLocaleString('zh-CN')
 const time = (v:string|null) => v ? new Date(v).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',hour12:false}) : '尚未收到'
@@ -100,16 +96,17 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
     <div class="notes"><template v-if="data?.statisticsAvailable">测试接入 · {{ data.deploymentTarget }}。绿点须同时收到有效心跳和客户端运行状态；不代表正在执行任务。<span v-if="data.pendingAccountingEvents"> {{ data.pendingAccountingEvents }} 条用量记录正在等待入库。</span></template><template v-else>筹备阶段 · 最终由日本代理服务器统一部署分发；公司 M4 仅用于测试，尚未接入真实设备与用量。</template><span class="legend">绿点在线 · 灰点离线或未接入 · “—”暂无计量</span></div>
 
     <section class="account-quota" aria-label="官方账户剩余额度">
-      <div v-for="entry in [{key:'primary',name:'5小时额度'},{key:'secondary',name:'每周额度'}]" :key="entry.key" class="quota-card">
-        <span>{{ quotaTitle(entry.key==='primary' ? data?.accountQuota?.primary : data?.accountQuota?.secondary,entry.name) }} · 官方账户剩余</span>
-        <template v-if="quotaFresh && (entry.key==='primary' ? data?.accountQuota?.primary : data?.accountQuota?.secondary)">
-          <strong>{{ percentLabel((entry.key==='primary' ? data?.accountQuota?.primary : data?.accountQuota?.secondary)?.remainingPercent ?? null) }}</strong>
-          <small>重置：{{ time(new Date(((entry.key==='primary' ? data?.accountQuota?.primary : data?.accountQuota?.secondary)?.resetsAt ?? 0)*1000).toISOString()) }}</small>
-        </template>
-        <template v-else><strong>—</strong><small>{{ quotaFresh ? '当前未返回此额度窗口' : quotaState }}</small></template>
+      <div v-for="entry in quotaView.windows" :key="entry.key" class="quota-card">
+        <span>{{ entry.title }} · 官方账户剩余</span>
+        <strong>{{ percentLabel(entry.remainingPercent) }}</strong>
+        <small>重置：{{ time(new Date(entry.resetsAt*1000).toISOString()) }}</small>
+      </div>
+      <div class="quota-card">
+        <span>官方额度采集状态</span><strong>{{ quotaView.state }}</strong>
+        <small>按官方实际返回的窗口展示；未返回的窗口不补成0%或无限额度。</small>
       </div>
     </section>
-    <p class="usage-disclaimer">官方剩余额度独立读取，不从Token反推。成员百分比为入口累计已计量Token占比；官方全账户Token总量未取得，不能据此计算成员占官方额度的比例。<span v-if="unknownRequests"> {{ unknownRequests }} 次请求用量未知。</span><span v-if="data?.accountQuota?.capturedAt"> 额度采集：{{ time(data.accountQuota.capturedAt) }}</span></p>
+    <p class="usage-disclaimer">官方剩余额度独立读取，不从Token反推；这里不是订阅账单或按Token计费金额。成员百分比为入口累计已计量Token占比；官方全账户Token总量未取得，不能据此计算成员占官方额度的比例。<span v-if="unknownRequests"> {{ unknownRequests }} 次请求用量未知。</span><span v-if="data?.accountQuota?.capturedAt"> 额度采集：{{ time(data.accountQuota.capturedAt) }}</span></p>
 
     <section class="ledger-panel" aria-label="统一入口用量账本">
       <h2>统一入口用量账本</h2>
