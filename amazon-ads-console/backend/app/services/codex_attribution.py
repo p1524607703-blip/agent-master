@@ -24,6 +24,15 @@ def current_window(quota):
     return next((w for w in windows if w['windowDurationMins'] == 10080), windows[0] if windows else None)
 
 
+WINDOW_DRIFT_SECONDS = 5
+
+
+def same_period(entry, window, plan):
+    return (entry.get('windowDurationMins') == window['windowDurationMins'] and
+            entry.get('planType') == plan and type(entry.get('resetsAt')) is int and
+            abs(entry['resetsAt']-window['resetsAt']) <= WINDOW_DRIFT_SECONDS)
+
+
 def account_attribution(quota, user_ids):
     result = {'status': 'unavailable', 'usedPercent': None, 'remainingPercent': None,
               'confirmedPercent': None, 'unattributedPercent': None, 'members': [],
@@ -51,7 +60,7 @@ def account_attribution(quota, user_ids):
         partial_estimate = False
         device_amounts = {}
         for entry, is_auto in [(entry,False) for entry in confirmations] + [(entry,True) for entry in automatic]:
-            if (entry.get('resetsAt'), entry.get('windowDurationMins'), entry.get('planType')) != (w['resetsAt'], w['windowDurationMins'], quota.get('planType')):
+            if entry.get('superseded') or not same_period(entry,w,quota.get('planType')):
                 continue
             uid, percent, key = entry['userId'], entry['usedPercent'], entry['confirmationId']
             at = datetime.fromisoformat(entry['confirmedAt'].replace('Z','+00:00'))

@@ -4,7 +4,7 @@ from app.core.config import settings
 from app.services.codex_quota import snapshot as quota_snapshot
 from app.services.codex_telemetry import flush_events,spool_dir
 from app.services.codex_ledger import read_ledger, present
-from app.services.codex_attribution import account_attribution, current_window, host_usage
+from app.services.codex_attribution import account_attribution, current_window, host_usage, same_period
 from app.services import codex_activity
 
 
@@ -73,8 +73,8 @@ async def overview():
                     d.update(currentWindowTokens=row['total_tokens'] if row else 0,
                              currentWindowUnknownRequests=row['unknown_requests'] if row else 0)
         if host and any(r['user_id'] == host['userId'] for r in roster):
-            same_period = window and (host['resetsAt'],host['windowDurationMins'],host['planType']) == (window['resetsAt'],window['windowDurationMins'],quota.get('planType'))
-            usable = host['fresh'] and same_period
+            matching_period = window and same_period(host,window,quota.get('planType'))
+            usable = host['fresh'] and matching_period
             grouped.setdefault(host['userId'],[]).append({
                 'deviceId':host['deviceId'],'deviceName':'潘锦龙主设备（本机）','platform':'macOS',
                 'sourceKind':'local-host',

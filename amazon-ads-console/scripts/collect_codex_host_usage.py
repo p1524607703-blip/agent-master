@@ -68,6 +68,19 @@ def collect_host(config, quota):
     w = next((w for w in windows if w['windowDurationMins'] == 10080), windows[0] if windows else None)
     if quota.get('status') != 'available' or not w:
         raise ValueError('official period unavailable')
+    # Preserve the prior period boundary when the official epoch jitters by seconds.
+    prior_path = config.get('localSnapshot')
+    if prior_path:
+        try:
+            p=Path(prior_path)
+            if p.stat().st_mode & 0o077 or p.stat().st_size>65536:
+                raise ValueError('private prior snapshot required')
+            prior=json.loads(p.read_text())
+            if (prior.get('planType')==quota.get('planType') and prior.get('windowDurationMins')==w['windowDurationMins']
+                    and type(prior.get('resetsAt')) is int and abs(prior['resetsAt']-w['resetsAt'])<=5):
+                w={**w,'resetsAt':prior['resetsAt']}
+        except (OSError,ValueError,TypeError,KeyError):
+            pass
     now = datetime.now(timezone.utc)
     start = datetime.fromtimestamp(w['resetsAt']-w['windowDurationMins']*60, timezone.utc)
     today = now.astimezone(ZoneInfo('Asia/Shanghai')).replace(hour=0,minute=0,second=0,microsecond=0).astimezone(timezone.utc)

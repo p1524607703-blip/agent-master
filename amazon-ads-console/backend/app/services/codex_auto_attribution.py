@@ -16,7 +16,7 @@ from pathlib import Path
 
 from app.core.config import settings
 from app.services.auth import _connect
-from app.services.codex_attribution import current_window, private_json, host_usage
+from app.services.codex_attribution import current_window, private_json, host_usage, same_period
 from app.services.codex_quota import snapshot
 from app.services.codex_telemetry import spool_dir, flush_events
 
@@ -32,7 +32,7 @@ def stamp(value):
 
 
 def matches(entry, window, plan):
-    return (entry.get('resetsAt'), entry.get('windowDurationMins'), entry.get('planType')) == (window['resetsAt'], window['windowDurationMins'], plan)
+    return not entry.get('superseded') and same_period(entry,window,plan)
 
 
 def atomic(path, value):
@@ -76,7 +76,10 @@ def advance(document, sample):
     at, used = sample['capturedAt'], Decimal(str(window['usedPercent']))
     identity = [window['resetsAt'], window['windowDurationMins'], plan]
     state = document.get('autoState') or {}
-    same = state.get('window') == identity
+    old_identity = state.get('window') or []
+    same = len(old_identity)==3 and same_period(dict(resetsAt=old_identity[0],windowDurationMins=old_identity[1],planType=old_identity[2]),window,plan)
+    if same:
+        identity=old_identity
     if same and state.get('capturedAt') and stamp(at) <= stamp(state['capturedAt']):
         return document
     if not same:
@@ -87,7 +90,7 @@ def advance(document, sample):
         document['autoState'] = state
         document['monitor'] = {'status':'paused', 'capturedAt':at,
                                'reason':sample.get('reason','coverage-unavailable'),
-                               'scope':'monitored-sources-only', 'allocationVersion':2}
+                               'scope':'monitored-sources-only', 'allocationVersion':3}
         return document
     by_id = {row['deviceId']:row for row in sample['sources']}
     previous = state.get('sources', {}) if same else {}
@@ -103,9 +106,13 @@ def advance(document, sample):
         old = previous.get(did, {})
         if any(row[k] < old.get(k,0) for k in ('events','tokens')):
             blocked = True
-        if row['events'] > old.get('events',0) or row['unknown'] > old.get('unknown',0) or row.get('inFlight'):
+        events, unknown = row.get('activityEvents',row['events']), row.get('activityUnknown',row['unknown'])
+        old_events, old_unknown = old.get('activityEvents',old.get('events',0)), old.get('activityUnknown',old.get('unknown',0))
+        if events > old_events or unknown > old_unknown or row.get('inFlight'):
             candidates.add(did)
-        if row.get('recentActivity') or (row.get('lastActivityAt') and stamp(at)-stamp(row['lastActivityAt']) <= REPORTING_GUARD):
+        if not events and not unknown and not row.get('inFlight'):
+            candidates.discard(did)
+        if (events or unknown or row.get('inFlight')) and (row.get('recentActivity') or (row.get('lastActivityAt') and stamp(at)-stamp(row['lastActivityAt']) <= REPORTING_GUARD)):
             recent.add(did)
     if set(previous)-set(by_id):
         blocked = True
@@ -134,7 +141,7 @@ def advance(document, sample):
         pending = Decimal(0)
         baseline, candidates = by_id, set()
     elif pending > 0:
-        if sole and sole in by_id and by_id[sole]['userId'] in sample['userIds'] and (by_id[sole]['events'] or by_id[sole]['unknown'] or by_id[sole].get('inFlight')):
+        if sole and sole in by_id and by_id[sole]['userId'] in sample['userIds'] and (by_id[sole].get('activityEvents',by_id[sole]['events']) or by_id[sole].get('activityUnknown',by_id[sole]['unknown']) or by_id[sole].get('inFlight')):
             shares = {sole:pending}
             method = 'observed-exclusive-interval' if same else 'observed-exclusive-period'
             reason = 'exclusive-source-inferred'
@@ -148,7 +155,7 @@ def advance(document, sample):
             reason = 'awaiting-device-measurement' if waiting else 'no-measurable-activity'
         if shares:
             key = hashlib.sha256(json.dumps([identity,at,str(pending),sorted(weights.items()),method],separators=(',',':')).encode()).hexdigest()[:24]
-            incomplete = any(row['unknown'] > baseline.get(did,{}).get('unknown',0) or row.get('inFlight')
+            incomplete = any(row.get('activityUnknown',row['unknown']) > baseline.get(did,{}).get('activityUnknown',baseline.get(did,{}).get('unknown',0)) or row.get('inFlight')
                              for did,row in by_id.items() if did in candidates) or (method=='observed-token-weighted-interval' and bool(boundary_sources-set(weights)))
             for did,amount in shares.items():
                 owner=by_id[did]
@@ -164,7 +171,7 @@ def advance(document, sample):
                 else:
                     document.setdefault('automatic',[]).append({
                         'confirmationId':record_key,'userId':owner['userId'],'deviceId':did,
-                        'usedPercent':float(amount),'planType':plan,'resetsAt':window['resetsAt'],
+                        'usedPercent':float(amount),'planType':plan,'resetsAt':identity[0],
                         'windowDurationMins':window['windowDurationMins'],'confirmedAt':at,
                         'method':method,'scope':'monitored-sources-only','officialDeviceBilling':False,
                         'firstConfirmedAt':at,'batches':1,'partialMeasurement':incomplete})
@@ -180,12 +187,12 @@ def advance(document, sample):
     if correction or allocated>used:
         status='reconciliation-required'
     new_boundary = at if settled or blocked else state.get('boundaryAt',sample['startedAt'])
-    document['autoState']={'allocationVersion':2,'window':identity,'capturedAt':at,'usedPercent':float(used),
+    document['autoState']={'allocationVersion':3,'window':identity,'capturedAt':at,'usedPercent':float(used),
                            'sources':by_id,'weightBaseline':baseline,'candidates':sorted(candidates),
                            'pendingPoints':float(pending),'blocked':bool(correction),
                            'correction':correction,'boundaryAt':new_boundary}
     document['monitor']={'status':status,'capturedAt':at,'reason':reason,'scope':'monitored-sources-only',
-                         'allocationVersion':2,'pendingSettlementPercent':float(pending),
+                         'allocationVersion':3,'pendingSettlementPercent':float(pending),
                          'waitingDeviceIds':waiting if pending>0 else [],
                          'weightBasis':'observed-total-token-deltas', 'reportingGuardSeconds':REPORTING_GUARD}
     return document
@@ -230,12 +237,15 @@ async def activity_sample():
             # Include revoked and non-roster devices too: their usage cannot disappear.
             rows = await conn.fetch('''SELECT d.device_id,d.user_id,count(r.request_id) events,
                 coalesce(sum(r.total_tokens),0) tokens,count(r.request_id) FILTER (WHERE r.total_tokens IS NULL) unknown,
-                max(r.finished_at) last_activity_at FROM codex_ops.devices d
+                count(r.request_id) FILTER (WHERE NOT (r.http_status IN (400,401,403,404,405,413,422,429) AND r.response_id IS NULL)) activity_events,
+                count(r.request_id) FILTER (WHERE r.total_tokens IS NULL AND NOT (r.http_status IN (400,401,403,404,405,413,422,429) AND r.response_id IS NULL)) activity_unknown,
+                max(r.finished_at) FILTER (WHERE NOT (r.http_status IN (400,401,403,404,405,413,422,429) AND r.response_id IS NULL)) last_activity_at FROM codex_ops.devices d
                 LEFT JOIN codex_ops.model_requests r ON r.device_id=d.device_id AND r.finished_at >= $1
                 GROUP BY d.device_id''', start)
         for row in rows:
             sample['sources'].append({'deviceId':str(row['device_id']), 'userId':row['user_id'],
                                       'events':int(row['events']), 'tokens':int(row['tokens']), 'unknown':int(row['unknown']),
+                                      'activityEvents':int(row.get('activity_events',row['events'])), 'activityUnknown':int(row.get('activity_unknown',row['unknown'])),
                                       'lastActivityAt':row['last_activity_at'].isoformat() if row['last_activity_at'] else None})
     finally:
         await conn.close()
