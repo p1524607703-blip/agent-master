@@ -24,6 +24,7 @@ SAFE_FIELDS = {
     'lock_timeout', 'psql_calls', 'db_wall_ms', 'build_ms', 'total_ms',
     'status_code', 'pid', 'release', 'commit', 'exception_type', 'stack',
     'performance_class', 'performance_reason', 'quality', 'response_bytes', 'build',
+    'query_timings', 'sb_attribution_mode',
 }
 
 

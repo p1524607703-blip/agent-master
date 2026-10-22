@@ -27,7 +27,10 @@ class WhitinAccountScopeTests(unittest.TestCase):
 
         sql = captured["sql"]
         self.assertIn("WHITIN", sql)
-        self.assertEqual(sql.count("HAVING count(DISTINCT r.account_name) = 4"), 2)
+        self.assertEqual(sql.count('FROM core.report_advertised_product_daily r JOIN'), len(operator_cpo.AD_ACCOUNTS))
+        self.assertEqual(sql.count('FROM core.report_purchased_product_daily r JOIN'), len(operator_cpo.AD_ACCOUNTS))
+        for account in operator_cpo.AD_ACCOUNTS:
+            self.assertGreaterEqual(sql.count(f"r.account_name='{account}'"), 2)
 
 
 if __name__ == "__main__":

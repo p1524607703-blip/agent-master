@@ -218,7 +218,7 @@ class RedisBuildCache:
         start_key = start or "all"
         end_key = end or "all"
         update_context(revision=revision)
-        key = f"cpo:complete-days:v1:{revision}:{start_key}:{end_key}"
+        key = f"cpo:complete-days:v2:{revision}:{start_key}:{end_key}"
         return self._get_or_set_key(key, self.historical_ttl, loader)
 
     def get_or_set_report_catalog(self, revision: str, loader: Callable[[], Any]) -> Any:
@@ -233,7 +233,7 @@ class RedisBuildCache:
             return 0
         try:
             keys = list(client.scan_iter(match="cpo:build:v1:*"))
-            keys.extend(client.scan_iter(match="cpo:complete-days:v1:*"))
+            keys.extend(client.scan_iter(match="cpo:complete-days:*"))
             keys.extend(client.scan_iter(match="cpo:report-catalog:*"))
             unique_keys = [key for key in dict.fromkeys(keys) if not (key.decode() if isinstance(key, bytes) else key).endswith(":lock")]
             return int(client.delete(*unique_keys)) if unique_keys else 0

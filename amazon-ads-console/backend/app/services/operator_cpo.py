@@ -280,57 +280,47 @@ def _data_revision() -> str:
 
 
 def _complete_days_uncached(start: Optional[str] = None, end: Optional[str] = None) -> list[str]:
-    """Dates with complete ads plus either complete child-business or legacy parent-business."""
-    c_range = ""
-    b_range = ""
-    a_range = ""
-    p_range = ""
+    """Probe source presence per account/day without sorting all fact rows."""
+    child_range = ""
+    parent_range = ""
     if start:
-        c_range += f" AND stat_date >= DATE '{start}'"
-        b_range += f" AND report_start_date >= DATE '{start}'"
-        a_range += f" AND stat_date >= DATE '{start}'"
-        p_range += f" AND stat_date >= DATE '{start}'"
+        child_range += f" AND stat_date >= DATE '{start}'"
+        parent_range += f" AND report_start_date >= DATE '{start}'"
     if end:
-        c_range += f" AND stat_date <= DATE '{end}'"
-        b_range += f" AND report_start_date <= DATE '{end}'"
-        a_range += f" AND stat_date <= DATE '{end}'"
-        p_range += f" AND stat_date <= DATE '{end}'"
+        child_range += f" AND stat_date <= DATE '{end}'"
+        parent_range += f" AND report_start_date <= DATE '{end}'"
+
+    def present(table, account, column='stat_date', canonical=False, same_day=False):
+        batch = (f" JOIN core.import_batches ib ON ib.batch_id=r.batch_id AND ib.target_table='{table}'"
+                 if canonical else "")
+        extra = " AND r.report_start_date=r.report_end_date" if same_day else ""
+        # OFFSET 0 retains a correlated presence probe, rather than allowing a
+        # full-history hash/merge semi-join. Existing account/date indexes stop
+        # after the first canonical row; report rows are never counted as orders.
+        return (f"EXISTS (SELECT 1 FROM {table} r{batch} "
+                f"WHERE r.account_name={_sql_names((account,))} AND r.{column}=c.d{extra} LIMIT 1 OFFSET 0)")
+
+    child = " AND ".join(present('core.report_business_child_asin_daily', account) for account in BUSINESS_ACCOUNTS)
+    parent = " AND ".join(present('core.report_business_parent_asin_period', account,
+                                'report_start_date', same_day=True) for account in BUSINESS_ACCOUNTS)
+    advertised = " AND ".join(present('core.report_advertised_product_daily', account, canonical=True) for account in AD_ACCOUNTS)
+    purchased = " AND ".join(present('core.report_purchased_product_daily', account, canonical=True) for account in AD_ACCOUNTS)
+    first = _sql_names((BUSINESS_ACCOUNTS[0],))
+    # Any complete business source must include the first required account.
+    # Candidate days are only keys; child and parent coverage remain separate.
     rows = query_rows(f"""
-        WITH bc AS (
-          SELECT stat_date AS d
-          FROM core.report_business_child_asin_daily
-          WHERE account_name IN ({_sql_names(BUSINESS_ACCOUNTS)}){c_range}
-          GROUP BY stat_date
-          HAVING count(DISTINCT account_name) = {len(BUSINESS_ACCOUNTS)}
-        ), bp AS (
-          SELECT report_start_date AS d
-          FROM core.report_business_parent_asin_period
-          WHERE report_start_date=report_end_date
-            AND account_name IN ({_sql_names(BUSINESS_ACCOUNTS)}){b_range}
-          GROUP BY report_start_date
-          HAVING count(DISTINCT account_name) = {len(BUSINESS_ACCOUNTS)}
-        ), b AS (
-          SELECT d FROM bc UNION SELECT d FROM bp
-        ), a AS (
-          SELECT r.stat_date AS d
-          FROM core.report_advertised_product_daily r
-          JOIN core.import_batches ib ON ib.batch_id=r.batch_id
-             AND ib.target_table='core.report_advertised_product_daily'
-          WHERE r.account_name IN ({_sql_names(AD_ACCOUNTS)}){a_range.replace("stat_date","r.stat_date")}
-          GROUP BY r.stat_date
-          HAVING count(DISTINCT r.account_name) = {len(AD_ACCOUNTS)}
-        ), p AS (
-          SELECT r.stat_date AS d
-          FROM core.report_purchased_product_daily r
-          JOIN core.import_batches ib ON ib.batch_id=r.batch_id
-             AND ib.target_table='core.report_purchased_product_daily'
-          WHERE r.account_name IN ({_sql_names(AD_ACCOUNTS)}){p_range.replace("stat_date","r.stat_date")}
-          GROUP BY r.stat_date
-          HAVING count(DISTINCT r.account_name) = {len(AD_ACCOUNTS)}
+        WITH candidates AS (
+            SELECT DISTINCT stat_date AS d FROM core.report_business_child_asin_daily
+            WHERE account_name={first}{child_range}
+            UNION
+            SELECT DISTINCT report_start_date AS d FROM core.report_business_parent_asin_period
+            WHERE account_name={first} AND report_start_date=report_end_date{parent_range}
         )
-        SELECT b.d::text d FROM b JOIN a USING(d) JOIN p USING(d) ORDER BY b.d
+        SELECT c.d::text AS d FROM candidates c
+        WHERE (({child}) OR ({parent})) AND ({advertised}) AND ({purchased})
+        ORDER BY c.d
     """)
-    return [r["d"] for r in rows]
+    return [row['d'] for row in rows]
 
 
 def _complete_days(

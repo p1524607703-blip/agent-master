@@ -111,7 +111,7 @@ class RedisBuildCacheTests(unittest.TestCase):
 
         self.assertEqual(first, second)
         self.assertEqual(calls["n"], 1)
-        self.assertIn("cpo:complete-days:v1:581:all:all", fake.data)
+        self.assertIn("cpo:complete-days:v2:581:all:all", fake.data)
 
     def test_disabled_cache_falls_back_to_loader(self):
         cache = RedisBuildCache(enabled=False)
