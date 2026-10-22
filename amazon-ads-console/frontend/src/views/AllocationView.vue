@@ -413,7 +413,6 @@ onMounted(load)
 </template>
 
 <style scoped>
-.allocation-page{max-width:1560px}
 .actions,.section-head{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .section-head{justify-content:space-between;align-items:flex-start}
 .section-head h2{margin:0 0 4px}

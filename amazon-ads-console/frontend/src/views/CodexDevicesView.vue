@@ -188,7 +188,7 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
   </main>
 </template>
 
-<style scoped>.codex-page{padding:18px 24px 20px;max-width:1600px;margin:auto;color:#233247;text-align:left}
+<style scoped>.codex-page{width:100%;min-width:0;padding:18px 24px 20px;margin:auto;color:#233247;text-align:left}
 .page-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:12px}
 .eyebrow{font-size:10px;letter-spacing:1.2px;color:#8190a5}
 .page-heading h1{font-size:20px;letter-spacing:-.3px;margin:4px 0;color:#1b2a3d}
