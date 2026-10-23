@@ -36,7 +36,7 @@ onMounted(load)
     <div class="table-wrap"><table><thead><tr><th>时间 / 追踪 ID</th><th>账号</th><th>异常</th><th>页面 / 目标页面</th><th>浏览器版本 / 服务端版本</th><th>定位</th></tr></thead>
     <tbody><tr v-for="row in rows" :key="row.event_id">
       <td>{{ time(row.timestamp) }}<small>{{ row.request_id }}</small></td><td>{{ row.username }}<small>ID {{ row.user_id }}</small></td>
-      <td>{{ labels[row.kind] || row.kind }}<small>{{ row.message }} · {{ row.exception_type }}</small><small v-if="row.duration_ms">持续 {{ (row.duration_ms/1000).toFixed(1) }} 秒</small></td>
+      <td>{{ labels[row.kind] || row.kind }}<strong v-if="row.is_test"> · 验收测试</strong><small>{{ row.message }} · {{ row.exception_type }}</small><small v-if="row.duration_ms">持续 {{ (row.duration_ms/1000).toFixed(1) }} 秒</small></td>
       <td>{{ row.page_path }}<small v-if="row.target_path">前往 {{ row.target_path }}</small></td>
       <td><code>{{ row.client_commit }}</code><small>{{ row.commit }}</small></td>
       <td><details v-if="row.stack?.length"><summary>调用位置</summary><div v-for="(frame,index) in row.stack" :key="index"><code>{{ frame.file }}:{{ frame.line }}:{{ frame.column }}</code></div></details><span v-else>—</span></td>

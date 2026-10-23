@@ -47,6 +47,7 @@ class FrontendError(BaseModel):
  client_commit: str=Field(pattern=r'^(?:[a-f0-9]{40}|development)$')
  duration_ms: int=Field(default=0,ge=0,le=86_400_000)
  occurrences: int=Field(default=1,ge=1,le=100)
+ is_test: bool=False
  stack: list[Frame]=Field(default_factory=list,max_length=12)
  @field_validator('page_path','target_path')
  @classmethod

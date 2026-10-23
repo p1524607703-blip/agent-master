@@ -29,10 +29,10 @@ class FrontendErrorsTests(unittest.TestCase):
  def read(self,query='',role='super_admin'):
   return self.client.get('/api/diagnostics/frontend-errors'+query,headers={'Authorization':'Bearer '+role})
  def test_durable_account_safe_fields_and_old_browser_version(self):
-  value=payload();response=self.post(value);self.assertEqual(response.status_code,202)
+  value=payload(is_test=True);response=self.post(value);self.assertEqual(response.status_code,202)
   rows=self.read('?username=op_lzz&page_path=/my-cpo&client_commit=aaaa&kind=vue_error&user_id=1').json()['items']
   self.assertEqual(len(rows),1);row=rows[0]
-  self.assertEqual(row['username'],'op_lzz');self.assertEqual(row['user_id'],'1')
+  self.assertTrue(row['is_test']);self.assertEqual(row['username'],'op_lzz');self.assertEqual(row['user_id'],'1')
   self.assertEqual(row['client_commit'],'a'*40);self.assertEqual(row['commit'],'b'*40)
   self.assertEqual(row['page_path'],'/my-cpo');self.assertEqual(row['target_path'],'/ad-allocation')
   self.assertEqual(row['stack'],[{'file':'/assets/app.js','line':42,'column':9}])

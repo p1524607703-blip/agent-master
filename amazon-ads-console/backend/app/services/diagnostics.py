@@ -25,7 +25,7 @@ SAFE_FIELDS = {
     'status_code', 'pid', 'release', 'commit', 'exception_type', 'stack',
     'performance_class', 'performance_reason', 'quality', 'response_bytes', 'build',
     'query_timings', 'sb_attribution_mode',
-    'event_id', 'kind', 'error_code', 'page_path', 'target_path', 'client_commit', 'duration_ms', 'occurrences', 'message',
+    'event_id', 'kind', 'error_code', 'page_path', 'target_path', 'client_commit', 'duration_ms', 'occurrences', 'message', 'is_test',
 }
 
 
