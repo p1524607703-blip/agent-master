@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { getJsonStrict, mutateJsonStrict } from '../api/client'
+import CodexDeviceBinding from './CodexDeviceBinding.vue'
 
 type Device = {deviceId:string; deviceName:string; platform:string; revoked:boolean; sourceKind?:string}
 type Member = {userId:number; displayName:string; devices:Device[]}
@@ -86,12 +87,12 @@ onUnmounted(()=>{stopped=true;issued.value=null;reveal.value=false})
 
 <template>
   <section class="access-panel" aria-label="API 接入与密钥">
-    <header><div><h2>API 接入与密钥</h2><p>统一 HTTPS 地址，管理层为每个接入命名、签发独立 Key，按归属人员记录用量。</p></div><button class="primary" :disabled="!access?.baseUrl || !members.length" @click="open('create')">创建 API Key</button></header>
+    <header><div><h2>API 接入与密钥</h2><p>管理层签发独立 Key，设备安装连接器并获批准后使用，按归属人员记录用量。</p></div><button class="primary" :disabled="!access?.baseUrl || !members.length" @click="open('create')">创建 API Key</button></header>
     <div class="connection-fields">
-      <label><span>HTTPS Base URL</span><div class="copy-field"><input aria-label="HTTPS Base URL" readonly :value="access?.baseUrl || ''" :placeholder="configLoading ? '正在读取…' : '管理员尚未发布接入地址'" /><button :disabled="!access?.baseUrl" @click="copy(access?.baseUrl)">复制地址</button></div></label>
+      <label><span>服务器地址（安装连接器时填写）</span><div class="copy-field"><input aria-label="HTTPS Base URL" readonly :value="access?.baseUrl || ''" :placeholder="configLoading ? '正在读取…' : '管理员尚未发布接入地址'" /><button :disabled="!access?.baseUrl" @click="copy(access?.baseUrl)">复制地址</button></div></label>
       <div class="model-info"><span>协议：Responses API</span><span>模型：{{ access?.models.join('、') || (configLoading ? '读取中…' : '暂未取得模型列表') }}</span><button @click="load" :disabled="configLoading">刷新接入信息</button></div>
     </div>
-    <div class="key-toolbar"><span>本系统 API Key 用于上方接入地址；新建时仅显示一次。</span><button @click="expanded=!expanded">{{ expanded ? '收起密钥列表' : `管理 API Key（${credentials.length}）` }}</button></div>
+    <div class="key-toolbar"><span>设备 Key 用于连接器登记；新建时仅显示一次。Codex++ 使用连接器生成的本机配置。</span><button @click="expanded=!expanded">{{ expanded ? '收起密钥列表' : `管理 API Key（${credentials.length}）` }}</button></div>
     <p v-if="notice" class="notice" role="status">{{ notice }}</p>
     <div v-if="expanded" class="key-table-wrap"><table><thead><tr><th>接入名称</th><th>归属人员</th><th>系统</th><th>密钥状态</th><th>管理</th></tr></thead><tbody>
       <tr v-for="item in credentials" :key="item.deviceId"><td>{{ item.deviceName }}</td><td>{{ item.displayName }}</td><td>{{ item.platform }}</td><td>{{ item.revoked ? '已撤销' : '有效 · 密钥已隐藏' }}</td><td class="row-actions"><button :disabled="item.revoked" @click="open('rename',item)">改名</button><button class="danger-text" :disabled="item.revoked" @click="open('revoke',item)">撤销</button></td></tr>
@@ -99,6 +100,7 @@ onUnmounted(()=>{stopped=true;issued.value=null;reveal.value=false})
     </tbody></table></div>
   </section>
 
+  <CodexDeviceBinding />
   <div v-if="mode" class="access-overlay">
     <section role="dialog" aria-modal="true" aria-labelledby="access-dialog-title" class="access-dialog">
       <header><h2 id="access-dialog-title">{{ heading }}</h2><button aria-label="关闭密钥管理" :disabled="working" @click="close">关闭</button></header>
@@ -107,6 +109,7 @@ onUnmounted(()=>{stopped=true;issued.value=null;reveal.value=false})
         <label><span>接入名称</span><input readonly :value="accessName.trim()" /></label>
         <label><span>API Key</span><div class="copy-field"><input aria-label="新建 API Key" readonly autocomplete="off" :type="reveal?'text':'password'" :value="issued.apiKey" /><button @click="reveal=!reveal">{{ reveal?'隐藏':'显示' }}</button><button @click="copy(issued.apiKey)">复制 Key</button></div></label>
         <label><span>HTTPS Base URL</span><div class="copy-field"><input readonly :value="access?.baseUrl || ''" /><button @click="copy(access?.baseUrl)">复制地址</button></div></label>
+        <p>此 Key 用于连接器首次申请。安装连接器并获批准后，用本机 provider.txt 中的地址和本地 Key 新增非当前供应商，通过「Codex多开」启动。</p>
         <p>模型：{{ access?.models.join('、') || '请刷新模型列表' }} · 协议：Responses API</p>
         <p v-if="notice" role="status" class="notice">{{ notice }}</p>
         <footer><button class="primary" @click="close">已保存，关闭</button></footer>

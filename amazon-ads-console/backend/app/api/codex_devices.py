@@ -14,7 +14,7 @@ from starlette.background import BackgroundTask
 from app.api.auth import require_super_admin_session
 from app.services.codex_devices import overview as read_overview
 from app.services import codex_telemetry as telemetry
-from app.services import codex_responses, codex_control
+from app.services import codex_responses, codex_control, codex_binding
 from app.core.config import settings
 from app.services.auth import _connect
 from app.services.codex_quota import snapshot as quota_snapshot
@@ -23,9 +23,39 @@ router = APIRouter(prefix='/codex', tags=['codex'])
 device_bearer = HTTPBearer(auto_error=False)
 
 
-async def require_device(credentials: HTTPAuthorizationCredentials = Depends(device_bearer)):
+async def device_credential(credentials: HTTPAuthorizationCredentials = Depends(device_bearer)):
     key = credentials.credentials if credentials and credentials.scheme.lower() == 'bearer' else None
-    return await telemetry.authenticate(key)
+    return await telemetry.authenticate(key), key
+
+
+async def require_device(request: Request, credential=Depends(device_credential)):
+    device, key = credential
+    await codex_binding.require_proof(device, key, request)
+    return device
+
+
+@router.post('/device-enrollment')
+async def device_enrollment(request: Request, credential=Depends(device_credential)):
+    device, key = credential
+    return JSONResponse(await codex_binding.claim(device, key, request), headers={'Cache-Control': 'no-store'})
+
+
+@router.get('/device-bindings', dependencies=[Depends(require_super_admin_session)])
+async def device_bindings():
+    from fastapi.encoders import jsonable_encoder
+    telemetry.require_enabled()
+    return JSONResponse(jsonable_encoder(await codex_binding.listing()), headers={'Cache-Control': 'no-store'})
+
+
+class BindingApproval(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    fingerprint: str = Field(pattern='^[0-9a-f]{64}$')
+
+
+@router.post('/device-bindings/{claim_id}/approve')
+async def approve_binding(claim_id: uuid.UUID, payload: BindingApproval, actor=Depends(require_super_admin_session)):
+    telemetry.require_enabled()
+    return await codex_binding.approve(claim_id, payload.fingerprint, actor[1]['userId'])
 
 
 class AccessName(BaseModel):
