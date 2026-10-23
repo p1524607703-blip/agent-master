@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { isNavigatingAway } from '../router/navigation'
 import SbAttributionToggle from '../components/SbAttributionToggle.vue'
-import { CpoRequestGate, normalizeSbMode, sbModeLabel, type SbAttributionMode } from '../api/cpoReport'
+import { CpoRequestGate, normalizeCpoDate, normalizeSbMode, sbModeLabel, type SbAttributionMode } from '../api/cpoReport'
 import FullFunnelRows from '../components/FullFunnelRows.vue'
 import PendingGroupExpenses from '../components/PendingGroupExpenses.vue'
 import { useSessionStore } from '../stores/session'
@@ -167,7 +167,7 @@ watch(
   async value => {
     if (!value) { ++preparationSequence; requestGate.cancel(); return }
     period.value = ['weekly','monthly'].includes(String(route.query.period)) ? route.query.period as Period : 'daily'
-    selectedDate.value = String(route.query.date || '')
+    selectedDate.value = normalizeCpoDate(route.query.date, period.value)
     sbAttributionMode.value = normalizeSbMode(route.query.sb_attribution_mode)
     await load()
   },
@@ -210,7 +210,7 @@ const changePeriod = async (value:Period) => {
   })
 }
 const changeRange = async (value:string) => {
-  const nextDate = value || ''
+  const nextDate = normalizeCpoDate(value, period.value)
   if (!nextDate || nextDate === selectedDate.value) return
   invalidateReport()
   loading.value = true

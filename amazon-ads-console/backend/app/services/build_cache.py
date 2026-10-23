@@ -6,6 +6,7 @@ import threading
 import time
 from weakref import WeakValueDictionary
 from datetime import date
+from pathlib import Path
 from typing import Any, Callable, Optional
 
 from app.core.observability import increment, update_context
@@ -92,8 +93,19 @@ class RedisBuildCache:
         return self._client
 
     @staticmethod
+    def namespace() -> str:
+        # Release-isolated snapshots permit old/new workers to overlap safely.
+        inferred = Path(__file__).resolve().parents[4].name
+        if len(inferred) != 40 or any(c not in "0123456789abcdef" for c in inferred):
+            inferred = ""
+        value = os.getenv("CPO_CACHE_NAMESPACE", inferred)
+        if value and (len(value) != 40 or any(c not in "0123456789abcdef" for c in value)):
+            raise ValueError("Invalid CPO cache release namespace")
+        return value + ":" if value else ""
+
+    @staticmethod
     def key(start: str, end: str, revision: str) -> str:
-        return f"cpo:build:v1:{revision}:{start}:{end}"
+        return f"cpo:build:v1:{RedisBuildCache.namespace()}{revision}:{start}:{end}"
 
     def _ttl(self, end: str) -> int:
         try:
@@ -218,12 +230,12 @@ class RedisBuildCache:
         start_key = start or "all"
         end_key = end or "all"
         update_context(revision=revision)
-        key = f"cpo:complete-days:v2:{revision}:{start_key}:{end_key}"
+        key = f"cpo:complete-days:v2:{self.namespace()}{revision}:{start_key}:{end_key}"
         return self._get_or_set_key(key, self.historical_ttl, loader)
 
     def get_or_set_report_catalog(self, revision: str, loader: Callable[[], Any]) -> Any:
         """Coalesce the exact, expensive coverage scan across all workers."""
-        return self._get_or_set_key(f"cpo:report-catalog:v2:{revision}", self.recent_ttl, loader)
+        return self._get_or_set_key(f"cpo:report-catalog:v2:{self.namespace()}{revision}", self.recent_ttl, loader)
 
     def clear(self) -> int:
         with self._client_lock:

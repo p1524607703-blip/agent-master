@@ -153,3 +153,13 @@ Body：
 4. 新业务报告发现未知父 ASIN时进入新品候选。
 5. 手动维护数据写 `chatgpt_ops` 隔离层，不修改原始广告/业务事实。
 6. CPO 计算必须使用同日期业务数据与广告数据，跨账户聚合但不跨日期混算。
+
+## CPO 报表日期契约（2026-10-22 更新）
+
+以下查询和下载接口共用日期校验：`GET /operator-cpo`、`GET /operators/{operator}`、`GET /my-cpo`、`GET /operator-reports/summary.xlsx`、`GET /operator-reports/operators/{operator}.xlsx`、`GET /operator-reports/all.zip`。
+
+- `period=daily|weekly|monthly`；`date` 可省略，省略时沿用最新可用日期。
+- 只要传入 `date`，必须是有效的完整公历日期 `YYYY-MM-DD`，日、周、月报规则相同。月报前端统一使用当月第一天，例如 `period=monthly&date=2026-09-01`。
+- 前端兼容月度链接的 `date=2026-09`，请求及导出前归一为 `2026-09-01`；直接调用 API 仍须传完整日期。
+- 空字符串、月份简写、周编号、时间戳、非真实日期（如 `2026-02-29`）返回 `422` 和日期格式提示。校验在读取报表缓存、执行报表查询之前完成，不触发计算。
+- 权限校验继续生效；日期参数不能绕过运营组访问或导出权限。

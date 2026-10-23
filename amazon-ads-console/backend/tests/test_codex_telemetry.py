@@ -63,7 +63,7 @@ class ParserTests(unittest.TestCase):
 
     def test_unbounded_delta_is_skipped_without_losing_final_usage(self):
         observer = service.UsageObserver()
-        observer.feed(b'data: '+b'x'*(1024*1024+20))
+        observer.feed(b'data: '+b'x'*(observer.max_event_size+20))
         observer.feed(b'\n\ndata: {"type":"response.completed","response":{"id":"r","usage":{"input_tokens":0,"output_tokens":0,"total_tokens":0}}}\n\n')
         self.assertTrue(observer.completed)
         self.assertEqual(observer.usage['total_tokens'],0)

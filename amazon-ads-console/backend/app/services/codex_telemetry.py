@@ -6,6 +6,7 @@ import json
 import logging
 import os
 import secrets
+import time
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -15,6 +16,7 @@ import httpx
 from fastapi import HTTPException
 
 from app.core.config import settings
+from app.core import observability
 from app.services.auth import _connect
 from app.services import codex_activity, codex_control
 
@@ -95,9 +97,15 @@ class UsageObserver:
         self.response_id = None
         self.usage = None
         self.completed = False
+        self.terminal_status = None
+        self.first_output_at = None
         self.capture_response = capture_response
         self.response = None
-        self.max_event_size = 16*1024*1024 if capture_response else 1024*1024
+        # A terminal event repeats the generated output. Use the same bounded
+        # limit for streamed and collected responses so a valid large terminal
+        # event is not mistaken for a truncated stream. Parsed output is discarded
+        # immediately unless this request explicitly collects a JSON response.
+        self.max_event_size = 16*1024*1024
 
     def feed(self, chunk):
         self.buffer += self.decoder.decode(chunk)
@@ -112,14 +120,22 @@ class UsageObserver:
                 event = json.loads(line[5:].strip())
             except ValueError:
                 continue
-            if not isinstance(event,dict) or event.get('type') not in ('response.completed','response.incomplete','response.failed'):
+            if not isinstance(event,dict):
                 continue
-            self.observe_response(event.get('response'),event['type'] == 'response.completed')
+            kind = event.get('type')
+            # Record only a timestamp, never the generated text or tool arguments.
+            if self.first_output_at is None and kind in (
+                    'response.output_text.delta', 'response.reasoning_text.delta',
+                    'response.reasoning_summary_text.delta', 'response.function_call_arguments.delta') and event.get('delta'):
+                self.first_output_at = time.perf_counter()
+            if kind not in ('response.completed','response.incomplete','response.failed'):
+                continue
+            self.observe_response(event.get('response'),kind == 'response.completed',kind.removeprefix('response.'))
         if len(self.buffer) > self.max_event_size:
             self.buffer = ''
             self.skipping = True
 
-    def observe_response(self,response,completed):
+    def observe_response(self,response,completed,terminal_status=None):
         if not isinstance(response,dict):
             return
         rid = response.get('id')
@@ -130,6 +146,8 @@ class UsageObserver:
             self.response = None
         self.response_id = rid
         self.completed = completed
+        status = terminal_status or ('completed' if completed else response.get('status','incomplete'))
+        self.terminal_status = status if status in ('completed','incomplete','failed') else None
         if self.capture_response:
             self.response = response
         usage = valid_usage(response.get('usage'))
@@ -287,25 +305,33 @@ async def model_catalog():
 
 
 async def proxy_response(device, body, route='/responses',forward_headers=None, observer=None, response_headers=None):
+    queued_at = time.perf_counter()
     lease = await codex_control.acquire(device['device_id'])
+    queue_ms = round((time.perf_counter() - queued_at) * 1000, 3)
     try:
         status, content_type, request_id, stream = await _proxy_response(
-            device, body, route, forward_headers, observer, response_headers)
+            device, body, route, forward_headers, observer, response_headers, queue_ms)
         return status, content_type, request_id, codex_control.ControlledStream(stream, lease)
     except BaseException:
         lease.close()
         raise
 
 
-async def _proxy_response(device, body, route='/responses',forward_headers=None, observer=None, response_headers=None):
+async def _proxy_response(device, body, route='/responses',forward_headers=None, observer=None, response_headers=None, queue_ms=0):
     base,headers = upstream()
     request_id = str(uuid.uuid4())
     started_at = datetime.now(timezone.utc).isoformat()
+    started_clock = time.perf_counter()
+    trace_context = observability.request_context.get()
+    trace_id = trace_context.get('request_id') if trace_context else request_id
+    if trace_context is not None:
+        trace_context['model_request_id'] = request_id
+        trace_context['model_queue_ms'] = queue_ms
     try:
         requested_model = json.loads(body).get('model')
     except (ValueError, AttributeError):
         requested_model = None
-    timing = {'started_at':started_at, 'user_id':device['user_id'],
+    timing = {'started_at':started_at, 'trace_request_id':trace_id, 'queue_ms':queue_ms, 'user_id':device['user_id'],
               'model_slug':requested_model if isinstance(requested_model,str) and len(requested_model)<=256 else None}
     activity = start_activity(request_id, device['device_id'])
     # Preserve supported Codex session metadata without forwarding device auth,
@@ -316,11 +342,15 @@ async def _proxy_response(device, body, route='/responses',forward_headers=None,
             if forward_headers.get(name):
                 headers[name] = forward_headers[name]
     headers['Content-Type'] = 'application/json'
+    # Generated locally: never forward an untrusted caller correlation header.
+    headers['X-Request-ID'] = request_id
     client = httpx.AsyncClient(trust_env=False,follow_redirects=False,
         timeout=httpx.Timeout(300,connect=10,pool=10))
     try:
         response = await client.send(client.build_request('POST',base+route,headers=headers,content=body),stream=True)
     except asyncio.CancelledError:
+        if trace_context is not None:
+            trace_context.update(model_outcome='client_cancelled',model_http_status=499,model_completed=False)
         try:
             stage_event({**timing,'request_id':request_id,'device_id':str(device['device_id']),
                 'response_id':None,'finished_at':datetime.now(timezone.utc).isoformat(),
@@ -331,7 +361,11 @@ async def _proxy_response(device, body, route='/responses',forward_headers=None,
             finish_activity(activity)
             await asyncio.shield(client.aclose())
         raise
-    except httpx.HTTPError:
+    except httpx.HTTPError as exc:
+        if trace_context is not None:
+            trace_context.update(model_outcome='upstream_headers_error',model_http_status=502,
+                model_completed=False,model_error_type=type(exc).__name__,
+                model_headers_ms=round((time.perf_counter()-started_clock)*1000,3))
         await client.aclose()
         try:
             await save_event({**timing,'request_id':request_id,'device_id':str(device['device_id']),
@@ -342,7 +376,12 @@ async def _proxy_response(device, body, route='/responses',forward_headers=None,
         finally:
             finish_activity(activity)
         raise HTTPException(502,'Model upstream is unavailable')
+    headers_ms = round((time.perf_counter() - started_clock) * 1000, 3)
+    upstream_request_id = response.headers.get('x-upstream-request-id') or response.headers.get('x-request-id')
+    if not isinstance(upstream_request_id,str) or not observability._REQUEST_ID.fullmatch(upstream_request_id):
+        upstream_request_id = None
     if response_headers is not None:
+        response_headers['X-Model-Request-ID'] = request_id
         # Preserve bounded retry guidance without exposing arbitrary source headers.
         for name in ('Retry-After', 'X-Relay-Limit-Origin'):
             value = response.headers.get(name)
@@ -354,8 +393,23 @@ async def _proxy_response(device, body, route='/responses',forward_headers=None,
         is_sse = 'text/event-stream' in response.headers.get('content-type','')
         json_body = bytearray()
         json_too_large = False
+        first_byte_ms = None
+        error_type = None
+        outcome = 'http_error' if status != 200 else 'incomplete'
+
+        def failure_event():
+            # Headers may already be HTTP 200. An explicit terminal error tells
+            # streaming clients that partial output is not a completed response.
+            # Never replay a request which could already have produced output.
+            return ('\n\nevent: error\ndata: ' + json.dumps({
+                'type':'error','code':'upstream_stream_interrupted',
+                'message':'Model response was interrupted before completion. Partial output may be present.',
+                'request_id':trace_id,'model_request_id':request_id}) + '\n\n').encode()
+
         try:
             async for chunk in response.aiter_bytes():
+                if chunk and first_byte_ms is None:
+                    first_byte_ms = round((time.perf_counter() - started_clock) * 1000, 3)
                 if status == 200:
                     if is_sse:
                         observer.feed(chunk)
@@ -366,22 +420,54 @@ async def _proxy_response(device, body, route='/responses',forward_headers=None,
                             json_body.clear()
                             json_too_large = True
                 yield chunk
-            if status == 200 and not is_sse and not json_too_large:
-                try:
-                    value = json.loads(json_body)
-                    observer.observe_response(value,isinstance(value,dict) and value.get('status','completed')=='completed')
-                except (ValueError,UnicodeDecodeError):
-                    pass
+            if status == 200:
+                if is_sse:
+                    observer.finish()
+                elif not json_too_large:
+                    try:
+                        value = json.loads(json_body)
+                        observer.observe_response(value,isinstance(value,dict) and value.get('status','completed')=='completed')
+                    except (ValueError,UnicodeDecodeError):
+                        pass
+                outcome = observer.terminal_status or 'incomplete'
+                if observer.terminal_status is None:
+                    status = 502
+                    error_type = 'MissingTerminalEvent'
+                    if is_sse:
+                        yield failure_event()
         except (asyncio.CancelledError,GeneratorExit):
-            status = 499
+            # A client closing after receiving our terminal error must not erase
+            # the upstream failure which triggered that error.
+            if error_type is None:
+                status = 499
+                outcome = 'client_cancelled'
             raise
-        except httpx.HTTPError:
+        except httpx.HTTPError as exc:
+            if is_sse:
+                observer.finish()
             status = 502
-            raise
+            error_type = type(exc).__name__
+            outcome = 'completed_transport_error' if observer.completed else 'transport_error'
+            if is_sse and response.status_code == 200:
+                if not observer.completed:
+                    yield failure_event()
+            else:
+                raise
         finally:
             if is_sse and status in (200,499,502):
                 observer.finish()
-            record = {**timing,'request_id':request_id,'device_id':str(device['device_id']),
+            ended_clock = time.perf_counter()
+            stream_timing = {
+                'model_request_id':request_id,'model_upstream_request_id':upstream_request_id,
+                'model_outcome':outcome,'model_http_status':status,
+                'model_completed':observer.completed,'model_error_type':error_type,
+                'model_headers_ms':headers_ms,'model_first_byte_ms':first_byte_ms,
+                'model_first_output_ms':round((observer.first_output_at - started_clock) * 1000, 3) if observer.first_output_at else None,
+                'model_stream_ms':round((ended_clock - started_clock) * 1000 - headers_ms, 3),
+            }
+            if trace_context is not None:
+                trace_context.update(stream_timing)
+            record = {**timing,**stream_timing,'request_id':request_id,'device_id':str(device['device_id']),
                 'response_id':observer.response_id,'finished_at':datetime.now(timezone.utc).isoformat(),
                 'http_status':status,'completed':observer.completed,'usage':observer.usage}
             # Stage synchronously before any cancellation point, even on client disconnect.

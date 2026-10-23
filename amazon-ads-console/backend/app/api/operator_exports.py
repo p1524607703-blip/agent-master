@@ -3,13 +3,13 @@ from __future__ import annotations
 
 import io
 import re
-from datetime import date as parse_date
 from typing import Optional, Literal
 from zipfile import ZipFile, ZIP_DEFLATED
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import Response
 from app.api.auth import require_session
+from app.api.cpo_dates import validate_cpo_report_date
 from app.services.operator_cpo import OPERATOR_NAMES, canonical_operator_name, operator_group_of, operator_cpo_summary, operator_cpo_detail, _build, _period_range
 from app.services.cache import cache
 
@@ -49,15 +49,6 @@ def _authorized_detail(user,name):
     return own
 
 
-def _valid_date(value):
-    if value:
-        try:
-            parse_date.fromisoformat(value)
-        except ValueError:
-            raise HTTPException(422, "Invalid report date")
-    return value
-
-
 def _load_summary(day,period,sb_attribution_mode):
     result=cached_summary(day,sb_attribution_mode) if period=="daily" else None
     return result if result is not None else operator_cpo_summary(day,period,sb_attribution_mode)
@@ -83,7 +74,7 @@ def download_shared_summary(period:Literal["daily","weekly","monthly"]="daily",
     user = _who(session)
     if not _manager(user) and (user.get('roleCode') != 'operator' or not operator_group_of(user.get('operatorCode'))):
         raise HTTPException(403, 'An active operator group is required')
-    _valid_date(date)
+    validate_cpo_report_date(date, period)
     data=_load_summary(date,period,sb_attribution_mode)
     if not _manager(user):
         own = operator_group_of(user.get('operatorCode') or user.get('operator_code'))
@@ -103,7 +94,7 @@ def download_operator(operator:str,period:Literal["daily","weekly","monthly"]="d
                       date:Optional[str]=None,session=Depends(require_session)):
     who=_who(session)
     canonical=_authorized_detail(who,operator)
-    _valid_date(date)
+    validate_cpo_report_date(date, period)
     data=_load_detail(canonical,date,period,sb_attribution_mode)
     name=f"operator_{(data.get('data_date') or date or 'latest')}_sb-{sb_attribution_mode}.xlsx"
     return _download(detail_xlsx(data),name,
@@ -116,7 +107,7 @@ def download_all_reports(period:Literal["daily","weekly","monthly"]="daily",
                          date:Optional[str]=None,session=Depends(require_session)):
     if not _manager(_who(session)):
         raise HTTPException(403,"Only management can export all operator reports")
-    _valid_date(date)
+    validate_cpo_report_date(date, period)
     summary=_load_summary(date,period,sb_attribution_mode)
     names=[canonical_operator_name(str(x.get("name") or "").strip())
            for x in (summary.get("operators") or []) if x.get("name")]

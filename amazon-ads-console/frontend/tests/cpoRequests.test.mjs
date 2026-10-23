@@ -129,3 +129,46 @@ for (const [filename,path] of [['OperatorCpoView.vue','/operator-cpo'],['MyCpoVi
     } finally {navigation.finishNavigation('/reports');view.unmount()}
   })
 }
+
+for (const [filename,path] of [['OperatorCpoView.vue','/operator-cpo'],['MyCpoView.vue','/my-cpo'],['OperatorDetailView.vue','/operators/ZF']]) {
+  test(`${filename}: month-only links request and retain a full month-first date`,async()=>{
+    const choices=deferred()
+    const view=mountView(filename,{path,params:path.startsWith('/operators/')?{operator:'ZF'}:{},query:{period:'monthly',date:'2026-09'}},{periods:choices.promise})
+    try {
+      await flush()
+      assert.equal(view.calls.length,1,'explicit month must not wait for date choices')
+      assert.equal(new URL(view.calls[0].path,'http://fixture').searchParams.get('date'),'2026-09-01')
+      view.calls[0].resolve({...response('name'),data_date:'2026-09-30',period:'monthly'})
+      await flush()
+      assert.equal(view.route.query.date,'2026-09-01')
+      assert.equal(view.calls.length,1,'canonical month URL must not refetch the same report')
+    } finally { choices.resolve({daily:[],weekly:[],monthly:[]});view.unmount() }
+  })
+}
+
+test('monthly normalization preserves calendar errors for explicit API validation',()=>{
+  for (const raw of ['2026-09','2026-09-01','2026-09-30']) assert.equal(report.normalizeCpoDate(raw,'monthly'),'2026-09-01')
+  assert.equal(report.normalizeCpoDate('2024-02-29','monthly'),'2024-02-01')
+  for (const raw of ['2026-02-29','2026-04-31','2026-13','0000-01','20260901','2026-09-01T00:00:00']) assert.equal(report.normalizeCpoDate(raw,'monthly'),raw)
+  assert.equal(report.normalizeCpoDate('2026-09','daily'),'2026-09')
+  assert.equal(report.normalizeCpoDate('2026-09-30','weekly'),'2026-09-30')
+  assert.equal(report.normalizeCpoDate(undefined,'monthly'),'')
+})
+
+test('download normalizes monthly dates before calling the export API',async()=>{
+  const exports = execute(readFileSync(new URL('../src/api/operatorExports.ts',import.meta.url),'utf8'),{
+    './client':{API_BASE:'/api',AUTH_TOKEN_KEY:'fixture-token'},'./cpoReport':report,
+  })
+  const previousFetch=globalThis.fetch, previousStorage=globalThis.localStorage
+  let called
+  try {
+    globalThis.localStorage={getItem:()=> 'fixture'}
+    globalThis.fetch=async url=>{called=url;return {ok:false,status:422}}
+    await assert.rejects(exports.downloadOperatorReport('all','monthly','2026-09'),/422/)
+    assert.equal(new URL(called,'http://fixture').searchParams.get('date'),'2026-09-01')
+  } finally {
+    globalThis.fetch=previousFetch
+    if(previousStorage===undefined) delete globalThis.localStorage
+    else globalThis.localStorage=previousStorage
+  }
+})

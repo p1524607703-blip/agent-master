@@ -242,6 +242,9 @@ class RequestDiagnosticsMiddleware:
             context["build"] = context["build_ms"] > 0
             context["performance_reason"] = ("contention" if context["lock_timeout"] or context["lock_wait_ms"] >= 1000
                 else "cold_rebuild" if context["build_ms"] > 0 else "database" if context["db_wall_ms"] >= 1000 else "cached" if context["l1_hit"] or context["l2_hit"] else "normal")
+            if "model_request_id" in context:
+                context["performance_class"] = "model_stream"
+                context["performance_reason"] = context.get("model_outcome", "upstream_headers")
             for field in TIMINGS:
                 context[field] = round(context[field], 3)
             try:

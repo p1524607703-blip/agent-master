@@ -44,7 +44,7 @@ def main():
     assert re.fullmatch(r'[0-9a-f]{40}', commit)
     # Only a commit already present in GitHub can reach the server.
     published = published_commit(commit)
-    # A rollback to an old application must retain today's safe stop/clear/warm
+    # A rollback to an old application must retain today's safe rolling
     # engine. Pin that engine to this checkout's *published* HEAD separately.
     engine_commit = git('rev-parse', 'HEAD^{commit}')
     engine_published = published if engine_commit == commit else published_commit(engine_commit)
@@ -100,6 +100,7 @@ fi
  mkdir -p {SERVER_ROOT}/tooling/engine-{engine_commit}
  git --git-dir={SERVER_ROOT}/repository.git show {engine_commit}:amazon-ads-console/scripts/deploy.sh > {SERVER_ROOT}/tooling/engine-{engine_commit}/deploy.sh
  git --git-dir={SERVER_ROOT}/repository.git show {engine_commit}:amazon-ads-console/deploy/cache_release.py > {SERVER_ROOT}/tooling/engine-{engine_commit}/cache_release.py
+ git --git-dir={SERVER_ROOT}/repository.git show {engine_commit}:amazon-ads-console/deploy/rolling_release.py > {SERVER_ROOT}/tooling/engine-{engine_commit}/rolling_release.py
 ''')
     writer = 'import sys,json; from pathlib import Path; d=json.load(sys.stdin); p=Path("/opt/agent/cpo/shared/approvals")/(d["commit"]+".json"); p.write_text(json.dumps(d)); p.chmod(0o600)'
     ssh(args.server, 'python3 -c ' + shlex.quote(writer), input=json.dumps(approval), text=True)

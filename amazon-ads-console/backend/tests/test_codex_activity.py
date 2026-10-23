@@ -96,7 +96,7 @@ class RequestActivityTests(unittest.TestCase):
             client.aclose = AsyncMock()
             with patch.object(telemetry, 'upstream', return_value=('https://example.test', {})), patch.object(telemetry.httpx, 'AsyncClient', return_value=client):
                 with self.assertRaises(asyncio.CancelledError):
-                    asyncio.run(telemetry.proxy_response({'device_id': 'YE'}, b'{}'))
+                    asyncio.run(telemetry.proxy_response({'device_id': 'YE', 'user_id': 1}, b'{}'))
             sources, ok = activity.observe(Path(tmp)/'active')
             self.assertTrue(ok)
             self.assertEqual(sources['YE']['activeRequests'], 0)

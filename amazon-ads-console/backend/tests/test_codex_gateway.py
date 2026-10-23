@@ -18,7 +18,7 @@ spec.loader.exec_module(gateway)
 
 class GatewayTests(unittest.TestCase):
     @contextmanager
-    def fixture(self, *, limit=2, queued=4, timeout=2, upstream_status=200, externally_managed=False):
+    def fixture(self, *, limit=2, queued=4, timeout=2, upstream_status=200, externally_managed=False, truncated=False):
         release = threading.Event()
         count_lock = threading.Lock()
         state = {'active': 0, 'maximum': 0, 'calls': 0, 'credentialForwarded': False}
@@ -30,11 +30,22 @@ class GatewayTests(unittest.TestCase):
                     state['active'] += 1; state['calls'] += 1
                     state['maximum'] = max(state['maximum'], state['active'])
                     state['credentialForwarded'] |= bool(self.headers.get('Authorization'))
+                    state['requestId'] = self.headers.get('X-Request-ID')
                 try:
                     release.wait(5)
                     body = b'{"error":{"code":"upstream_fixture_limit"}}' if upstream_status == 429 else b'{"status":"completed"}'
                     self.send_response(upstream_status)
+                    if truncated:
+                        self.send_header('Content-Type','text/event-stream')
+                        self.send_header('Transfer-Encoding','chunked')
+                        self.end_headers()
+                        partial = b'data: {"type":"response.created"}\n\n'
+                        self.wfile.write(('%x\r\n' % len(partial)).encode()+partial+b'\r\n')
+                        self.wfile.flush()
+                        self.close_connection = True  # Deliberately omit terminal chunk.
+                        return
                     self.send_header('Content-Type','application/json')
+                    self.send_header('X-Request-ID','source-fixture-id')
                     self.send_header('Content-Length',str(len(body)))
                     if upstream_status == 429: self.send_header('Retry-After','7')
                     self.end_headers(); self.wfile.write(body)
@@ -52,7 +63,7 @@ class GatewayTests(unittest.TestCase):
         def call():
             with httpx.Client(trust_env=False,timeout=6) as client:
                 return client.post(f'http://127.0.0.1:{relay.server_port}/v1/responses',
-                    headers={'Authorization':'Bearer fixture-private-key'},json={'model':'fixture','input':'hi'})
+                    headers={'Authorization':'Bearer fixture-private-key','X-Request-ID':'console-fixture-id'},json={'model':'fixture','input':'hi'})
         try: yield relay, release, state, call
         finally:
             release.set()
@@ -121,6 +132,30 @@ class GatewayTests(unittest.TestCase):
             release.set()
             self.assertEqual([job.result().status_code for job in jobs],[200]*3)
             self.assertEqual(state['maximum'],3)
+
+    def test_correlation_ids_survive_gateway_and_link_upstream(self):
+        with self.fixture() as (_,release,state,call):
+            release.set()
+            response = call()
+            self.assertEqual(response.status_code,200)
+            self.assertEqual(state['requestId'],'console-fixture-id')
+            self.assertEqual(response.headers['x-request-id'],'console-fixture-id')
+            self.assertEqual(response.headers['x-upstream-request-id'],'source-fixture-id')
+
+    def test_upstream_transport_failure_logs_actual_outcome_after_http200(self):
+        with self.fixture(truncated=True) as (relay,release,state,call):
+            release.set()
+            with self.assertLogs(level='INFO') as logs:
+                with self.assertRaises(httpx.RemoteProtocolError):
+                    call()
+            line = next(line for line in logs.output if 'request_id=console-fixture-id' in line)
+            self.assertIn('status=502',line)
+            self.assertIn('headers_sent=True',line)
+            self.assertIn('stage=upstream_read',line)
+            self.assertIn('error_type=IncompleteRead',line)
+            self.assertNotIn('fixture-private-key',line)
+            self.assertEqual(state['calls'],1)
+            self.assertEqual(relay.capacity.snapshot(),(0,0))
 
     def test_fifo_prevents_new_requests_jumping_existing_waiters(self):
         admission=gateway.Admission(1,4)

@@ -15,6 +15,7 @@ from app.services.rds_query import ping
 from app.services.cpo_imports import validate_upload, commit_upload, source_status
 from app.services.cache import cache
 from app.services.diagnostics import diagnostic_status, request_traces
+from app.api.cpo_dates import validate_cpo_report_date
 
 router = APIRouter()
 
@@ -74,6 +75,7 @@ def operator_cpo(date: Optional[str] = None, period: str = Query('daily'),
     if user.get('roleCode') not in ('management', 'super_admin') and (
             user.get('roleCode') != 'operator' or not operator_group_of(user.get('operatorCode'))):
         raise HTTPException(403, 'An active operator group is required')
+    date = validate_cpo_report_date(date, period)
     period = period if period in ('daily','weekly','monthly') else 'daily'
     data = cache.get_or_set(f'operator:summary:{sb_attribution_mode}:{period}:{date or "latest"}', lambda: operator_cpo_summary(date, period, sb_attribution_mode), 60)
     if session[1].get('roleCode') == 'operator':
@@ -92,6 +94,7 @@ def operator_cpo(date: Optional[str] = None, period: str = Query('daily'),
 def operator_view(operator: str, date: Optional[str] = None, period: str = Query('daily'),
                   sb_attribution_mode: Literal['name','asin'] = 'name',
                   session: Tuple[str, Dict[str, Any]] = Depends(require_operator_access)):
+    date = validate_cpo_report_date(date, period)
     period = period if period in ('daily','weekly','monthly') else 'daily'
     data = cache.get_or_set(f'operator:detail:{operator}:{sb_attribution_mode}:{period}:{date or "latest"}', lambda: operator_cpo_detail(operator,date,period,sb_attribution_mode=sb_attribution_mode), 60)
     if session[1].get('roleCode') != 'operator':
@@ -112,6 +115,7 @@ def operator_view(operator: str, date: Optional[str] = None, period: str = Query
 def my_cpo(date: Optional[str] = None, period: str = Query('daily'),
            sb_attribution_mode: Literal['name','asin'] = 'name',
            session: Tuple[str, Dict[str, Any]] = Depends(require_own_operator_session)):
+    date = validate_cpo_report_date(date, period)
     period = period if period in ('daily','weekly','monthly') else 'daily'
     user = session[1] or {}
     code = user.get('operatorCode') or user.get('operator_code') or ''

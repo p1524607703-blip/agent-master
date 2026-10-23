@@ -6,6 +6,8 @@ import hmac
 import http.client
 import json
 import logging
+import re
+import uuid
 from logging.handlers import RotatingFileHandler
 import threading
 import time
@@ -14,6 +16,13 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 MAX_BODY = 16 * 1024 * 1024
+REQUEST_ID = re.compile(r'[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}\Z')
+
+
+def safe_request_id(value):
+    return value if isinstance(value, str) and REQUEST_ID.fullmatch(value) else None
+
+
 FORWARD_HEADERS = (
     'user-agent', 'session-id', 'thread-id', 'x-opencode-session',
     'x-codex-beta-features', 'openai-beta', 'x-codex-client-version',
@@ -166,6 +175,7 @@ class Handler(BaseHTTPRequestHandler):
         if not isinstance(request, dict) or request.get('model') not in self.server.settings['verifiedModels']:
             self.reply(400, {'error': {'message': 'Model has not been enabled'}})
             return
+        request_id = safe_request_id(self.headers.get('X-Request-ID')) or uuid.uuid4().hex
         queued_at = time.monotonic()
         # The console authenticates individual devices and owns their admission leases.
         # This exception is selected by the private credential, never a caller header.
@@ -185,10 +195,15 @@ class Handler(BaseHTTPRequestHandler):
         status = 502
         response_started = False
         connection = None
+        error_type = None
+        outcome = 'upstream_headers_error'
+        stage = 'headers'
+        headers_ms = first_byte_ms = None
+        upstream_request_id = None
         try:
             connection = http.client.HTTPConnection(
                 self.server.settings['upstreamHost'], self.server.settings['upstreamPort'], timeout=180)
-            headers = {'Content-Type': 'application/json', 'Accept-Encoding': 'identity'}
+            headers = {'Content-Type': 'application/json', 'Accept-Encoding': 'identity', 'X-Request-ID':request_id}
             for name in FORWARD_HEADERS:
                 if self.headers.get(name):
                     headers[name] = self.headers[name]
@@ -196,9 +211,14 @@ class Handler(BaseHTTPRequestHandler):
             connection.request('POST', path, body=body, headers=headers)
             upstream = connection.getresponse()
             status = upstream.status
+            headers_ms = (time.monotonic()-start)*1000
+            upstream_request_id = safe_request_id(upstream.getheader('X-Request-ID'))
             self.send_response(status)
             self.send_header('Content-Type', upstream.getheader('Content-Type', 'application/json'))
             self.send_header('Cache-Control', 'no-store')
+            self.send_header('X-Request-ID', request_id)
+            if upstream_request_id:
+                self.send_header('X-Upstream-Request-ID', upstream_request_id)
             if status == 429:
                 self.send_header('X-Relay-Limit-Origin', 'upstream')
             self.send_header('X-Accel-Buffering', 'no')
@@ -210,16 +230,27 @@ class Handler(BaseHTTPRequestHandler):
             response_started = True
             self.close_connection = True
             while True:
+                stage = 'upstream_read'
                 data = upstream.read1(65536)
                 if not data:
                     break
+                if first_byte_ms is None:
+                    first_byte_ms = (time.monotonic()-start)*1000
+                stage = 'downstream_write'
                 self.wfile.write(('%x\r\n' % len(data)).encode() + data + b'\r\n')
                 self.wfile.flush()
+            stage = 'downstream_write'
             self.wfile.write(b'0\r\n\r\n')
             self.wfile.flush()
-        except (BrokenPipeError, ConnectionResetError):
-            status = 499
-        except (OSError, http.client.HTTPException):
+            outcome = 'transport_complete'
+        except (BrokenPipeError, ConnectionResetError) as exc:
+            error_type = type(exc).__name__
+            status = 499 if stage == 'downstream_write' else 502
+            outcome = 'downstream_disconnected' if status == 499 else 'upstream_transport_error'
+        except (OSError, http.client.HTTPException) as exc:
+            error_type = type(exc).__name__
+            status = 502
+            outcome = 'upstream_headers_error' if not response_started else 'transport_error'
             if not response_started:
                 self.reply(502, {'error': {'message': 'Codex++ upstream unavailable'}})
         finally:
@@ -227,8 +258,10 @@ class Handler(BaseHTTPRequestHandler):
                 connection.close()
             if not externally_managed:
                 self.server.capacity.release()
-            logging.info('device=%s route=%s status=%s origin=upstream wait=%.2f elapsed=%.2f',
-                         device, path, status, waited, time.monotonic() - start)
+            logging.info('request_id=%s upstream_request_id=%s device=%s route=%s status=%s headers_sent=%s outcome=%s stage=%s error_type=%s origin=upstream wait=%.2f headers_ms=%s first_byte_ms=%s elapsed=%.2f',
+                         request_id, upstream_request_id, device, path, status, response_started, outcome, stage, error_type,
+                         waited, round(headers_ms,3) if headers_ms is not None else None,
+                         round(first_byte_ms,3) if first_byte_ms is not None else None, time.monotonic()-start)
 
     def do_GET(self):
         self.dispatch()

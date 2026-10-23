@@ -1,5 +1,5 @@
 import { API_BASE, AUTH_TOKEN_KEY } from './client'
-import { sbModeLabel, type SbAttributionMode } from './cpoReport'
+import { normalizeCpoDate, sbModeLabel, type SbAttributionMode } from './cpoReport'
 
 type Period = 'daily' | 'weekly' | 'monthly'
 type Kind = 'summary' | 'all' | 'detail'
@@ -10,6 +10,7 @@ export async function downloadOperatorReport(
 ): Promise<void> {
   const token = localStorage.getItem(AUTH_TOKEN_KEY)
   if (!token) throw new Error('登录已失效，请重新登录')
+  date = normalizeCpoDate(date, period)
   const params = new URLSearchParams({ period, sb_attribution_mode: sbAttributionMode })
   if (date) params.set('date', date)
   let path = '/operator-reports/summary.xlsx'
