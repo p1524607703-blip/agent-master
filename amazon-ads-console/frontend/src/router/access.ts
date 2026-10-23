@@ -12,7 +12,7 @@ const system: NavGroup = { title: '系统管理', items: [
 ] }
 export function navigationFor(role?: string | null): NavGroup[] {
   if (role === 'operator') return [{title: '我的数据', items: [
-    ['/my-cpo', '我的 CPO 明细'], ['/operator-cpo', '团队 CPO 汇总'], ['/ad-allocation', '广告费用分摊'],
+    ['/my-cpo', '我的 CPO 明细'], ['/ad-allocation', '广告费用分摊'],
     ['/data-changes', '新品 / ASIN 提交'],
   ]}]
   if (role === 'management') return [business]

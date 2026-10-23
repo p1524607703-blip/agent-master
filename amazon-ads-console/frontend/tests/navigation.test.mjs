@@ -87,10 +87,11 @@ test('role menus have three business entries and reserve system entries for supe
   const paths = role => access.navigationFor(role).flatMap(group => group.items.map(([path]) => path))
   assert.deepEqual(paths('management'), ['/operator-cpo', '/ad-allocation', '/product-mappings'])
   assert.equal(paths('super_admin').length, 6)
-  assert.deepEqual(paths('operator'), ['/my-cpo', '/operator-cpo', '/ad-allocation', '/data-changes'])
+  assert.deepEqual(paths('operator'), ['/my-cpo', '/ad-allocation', '/data-changes'])
   for (const role of ['management','operator','viewer',null]) {
     for (const path of ['/codex-devices','/diagnostics','/data-maintenance']) assert.equal(access.canAccessRoute(role,path), false)
   }
+  assert.equal(access.canAccessRoute('operator','/operator-cpo'), false)
   assert.equal(access.canAccessRoute('management','/data-changes'), true)
   assert.equal(access.canAccessRoute('operator','/data-changes'), true)
   assert.equal(access.canAccessRoute('management','/operators/ZF'), true)
@@ -117,6 +118,8 @@ test('real router rejects direct system links and retires old bookmarks for each
         await router.push(path)
         assert.equal(router.currentRoute.value.path,role==='super_admin'?path:access.homeFor(role))
       }
+      await router.push('/operator-cpo')
+      assert.equal(router.currentRoute.value.path,role==='operator'?'/my-cpo':'/operator-cpo')
       await router.push('/reports')
       assert.equal(router.currentRoute.value.path,role==='super_admin'?'/data-maintenance':access.homeFor(role))
       await router.push('/cpo-jobs')
