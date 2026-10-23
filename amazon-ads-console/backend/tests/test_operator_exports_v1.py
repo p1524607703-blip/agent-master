@@ -61,14 +61,12 @@ def test_operator_can_export_only_own_detail():
         assert app_as("operator","NONE").get("/api/operator-reports/operators/%E5%AD%90%E5%A8%9F.xlsx?date=2026-10-17").status_code==403
 
 
-def test_shared_summary_for_operator_and_manager_all():
+def test_team_summary_and_archive_are_management_only():
     with patch("app.api.operator_exports.cached_summary",return_value=SUMMARY), \
          patch("app.api.operator_exports.cached_detail",return_value=DETAIL):
         operator=app_as("operator","ZJ1")
         resp=operator.get("/api/operator-reports/summary.xlsx?period=daily&date=2026-10-17")
-        assert resp.status_code==200
-        assert resp.content[:2]==b"PK"
-        assert "spreadsheetml.sheet" in resp.headers.get("content-type","")
+        assert resp.status_code==403
         assert operator.get("/api/operator-reports/all.zip?date=2026-10-17").status_code==403
         manager=app_as("management")
         bundle=manager.get("/api/operator-reports/all.zip?period=daily&date=2026-10-17")
@@ -83,7 +81,7 @@ def test_shared_summary_for_operator_and_manager_all():
 
 def test_bad_period_and_date_rejected_before_query():
     with patch("app.api.operator_exports.cached_summary") as cached:
-        c=app_as("operator","ZJ1")
+        c=app_as("management")
         assert c.get("/api/operator-reports/summary.xlsx?date=2026-13-99").status_code==422
         assert c.get("/api/operator-reports/summary.xlsx?period=quarterly").status_code==422
         cached.assert_not_called()

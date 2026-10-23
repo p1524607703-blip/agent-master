@@ -8,7 +8,7 @@ from zipfile import ZipFile, ZIP_DEFLATED
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import Response
-from app.api.auth import require_session
+from app.api.auth import require_session, require_management_session
 from app.api.cpo_dates import validate_cpo_report_date
 from app.services.operator_cpo import OPERATOR_NAMES, canonical_operator_name, operator_group_of, operator_cpo_summary, operator_cpo_detail, _build, _period_range
 from app.services.cache import cache
@@ -70,19 +70,9 @@ def _download(content, filename, media_type):
 @router.get("/summary.xlsx")
 def download_shared_summary(period:Literal["daily","weekly","monthly"]="daily",
                             sb_attribution_mode:Literal['name','asin']='name',
-                            date:Optional[str]=None, session=Depends(require_session)):
-    user = _who(session)
-    if not _manager(user) and (user.get('roleCode') != 'operator' or not operator_group_of(user.get('operatorCode'))):
-        raise HTTPException(403, 'An active operator group is required')
+                            date:Optional[str]=None, session=Depends(require_management_session)):
     validate_cpo_report_date(date, period)
     data=_load_summary(date,period,sb_attribution_mode)
-    if not _manager(user):
-        own = operator_group_of(user.get('operatorCode') or user.get('operator_code'))
-        data = {**data, 'operators': [
-            dict(row) if any(str(g or '').upper()[:2] == own for g in (row.get('groups') or [row.get('group')]))
-            else {k: v for k, v in row.items() if k != 'pendingProductSpend'}
-            for row in data.get('operators', [])
-        ]}
     name=f"all_operators_{(data.get('data_date') or date or 'latest')}_sb-{sb_attribution_mode}.xlsx"
     return _download(summary_xlsx(data),name,
                      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")

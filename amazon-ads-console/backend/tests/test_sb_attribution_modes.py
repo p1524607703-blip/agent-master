@@ -158,14 +158,16 @@ def test_mode_cache_keys_are_separate_but_source_revision_is_unchanged():
 def test_modes_validated_before_service_and_cross_group_permissions_still_apply():
     with patch('app.api.routes.cache.get_or_set',side_effect=lambda key,loader,ttl:loader()), \
          patch('app.api.routes.operator_cpo_summary',return_value={'operators':[],'sbAttributionMode':'asin'}) as summary:
-        client = app_as('operator','ZF1')
+        client = app_as('management')
         assert client.get('/api/operator-cpo?sb_attribution_mode=bad').status_code == 422
         summary.assert_not_called()
         response = client.get('/api/operator-cpo?sb_attribution_mode=asin')
         assert response.status_code == 200
         assert response.json()['sbAttributionMode'] == 'asin'
         summary.assert_called_once_with(None,'daily','asin')
-        assert client.get('/api/operators/雪敏?sb_attribution_mode=asin').status_code == 403
+        operator=app_as('operator','ZF1')
+        assert operator.get('/api/operator-cpo?sb_attribution_mode=asin').status_code == 403
+        assert operator.get('/api/operators/雪敏?sb_attribution_mode=asin').status_code == 403
 
 
 def test_export_uses_selected_mode_and_labels_workbook():

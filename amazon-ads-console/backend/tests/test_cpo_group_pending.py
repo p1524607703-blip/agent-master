@@ -94,19 +94,12 @@ def test_own_detail_and_my_ledger_exclude_other_group_pending_amounts():
     assert '178.45' not in str(own) and '178.45' not in str(mine)
 
 
-def test_shared_summary_keeps_existing_totals_but_new_pending_detail_is_own_only():
-    payload={'operators':[
-        {'name':'珍凤','groups':['ZF1'],'spend':70,'pendingProductSpend':50},
-        {'name':'雪敏','groups':['XM1'],'spend':602.3,'pendingProductSpend':178.45}],
-        'operatorPendingSpend':228.45,'groupPendingExpenses':[{'PRIVATE_CAMPAIGN':'do-not-share'}]}
-    with patch('app.api.routes.cache.get_or_set',return_value=deepcopy(payload)):
+def test_team_summary_and_its_workbook_are_blocked_before_cached_totals():
+    with patch('app.api.routes.cache.get_or_set') as cached:
         response=app_as('operator','ZF1').get('/api/operator-cpo')
-    assert response.status_code==200
-    result=response.json()
-    assert result['operators'][0]['pendingProductSpend']==50
-    assert 'pendingProductSpend' not in result['operators'][1]
-    assert 'groupPendingExpenses' not in result and 'operatorPendingSpend' not in result
-    with patch('app.api.operator_exports.cached_summary',return_value=deepcopy(payload)):
+        assert response.status_code==403
+        cached.assert_not_called()
+    with patch('app.api.operator_exports.cached_summary') as cached:
         response=exports_as('operator','ZF1').get('/api/operator-reports/summary.xlsx?date='+DAY)
-    assert response.status_code==200
-    assert b'178.45' not in _xlsx_xml(response.content)
+        assert response.status_code==403
+        cached.assert_not_called()

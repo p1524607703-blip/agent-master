@@ -1,4 +1,4 @@
-"""Permissions: shared operator summary for all staff, detail only own group or management."""
+"""Permissions: team summary for management only, detail only own group or management."""
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from unittest.mock import patch
@@ -14,11 +14,11 @@ def app_as(role, code=None):
     return TestClient(app)
 
 
-def test_operator_can_read_shared_summary():
-    with patch('app.api.routes.cache.get_or_set',return_value={'operators':[{'name':'子娟'},{'name':'雪敏'}]}):
+def test_operator_cannot_read_team_summary():
+    with patch('app.api.routes.cache.get_or_set',return_value={'operators':[{'name':'子娟'},{'name':'雪敏'}]}) as cached:
         r=app_as('operator','ZJ1').get('/api/operator-cpo?date=2026-10-17')
-    assert r.status_code==200
-    assert len(r.json()['operators'])==2
+    assert r.status_code==403
+    cached.assert_not_called()
 
 
 def test_operator_can_read_own_detail_and_alias():
