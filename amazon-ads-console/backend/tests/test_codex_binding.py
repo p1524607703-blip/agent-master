@@ -37,6 +37,14 @@ def headers(key, private, method, path, body=b'', timestamp=None, nonce=None):
 
 
 class ProofTests(unittest.TestCase):
+    def test_noncanonical_public_key_encodings_are_rejected(self):
+        _, public = identity()
+        alphabet='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+        # Change unused pad bits without changing the decoded public point.
+        alternate=public[:-2]+alphabet[alphabet.index(public[-2])|1]+'='
+        self.assertEqual(base64.b64decode(public),base64.b64decode(alternate))
+        with self.assertRaises(HTTPException):binding.public_key(alternate)
+
     def test_proof_covers_credential_method_path_body_timestamp_and_nonce(self):
         a, public = identity()
         key, method, path, body = 'fixture-key-' + 'a' * 40, 'POST', '/api/codex/v1/responses', b'{"input":"hi"}'

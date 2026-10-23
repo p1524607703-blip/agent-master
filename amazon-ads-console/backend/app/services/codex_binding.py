@@ -30,7 +30,7 @@ def canonical(key, method, target, timestamp, nonce, body):
 def public_key(value):
     try:
         raw = base64.b64decode(value, validate=True)
-        if len(raw) != 65 or raw[0] != 4:
+        if len(raw) != 65 or raw[0] != 4 or base64.b64encode(raw).decode() != value:
             raise ValueError()
         key = ec.EllipticCurvePublicKey.from_encoded_point(ec.SECP256R1(), raw)
         return key, hashlib.sha256(raw).hexdigest()
