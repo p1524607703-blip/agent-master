@@ -31,8 +31,8 @@ const openRow = ref<string | null>(null)
 const showAllColumns = ref(false)
 const isManager = computed(() => ['management', 'super_admin'].includes(session.user?.roleCode || ''))
 const availablePeriods = computed(() => [...new Set(runs.value.map(run => run.period).filter(Boolean))].sort().reverse())
-const ownGroup = computed(() => session.user?.operatorCode || '未绑定')
-const ownTotalLabel = computed(() => rowsComplete.value ? '我的分摊费用合计' : '已加载款式合计')
+const ownGroup = computed(() => session.user?.operatorCode?.slice(0,2) || '未绑定')
+const ownTotalLabel = computed(() => rowsComplete.value ? '本组分摊费用合计' : '本组已加载款式合计')
 const canCreate = computed(() => isManager.value && capabilities.value?.can_create_run === true)
 const enabled = computed(() => capabilities.value?.enabled === true)
 const isConfirmedReference = (run: AllocationRun) => run.purpose === 'OPERATIONS_CONFIRMED_REFERENCE' && run.status === 'REFERENCE' && run.calculation_status === 'NOT_RECALCULATED' && run.review_status === 'OPERATIONS_CONFIRMED'
@@ -237,12 +237,12 @@ onMounted(load)
 <template>
   <section class="page allocation-page">
     <header class="page-head">
-      <div><h1>广告费用分摊</h1><p>{{ isManager ? '每个款最终承担多少广告费、钱从哪来，一眼看清。' : '按月查看本人款式承担的广告费用；日常费用和 CPO 请到“我的 CPO 明细”。' }}</p></div>
+      <div><h1>广告费用分摊</h1><p>{{ isManager ? '每个款最终承担多少广告费、钱从哪来，一眼看清。' : '按月查看本运营组款式承担的广告费用，组内成员共享；日常费用和 CPO 请到“我的 CPO 明细”。' }}</p></div>
       <div class="actions"><router-link to="/data-changes" class="btn">{{ isManager ? '映射提交与审批' : '新品 / ASIN 提交' }}</router-link><button :disabled="loading || busy" @click="load">刷新</button><button v-if="canCreate" :disabled="!enabled || busy" @click="showCreate = !showCreate">新建试算</button></div>
     </header>
 
     <div class="notice">{{ announcement }}</div>
-    <p v-if="!isManager && !loading && availablePeriods.length" class="scope-note">当前账号 {{ ownGroup }} · 可查看月份：{{ availablePeriods.join('、') }}。只展示已提供的月度结果，其他月份尚无结果时不会显示为 0。</p>
+    <p v-if="!isManager && !loading && availablePeriods.length" class="scope-note">当前账号 {{ session.user?.operatorCode }} · {{ ownGroup }} 运营组共享数据 · 可查看月份：{{ availablePeriods.join('、') }}。只展示已提供的月度结果，其他月份尚无结果时不会显示为 0。</p>
     <p v-if="error" class="error" role="alert">{{ error }}</p>
     <p v-if="notice" class="success" role="status">{{ notice }}</p>
     <p v-if="loading" role="status">正在读取分摊模块…</p>
@@ -284,7 +284,7 @@ onMounted(load)
               <div class="kpi kpi-primary">
                 <span>{{ !isManager ? ownTotalLabel : kpi.mode === 'rows' ? '已加载款式合计' : '最终承担费用' }}</span>
                 <strong>{{ kpi.finalCost === null ? '待核实' : money(kpi.finalCost) }}<small v-if="kpi.finalCost !== null">USD</small></strong>
-                <p>{{ isManager ? '本版本所有款式分摊后的承担总额，是这张表的最终结论。' : `仅统计本人 ${ownGroup} 有权查看的款式，不含其他运营费用。` }}</p>
+                <p>{{ isManager ? '本版本所有款式分摊后的承担总额，是这张表的最终结论。' : `仅统计 ${ownGroup} 运营组有权查看的款式，不含其他运营组费用。` }}</p>
               </div>
               <div v-if="isManager" class="kpi">
                 <span>来源广告费用</span>
@@ -297,13 +297,13 @@ onMounted(load)
                 <p>来源费用 − 最终承担。等于 0 才说明钱没有多也没有少。</p>
               </div>
               <div class="kpi">
-                <span>{{ isManager ? '覆盖规模' : '我的款式' }}</span>
+                <span>{{ isManager ? '覆盖规模' : '本组款式' }}</span>
                 <strong class="scale"><template v-if="kpi.products !== null">{{ integer(kpi.products) }}<small>款</small></template><i v-if="kpi.products !== null && kpi.campaigns !== null">·</i><template v-if="kpi.campaigns !== null">{{ integer(kpi.campaigns) }}<small>活动</small></template><template v-if="kpi.products === null && kpi.campaigns === null">—</template></strong>
-                <p>{{ isManager ? '参与本期分摊的款式数，以及这些款式涉及的广告活动数。' : '当前所选月份、版本下，本账号可查看的款式数。' }}</p>
+                <p>{{ isManager ? '参与本期分摊的款式数，以及这些款式涉及的广告活动数。' : '当前所选月份、版本下，本运营组可查看的款式数。' }}</p>
               </div>
             </div>
 
-            <p v-if="!isManager" class="muted scope-note">{{ kpi.finalCost === null ? '当前版本仍有待核实金额，暂不显示确定的分摊总额。' : `以上为本人已加载 ${loadedCount} 款的可见合计${rowsComplete ? '' : '（尚未加载完）'}。` }}</p>
+            <p v-if="!isManager" class="muted scope-note">{{ kpi.finalCost === null ? '当前版本仍有待核实金额，暂不显示确定的分摊总额。' : `以上为本组已加载 ${loadedCount} 款的可见合计${rowsComplete ? '' : '（尚未加载完）'}。` }}</p>
             <p v-else-if="kpi.mode === 'rows'" class="muted scope-note">{{ kpi.finalCost === null ? `当前版本没有返回汇总，且金额尚不能确定（待核实）；以下是已加载 ${loadedCount} 款的件数明细。` : `当前版本没有返回汇总，以上为已加载 ${loadedCount} 款的可见合计${rowsComplete ? '' : '（尚未加载完）'}。` }}</p>
             <p v-if="currentIsReference" class="reference-note">运营确认历史参考：保留原文件与原确认口径，未按当前事实或新规则重算，不代表新增财务签核。</p>
             <p v-else-if="current.calculation_status === 'PARTIAL' || current.status === 'PARTIAL'" class="warning-note">本次试算存在待核实项：未知价格、映射或销量不会被估算补齐，相关金额保持为空。</p>
