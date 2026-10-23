@@ -225,6 +225,7 @@ class SamplingFailureTests(unittest.IsolatedAsyncioTestCase):
             def transaction(self,**kwargs):return Transaction()
             async def fetch(self,sql,*args):
                 if 'personnel_roster' in sql:return [dict(user_id=17),dict(user_id=18)]
+                if 'SELECT r.request_id' in sql:return []
                 return [dict(device_id='child',user_id=18,events=0,tokens=Decimal(0),unknown=0,last_activity_at=None)]
             async def close(self):pass
         with tempfile.TemporaryDirectory() as tmp, patch.object(settings,'codex_event_spool_dir',tmp):

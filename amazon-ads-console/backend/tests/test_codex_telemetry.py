@@ -241,7 +241,7 @@ class IntegrationTests(unittest.TestCase):
     def test_client_disconnect_records_unknown_before_cleanup(self):
         async def run():
             with self.fake_upstream():
-                _,_,_,stream=await service.proxy_response({'device_id':uuid.UUID(self.device['deviceId'])},b'{}')
+                _,_,_,stream=await service.proxy_response({'device_id':uuid.UUID(self.device['deviceId']),'user_id':1},b'{}')
                 await stream.__anext__()
                 await stream.aclose()
         asyncio.run(run())

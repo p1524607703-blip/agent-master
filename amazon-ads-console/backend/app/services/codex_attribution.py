@@ -57,9 +57,22 @@ def account_attribution(quota, user_ids):
         ids = set()
         manual_total = Decimal(0)
         weighted_total = Decimal(0)
+        provisional_total = Decimal(0)
+        batch = document.get('batchSummary') or {}
+        identity = batch.get('window') or []
+        batch_current = len(identity)==3 and same_period(dict(resetsAt=identity[0],windowDurationMins=identity[1],planType=identity[2]),w,quota.get('planType'))
+        batch_entries = []
+        if batch_current:
+            for row in batch.get('allocations',[]):
+                if row.get('userId') not in amounts or row.get('usedPercent',0)<=0:
+                    continue
+                batch_entries.append({**row,'confirmationId':f"batch-{row['userId']}-{row['deviceId']}-{row['status']}",
+                    'confirmedAt':batch['capturedAt'],'resetsAt':identity[0], 'windowDurationMins':identity[1],
+                    'planType':identity[2], 'partialMeasurement':row['status']=='provisional',
+                    'method':'provisional-token-weighted-batch' if row['status']=='provisional' else 'observed-token-weighted-batch'})
         partial_estimate = False
         device_amounts = {}
-        for entry, is_auto in [(entry,False) for entry in confirmations] + [(entry,True) for entry in automatic]:
+        for entry, is_auto in [(entry,False) for entry in confirmations] + [(entry,True) for entry in automatic+batch_entries]:
             if entry.get('superseded') or not same_period(entry,w,quota.get('planType')):
                 continue
             uid, percent, key = entry['userId'], entry['usedPercent'], entry['confirmationId']
@@ -71,11 +84,13 @@ def account_attribution(quota, user_ids):
             ids.add(key)
             amounts[uid] += Decimal(str(percent))
             method = entry.get('method') if is_auto else 'owner-confirmed'
-            if is_auto and method not in ('observed-exclusive-period', 'observed-exclusive-interval', 'observed-token-weighted-interval'):
+            if is_auto and method not in ('observed-exclusive-period', 'observed-exclusive-interval', 'observed-token-weighted-interval', 'provisional-token-weighted-batch','observed-token-weighted-batch'):
                 raise ValueError('invalid automatic evidence')
-            if method == 'observed-token-weighted-interval':
+            if method in ('observed-token-weighted-interval','provisional-token-weighted-batch','observed-token-weighted-batch'):
                 weighted_total += Decimal(str(percent))
                 partial_estimate = partial_estimate or entry.get('partialMeasurement', False)
+            if method=='provisional-token-weighted-batch':
+                provisional_total += Decimal(str(percent))
             if not is_auto:
                 manual_total += Decimal(str(percent))
             device_id = entry.get('deviceId')
@@ -94,6 +109,9 @@ def account_attribution(quota, user_ids):
                 'unattributedPercent': float(used-confirmed),
                 'ownerConfirmedPercent': float(manual_total), 'automaticPercent': float(confirmed-manual_total),
                 'concurrentEstimatedPercent': float(weighted_total), 'partialConcurrentEstimate': partial_estimate,
+                'provisionalPercent':float(provisional_total),
+                'batchMonitoring':{key:batch.get(key) for key in ('status','cutoverAt','capturedAt','observedEstimatePercent',
+                    'pendingBatchPercent','recalculationCount','observationSeconds','latestBatches')} if batch_current else None,
                 'automaticMonitor': document.get('monitor'),
                 'deviceShares': [{'userId': uid, 'deviceId': did, 'usedPercent': float(amount)} for (uid,did),amount in device_amounts.items()],
                 'members': [{'userId': uid, 'usedPercent': float(amount), 'evidence': evidence[uid]}

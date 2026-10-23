@@ -1,4 +1,6 @@
 import json
+import asyncio
+import sqlite3
 import uuid
 from urllib.parse import urlsplit
 from typing import Literal, Optional
@@ -239,6 +241,16 @@ async def responses(request: Request,device=Depends(require_device)):
 @router.get('/account-quota', dependencies=[Depends(require_management_session)])
 async def account_quota():
     return quota_snapshot()
+
+
+@router.get('/quota-batches/{batch_id}/revisions', dependencies=[Depends(require_management_session)])
+async def quota_batch_revisions(batch_id: str):
+    from app.services.codex_quota_batches import revisions
+    try:
+        value = await asyncio.to_thread(revisions,batch_id)
+        return JSONResponse(value,headers={'Cache-Control':'no-store'})
+    except (ValueError,OSError,sqlite3.Error):
+        raise HTTPException(404,'Batch history is unavailable')
 
 
 @router.get('/overview', dependencies=[Depends(require_management_session)])

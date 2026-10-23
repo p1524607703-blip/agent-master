@@ -11,7 +11,7 @@
 
 | 页面 | 摘要 | 状态 | 日期 |
 |---|---|---|---|
-| [[AI工程/Codex额度通知与采集]] | 额度变化通知优先，主机与子设备计量触发复核，60秒采集兜底；Token独立计量、占比明确为估算。 | 现行 | 2026-10-22 |
+| [[AI工程/Codex额度通知与采集]] | 通知优先与60秒兜底；暂估批次按原请求时间接纳迟到计量并自动回算，保留具体Token、历史确认和待归属。 | 现行 | 2026-10-22 |
 | [[AI工程/Amazon-Brand-Analytics-SQP与SCP-口径与现状]] | 亚马逊品牌分析（Brand Analytics）里最容易被混为一谈的两份报告：SQP（搜索查询绩效 / Search Query Performance）和 SCP（搜索目录绩效 / Search Catalog Performance）。一句话区分 —… | 现行 | 2026-09-21 |
 | [[AI工程/OpenClaw/IoT实现/C700配置参考]] | title: C700 配置参考 + 兼容表 | 待整理 | 2026-03-25 |
 | [[AI工程/OpenClaw/IoT实现/HA-API参考]] | title: Home Assistant REST API 参考 | 待整理 | 2026-03-25 |

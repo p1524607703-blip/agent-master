@@ -239,6 +239,8 @@ async def flush_events(paths=None):
                         uuid.UUID(record['device_id']),uuid.UUID(record['request_id']),record.get('response_id'),
                         *[usage.get(k) for k in ['input_tokens','output_tokens','total_tokens','cached_tokens','reasoning_tokens']],
                         record['completed'])
+                from app.services.codex_quota_batches import record_request
+                await asyncio.to_thread(record_request, record)
                 path.unlink(missing_ok=True)
                 try:
                     # Private LISTEN/NOTIFY hint after committed accounting. No
@@ -298,6 +300,13 @@ async def proxy_response(device, body, route='/responses',forward_headers=None, 
 async def _proxy_response(device, body, route='/responses',forward_headers=None, observer=None, response_headers=None):
     base,headers = upstream()
     request_id = str(uuid.uuid4())
+    started_at = datetime.now(timezone.utc).isoformat()
+    try:
+        requested_model = json.loads(body).get('model')
+    except (ValueError, AttributeError):
+        requested_model = None
+    timing = {'started_at':started_at, 'user_id':device['user_id'],
+              'model_slug':requested_model if isinstance(requested_model,str) and len(requested_model)<=256 else None}
     activity = start_activity(request_id, device['device_id'])
     # Preserve supported Codex session metadata without forwarding device auth,
     # cookies, arbitrary proxy headers or caller-selected upstream destinations.
@@ -313,7 +322,7 @@ async def _proxy_response(device, body, route='/responses',forward_headers=None,
         response = await client.send(client.build_request('POST',base+route,headers=headers,content=body),stream=True)
     except asyncio.CancelledError:
         try:
-            stage_event({'request_id':request_id,'device_id':str(device['device_id']),
+            stage_event({**timing,'request_id':request_id,'device_id':str(device['device_id']),
                 'response_id':None,'finished_at':datetime.now(timezone.utc).isoformat(),
                 'http_status':499,'completed':False,'usage':None})
         except Exception:
@@ -325,7 +334,7 @@ async def _proxy_response(device, body, route='/responses',forward_headers=None,
     except httpx.HTTPError:
         await client.aclose()
         try:
-            await save_event({'request_id':request_id,'device_id':str(device['device_id']),
+            await save_event({**timing,'request_id':request_id,'device_id':str(device['device_id']),
                 'response_id':None,'finished_at':datetime.now(timezone.utc).isoformat(),
                 'http_status':502,'completed':False,'usage':None})
         except Exception:
@@ -372,7 +381,7 @@ async def _proxy_response(device, body, route='/responses',forward_headers=None,
         finally:
             if is_sse and status in (200,499,502):
                 observer.finish()
-            record = {'request_id':request_id,'device_id':str(device['device_id']),
+            record = {**timing,'request_id':request_id,'device_id':str(device['device_id']),
                 'response_id':observer.response_id,'finished_at':datetime.now(timezone.utc).isoformat(),
                 'http_status':status,'completed':observer.completed,'usage':observer.usage}
             # Stage synchronously before any cancellation point, even on client disconnect.

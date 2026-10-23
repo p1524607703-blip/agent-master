@@ -219,6 +219,7 @@ async def activity_sample():
         raise ValueError('fresh official quota required')
     start = datetime.fromtimestamp(window['resetsAt']-window['windowDurationMins']*60, timezone.utc)
     sample = {'window':window, 'planType':quota.get('planType'), 'capturedAt':quota['capturedAt'],
+              'observedAt':datetime.now(timezone.utc).isoformat(), 'activeRequests':[], 'gatewayEvidence':[],
               'startedAt':start.isoformat(), 'healthy':True, 'sources':[], 'userIds':[]}
     if not host or host.get('totalTokens') is None or host.get('usageEvents') is None or not host['fresh'] or not matches(host, window, sample['planType']) or abs(stamp(host['capturedAt'])-stamp(quota['capturedAt'])) > 60:
         sample.update(healthy=False, reason='host-coverage-unavailable')
@@ -242,6 +243,26 @@ async def activity_sample():
                 max(r.finished_at) FILTER (WHERE NOT (r.http_status IN (400,401,403,404,405,413,422,429) AND r.response_id IS NULL)) last_activity_at FROM codex_ops.devices d
                 LEFT JOIN codex_ops.model_requests r ON r.device_id=d.device_id AND r.finished_at >= $1
                 GROUP BY d.device_id''', start)
+            # Recover legacy spool records and migration races from the committed
+            # ledger. Native gateway records retain richer start/model metadata in
+            # the private journal; these finish-only fallbacks never overwrite it.
+            evidence_rows = await conn.fetch('''SELECT r.request_id,r.response_id,d.device_id,d.user_id,
+                r.finished_at,r.http_status,r.input_tokens,r.output_tokens,r.total_tokens,r.cached_tokens,r.reasoning_tokens
+                FROM codex_ops.devices d CROSS JOIN LATERAL (
+                    SELECT * FROM codex_ops.model_requests WHERE device_id=d.device_id
+                    AND finished_at >= $1 ORDER BY finished_at DESC LIMIT 20001
+                ) r ORDER BY r.finished_at DESC LIMIT 20001''',
+                datetime.fromtimestamp(max(start.timestamp(),stamp(sample['observedAt'])-REPORTING_GUARD),timezone.utc))
+            if len(evidence_rows)>20000:
+                sample.update(healthy=False,reason='request-evidence-coverage-limit')
+            for row in evidence_rows[:20000]:
+                sample['gatewayEvidence'].append({'eventKey':'gateway:'+str(row['request_id']),
+                    'responseId':row['response_id'],'source':str(row['device_id']),'userId':row['user_id'],
+                    'startedAt':row['finished_at'].isoformat(),'endedAt':row['finished_at'].isoformat(),
+                    'timingComplete':False,'eligible':not(row['http_status'] in (400,401,403,404,405,413,422,429) and not row['response_id']),
+                    **{destination:int(row[source]) if row[source] is not None else None for destination,source in
+                       [('totalTokens','total_tokens'),('inputTokens','input_tokens'),('outputTokens','output_tokens'),
+                        ('cachedTokens','cached_tokens'),('reasoningTokens','reasoning_tokens')]}})
         for row in rows:
             sample['sources'].append({'deviceId':str(row['device_id']), 'userId':row['user_id'],
                                       'events':int(row['events']), 'tokens':int(row['tokens']), 'unknown':int(row['unknown']),
@@ -260,6 +281,9 @@ async def activity_sample():
             source = by_id[record['deviceId']]
             source['inFlight'] = not bool(finished)
             source['recentActivity'] = True
+            if not finished:
+                sample['activeRequests'].append({'requestId':path.stem,'deviceId':record['deviceId'],
+                    'startedAt':record['startedAt']})
         except (OSError,ValueError,KeyError,TypeError):
             sample.update(healthy=False, reason='unidentified-in-flight-request')
     return sample
@@ -277,7 +301,21 @@ async def reconcile():
         drain_audit(path, document)
         try:
             sample = await asyncio.wait_for(activity_sample(), 20)
-            document = advance(document, sample)
+            from app.services import codex_quota_batches as batches
+            native = batches.native_evidence(sample,host_usage())
+            def update_batches():
+                with batches.database() as conn:
+                    return batches.advance(conn,document,sample,native)
+            result = await asyncio.to_thread(update_batches)
+            document['batchSummary'] = result
+            document['autoState'] = {'allocationVersion':4,'window':result['window'],
+                'capturedAt':sample['capturedAt'],'usedPercent':sample['window']['usedPercent']}
+            document['monitor'] = {'status':result['status'],'capturedAt':sample['observedAt'],
+                'quotaCapturedAt':sample['capturedAt'],'reason':'provisional-batches-updated',
+                'scope':'monitored-sources-only','allocationVersion':4,
+                'pendingSettlementPercent':result['pendingBatchPercent'],
+                'observationSeconds':batches.OBSERVATION_SECONDS,
+                'recalculationCount':result['recalculationCount']}
         except Exception:
             if document.get('autoState'):
                 document['autoState']['blocked'] = True

@@ -122,6 +122,13 @@ def publish(config, value):
             config['sshHost'],'python3 -c '+shlex.quote(REMOTE_WRITER)],
             input=json.dumps({'destination':host_config['remoteSnapshot'],'snapshot':host}),text=True,
             stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,timeout=20,check=True)
+        evidence_path = Path(host_config['localSnapshot']).with_suffix('.evidence.json')
+        if evidence_path.exists() and evidence_path.stat().st_size<=8*1024*1024 and not evidence_path.stat().st_mode & 0o077:
+            subprocess.run(['ssh','-o','BatchMode=yes','-o','StrictHostKeyChecking=yes','-o','ConnectTimeout=8',
+                config['sshHost'],'python3 -c '+shlex.quote(REMOTE_WRITER)],
+                input=json.dumps({'destination':str(Path(host_config['remoteSnapshot']).with_suffix('.evidence.json')),
+                                  'snapshot':json.loads(evidence_path.read_text())}),text=True,
+                stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,timeout=20,check=True)
     if config.get('reconcileAttribution') is True:
         # Fixed server entrypoint, using only code from the active published release.
         command = ('CPO_ENV_FILE=/opt/agent/cpo/shared/backend.env '

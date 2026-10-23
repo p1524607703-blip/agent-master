@@ -7,6 +7,7 @@ import { confirmedShare, attributionMethod, allocationLabel, type Attribution } 
 import { activityState, activityLabels, type ActivityDevice } from '../utils/codexActivity'
 import CodexAccessPanel from '../components/CodexAccessPanel.vue'
 import CodexControlPanel from '../components/CodexControlPanel.vue'
+import CodexQuotaBatches from '../components/CodexQuotaBatches.vue'
 
 type Device = ActivityDevice & { sourceKind?:string; currentWindowTokens?:number|string|null; currentWindowUnknownRequests?:number; deviceId:string; deviceName:string; platform:string; online:boolean; agentOnline:boolean; codexRunning:boolean; revoked:boolean; lastHeartbeatAt:string|null; lastRequestAt:string|null; totalTokens:number|string|null; todayTokens:number|string|null; inputTokens:number|null; outputTokens:number|null; requests:number; unknownRequests:number }
 type Member = { userId:number; displayName:string; username:string; groupCode:string; groupName:string; personCode:string|null; roleCode:string; devices:Device[] }
@@ -37,6 +38,7 @@ const filtered = computed(() => members.value.filter(m => (group.value === 'all'
 watch(filtered, items => { if (!items.some(m=>m.userId===selectedId.value)) selectedId.value = items[0]?.userId ?? null })
 const selected = computed(() => members.value.find(m=>m.userId === selectedId.value))
 const devices = computed(() => members.value.flatMap(m=>m.devices))
+const deviceNames = computed(()=>Object.fromEntries(members.value.flatMap(m=>m.devices.map(d=>[d.deviceId,`${m.displayName} · ${d.deviceName}`]))))
 const activeCount = computed(() => devices.value.filter(isActive).length)
 const selectedActive = computed(() => (selected.value?.devices || []).filter(isActive).length)
 const sum = sumTokens
@@ -78,7 +80,7 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
       <div>
         <span class="eyebrow">CODEX · 团队设备</span>
         <h1>分发人员 &amp; 设备</h1>
-        <p>账户总额度100% · 人员消耗归属 · rc.8 · 通知优先更新</p>
+        <p>账户总额度100% · 人员消耗归属 · rc.9 · 暂估批次自动回算</p>
 
       </div>
       <button class="refresh" :disabled="loading" @click="refresh">{{ loading ? '刷新中…' : '刷新状态' }}</button>
@@ -113,13 +115,14 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
     <section class="summary-grid account-allocation" aria-label="本期账户额度归属">
       <div class="summary-card"><span>账户已用 · 总额度为100%</span><strong>{{ percentLabel(accountPercent('usedPercent')) }}</strong></div>
       <div class="summary-card"><span>账户剩余</span><strong>{{ percentLabel(accountPercent('remainingPercent')) }}</strong></div>
-      <div class="summary-card"><span>已归属人员消耗（含估算）</span><strong>{{ percentLabel(accountPercent('confirmedPercent')) }}</strong></div>
+      <div class="summary-card"><span>已归属人员消耗（含暂估）</span><strong>{{ percentLabel(accountPercent('confirmedPercent')) }}</strong></div>
       <div class="summary-card"><span>待归属消耗</span><strong>{{ percentLabel(accountPercent('unattributedPercent')) }}</strong></div>
     </section>
+    <CodexQuotaBatches :value="data?.accountAttribution" :names="deviceNames" :fresh="accountFresh && data?.accountAttribution?.batchMonitoring?.status==='active' && now-Date.parse(data?.accountAttribution?.batchMonitoring?.capturedAt || '')<=300000" />
     <p v-if="data?.accountAttribution?.status==='reconciliation-required'" class="error">官方额度回调后与已确认记录不一致，归属待复核；暂不展示人员比例。</p>
     <p v-else-if="!accountFresh" class="notes">账户额度归属暂不可确认，请等待有效采集或核对归属配置。</p>
     <p v-if="data?.accountAttribution?.startedAt" class="usage-disclaimer">本期：{{ time(data.accountAttribution.startedAt) }} 至 {{ time(new Date((data.accountAttribution.resetsAt || 0)*1000).toISOString()) }}。0%表示暂无已归属额度消耗，不表示从未使用过模型。</p>
-    <p class="usage-disclaimer">账户总额度为100%；人员已归属消耗＋待归属＝账户已用，另加账户剩余＝100%。变化通知优先触发复核，60秒定时采集兜底；主设备用量事件和子设备请求计量也触发复核，页面每15秒更新。以上为本系统采集频率，官方数据仍可能延迟或取整。单一可见来源的额度增量自动推定归属，保留本人确认记录；并发按本统计区间各设备已计量总Token比例自动估算，刚开始执行尚无计量的设备自动等待回传；采集中断、身份不明或完全没有计量的部分单列。自动推定只覆盖已监测来源，不是官方逐设备账单。具体Token独立计量，不拿以前区间的Token重分历史消耗，也不将Token换算为账单金额。<span v-if="unknownRequests"> {{ unknownRequests }} 条请求或日志计量待核对。</span><span v-if="data?.accountQuota?.capturedAt"> 额度采集：{{ time(data.accountQuota.capturedAt) }}</span></p>
+    <p class="usage-disclaimer">账户总额度为100%；人员已归属消耗（含暂估）＋待归属＝账户已用，另加账户剩余＝100%。变化通知优先，60秒采集兜底，页面每15秒更新。官方额度可能迟报或取整：新增批次先暂估，迟到计量按原请求时间自动回算；观察组只采用其时间范围内的独立计量，不使用升级前累计Token重分本人确认或旧版结算。未知来源或采集缺口单列待归属。具体Token独立计量，额度比例是估算，不是官方逐设备账单，也不换算为费用。<span v-if="unknownRequests"> {{ unknownRequests }} 条请求或日志计量待核对。</span><span v-if="data?.accountQuota?.capturedAt"> 额度采集：{{ time(data.accountQuota.capturedAt) }}</span></p>
 
     <p v-if="data?.accountAttribution?.automaticMonitor" class="usage-disclaimer">自动归属：{{ data.accountAttribution.automaticMonitor.status==='active' && now-Date.parse(data.accountAttribution.automaticMonitor.capturedAt)<=300000 ? '运行中' : '已暂停或待核对' }} · 最近核对 {{ time(data.accountAttribution.automaticMonitor.capturedAt) }} · 本人确认 {{ percentLabel(data.accountAttribution.ownerConfirmedPercent ?? null) }} · 自动归属 {{ allocationLabel(data.accountAttribution.automaticPercent ?? null) }}（其中并发估算 {{ allocationLabel(data.accountAttribution.concurrentEstimatedPercent ?? null) }}）。<span v-if="data.accountAttribution.automaticMonitor.pendingSettlementPercent"> 等待计量后自动结算：{{ allocationLabel(data.accountAttribution.automaticMonitor.pendingSettlementPercent) }}。</span><span v-if="data.accountAttribution.partialConcurrentEstimate"> 部分估算包含尚未完整回传的计量，置信度较低；不会据此声称精确消耗。</span></p>
 
@@ -189,7 +192,7 @@ onUnmounted(() => { stopped = true; clearInterval(timer); clearInterval(clock); 
       </section>
     </div>
 
-    <p class="updated">额度归属 rc.8 · 通知优先更新 · 每 15 秒刷新 · 时间以北京时间显示<span v-if="data"> · 最近更新 {{ time(data.serverTime) }}</span></p>
+    <p class="updated">额度归属 rc.9 · 暂估批次自动回算 · 每 15 秒刷新 · 时间以北京时间显示<span v-if="data"> · 最近更新 {{ time(data.serverTime) }}</span></p>
 
   </main>
 </template>

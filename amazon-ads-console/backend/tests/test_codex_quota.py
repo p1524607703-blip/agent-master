@@ -92,9 +92,11 @@ class QuotaEndpointTests(unittest.IsolatedAsyncioTestCase):
         async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app),base_url='http://fixture.test') as client:
             response=await client.get('/api/codex/account-quota')
             self.assertEqual(response.status_code,401)
+            self.assertEqual((await client.get('/api/codex/quota-batches/'+'a'*24+'/revisions')).status_code,401)
             with patch('app.api.auth.resolve_session',new=AsyncMock(return_value={'userId':1,'username':'fixture','roleCode':'operator','operatorCode':'ZJ1'})):
                 response=await client.get('/api/codex/account-quota',headers={'Authorization':'Bearer fixture-session'})
                 self.assertEqual(response.status_code,403)
+                self.assertEqual((await client.get('/api/codex/quota-batches/'+'a'*24+'/revisions',headers={'Authorization':'Bearer fixture-session'})).status_code,403)
 
 
 if __name__=='__main__':
