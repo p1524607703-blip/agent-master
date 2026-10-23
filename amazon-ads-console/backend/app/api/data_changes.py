@@ -11,7 +11,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.api.auth import require_session
-from app.services.data_changes import COLUMNS, ChangeError, DataChangeService, SQLiteDataChangeRepository
+from app.services.data_changes import ADD_TEMPLATE_COLUMNS, COLUMNS, ChangeError, DataChangeService, SQLiteDataChangeRepository
 from app.services.allocation import enabled as allocation_enabled
 from app.core.config import settings
 
@@ -80,12 +80,13 @@ def build_router(service_provider=default_service, server_tenant=None, enabled=N
 
     @router.get('/templates')
     def template(template: str = Query('mapping'), session=Depends(require_session), svc=Depends(service)):
-        if template != 'mapping':
-            raise HTTPException(422, detail={'code': 'TEMPLATE_NOT_SUPPORTED', 'message': 'Only mapping-v1 CSV is implemented.'})
+        if template not in {'mapping', 'mapping-add'}:
+            raise HTTPException(422, detail={'code': 'TEMPLATE_NOT_SUPPORTED', 'message': 'Supported templates: mapping, mapping-add.'})
         output = io.StringIO(newline='')
-        csv.writer(output).writerow(COLUMNS)
+        csv.writer(output).writerow(ADD_TEMPLATE_COLUMNS if template == 'mapping-add' else COLUMNS)
+        version = 'mapping-add-v1' if template == 'mapping-add' else 'mapping-v1'
         return Response('\ufeff' + output.getvalue(), media_type='text/csv; charset=utf-8',
-                        headers={'Content-Disposition': 'attachment; filename="mapping-v1.csv"', 'X-Template-Version': 'mapping-v1'})
+                        headers={'Content-Disposition': f'attachment; filename="{version}.csv"', 'X-Template-Version': version})
 
     @router.post('/uploads', status_code=202)
     def upload(payload: UploadRequest, response: Response, session=Depends(require_session), svc=Depends(service),

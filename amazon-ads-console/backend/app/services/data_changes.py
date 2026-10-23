@@ -19,6 +19,8 @@ COLUMNS = ['change_type', 'account_id', 'marketplace_id', 'operator_code', 'prod
            'parent_asin', 'no_parent', 'child_asin', 'sku', 'effective_from', 'effective_to',
            'reason', 'record_id', 'expected_version', 'modified_fields', 'clear_fields',
            'product_category', 'age_segment', 'business_group']
+# Batch context supplies account, marketplace, operator, date and reason.
+ADD_TEMPLATE_COLUMNS = ['change_type', 'product_code', 'parent_asin', 'no_parent', 'child_asin', 'sku']
 EDITABLE = {'operator_code', 'product_code', 'parent_asin', 'no_parent', 'child_asin',
             'sku', 'effective_from', 'effective_to', 'product_category', 'age_segment', 'business_group'}
 NULLABLE = {'parent_asin', 'sku', 'effective_to', 'product_category', 'age_segment', 'business_group'}
@@ -251,7 +253,7 @@ class DataChangeService:
                 if len(raw_rows) >= 5000:
                     raise ChangeError(413, 'ROW_LIMIT_EXCEEDED', 'Maximum 5000 rows per upload.')
                 if None in row or any(value is None for value in row.values()):
-                    raise ChangeError(422, 'CSV_ROW_INVALID', 'CSV row width differs from the header.')
+                    raise ChangeError(422, 'CSV_ROW_INVALID', f'CSV row {reader.line_num}: column count differs from the header.')
                 raw_rows.append(row)
         except csv.Error as exc:
             raise ChangeError(422, 'CSV_INVALID', 'Malformed CSV.') from exc

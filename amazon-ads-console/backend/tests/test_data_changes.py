@@ -203,3 +203,56 @@ def test_upload_size_transport_size_and_content_hash(service):
     response = TestClient(app).post('/api/data-changes/uploads', content=b'x' * (10 * 1024 * 1024 + 1), headers={'Content-Type': 'application/json'})
     assert response.status_code == 413
     assert response.json()['detail']['code'] == 'REQUEST_TOO_LARGE'
+
+
+@pytest.mark.parametrize('template_name', ['mapping', 'mapping-add'])
+def test_downloaded_template_round_trip_context_and_row_errors(service, template_name):
+    """Download real headers; fill demonstration rows and validate via the API."""
+    app = FastAPI()
+    app.include_router(build_router(lambda: service, enabled=True), prefix='/api')
+    app.dependency_overrides[require_session] = lambda: ('token', OP)
+    with TestClient(app) as client:
+        response = client.get('/api/data-changes/templates', params={'template': template_name})
+        assert response.status_code == 200
+        assert response.content.startswith(b'\xef\xbb\xbf')
+        header = next(csv.reader(io.StringIO(response.content.decode('utf-8-sig'))))
+        assert header == (COLUMNS if template_name == 'mapping' else
+                          ['change_type', 'product_code', 'parent_asin', 'no_parent', 'child_asin', 'sku'])
+        assert len(list(csv.reader(io.StringIO(response.text)))) == 1  # no accidental example record
+        output = io.StringIO()
+        writer = csv.DictWriter(output, fieldnames=header)
+        writer.writeheader()
+        writer.writerows([
+            {'change_type': 'ADD', 'product_code': 'DEMO-01', 'parent_asin': 'B000000001', 'child_asin': 'B000000002'},
+            {'change_type': 'ADD', 'product_code': 'DEMO-02', 'no_parent': 'true', 'child_asin': 'B000000003'},
+        ])
+        context = {'account_id': 'DEMO-ACCOUNT', 'marketplace_id': 'DEMO-MARKET',
+                   'operator_code': OP['operatorCode'], 'effective_from': '2026-10-23', 'reason': 'demonstration only'}
+        payload = {'file_name': 'demo.csv', 'csv_text': '\ufeff' + output.getvalue(), 'context': context}
+        result = client.post('/api/data-changes/uploads', json=payload, headers={'Idempotency-Key': template_name})
+        assert result.status_code == 202
+        assert result.json()['status'] == 'READY'
+        rows = client.get('/api/data-changes/' + result.json()['id'] + '/rows').json()['items']
+        assert [row['line'] for row in rows] == [2, 3]
+        assert all(row['new_values']['account_id'] == 'DEMO-ACCOUNT' and not row['errors'] for row in rows)
+        # The minimal template cannot bypass operator scope or parent requirements.
+        payload['context']['operator_code'] = 'OTHER'
+        payload['csv_text'] = payload['csv_text'].replace('B000000001', '')
+        invalid = client.post('/api/data-changes/uploads', json=payload, headers={'Idempotency-Key': template_name + '-bad'}).json()
+        assert invalid['status'] == 'VALIDATION_FAILED'
+        errors = client.get('/api/data-changes/' + invalid['id'] + '/rows').json()['items'][0]
+        assert errors['line'] == 2
+        assert 'PARENT_OR_EXPLICIT_NO_PARENT_REQUIRED' in errors['errors']
+        assert 'TARGET_OUTSIDE_OWN_SCOPE' in errors['errors']
+
+
+@pytest.mark.parametrize('operation', ['MODIFY', 'DISABLE'])
+def test_full_template_existing_record_requirements(service, operation):
+    batch = upload(service, change_type=operation)
+    issues = service.rows('company', OP, batch['id'])['items'][0]['errors']
+    assert 'RECORD_VERSION_REQUIRED' in issues
+    if operation == 'MODIFY':
+        assert 'MODIFIED_FIELDS_REQUIRED' in issues
+    unresolved = upload(service, key='unresolved', change_type=operation,
+                        record_id='DEMO-RECORD', expected_version='1', modified_fields='product_code')
+    assert 'AUTHORITATIVE_SOURCE_UNAVAILABLE' in service.rows('company', OP, unresolved['id'])['items'][0]['errors']

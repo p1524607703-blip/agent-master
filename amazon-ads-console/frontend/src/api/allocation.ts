@@ -93,7 +93,7 @@ export const changesApi = {
   list: (cursor?: string | null) => moduleGet<CursorPage<ChangeBatch>>('/data-changes' + pageQuery(cursor)),
   batch: (id: string) => moduleGet<ChangeBatch>(`/data-changes/${encodeURIComponent(id)}`),
   rows: (id: string, cursor?: string | null) => moduleGet<CursorPage<ChangeRow>>(`/data-changes/${encodeURIComponent(id)}/rows` + pageQuery(cursor)),
-  template: () => authenticatedDownload('/data-changes/templates?template=mapping', '运营映射变更模板.csv'),
+  template: (kind: 'mapping' | 'mapping-add' = 'mapping') => authenticatedDownload('/data-changes/templates?template=' + kind, kind === 'mapping-add' ? '新增ASIN模板.csv' : '运营映射变更模板.csv'),
   upload: (fileName: string, csvText: string, context: JsonObject) => modulePost<ChangeBatch>('/data-changes/uploads', { file_name: fileName, csv_text: csvText, context }),
   submit: (batch: ChangeBatch) => modulePost<ChangeBatch>(`/data-changes/${encodeURIComponent(batch.id)}/submit`, {}, batch.etag),
   withdraw: (batch: ChangeBatch) => modulePost<ChangeBatch>(`/data-changes/${encodeURIComponent(batch.id)}/withdraw`, {}, batch.etag),
