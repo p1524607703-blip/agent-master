@@ -1,0 +1,23 @@
+[package]
+name = "cpo-codex-source-worker"
+version = "0.1.0"
+edition = "2024"
+license = "AGPL-3.0-only"
+
+[workspace]
+
+[dependencies]
+anyhow = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["rt","time"] }
+codex-plus-core = { path = "../vendor/crates/codex-plus-core" }
+codex-plus-launcher = { path = "../vendor/apps/codex-plus-launcher" }
+
+[profile.cpo]
+inherits = "release"
+opt-level = 1
+lto = false
+debug = 0
+incremental = false
+strip = true

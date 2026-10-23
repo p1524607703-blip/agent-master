@@ -6,6 +6,7 @@ import select
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 import uuid
 from unittest.mock import patch
@@ -57,6 +58,29 @@ class AdmissionTests(unittest.IsolatedAsyncioTestCase):
         leases=await asyncio.gather(*(control.acquire(A) for _ in range(10)))
         self.assertEqual(control.snapshot()[1][A]['activeRequests'],10)
         for lease in leases:lease.close()
+
+    async def test_expiring_source_maintenance_queues_new_work_without_changing_limits(self):
+        self.update(max_concurrent=None)
+        before=control.snapshot()[0]
+        running=await control.acquire(A)
+        path=Path(self.temp.name)/'control/maintenance.json'
+        path.write_text(json.dumps({'expiresAt':time.time()+60}));path.chmod(0o600)
+        task=asyncio.create_task(control.acquire(B));await self.queued(B)
+        self.assertFalse(task.done())
+        self.assertEqual(control.snapshot()[1][A]['activeRequests'],1)
+        self.assertIn('sourceMaintenanceUntil',control.snapshot()[0])
+        path.write_text(json.dumps({'expiresAt':time.time()-1}))
+        second=await asyncio.wait_for(task,1)
+        self.assertEqual(control.snapshot()[0],before)
+        running.close();second.close()
+
+    async def test_invalid_maintenance_cannot_admit_work_or_leave_a_slot(self):
+        path=Path(self.temp.name)/'control/maintenance.json'
+        control.snapshot();path.write_text('{broken');path.chmod(0o600)
+        with self.assertRaises(HTTPException) as raised:await control.acquire(A)
+        self.assertEqual(raised.exception.status_code,503)
+        self.assertEqual(list(path.parent.joinpath('leases').glob('*.json')),[])
+        path.unlink();lease=await control.acquire(A);lease.close()
 
     async def test_device_limit_does_not_block_other_devices_and_pause_cancels_queue(self):
         self.update(max_concurrent=None)

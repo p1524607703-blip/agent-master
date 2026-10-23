@@ -203,7 +203,7 @@ class Handler(BaseHTTPRequestHandler):
         try:
             connection = http.client.HTTPConnection(
                 self.server.settings['upstreamHost'], self.server.settings['upstreamPort'],
-                timeout=self.server.settings.get('upstreamIdleTimeoutSeconds',600))
+                timeout=self.server.settings.get('upstreamIdleTimeoutSeconds',660))
             headers = {'Content-Type': 'application/json', 'Accept-Encoding': 'identity', 'X-Request-ID':request_id}
             for name in FORWARD_HEADERS:
                 if self.headers.get(name):
@@ -279,7 +279,7 @@ def main():
     settings = json.loads(Path(args.config).read_text())
     for name, default, maximum in [('maxConcurrent', 6, 32), ('maxQueued', 24, 128),
                                     ('maxConnections', 32, 192), ('queueWaitSeconds', 120, 240),
-                                    ('upstreamIdleTimeoutSeconds',600,3600)]:
+                                    ('upstreamIdleTimeoutSeconds',660,3600)]:
         value = settings.get(name, default)
         if name == 'maxConnections' and value is None:
             continue

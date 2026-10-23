@@ -160,6 +160,7 @@ async def control_state():
     rows = await control_devices()
     policy, counts = codex_control.snapshot()
     return {'revision':policy['revision'],'globalMaxConcurrent':policy['globalMaxConcurrent'],
+            'sourceMaintenanceUntil':policy.get('sourceMaintenanceUntil'),
             'updatedAt':policy['updatedAt'],'queueLimit':codex_control.QUEUE_LIMIT,'queueWaitSeconds':codex_control.QUEUE_SECONDS,
             'activeRequests':sum(r['activeRequests'] for r in counts.values()),
             'queuedRequests':sum(r['queuedRequests'] for r in counts.values()),

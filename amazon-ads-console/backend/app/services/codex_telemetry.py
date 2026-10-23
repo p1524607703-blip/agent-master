@@ -372,7 +372,7 @@ async def _proxy_response(device, body, route='/responses',forward_headers=None,
     # Generated locally: never forward an untrusted caller correlation header.
     headers['X-Request-ID'] = request_id
     client = httpx.AsyncClient(trust_env=False,follow_redirects=False,
-        timeout=httpx.Timeout(610,connect=10,pool=10))
+        timeout=httpx.Timeout(670,connect=10,pool=10))
     try:
         for attempt in range(2):
             try:

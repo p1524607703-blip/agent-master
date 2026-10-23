@@ -3,7 +3,7 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { getJsonStrict, mutateJsonStrict } from '../api/client'
 
 type Device = {deviceId:string;deviceName:string;displayName:string;platform:string;revoked:boolean;memberActive:boolean;enabled:boolean;maxConcurrent:number|null;activeRequests:number;queuedRequests:number}
-type Control = {revision:number;globalMaxConcurrent:number|null;activeRequests:number;queuedRequests:number;queueLimit:number;queueWaitSeconds:number;updatedAt:string|null;devices:Device[]}
+type Control = {revision:number;globalMaxConcurrent:number|null;activeRequests:number;queuedRequests:number;queueLimit:number;queueWaitSeconds:number;updatedAt:string|null;sourceMaintenanceUntil?:number|null;devices:Device[]}
 const props=defineProps<{refreshKey:number}>()
 const emit=defineEmits<{changed:[]}>()
 const state=ref<Control|null>(null)
@@ -82,6 +82,7 @@ onUnmounted(()=>{stopped=true})
       <div class="running"><span>当前上限 <b>{{state?limitLabel(state.globalMaxConcurrent):'—'}}</b></span><span>正在执行 <b>{{unavailable?'—':state?.activeRequests??'—'}}</b></span><span>排队 <b>{{unavailable?'—':state?.queuedRequests??'—'}}</b></span></div>
     </div>
     <p class="hint">“无限”表示不设置此层并发上限，仍受上游容量约束。单台上限与总上限同时生效；达到上限后最多排队 {{state?.queueWaitSeconds??120}} 秒。</p>
+    <p v-if="state?.sourceMaintenanceUntil && state.sourceMaintenanceUntil*1000>Date.now()" class="notice" role="status">模型源正在更新，新请求暂时排队，已有任务继续完成。</p>
     <div class="bulk-toolbar"><div class="bulk-actions"><button :disabled="blocked || !devices.some(d=>!d.revoked)" @click="bulk('all',true)">全部启用</button><button :disabled="blocked || !devices.some(d=>!d.revoked)" @click="bulk('all',false)">全部停用</button><span class="separator"></span><span>已选 {{selected.length}} 台</span><button :disabled="blocked || !selected.length" @click="bulk('selected',true)">批量启用</button><button :disabled="blocked || !selected.length" @click="bulk('selected',false)">批量停用</button></div><input v-model="search" aria-label="筛选控制设备" placeholder="搜索设备或人员" /></div>
     <p v-if="notice" class="notice" role="status">{{notice}}</p><p v-if="error && !editing" class="error" role="alert">{{error}}</p>
     <div class="control-table"><table><thead><tr><th><input type="checkbox" aria-label="选择全部可见设备" :checked="allSelected" :indeterminate="partialSelected" :disabled="blocked || !selectable.length" @change="selectAll(($event.target as HTMLInputElement).checked)" /></th><th>接入名称 / 人员</th><th>启用状态</th><th>单台并发上限</th><th>正在执行</th><th>排队</th></tr></thead><tbody>

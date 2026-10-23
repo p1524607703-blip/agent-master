@@ -3,6 +3,7 @@ import asyncio
 from contextlib import contextmanager
 import fcntl
 import json
+import math
 import os
 from pathlib import Path
 import time
@@ -115,11 +116,31 @@ def snapshot():
     with locked() as root:
         policy = read_policy(root)
         leases = live_leases(root)
+        maintenance = source_maintenance_until(root)
+        if maintenance:
+            policy = dict(policy,sourceMaintenanceUntil=maintenance)
     counts = {}
     for lease in leases:
         count = counts.setdefault(lease['deviceId'], {'activeRequests': 0, 'queuedRequests': 0})
         count['activeRequests' if lease['state'] == 'active' else 'queuedRequests'] += 1
     return policy, counts
+
+
+def source_maintenance_until(root):
+    """A private, expiring maintenance gate queues new work without interrupting streams."""
+    path = root/'maintenance.json'
+    if not path.exists():
+        return None
+    try:
+        if path.stat().st_size>1024 or path.stat().st_mode & 0o077:
+            raise ValueError()
+        value=json.loads(path.read_text())['expiresAt']
+        now=time.time()
+        if type(value) not in (int,float) or not math.isfinite(value) or value>now+120:
+            raise ValueError()
+        return value if value>now else None
+    except (OSError,ValueError,KeyError,TypeError,OverflowError):
+        raise HTTPException(503,{'code':'maintenance_status_unavailable','message':'Model source maintenance status is unavailable'}) from None
 
 
 class Lease:
@@ -167,7 +188,7 @@ async def acquire(device_id):
                 active = [r for r in leases if r['state'] == 'active']
                 queued = sorted((r for r in leases if r['state'] == 'queued'), key=lambda r: (r['ticket'], r['id']))
                 total_limit = policy['globalMaxConcurrent']
-                if total_limit is None or len(active) < total_limit:
+                if not source_maintenance_until(root) and (total_limit is None or len(active) < total_limit):
                     # Skip a waiting device whose own slots are full; other devices can still run.
                     for waiter in queued:
                         item = device_policy(policy, waiter['deviceId'])
