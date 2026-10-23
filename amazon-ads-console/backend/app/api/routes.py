@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Query, Header, Request, HTTPException
 from fastapi.responses import JSONResponse
 # 业务读全部走「一份报告一张表」的新事实层（core.report_*_daily）
 from app.services.report_data import reports
-from app.services.operator_cpo import operator_cpo_summary, operator_cpo_detail, operator_period_options, my_cpo_summary, _data_revision, operator_group_of
+from app.services.operator_cpo import operator_cpo_summary, operator_cpo_detail, operator_period_options, my_cpo_summary, _data_revision, operator_group_of, canonical_operator_name
 # 运营页权限在读取缓存之前验证角色与运营组绑定
 from app.api.auth import require_session, require_management_session, require_super_admin_session, require_operator_access, require_own_operator_session
 # 产品主数据：读取V2正式映射视图，只读直显，无控制台确认写入路径
@@ -71,6 +71,9 @@ def operator_view(operator: str, date: Optional[str] = None, period: str = Query
                   session: Tuple[str, Dict[str, Any]] = Depends(require_operator_access)):
     date = validate_cpo_report_date(date, period)
     period = period if period in ('daily','weekly','monthly') else 'daily'
+    # Authorization has already checked the path. Equivalent group aliases must
+    # share one report snapshot rather than allocating caller-selected keys.
+    operator = canonical_operator_name(operator)
     data = cache.get_or_set(f'operator:detail:{operator}:{sb_attribution_mode}:{period}:{date or "latest"}', lambda: operator_cpo_detail(operator,date,period,sb_attribution_mode=sb_attribution_mode), 60)
     if session[1].get('roleCode') != 'operator':
         # Management uses the aggregate disclosure panel, never an operator detail panel.

@@ -113,6 +113,27 @@ def test_export_is_frozen_authorized_and_formula_safe(client):
     assert client.get("/api/ad-allocation/v1/exports/" + eid + "/download").status_code == 404
 
 
+def test_shared_group_visibility_and_old_exports_reauthorize_current_scope(client):
+    rid = create(client).json()['run_id']
+    path = '/api/ad-allocation/v1/runs/' + rid
+    client.actor.update(userId='operator', roleCode='operator', operatorCode='AJ1')
+    expected = client.get(path + '/products').json()['items']
+    export = client.post(path + '/exports', json={'format': 'csv', 'report': 'products'},
+                         headers={'Idempotency-Key': 'own-export'}).json()
+    download = '/api/ad-allocation/v1/exports/' + export['id'] + '/download'
+    for code in ('AJ2', 'AJ0'):
+        client.actor['operatorCode'] = code
+        assert client.get(path + '/products').json()['items'] == expected
+        assert client.get(download).status_code == 200
+        assert client.get(path + '/groups').status_code == 403
+    client.actor['operatorCode'] = 'ZJ1'
+    assert client.get(download).status_code == 403
+    assert [row['group'] for row in client.get(path + '/products').json()['items']] == ['ZJ1']
+    assert client.get(path + '/workbook.xlsx').status_code == 200
+    client.actor['operatorCode'] = 'XM1'
+    assert client.get(download).status_code == 404
+
+
 def test_cursor_is_bound_to_result_and_actor(client):
     rid = create(client).json()["run_id"]
     first = client.get("/api/ad-allocation/v1/runs/" + rid + "/products?limit=1").json()

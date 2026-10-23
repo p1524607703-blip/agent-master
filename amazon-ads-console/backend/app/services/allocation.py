@@ -10,6 +10,7 @@ from fastapi import HTTPException
 
 from .allocation_store import AllocationStore, StoreConflict, digest, now
 from .allocation_cpo import business_metrics
+from .operator_cpo import operator_group_of
 from app.core.config import settings
 
 TENANT = os.getenv("CPO_COMPANY_TENANT", "company")
@@ -172,9 +173,11 @@ class AllocationService:
         if not run:
             error(404, "RESOURCE_NOT_FOUND", "未找到可访问的计算版本")
         if not manager(user):
+            group = operator_group_of(user.get("operatorCode"))
             if user.get("roleCode") != "operator" or not user.get("operatorCode"):
                 error(403, "CAPABILITY_DENIED", "当前账户没有读取权限")
-            own = [p for p in (run.get("result") or {}).get("products", []) if p.get("group") == user["operatorCode"]]
+            own = [p for p in (run.get("result") or {}).get("products", [])
+                   if group and operator_group_of(p.get("group")) == group]
             if not own:
                 error(404, "RESOURCE_NOT_FOUND", "未找到可访问的计算版本")
         return run
@@ -194,7 +197,8 @@ class AllocationService:
             error(403, "CAPABILITY_DENIED", "运营可读取本人款式及成本结果")
         rows = (run.get("result") or {}).get(report, [])
         if not manager(user):
-            rows = [p for p in rows if p.get("group") == user.get("operatorCode")]
+            group = operator_group_of(user.get("operatorCode"))
+            rows = [p for p in rows if group and operator_group_of(p.get("group")) == group]
         return rows
 
 

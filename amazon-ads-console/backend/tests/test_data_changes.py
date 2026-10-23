@@ -78,6 +78,41 @@ def test_scope_isolation_and_spoofed_operator_never_ready(service):
     assert_code('BATCH_NOT_READY', lambda: submit(service, invalid))
 
 
+def test_current_group_reauthorizes_reads_commands_and_upload_replays(service):
+    original = upload(service)
+    submitted = submit(service, original)
+    reviewed = decision(service, submitted, decision='REJECT')
+    moved = {**OP, 'operatorCode': 'XM1'}
+    assert service.list('company', moved)['items'] == []
+    for read in (service.get, service.rows, service.impact):
+        assert_code('BATCH_NOT_FOUND', lambda: read('company', moved, original['id']))
+    assert_code('BATCH_NOT_FOUND', lambda: service.command('company', moved, original['id'], 'withdraw', {}, reviewed['etag'], 'moved-withdraw'))
+    assert_code('BATCH_NOT_FOUND', lambda: upload(service, user=moved))
+    # A different upload key must not return the old group's deduplicated response.
+    fresh = upload(service, user=moved, key='new-group-upload')
+    assert fresh['id'] != original['id']
+    assert fresh['status'] == 'VALIDATION_FAILED'
+    assert fresh['review_reason'] is None
+    assert service.get('company', moved, fresh['id'])['status'] == 'VALIDATION_FAILED'
+    # A suffix change stays inside the user-confirmed shared group.
+    sibling = {**OP, 'operatorCode': 'AJ2'}
+    assert service.get('company', sibling, original['id'])['id'] == original['id']
+
+
+def test_demotion_cannot_read_manager_multigroup_batches_or_cached_upload(service):
+    manager = {**MANAGER, 'userId': OP['userId']}
+    text = csv_text({}, {'operator_code': 'XM1', 'child_asin': 'B012345679'})
+    batch = service.upload('company', manager, 'mapping.csv', text, {}, 'manager-upload')
+    assert batch['status'] == 'READY'
+    assert service.list('company', OP)['items'] == []
+    assert_code('BATCH_NOT_FOUND', lambda: service.get('company', OP, batch['id']))
+    assert_code('BATCH_NOT_FOUND', lambda: service.upload('company', OP, 'mapping.csv', text, {}, 'manager-upload'))
+    # Legacy batches lack a role snapshot; inspect stored row ownership as well.
+    with service.repository.transaction() as state:
+        state['batches'][batch['id']].pop('created_role', None)
+    assert_code('BATCH_NOT_FOUND', lambda: service.rows('company', OP, batch['id']))
+
+
 def test_missing_parent_rejected_without_explicit_standalone(service):
     invalid = upload(service, no_parent='')
     assert invalid['status'] == 'VALIDATION_FAILED'
