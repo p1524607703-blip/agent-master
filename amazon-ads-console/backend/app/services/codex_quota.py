@@ -7,6 +7,24 @@ from pathlib import Path
 from app.core.config import settings
 
 
+def collection(value):
+    if not isinstance(value, dict) or value.get('mode') != 'notifications-first':
+        return None
+    result = {'mode':'notifications-first'}
+    for key in ('fallbackSeconds', 'publishSeconds'):
+        number = value.get(key)
+        if type(number) is int and 5 <= number <= 300:
+            result[key] = number
+    for key in ('readerConnected', 'deviceNotificationsConnected'):
+        result[key] = value.get(key) is True
+    # Only bounded diagnostic counters; never forward arbitrary event payloads.
+    for key in ('reads', 'usageEvents'):
+        number = value.get(key)
+        if type(number) is int and 0 <= number <= 10**12:
+            result[key] = number
+    return result
+
+
 def window(value):
     if value is None:
         return None
@@ -38,6 +56,7 @@ def snapshot():
         result = {'status': status, 'capturedAt': captured.isoformat(),
                   'primary': None, 'secondary': None, 'source': 'official-account-rate-limits',
                   'accountTotalTokens':None, 'tokenTotalScope':'unverified'}
+        result['collection'] = collection(value.get('collection'))
         if status == 'available':
             result['primary'] = window(value.get('primary'))
             result['secondary'] = window(value.get('secondary'))

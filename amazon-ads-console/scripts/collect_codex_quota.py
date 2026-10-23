@@ -9,7 +9,6 @@ from pathlib import Path
 import shlex
 import subprocess
 import tempfile
-import time
 from datetime import datetime, timezone
 
 
@@ -103,13 +102,8 @@ os.chmod(t,0o600);t.replace(p)
 '''
 
 
-def collect(config):
-    try:
-        value = asyncio.run(read_limits(config))
-    except Exception:
-        # Never keep old percentages looking fresh, or print subprocess/credential errors.
-        value = {'schemaVersion': 1, 'status': 'unavailable',
-                 'capturedAt': datetime.now(timezone.utc).isoformat(), 'primary': None, 'secondary': None}
+def publish(config, value):
+    """Publish a verified sample. Reusing it must never change capturedAt."""
     atomic(config['localSnapshot'], value)
     payload = json.dumps({'destination': config['remoteSnapshot'], 'snapshot': value})
     subprocess.run(['ssh', '-o', 'BatchMode=yes', '-o', 'StrictHostKeyChecking=yes', '-o', 'ConnectTimeout=8',
@@ -138,6 +132,25 @@ def collect(config):
     return value
 
 
+def collect(config):
+    try:
+        value = asyncio.run(read_limits(config))
+    except Exception:
+        value = unavailable()
+    return publish(config, value)
+
+
+def unavailable():
+    return {'schemaVersion': 1, 'status': 'unavailable',
+            'capturedAt': datetime.now(timezone.utc).isoformat(), 'primary': None, 'secondary': None}
+
+
+# The persistent scheduler is separate so --once remains a bounded diagnostic.
+async def serve(config):
+    from codex_quota_events import monitor
+    await monitor(config, sanitize, unavailable, publish)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--config', required=True)
@@ -157,12 +170,7 @@ def main():
             fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError:
             return
-        while True:
-            try:
-                collect(config)
-            except Exception:
-                pass  # A failed transport leaves the server snapshot to expire after five minutes.
-            time.sleep(120)
+        asyncio.run(serve(config))
 
 
 if __name__ == '__main__':

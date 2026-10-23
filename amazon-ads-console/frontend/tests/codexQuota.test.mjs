@@ -37,3 +37,15 @@ test('missing windows and invalid periods are never converted to unlimited or ze
     assert.equal(view.state,'官方未返回可展示窗口')
   }
 })
+
+test('notification health is separate from fresh quota, stale connections never look healthy', () => {
+  const value = {...fixture(),collection:{mode:'notifications-first',fallbackSeconds:60,
+    readerConnected:true,deviceNotificationsConnected:true}}
+  let view = quotaDisplay(value,now,false)
+  assert.match(view.updatePolicy,/60秒/)
+  assert.match(view.notificationState,/已连接/)
+  view = quotaDisplay({...value,collection:{...value.collection,deviceNotificationsConnected:false}},now,false)
+  assert.equal(view.state,'采集正常')
+  assert.match(view.notificationState,/重连中/)
+  assert.match(quotaDisplay(value,now,true).notificationState,/暂不可确认/)
+})

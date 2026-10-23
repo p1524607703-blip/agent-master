@@ -60,7 +60,19 @@ class ConcurrentFlowTests(unittest.IsolatedAsyncioTestCase):
                     async for _ in stream:pass
                     self.assertEqual(status,200)
                 with patch.object(relay.httpx,'AsyncClient',side_effect=lambda **kw:original(transport=httpx.MockTransport(handler),**kw)):
-                    await asyncio.gather(*(request(uid,material) for uid,material in credentials.items()))
+                    listener = await _connect()
+                    changed = asyncio.Event()
+                    payloads = []
+                    def notified(connection, pid, channel, payload):
+                        payloads.append(payload); changed.set()
+                    try:
+                        await listener.add_listener('codex_usage_changed', notified)
+                        await asyncio.gather(*(request(uid,material) for uid,material in credentials.items()))
+                        await asyncio.wait_for(changed.wait(), 2)
+                        self.assertTrue(payloads)
+                        self.assertEqual(set(payloads), {''})
+                    finally:
+                        await listener.close()
                 snapshots(1,1700,1)
                 monitor=await reconcile();self.assertEqual(monitor['reason'],'concurrent-token-estimate')
                 result=await overview();allocation=result['accountAttribution']

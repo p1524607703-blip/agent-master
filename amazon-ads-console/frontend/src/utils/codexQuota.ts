@@ -1,5 +1,5 @@
 export type QuotaWindow = { usedPercent:number; remainingPercent:number; windowDurationMins:number; resetsAt:number }
-export type AccountQuota = { status:string; capturedAt?:string; primary:QuotaWindow|null; secondary:QuotaWindow|null; planType?:string|null; accountTotalTokens?:number|null; tokenTotalScope?:string }
+export type AccountQuota = { status:string; capturedAt?:string; primary:QuotaWindow|null; secondary:QuotaWindow|null; planType?:string|null; accountTotalTokens?:number|null; tokenTotalScope?:string; collection?: {mode:string; fallbackSeconds?:number; publishSeconds?:number; readerConnected:boolean; deviceNotificationsConnected:boolean} | null }
 
 // primary/secondary are positions, not stable meanings across subscription plans.
 export function quotaDisplay(quota:AccountQuota|undefined, now:number, overviewStale:boolean) {
@@ -15,5 +15,10 @@ export function quotaDisplay(quota:AccountQuota|undefined, now:number, overviewS
   const messages:Record<string,string> = {unconfigured:'尚未接入', unavailable:'读取失败', stale:'数据过期'}
   const state = fresh ? windows.length ? '采集正常' : '官方未返回可展示窗口' :
     overviewStale || quota?.status === 'available' ? '数据过期或连接中断' : messages[quota?.status || 'unconfigured'] || '读取失败'
-  return {fresh, windows, state}
+  const c = quota?.collection
+  const eventMode = c?.mode === 'notifications-first'
+  const updatePolicy = eventMode ? `变化通知优先 · ${c.fallbackSeconds ?? 60}秒定时兜底` : '定时采集'
+  const notificationState = !fresh ? '通知状态暂不可确认' : eventMode ?
+    c.readerConnected && c.deviceNotificationsConnected ? '额度监听与子设备事件通道已连接' : '通知通道重连中，定时采集兜底' : ''
+  return {fresh, windows, state, updatePolicy, notificationState}
 }

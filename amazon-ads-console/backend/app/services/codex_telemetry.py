@@ -240,6 +240,13 @@ async def flush_events(paths=None):
                         *[usage.get(k) for k in ['input_tokens','output_tokens','total_tokens','cached_tokens','reasoning_tokens']],
                         record['completed'])
                 path.unlink(missing_ok=True)
+                try:
+                    # Private LISTEN/NOTIFY hint after committed accounting. No
+                    # device identity, key or token payload crosses this channel.
+                    # Failure must never fail or replay an already saved request.
+                    await conn.execute("SELECT pg_notify('codex_usage_changed', '')")
+                except Exception:
+                    log.warning('codex_usage_notification_unavailable')
             except (OSError,ValueError):
                 log.error('codex_accounting_spool_invalid file=%s',path.name)
     finally:

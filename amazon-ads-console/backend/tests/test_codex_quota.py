@@ -65,6 +65,16 @@ class QuotaTests(unittest.TestCase):
         data=self.fixture();data['primary']['usedPercent']=101
         self.assertEqual(self.read(data)['status'],'unavailable')
 
+    def test_notification_health_metadata_is_whitelisted(self):
+        data = self.fixture()
+        data['collection'] = {'mode':'notifications-first','fallbackSeconds':60,
+            'publishSeconds':30,'readerConnected':True,'deviceNotificationsConnected':False,
+            'reads':2,'usageEvents':20,'access_token':'never-export'}
+        value = self.read(data)['collection']
+        self.assertEqual(value['fallbackSeconds'],60)
+        self.assertFalse(value['deviceNotificationsConnected'])
+        self.assertNotIn('access_token',value)
+
     def test_collector_strips_private_fields_and_checks_source_identity(self):
         identity='fixture-account';digest=hashlib.sha256(identity.encode()).hexdigest()
         limits=self.fixture()

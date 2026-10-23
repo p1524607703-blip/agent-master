@@ -69,6 +69,25 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(observer.usage['total_tokens'],0)
 
 
+class NotificationTests(unittest.IsolatedAsyncioTestCase):
+    async def test_notification_failure_does_not_replay_committed_accounting(self):
+        with tempfile.TemporaryDirectory() as tmp, patch.object(settings,'codex_event_spool_dir',tmp):
+            record = {'request_id':str(uuid.uuid4()),'device_id':str(uuid.uuid4()),
+                'finished_at':datetime.now(timezone.utc).isoformat(),
+                'http_status':200,'completed':True,'usage':{'input_tokens':2,'output_tokens':1,'total_tokens':3}}
+            conn = AsyncMock()
+            async def execute(sql, *args):
+                if 'pg_notify' in sql: raise RuntimeError('notification unavailable')
+            conn.execute.side_effect = execute
+            with patch.object(service,'_connect',new=AsyncMock(return_value=conn)):
+                await service.save_event(record)
+            self.assertEqual(list(Path(tmp).glob('*.json')), [])
+            calls = [call.args[0] for call in conn.execute.await_args_list]
+            self.assertEqual(sum('INSERT INTO' in sql for sql in calls),1)
+            self.assertEqual(sum('pg_notify' in sql for sql in calls),1)
+            conn.close.assert_awaited_once()
+
+
 @unittest.skipUnless(os.environ.get('CODEX_ISOLATED_DB_TEST')=='1','requires disposable private PostgreSQL fixture')
 class IntegrationTests(unittest.TestCase):
     @classmethod
