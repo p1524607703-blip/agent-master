@@ -20,7 +20,7 @@ from typing import Any, Optional
 from fastapi import HTTPException
 from app.core.observability import increment, update_context
 
-from .cpo_identity import AdIdentityResolver, CampaignOwnerRules, FullFunnelLedger, resolve_sb_accounting
+from .cpo_identity import AdIdentityResolver, CampaignOwnerRules, FullFunnelLedger, resolve_sb_accounting, expand_equal_campaign_rows
 from .cpo_group_pending import pending_group_expense, pending_expenses, pending_total, merge_pending_expenses
 from .full_funnel_visibility import full_funnel_for_viewer
 
@@ -275,7 +275,7 @@ def _data_revision() -> str:
           (SELECT md5(coalesce(string_agg(to_jsonb(c)::text,E'\n' ORDER BY rule_id),'')) FROM ops_products.cpo_campaign_cost_rules c)
         )) revision
     """) or {}
-    revision = 'identity-v2-brand-disclosure-v6-group-pending:' + str(row.get("revision") or 0) + ':' + str(mapping.get("revision") or '')
+    revision = 'identity-v2-brand-disclosure-v7-equal-campaign:' + str(row.get("revision") or 0) + ':' + str(mapping.get("revision") or '')
     update_context(revision=revision)
     return revision
 
@@ -707,10 +707,10 @@ def _build_uncached(start: str, end: str, revision: Optional[str] = None,
     ad_rows = query_rows(f"""
         SELECT r.stat_date::text stat_date, r.account_id, r.account_name,
                r.campaign_id, r.campaign_name, r.advertised_product_id child_asin, r.advertised_product_parent_id parent_asin, r.ad_product,
-               COALESCE(sum(r.spend),0)::float8 spend,
-               COALESCE(sum(r.units),0)::float8 ad_orders,
-               COALESCE(sum(r.purchases),0)::float8 ad_purchases,
-               COALESCE(sum(r.sales),0)::float8 ad_sales, count(*)::int rows
+               COALESCE(sum(r.spend),0)::text spend,
+               COALESCE(sum(r.units),0)::text ad_orders,
+               COALESCE(sum(r.purchases),0)::text ad_purchases,
+               COALESCE(sum(r.sales),0)::text ad_sales, count(*)::int rows
         FROM core.report_advertised_product_daily r
         JOIN core.import_batches ib ON ib.batch_id=r.batch_id
            AND ib.target_table='core.report_advertised_product_daily'
@@ -722,12 +722,19 @@ def _build_uncached(start: str, end: str, revision: Optional[str] = None,
     campaign_rules = CampaignOwnerRules(query_rows("SELECT * FROM ops_products.cpo_campaign_cost_rules WHERE active=true"), identity_resolver.candidates, parent_mapping)
     full_funnel = FullFunnelLedger()
     ad_scopes = {}
+    ad_contexts = {}
     for evidence in ad_rows:
         evidence_scope=resolve_ad_scope(evidence.get('account_name') or '',evidence.get('child_asin') or '',evidence.get('parent_asin') or '',evidence['stat_date'],evidence.get('campaign_name') or '')
         ad_scopes[id(evidence)] = evidence_scope
+        evidence_meta, evidence_method = resolve_meta(evidence_scope,evidence.get('child_asin') or '',evidence.get('parent_asin') or '')
+        ad_contexts[id(evidence)] = {'scope': evidence_scope, 'source_meta': evidence_meta,
+                                    'source_method': evidence_method,
+                                    'blocked': (evidence_scope,evidence.get('child_asin') or '') in blocked_child_keys}
         if evidence_scope and not evidence_scope.startswith('__'):
-            evidence_meta,_=resolve_meta(evidence_scope,evidence.get('child_asin') or '',evidence.get('parent_asin') or '')
             identity_resolver.observe(evidence,evidence_scope,evidence_meta)
+    ad_rows, ad_contexts = expand_equal_campaign_rows(
+        ad_rows, ad_contexts, campaign_rules, sb_attribution_mode,
+        {'spend': 2, 'ad_orders': 2, 'ad_purchases': 2, 'ad_sales': 2})
     unmapped_ad = {"spend":0.0,"orders":0.0,"sales":0.0,"parents":set(),"rows":0}
     group_pending_expenses = []
     unknown_ad_types: set[str] = set()
@@ -735,7 +742,9 @@ def _build_uncached(start: str, end: str, revision: Optional[str] = None,
     for row in ad_rows:
         parent=row.get("parent_asin") or ""; child=row.get("child_asin") or ""
         ad_account=row.get("account_name") or ""
-        account_scope=ad_scopes[id(row)]
+        context = ad_contexts[id(row)]
+        account_scope=context['scope']
+        audit_rows = int(row.get('_audit_rows', row.get('rows')) or 0)
         if not account_scope or account_scope.startswith("__AMS_"):
             if row['ad_product']=='Full-Funnel':
                 full_funnel.add(row,None)
@@ -744,20 +753,23 @@ def _build_uncached(start: str, end: str, revision: Optional[str] = None,
             unmapped_ad["spend"] += float(row.get("spend") or 0); unmapped_ad["orders"] += float(row.get("ad_orders") or 0); unmapped_ad["sales"] += float(row.get("ad_sales") or 0); unmapped_ad["rows"] += int(row.get("rows") or 0)
             if parent: unmapped_ad["parents"].add(parent)
             continue
-        meta,method=resolve_meta(account_scope,child,parent)
+        meta,method=context.get('source_meta'),context.get('source_method')
         source_meta = meta
         is_sb = _classify_ad_type(row.get('ad_product') or '') == 'SB'
         rule = None
         if is_sb:
-            meta, method, rule = resolve_sb_accounting(
-                row, account_scope, source_meta, method, identity_resolver, campaign_rules,
-                sb_attribution_mode, blocked_source=(account_scope,child) in blocked_child_keys)
+            if context.get('financial_meta'):
+                meta, method, rule = context['financial_meta'], context['financial_method'], context['financial_rule']
+            else:
+                meta, method, rule = resolve_sb_accounting(
+                    row, account_scope, source_meta, method, identity_resolver, campaign_rules,
+                    sb_attribution_mode, blocked_source=(account_scope,child) in blocked_child_keys)
             if meta and sb_attribution_mode == 'name':
-                ad_audit['sbNameRows'] += int(row.get('rows') or 0)
+                ad_audit['sbNameRows'] += audit_rows
             elif not meta:
-                ad_audit['sbPendingRows'] += int(row.get('rows') or 0)
+                ad_audit['sbPendingRows'] += audit_rows
         if rule is not None:
-            ad_audit['confirmedCampaignRows' if meta else 'campaignRuleReviewRows'] += int(row.get('rows') or 0)
+            ad_audit['confirmedCampaignRows' if meta else 'campaignRuleReviewRows'] += audit_rows
         if not is_sb and not meta and (account_scope,child) not in blocked_child_keys:
             meta,method=identity_resolver.resolve(row,account_scope)
         if not meta:
@@ -775,11 +787,11 @@ def _build_uncached(start: str, end: str, revision: Optional[str] = None,
             if parent: unmapped_ad["parents"].add(parent)
             continue
         if method=="child_exact":
-            ad_audit["childExactRows"] += int(row.get("rows") or 0)
+            ad_audit["childExactRows"] += audit_rows
         elif method=="parent_fallback":
-            ad_audit["parentFallbackRows"] += int(row.get("rows") or 0)
+            ad_audit["parentFallbackRows"] += audit_rows
         else:
-            ad_audit["campaignPrefixRows"] += int(row.get("rows") or 0)
+            ad_audit["campaignPrefixRows"] += audit_rows
         p=bucket(meta,account_scope)
         if not is_sb and rule is None:
             review = identity_resolver.cost_review(row,account_scope,meta)
@@ -799,6 +811,9 @@ def _build_uncached(start: str, end: str, revision: Optional[str] = None,
                 'targetProduct':meta['productCode'],'spend':round(float(row.get('spend') or 0),2),
                 'adOrders':float(row.get('ad_orders') or 0),
                 'attributionMode':sb_attribution_mode,'method':method,
+                **({'sourceProducts': context['source_products'], 'weight': context['allocation_weight'],
+                    'originalCampaignTotals': context['original_totals']}
+                   if context.get('financial_meta') else {}),
             })
         p["allocationMethods"].add(method)
         p["adAccounts"].add(ad_account or row.get("account_id") or "")
@@ -818,8 +833,8 @@ def _build_uncached(start: str, end: str, revision: Optional[str] = None,
     purchased_rows = query_rows(f"""
         SELECT r.stat_date::text stat_date, r.account_id, r.account_name, r.campaign_id, r.campaign_name, r.ad_product,
                r.advertised_product_id child_asin, r.advertised_product_parent_id parent_asin,
-               COALESCE(sum(r.purchases),0)::float8 purchases,
-               COALESCE(sum(r.sales),0)::float8 sales, count(*)::int rows
+               COALESCE(sum(r.purchases),0)::text purchases,
+               COALESCE(sum(r.sales),0)::text sales, count(*)::int rows
         FROM core.report_purchased_product_daily r
         JOIN core.import_batches ib ON ib.batch_id=r.batch_id
            AND ib.target_table='core.report_purchased_product_daily'
@@ -827,16 +842,28 @@ def _build_uncached(start: str, end: str, revision: Optional[str] = None,
           AND {_date_filter("r.stat_date", complete_days)}
         GROUP BY r.stat_date,r.account_id,r.account_name,r.campaign_id,r.campaign_name,r.ad_product,r.advertised_product_id,r.advertised_product_parent_id
     """)
+    purchased_contexts = {}
+    for row in purchased_rows:
+        scope=resolve_ad_scope(row.get('account_name') or '',row.get('child_asin') or '',row.get('parent_asin') or '',row.get('stat_date') or '',row.get('campaign_name') or '')
+        source_meta, source_method=resolve_meta(scope,row.get('child_asin') or '',row.get('parent_asin') or '')
+        purchased_contexts[id(row)]={'scope':scope,'source_meta':source_meta,'source_method':source_method,
+                                     'blocked':(scope,row.get('child_asin') or '') in blocked_child_keys}
+    purchased_rows, purchased_contexts = expand_equal_campaign_rows(
+        purchased_rows, purchased_contexts, campaign_rules, sb_attribution_mode, {'purchases': 2, 'sales': 2})
     purchased_unmapped_rows=0
     for row in purchased_rows:
         parent=row.get("parent_asin") or ""; child=row.get("child_asin") or ""; ad_account=row.get("account_name") or ""
-        scope=resolve_ad_scope(ad_account,child,parent,row.get("stat_date") or "",row.get("campaign_name") or "")
+        context=purchased_contexts[id(row)]
+        scope=context['scope']
         if not scope or scope.startswith("__AMS_"):
             purchased_unmapped_rows += int(row.get("rows") or 0); continue
-        meta,method=resolve_meta(scope,child,parent)
+        meta,method=context.get('source_meta'),context.get('source_method')
         if _classify_ad_type(row.get('ad_product') or '') == 'SB':
-            meta,_,_=resolve_sb_accounting(row,scope,meta,method,identity_resolver,campaign_rules,
-                sb_attribution_mode,blocked_source=(scope,child) in blocked_child_keys)
+            if context.get('financial_meta'):
+                meta=context['financial_meta']
+            else:
+                meta,_,_=resolve_sb_accounting(row,scope,meta,method,identity_resolver,campaign_rules,
+                    sb_attribution_mode,blocked_source=(scope,child) in blocked_child_keys)
         if not meta:
             purchased_unmapped_rows += int(row.get("rows") or 0); continue
         p=bucket(meta,scope)

@@ -1,5 +1,6 @@
 """Evidence-scoped identity fallback; never allocates a multi-product campaign."""
 from collections import defaultdict
+from decimal import Decimal, ROUND_HALF_UP
 import re
 
 
@@ -94,10 +95,53 @@ class CampaignOwnerRules:
             if rule.get('active'):
                 self.rules[(rule['account_name'], rule['campaign_id'], rule['ad_product'])].append(rule)
 
-    def resolve(self, row, scope, source_meta):
+    def matching(self, row):
         day = str(row['stat_date'])
-        rules = [r for r in self.rules[(row['account_name'], row['campaign_id'], row['ad_product'])]
+        return [r for r in self.rules[(row['account_name'], row['campaign_id'], row['ad_product'])]
                  if str(r['valid_from']) <= day and (not r.get('valid_to') or day <= str(r['valid_to']))]
+
+    def equal_targets(self, row, scope, source_meta):
+        """Validate every target; a partial valid list is never a valid rule."""
+        matches = self.matching(row)
+        if len(matches) != 1:
+            return None
+        rule = matches[0]
+        config = rule.get('rule_config') or {}
+        if not isinstance(config, dict):
+            return None
+        targets = config.get('targets')
+        if not (rule.get('allocation_mode') == 'multi_owner_equal'
+                and row['ad_product'] == 'Sponsored Brands'
+                and row['campaign_name'] == rule['expected_campaign_name']
+                and scope == rule['business_account']
+                and source_meta is not None
+                and source_meta['group'] == rule['operator_group']
+                and source_meta['productCode'] in rule['allowed_source_products']
+                and (not config.get('expected_account_id') or row.get('account_id') == config['expected_account_id'])
+                and isinstance(targets, list) and 2 <= len(targets) <= 20):
+            return None
+        result = []
+        seen = set()
+        for target in targets:
+            if not isinstance(target, dict):
+                return None
+            identity = (target.get('operator_group'), target.get('product_code'))
+            parent = self.parent_mapping.get(target.get('parent_asin'))
+            if (identity in seen or identity[0] != rule['operator_group']
+                    or type(target.get('weight')) is not int or target['weight'] != 1
+                    or identity not in self.scoped_candidates.get(scope, {})
+                    or parent is None or parent.get('brand') != scope
+                    or (parent['group'], parent['productCode']) != identity):
+                return None
+            seen.add(identity)
+            result.append(dict(parent))
+        # Legacy required columns are an anchor, never an extra charged target.
+        if not any(m['productCode'] == rule['product_code'] and m['parentAsin'] == rule['parent_asin'] for m in result):
+            return None
+        return sorted(result, key=lambda m: (m['group'], m['productCode']))
+
+    def resolve(self, row, scope, source_meta):
+        rules = self.matching(row)
         if not rules:
             return None, '', None
         # A matching but invalid rule must not silently fall back to source identity.
@@ -121,6 +165,63 @@ class CampaignOwnerRules:
         if not valid:
             return None, 'campaign_owner_rule_needs_review', rule
         return dict(target), 'campaign_owner_confirmed', rule
+
+
+def _equal_decimal_parts(total, count, scale):
+    """Deterministic largest-remainder allocation, including signed corrections."""
+    quantum = Decimal(1).scaleb(-scale)
+    amount = total.quantize(quantum, rounding=ROUND_HALF_UP)
+    minor = int(abs(amount) / quantum)
+    base, remainder = divmod(minor, count)
+    sign = -1 if amount < 0 else 1
+    return [Decimal(sign * (base + (index < remainder))) * quantum for index in range(count)]
+
+
+def expand_equal_campaign_rows(rows, contexts, rules, mode, metrics):
+    """Expand approved name-mode campaigns after aggregating all source rows.
+
+    Contexts are trusted resolved scope/source identities. The original rows and
+    mappings remain unchanged. A renamed, blocked or newly introduced source
+    invalidates the entire day/account/campaign, rather than allocating its safe
+    subset and hiding the rest. ASIN mode is returned verbatim.
+    """
+    if mode != 'name':
+        return list(rows), dict(contexts)
+    groups = defaultdict(list)
+    for row in rows:
+        groups[(row['stat_date'], row.get('account_id'), row['account_name'], row['campaign_id'], row['ad_product'])].append(row)
+    prepared, prepared_contexts = [], {}
+    for group in groups.values():
+        matches = rules.matching(group[0])
+        targets = None
+        if len(matches) == 1 and matches[0].get('allocation_mode') == 'multi_owner_equal':
+            for row in group:
+                context = contexts[id(row)]
+                current = None if context.get('blocked') else rules.equal_targets(row, context['scope'], context.get('source_meta'))
+                if current is None or (targets is not None and current != targets):
+                    targets = None
+                    break
+                targets = current
+        if targets is None:
+            for row in group:
+                prepared.append(row)
+                prepared_contexts[id(row)] = contexts[id(row)]
+            continue
+        totals = {field: sum((Decimal(str(row.get(field) or 0)) for row in group), Decimal(0)) for field in metrics}
+        parts = {field: _equal_decimal_parts(totals[field], len(targets), scale) for field, scale in metrics.items()}
+        source_products = sorted({contexts[id(row)]['source_meta']['productCode'] for row in group})
+        source_count = sum(int(row.get('rows') or 0) for row in group)
+        for index, target in enumerate(targets):
+            allocated = {**group[0], **{field: str(values[index]) for field, values in parts.items()}, 'rows': source_count,
+                         '_audit_rows': source_count if index == 0 else 0}
+            context = {**contexts[id(group[0])], 'financial_meta': target, 'financial_rule': matches[0],
+                       'financial_method': 'campaign_multi_owner_equal_confirmed', 'source_products': source_products,
+                       'source_meta': contexts[id(group[0])]['source_meta'] if len(source_products) == 1 else None,
+                       'original_totals': {field: str(value) for field, value in totals.items()},
+                       'allocation_weight': {'numerator': 1, 'denominator': len(targets)}}
+            prepared.append(allocated)
+            prepared_contexts[id(allocated)] = context
+    return prepared, prepared_contexts
 
 
 def resolve_sb_accounting(row, scope, source_meta, source_method, resolver, rules, mode,

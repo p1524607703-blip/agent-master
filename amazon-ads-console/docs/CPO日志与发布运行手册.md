@@ -72,3 +72,20 @@ python3 amazon-ads-console/scripts/release.py rollback <以前成功的tag或com
 管理层登录 [系统诊断](https://193.112.27.91:80/diagnostics)，选时间和用户名，或粘贴页面复制的 Request ID。查看 HTTP 状态、快慢等级、数据库耗时、缓存与锁、版本及脱敏错误堆栈。运营人员可在自己的 CPO 页面复制或下载本次浏览器诊断记录交给管理层。
 
 需核查主机时，在本机执行 `ssh -N -L 19090:127.0.0.1:9090 Agent-server`，打开 `https://127.0.0.1:19090` 的 Cockpit；日志中过滤 `cpo-console` 或 `cpo-redis-watchdog`。无需向公网开放管理端口。已有日志从启用时开始累计，无法补回过去未记录的请求。
+
+## 滚动发布及流结果诊断
+
+当前滚动发布以 [ROLLING_RELEASE.md](../deploy/ROLLING_RELEASE.md) 为准：先验证并
+预热新 blue/green 实例，再切换 Nginx；禁止停掉在线实例后清缓存的旧发布步骤。
+旧连接排空后才退役，待排空实例不能被下一次发布强占。巡检同时读取
+`shared/rolling.json`、真实活动实例就绪头、`cpo-console-blue/green` 和退役服务日志；
+`cpo-console` 聚合服务 active 不能单独证明应用健康。阶段状态与版本指针
+不一致时停止自动退役/下一发布，使用私有恢复清单核对。
+
+模型流的 HTTP 200 只表示响应头已经发送。巡检同时核对 `model_outcome`、
+`model_http_status`、`model_completed`、`model_error_type`、模型请求/上游请求 ID，
+以及排队、响应头、首字节、首次输出、流耗时。`MissingTerminalEvent` 或传输失败
+应计为异常；正常有终态的 `response.incomplete` 不按断流计数。长生成归类为
+`model_stream`，不能套用页面加载耗时阈值。已有部分输出的请求不自动重放；
+实际已观测用量保留，不以错误或重试补造用量。网关诊断是否更新须分别核实，
+不能从后端版本推断本机网关也已更新。
