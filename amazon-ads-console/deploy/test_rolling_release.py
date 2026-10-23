@@ -162,6 +162,34 @@ class RollingTests(unittest.TestCase):
         with self.assertRaises(ValueError): r.proxy_snippet('proxy_pass http://other;')
         self.assertEqual(r.proxy_snippet('proxy_pass http://127.0.0.1:8000;'), 'proxy_pass http://cpo_active;')
 
+    def test_public_gate_waits_for_nginx_workers_and_bounds_mismatch(self):
+        imported = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(imported)
+        class Response:
+            def __init__(self, data, commit=None):
+                import io
+                self.body=io.BytesIO(json.dumps(data).encode())
+                self.headers={'X-CPO-Release':commit}
+            def read(self,*args): return self.body.read(*args)
+            def __enter__(self): return self
+            def __exit__(self,*args): self.close()
+            def close(self): self.body.close()
+        class Opener:
+            def __init__(self): self.calls=0
+            def open(self,url,timeout):
+                import urllib.error, io
+                self.calls+=1
+                if url.endswith('auth/me'): raise urllib.error.HTTPError(url,401,'',{},io.BytesIO(b''))
+                if url.endswith('version.json'): return Response({'commit':'new' if self.calls>1 else 'old'})
+                return Response({'ok':True},'new')
+        now=[0.0]
+        with patch.object(imported.urllib.request,'build_opener',return_value=Opener()):
+            imported.public_ready('https://example.invalid','new',clock=lambda:now[0],pause=lambda n:now.__setitem__(0,now[0]+n))
+        self.assertEqual(now[0],.5)
+        with patch.object(imported.urllib.request,'build_opener',return_value=Opener()):
+            with self.assertRaisesRegex(RuntimeError,'did not converge'):
+                imported.public_ready('https://example.invalid','missing',seconds=1,clock=lambda:now[0],pause=lambda n:now.__setitem__(0,now[0]+n))
+
     def test_idle_requires_consecutive_zero_samples(self):
         actual = spec.loader
         # Exercise the real idle routine, overriding only its connection source.

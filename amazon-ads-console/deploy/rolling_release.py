@@ -249,20 +249,35 @@ def ensure_marker(slot):
     run('systemctl', 'start', 'cpo-console')
 
 
-def public_ready(url, commit):
+def public_ready(url, commit, *, seconds=30, clock=time.monotonic, pause=time.sleep):
+    # nginx reload is asynchronous: old workers may briefly accept a new request.
+    # Wait for *both* versions and the auth boundary to converge before committing.
     opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
-    for suffix in ('/version.json', '/api/ping'):
-        with opener.open(url.rstrip('/') + suffix, timeout=10) as response:
-            value = json.load(response)
-            actual = value.get('commit') if suffix == '/version.json' else response.headers.get('X-CPO-Release')
-        if actual != commit:
-            raise RuntimeError('Public release mismatch')
-    try:
-        opener.open(url.rstrip('/') + '/api/auth/me', timeout=10)
-    except urllib.error.HTTPError as error:
-        if error.code == 401:
-            return
-    raise RuntimeError('Public authentication boundary failed')
+    deadline = clock() + seconds
+    mismatch = 'unknown'
+    while True:
+        try:
+            for suffix in ('/version.json', '/api/ping'):
+                with opener.open(url.rstrip('/') + suffix, timeout=3) as response:
+                    value = json.load(response)
+                    actual = value.get('commit') if suffix == '/version.json' else response.headers.get('X-CPO-Release')
+                if actual != commit:
+                    mismatch = suffix
+                    raise ValueError('Release not converged')
+            try:
+                response = opener.open(url.rstrip('/') + '/api/auth/me', timeout=3)
+                response.close()
+                mismatch = 'authentication'
+            except urllib.error.HTTPError as error:
+                error.close()
+                if error.code == 401:
+                    return
+                mismatch = 'authentication_status'
+        except (OSError, ValueError):
+            pass
+        if clock() >= deadline:
+            raise RuntimeError('Public readiness did not converge: ' + mismatch)
+        pause(min(.5, max(0, deadline - clock())))
 
 
 @contextmanager
