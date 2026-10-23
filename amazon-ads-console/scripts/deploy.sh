@@ -176,6 +176,9 @@ PY
 fi
 # These checks run again even for a previously prepared release.
 git --git-dir="$repo" show "$commit":amazon-ads-console/deploy/verify_release.py | python3 - "$repo" "$release" "$commit"
+# Read the helper from the verified engine so application rollbacks to versions
+# without this helper retain compatible assets too. Preparation is additive.
+git --git-dir="$repo" show "$engine_commit":amazon-ads-console/deploy/retain_frontend_assets.py | python3 - "$base/releases" "$release"
 (
   cd "$release/amazon-ads-console/backend"
   "$release/.venv/bin/python" ../deploy/health_check.py "$release"

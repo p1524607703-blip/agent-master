@@ -15,6 +15,7 @@ function execute(source, imports) {
   return module.exports
 }
 const report = execute(readFileSync(new URL('../src/api/cpoReport.ts',import.meta.url),'utf8'),{})
+const navigation = execute(readFileSync(new URL('../src/router/navigation.ts',import.meta.url),'utf8'),{vue:Vue})
 const deferred = () => { let resolve, reject; const promise = new Promise((a,b)=>{resolve=a;reject=b}); return {promise,resolve,reject} }
 const flush = async () => { for (let n=0;n<5;n++) { await Vue.nextTick(); await new Promise(resolve=>setImmediate(resolve)) } }
 const renderer = Vue.createRenderer({
@@ -46,6 +47,7 @@ function mountView(filename, initial, options={}) {
     },
     '../api/operatorExports':{downloadOperatorReport:()=>Promise.resolve()},
     '../api/cpoReport':report,
+    '../router/navigation':navigation,
     '../diagnostics/pageTrace':{usePageRenderTrace(){}},
     '../diagnostics/cpoQuality':{qualityLabel:()=>''},
     'naive-ui':{NButton:{},NDatePicker:{},NSelect:{}},
@@ -112,3 +114,18 @@ test('request gate preserves both modes and cancels stale work',()=>{
   gate.cancel()
   assert.ok(gate.start('canonical-asin',true));gate.cancel()
 })
+
+for (const [filename,path] of [['OperatorCpoView.vue','/operator-cpo'],['MyCpoView.vue','/my-cpo'],['OperatorDetailView.vue','/operators/ZF']]) {
+  test(`${filename}: late report response cannot cancel a pending module switch`,async()=>{
+    const view=mountView(filename,{path,params:path.startsWith('/operators/')?{operator:'ZF'}:{},query:{period:'daily',date:'2026-10-19'}})
+    try {
+      await flush()
+      navigation.beginNavigation('/reports')
+      view.calls[0].resolve(response('name'))
+      await flush()
+      assert.equal(view.route.path,path,'canonical URL replacement must not supersede the pending navigation')
+      assert.equal(view.route.query.sb_attribution_mode,undefined)
+      assert.equal(view.state.loading,false)
+    } finally {navigation.finishNavigation('/reports');view.unmount()}
+  })
+}

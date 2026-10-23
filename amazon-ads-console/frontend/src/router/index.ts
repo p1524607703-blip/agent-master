@@ -3,6 +3,7 @@ import { nextTick } from 'vue'
 import { canViewDiagnostics } from '../diagnostics/permissions'
 import { enterPage, completePageRender } from '../diagnostics/browserTrace'
 import { useSessionStore } from '../stores/session'
+import { beginNavigation, finishNavigation, navigationState, recoverNavigation } from './navigation'
 
 const DiagnosticsView = () => import('../views/DiagnosticsView.vue')
 const CodexDevicesView = () => import('../views/CodexDevicesView.vue')
@@ -61,7 +62,21 @@ const router = createRouter({
   ],
 })
 
+const prefetched = new Set<string>()
+// Fetch only the code for a visible menu item on hover/focus; component setup
+// and its data requests still run only after an authorized navigation.
+export function prefetchRoute(path: string): void {
+  if (prefetched.has(path)) return
+  const records = router.resolve(path).matched
+  const component = records[records.length - 1]?.components?.default
+  if (typeof component !== 'function') return
+  prefetched.add(path)
+  void Promise.resolve().then(() => (component as () => Promise<unknown>)())
+    .catch(() => { prefetched.delete(path) })
+}
+
 router.beforeEach(async (to) => {
+  beginNavigation(to.fullPath)
   const session = useSessionStore()
   if (to.meta.public) {
     if (to.path === '/login' && session.token && await session.ensureUser()) {
@@ -92,10 +107,17 @@ router.beforeEach(async (to) => {
 })
 
 router.afterEach(async (to, _from, failure) => {
+  finishNavigation(to.fullPath)
   if (failure) return
   const pageId = enterPage(to.path)
   await nextTick()
   requestAnimationFrame(() => completePageRender(pageId, 'shell'))
+})
+
+router.onError((error, to) => {
+  if (navigationState.target !== to.fullPath) return
+  if (recoverNavigation(error, to.fullPath)) return
+  finishNavigation(to.fullPath, '页面加载失败，请重新加载后重试。')
 })
 
 export default router

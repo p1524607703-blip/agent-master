@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { isNavigatingAway } from '../router/navigation'
 import SbAttributionToggle from '../components/SbAttributionToggle.vue'
 import { CpoRequestGate, normalizeSbMode, sbModeLabel, type SbAttributionMode } from '../api/cpoReport'
 import FullFunnelRows from '../components/FullFunnelRows.vue'
@@ -110,6 +111,7 @@ const changeSbMode = async (mode:SbAttributionMode) => {
 }
 
 const load = async (force=false) => {
+  const sourcePath = route.path
   const preparation = ++preparationSequence
   // Explicit dates can load immediately; date choices are fetched concurrently.
   if (!selectedDate.value) {
@@ -137,7 +139,7 @@ const load = async (force=false) => {
     data.value = result
     if (!selectedDate.value && result.data_date) selectedDate.value = result.data_date
     request.finish(JSON.stringify([targetOperator,targetPeriod,selectedDate.value,targetMode]))
-    await router.replace({ path:'/operator-cpo', query:reportQuery() })
+    if (route.path === sourcePath && !isNavigatingAway(sourcePath)) await router.replace({ path:'/operator-cpo', query:reportQuery() })
   } catch (error) {
     if (!request.current()) return
     loadError.value = request.signal.aborted ? '数据读取超时，请重试' : error instanceof Error ? error.message : '数据读取失败，请稍后重试'

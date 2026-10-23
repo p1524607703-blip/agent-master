@@ -4,6 +4,7 @@ import { NIcon } from 'naive-ui'
 import { GripVertical } from '@vicons/tabler'
 import { useSessionStore } from '../stores/session'
 import { canViewDiagnostics } from '../diagnostics/permissions'
+import { prefetchRoute } from '../router'
 
 type NavItem = [string, string]
 type NavGroup = { title: string; items: NavItem[] }
@@ -223,7 +224,8 @@ const dropItem = (event: DragEvent, groupIndex: number, targetIndex: number) => 
               @dragstart="startItemDrag($event, groupIndex, itemIndex)"
               @dragend="clearDragState"
             ><NIcon :size="15"><GripVertical /></NIcon></span>
-            <router-link :to="item[0]" class="nav-item" :class="{ 'codex-nav': item[0] === '/codex-devices' }">{{ item[1] }}</router-link>
+            <router-link :to="item[0]" class="nav-item" :class="{ 'codex-nav': item[0] === '/codex-devices' }"
+              @pointerenter="prefetchRoute(item[0])" @focus="prefetchRoute(item[0])">{{ item[1] }}</router-link>
           </div>
         </div>
       </section>
