@@ -7,6 +7,7 @@ from app.api.codex_devices import router as codex_router
 from app.api.allocation import router as allocation_router
 from app.api.data_changes import build_router as build_data_changes_router
 from app.api.operator_exports import router as operator_exports_router
+from app.api.frontend_errors import router as frontend_errors_router
 from app.core.config import settings
 from app.services.operator_cpo import operator_cpo_summary
 from app.services.build_cache import BuildBusyError
@@ -28,6 +29,7 @@ app.add_middleware(
 )
 app.add_middleware(RequestDiagnosticsMiddleware)
 app.include_router(auth_router, prefix=settings.api_prefix)
+app.include_router(frontend_errors_router, prefix=settings.api_prefix)
 app.include_router(codex_router, prefix=settings.api_prefix)
 app.include_router(allocation_router, prefix=settings.api_prefix)
 app.include_router(build_data_changes_router(), prefix=settings.api_prefix)

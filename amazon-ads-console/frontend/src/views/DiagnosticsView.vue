@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import FrontendErrorsPanel from '../components/FrontendErrorsPanel.vue'
 import { computed, onMounted, ref } from 'vue'
 import { getDiagnosticRequests, getDiagnosticsStatus, type DiagnosticFilters, type DiagnosticRequest, type DiagnosticRequests, type DiagnosticStatus } from '../api/diagnostics'
 import { browserTraceSnapshot, clearBrowserTrace, copyEvidence, downloadEvidence } from '../diagnostics/browserTrace'
@@ -104,6 +105,8 @@ onMounted(load)
       </div>
       <details v-if="cacheEntries.length" class="cache-details"><summary>缓存状态</summary><dl><template v-for="[key,value] in cacheEntries" :key="key"><dt>{{ key }}</dt><dd>{{ cell(value) }}</dd></template></dl></details>
     </div>
+
+    <FrontendErrorsPanel />
 
     <div class="card panel">
       <div class="panel-head"><div><h2>服务端请求记录</h2><p>时间按当前浏览器时区输入。{{ requests.retention_days != null ? `最长保留 ${requests.retention_days} 天，容量限制可能提前轮转。` : '' }}</p></div>

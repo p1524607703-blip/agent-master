@@ -1,8 +1,23 @@
 import { reactive } from 'vue'
 
+type NavigationDiagnostic = (target: string, duration: number) => void
+let reportStall: NavigationDiagnostic | undefined
+let timer: ReturnType<typeof setTimeout> | undefined
+let attempt = 0
+export const NAVIGATION_TIMEOUT_MS = 30_000
+export function configureNavigationDiagnostics(report?: NavigationDiagnostic): void {reportStall = report}
+
 export const navigationState = reactive({ target: '', loading: false, error: '' })
 
 export function beginNavigation(target: string): void {
+  if (timer) clearTimeout(timer)
+  const current = ++attempt, started = Date.now()
+  timer = setTimeout(() => {
+    if (current !== attempt || !navigationState.loading) return
+    reportStall?.(target, Date.now() - started)
+    navigationState.error = '页面打开超过 30 秒仍未完成，请检查连接或重新加载。'
+  }, NAVIGATION_TIMEOUT_MS)
+  ;(timer as unknown as { unref?: () => void }).unref?.()
   navigationState.target = target
   navigationState.loading = true
   navigationState.error = ''
@@ -10,6 +25,8 @@ export function beginNavigation(target: string): void {
 
 export function finishNavigation(target: string, error = ''): void {
   if (navigationState.target !== target) return
+  if (timer) clearTimeout(timer)
+  ++attempt
   navigationState.loading = false
   navigationState.error = error
 }

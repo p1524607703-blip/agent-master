@@ -88,7 +88,7 @@ if [ ! -f "$release/release.json" ]; then
   (
     cd "$staging/amazon-ads-console/frontend"
     npm ci --no-audit --no-fund --fetch-retries=1 --fetch-timeout=30000
-    VITE_API_BASE=/api npm run build
+    VITE_API_BASE=/api VITE_APP_COMMIT="$commit" npm run build
   )
   python3 - "$staging" "$approval" "$commit" <<'PY'
 import json,sys

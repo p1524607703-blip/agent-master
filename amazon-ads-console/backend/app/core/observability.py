@@ -120,7 +120,7 @@ def _safe_stack(exc: BaseException) -> list[dict[str, Any]]:
     return frames[-80:]
 
 
-def emit_diagnostic(record: dict[str, Any]) -> None:
+def emit_diagnostic(record: dict[str, Any]) -> bool:
     # Observability must never change a successful response or hide an exception.
     try:
         logger.info("request diagnostic", extra={"diagnostic": record})
@@ -134,11 +134,13 @@ def emit_diagnostic(record: dict[str, Any]) -> None:
             # external; reopen on each append so rename/create rotation works.
             fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)
             try:
-                os.write(fd, encoded)
+                written = os.write(fd, encoded)
             finally:
                 os.close(fd)
+            return written == len(encoded)
         except (OSError, ValueError, TypeError):
             pass
+    return False
 
 
 def read_request_traces(limit: int = 100, request_id: Optional[str] = None,

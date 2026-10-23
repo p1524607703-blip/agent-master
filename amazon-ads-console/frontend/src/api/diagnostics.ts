@@ -76,3 +76,14 @@ export function getDiagnosticRequests(filters: DiagnosticFilters): Promise<Diagn
   for (const [key, value] of Object.entries(filters)) if (value) params.set(key, value)
   return getJsonStrict<DiagnosticRequests>(`/diagnostics/requests?${params}`)
 }
+
+export type FrontendErrorRecord = {
+  event_id: string; request_id: string; timestamp: string; username: string; user_id: string
+  kind: string; message: string; error_code: string; page_path: string; target_path: string
+  client_commit: string; commit: string; exception_type: string; duration_ms: number; occurrences: number
+  stack: Array<{file:string;line:number;column:number}>
+}
+export const getFrontendErrors = (filters: Record<string,string>) => {
+  const params = new URLSearchParams(Object.entries(filters).filter(([,value])=>value))
+  return getJsonStrict<{items:FrontendErrorRecord[];available:boolean;scan_truncated?:boolean;message?:string}>(`/diagnostics/frontend-errors?${params}`)
+}

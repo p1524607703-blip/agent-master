@@ -25,6 +25,7 @@ SAFE_FIELDS = {
     'status_code', 'pid', 'release', 'commit', 'exception_type', 'stack',
     'performance_class', 'performance_reason', 'quality', 'response_bytes', 'build',
     'query_timings', 'sb_attribution_mode',
+    'event_id', 'kind', 'error_code', 'page_path', 'target_path', 'client_commit', 'duration_ms', 'occurrences', 'message',
 }
 
 
@@ -72,7 +73,8 @@ def diagnostic_status() -> dict[str, Any]:
 def request_traces(*, request_id: str | None = None, user_id: str | None = None,
                    username: str | None = None, endpoint: str | None = None,
                    since: str | None = None, until: str | None = None,
-                   limit: int = 100) -> dict[str, Any]:
+                   limit: int = 100, event: str = 'request_complete', page_path: str | None = None,
+                   client_commit: str | None = None, kind: str | None = None) -> dict[str, Any]:
     now = datetime.now(timezone.utc)
     start = _timestamp(since) if since else now - timedelta(days=RETENTION_DAYS if request_id else 1)
     end = _timestamp(until) if until else now + timedelta(minutes=5)
@@ -117,7 +119,7 @@ def request_traces(*, request_id: str | None = None, user_id: str | None = None,
                         continue
                     try:
                         record = json.loads(line)
-                        if not isinstance(record, dict) or record.get('event') != 'request_complete':
+                        if not isinstance(record, dict) or record.get('event') != event:
                             continue
                         when = _timestamp(record['timestamp'])
                         if not start <= when <= end:
@@ -129,6 +131,10 @@ def request_traces(*, request_id: str | None = None, user_id: str | None = None,
                         if username and record.get('username') != username:
                             continue
                         if endpoint and endpoint not in str(record.get('endpoint', '')):
+                            continue
+                        if any(value and value not in str(record.get(key, '')) for key,value in (('page_path',page_path),('client_commit',client_commit))):
+                            continue
+                        if kind and record.get('kind') != kind:
                             continue
                         matches.append({key: value for key, value in record.items() if key in SAFE_FIELDS})
                     except (ValueError, KeyError, TypeError):
