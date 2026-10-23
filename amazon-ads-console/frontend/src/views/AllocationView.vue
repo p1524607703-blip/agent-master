@@ -235,7 +235,7 @@ onMounted(load)
   <section class="page allocation-page">
     <header class="page-head">
       <div><h1>广告费用分摊</h1><p>每个款最终承担多少广告费、钱从哪来，一眼看清。</p></div>
-      <div class="actions"><button :disabled="loading || busy" @click="load">刷新</button><button v-if="canCreate" :disabled="!enabled || busy" @click="showCreate = !showCreate">新建试算</button></div>
+      <div class="actions"><router-link to="/data-changes" class="btn">{{ isManager ? '映射提交与审批' : '提交映射变更' }}</router-link><button :disabled="loading || busy" @click="load">刷新</button><button v-if="canCreate" :disabled="!enabled || busy" @click="showCreate = !showCreate">新建试算</button></div>
     </header>
 
     <div class="notice">{{ announcement }}</div>

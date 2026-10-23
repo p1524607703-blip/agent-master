@@ -18,6 +18,7 @@ function execute(file, imports) {
   }, module, module.exports)
   return module.exports
 }
+const access = execute('../src/router/access.ts', {})
 const nav = execute('../src/router/navigation.ts', {vue:Vue})
 const deferred = () => {let resolve,reject;const promise=new Promise((a,b)=>{resolve=a;reject=b});return {promise,resolve,reject}}
 const flush = async () => {for(let i=0;i<5;i++) await new Promise(resolve=>setImmediate(resolve))}
@@ -57,26 +58,72 @@ test('real router exposes pending lazy navigation immediately and settles after 
     'vue-router':{...Router,createWebHistory:Router.createMemoryHistory},vue:Vue,
     './navigation':nav,
     '../stores/session':{useSessionStore:()=>({token:'fixture',user:{roleCode:'super_admin'},ensureUser:async()=>true})},
-    '../diagnostics/permissions':{canViewDiagnostics:()=>true},
+    './access':access,
     '../diagnostics/browserTrace':{enterPage:()=>'',completePageRender(){}},
     // Preserve the asynchronous import boundary through TS's CommonJS wrapper.
-    '../views/ReportsView.vue':Object.assign(lazy.promise,{__esModule:true}),
+    '../views/DataMaintenanceView.vue':Object.assign(lazy.promise,{__esModule:true}),
   })
   const router=routerModule.default
   try {
     await router.push('/operator-cpo')
-    routerModule.prefetchRoute('/reports')
+    routerModule.prefetchRoute('/data-maintenance')
     await flush()
     assert.equal(router.currentRoute.value.path,'/operator-cpo','preloading code must not navigate')
     assert.equal(nav.navigationState.loading,false,'preloading must not block the current page')
-    const pending=router.push('/reports')
+    const pending=router.push('/data-maintenance')
     await flush()
     assert.equal(router.currentRoute.value.path,'/operator-cpo')
-    assert.equal(nav.navigationState.target,'/reports')
+    assert.equal(nav.navigationState.target,'/data-maintenance')
     assert.equal(nav.navigationState.loading,true)
     lazy.resolve({__esModule:true,default:{render:()=>null}})
     await pending
-    assert.equal(router.currentRoute.value.path,'/reports')
+    assert.equal(router.currentRoute.value.path,'/data-maintenance')
     assert.equal(nav.navigationState.loading,false)
+  } finally {globalThis.requestAnimationFrame=frame}
+})
+
+
+test('role menus have three business entries and reserve system entries for super admins', () => {
+  const paths = role => access.navigationFor(role).flatMap(group => group.items.map(([path]) => path))
+  assert.deepEqual(paths('management'), ['/operator-cpo', '/ad-allocation', '/product-mappings'])
+  assert.equal(paths('super_admin').length, 6)
+  assert.equal(paths('operator').length, 3)
+  for (const role of ['management','operator','viewer',null]) {
+    for (const path of ['/codex-devices','/diagnostics','/data-maintenance']) assert.equal(access.canAccessRoute(role,path), false)
+  }
+  assert.equal(access.canAccessRoute('management','/data-changes'), true)
+  assert.equal(access.canAccessRoute('operator','/data-changes'), true)
+  assert.equal(access.canAccessRoute('management','/operators/ZF'), true)
+  assert.deepEqual(paths('viewer'), [])
+})
+
+test('real router rejects direct system links and retires old bookmarks for each role', async () => {
+  const frame=globalThis.requestAnimationFrame
+  globalThis.requestAnimationFrame=callback=>{callback();return 0}
+  try {
+    for (const role of ['management','operator','super_admin']) {
+      const routerModule=execute('../src/router/index.ts', {
+        'vue-router':{...Router,createWebHistory:Router.createMemoryHistory},vue:Vue,
+        './navigation':nav,'./access':access,
+        '../stores/session':{useSessionStore:()=>({token:'fixture',user:{roleCode:role},ensureUser:async()=>true})},
+        '../diagnostics/browserTrace':{enterPage:()=>'',completePageRender(){}},
+      })
+      const router=routerModule.default
+      for (const path of ['/dashboard','/issues','/rules','/products','/ad-types','/unknown']) {
+        await router.push(path)
+        assert.equal(router.currentRoute.value.path,access.homeFor(role))
+      }
+      for (const path of ['/codex-devices','/diagnostics','/data-maintenance']) {
+        await router.push(path)
+        assert.equal(router.currentRoute.value.path,role==='super_admin'?path:access.homeFor(role))
+      }
+      await router.push('/reports')
+      assert.equal(router.currentRoute.value.path,role==='super_admin'?'/data-maintenance':access.homeFor(role))
+      await router.push('/cpo-jobs')
+      if(role==='super_admin') assert.equal(router.currentRoute.value.query.tab,'imports')
+      else assert.equal(router.currentRoute.value.path,access.homeFor(role))
+      await router.push('/data-changes')
+      assert.equal(router.currentRoute.value.path,'/data-changes')
+    }
   } finally {globalThis.requestAnimationFrame=frame}
 })

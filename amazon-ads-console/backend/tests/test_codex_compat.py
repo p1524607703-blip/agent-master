@@ -76,7 +76,7 @@ class CompatibilityAndAccessTests(unittest.TestCase):
         self.query('TRUNCATE codex_ops.model_requests,codex_ops.devices')
         self.query("UPDATE iam.users SET status='active'")
         self.app = FastAPI();self.app.include_router(api.router,prefix='/api')
-        self.app.dependency_overrides[require_session] = lambda:('fixture',{'roleCode':'management'})
+        self.app.dependency_overrides[require_session] = lambda:('fixture',{'roleCode':'super_admin'})
         self.client = TestClient(self.app)
         self.device = self.client.post('/api/codex/devices',json={'userId':1,'deviceName':'YE 测试 Key','platform':'windows'}).json()
         self.headers = {'Authorization':'Bearer '+self.device['apiKey']}
@@ -175,13 +175,13 @@ class CompatibilityAndAccessTests(unittest.TestCase):
         self.assertNotIn(original,overview);self.assertNotIn(self.device['apiKey'],overview)
         self.assertNotIn('fixture-upstream-private',config.text+overview)
 
-    def test_management_permissions_and_name_validation(self):
-        for role in ['operator','ai','viewer']:
+    def test_super_admin_permissions_and_name_validation(self):
+        for role in ['management','operator','ai','viewer']:
             self.app.dependency_overrides[require_session]=lambda role=role:('fixture',{'roleCode':role})
             self.assertEqual(self.client.get('/api/codex/access-config').status_code,403)
             self.assertEqual(self.client.patch('/api/codex/devices/'+self.device['deviceId'],json={'deviceName':'bad'}).status_code,403)
             self.assertEqual(self.client.post('/api/codex/devices',json={'userId':1,'deviceName':'forbidden','platform':'windows'}).status_code,403)
-        self.app.dependency_overrides[require_session]=lambda:('fixture',{'roleCode':'management'})
+        self.app.dependency_overrides[require_session]=lambda:('fixture',{'roleCode':'super_admin'})
         for name in ['   ','a\nb','x'*81]:
             self.assertEqual(self.client.patch('/api/codex/devices/'+self.device['deviceId'],json={'deviceName':name}).status_code,422)
         self.assertEqual(self.client.patch('/api/codex/devices/'+self.device['deviceId'],json={'deviceName':'name','userId':2}).status_code,422)

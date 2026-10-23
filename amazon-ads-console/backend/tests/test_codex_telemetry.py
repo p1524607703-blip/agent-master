@@ -119,7 +119,7 @@ class IntegrationTests(unittest.TestCase):
         self.query("UPDATE iam.users SET status='active'")
         self.app = FastAPI()
         self.app.include_router(api.router,prefix='/api')
-        self.app.dependency_overrides[require_session] = lambda:('test',{'roleCode':'management'})
+        self.app.dependency_overrides[require_session] = lambda:('test',{'roleCode':'super_admin'})
         self.client = TestClient(self.app)
         result = self.client.post('/api/codex/devices',json={'userId':1,'deviceName':'Test Windows','platform':'windows'})
         self.assertEqual(result.status_code,200,result.text)
@@ -157,8 +157,8 @@ class IntegrationTests(unittest.TestCase):
         stored = self.query('SELECT key_hash FROM codex_ops.devices')[0]['key_hash']
         self.assertNotEqual(stored,self.device['apiKey'])
 
-    def test_only_management_provisions_and_reads(self):
-        for role in ['ai','operator','viewer']:
+    def test_only_super_admin_provisions_and_reads(self):
+        for role in ['management','ai','operator','viewer']:
             self.app.dependency_overrides[require_session] = lambda role=role:('test',{'roleCode':role})
             self.assertEqual(self.client.get('/api/codex/overview').status_code,403)
             self.assertEqual(self.client.post('/api/codex/devices',json={'userId':1,'deviceName':'Forbidden','platform':'windows'}).status_code,403)
@@ -381,7 +381,7 @@ class LiveProxyTests(unittest.TestCase):
             settings.codex_event_spool_dir=temporary
             device=asyncio.run(service.register_device(1,'Synthetic live acceptance','windows'))
             app=FastAPI();app.include_router(api.router,prefix='/api')
-            app.dependency_overrides[require_session]=lambda:('test',{'roleCode':'management'})
+            app.dependency_overrides[require_session]=lambda:('test',{'roleCode':'super_admin'})
             marker='candidate-live-'+secrets.token_hex(8)
             with TestClient(app) as client:
                 response=client.post('/api/codex/v1/responses',

@@ -64,9 +64,47 @@ class PermissionTests(unittest.TestCase):
         with patch.object(routes, 'operator_cpo_summary', return_value={'operators': [{'group': 'XM1'}, {'group': 'AJ1'}]}):
             self.assertEqual(self.get('/api/operator-cpo?date=2026-10-04', 'manager').status_code, 200)
         for user in ('xm', 'aj', 'unknown'):
-            for path in ('/api/dashboard/overview', '/api/product-mappings', '/api/cache/stats', '/api/health', '/api/reports', '/api/diagnostics/status', '/api/diagnostics/requests'):
+            for path in ('/api/product-mappings', '/api/cache/stats', '/api/health', '/api/reports', '/api/diagnostics/status', '/api/diagnostics/requests'):
                 with self.subTest(user=user, path=path):
                     self.assertEqual(self.get(path, user).status_code, 403)
+
+    def test_management_cannot_access_system_modules_before_any_loader(self):
+        with patch.object(routes, 'reports') as reports, patch.object(routes, 'source_status') as sources, \
+             patch.object(routes, 'diagnostic_status') as diagnostic, patch.object(routes, 'request_traces') as traces:
+            for path in ('/api/reports', '/api/cpo/source-status?date=2026-10-20',
+                         '/api/cache/stats', '/api/health', '/api/diagnostics/status', '/api/diagnostics/requests'):
+                self.assertEqual(self.get(path, 'manager').status_code, 403, path)
+            for loader in (reports, sources, diagnostic, traces):
+                loader.assert_not_called()
+            reports.return_value = []
+            self.assertEqual(self.get('/api/reports', 'admin').status_code, 200)
+            self.assertEqual(self.get('/api/reports', 'manager').status_code, 403)
+
+    def test_management_cannot_upload_or_commit_reports(self):
+        with patch.object(routes, 'validate_upload') as validate, patch.object(routes, 'commit_upload') as commit:
+            for path in ('/api/cpo/imports/validate?account=fixture&report_type=fixture&date=2026-10-20',
+                         '/api/cpo/imports/fixture/commit'):
+                response = self.client.post(path, headers={'Authorization': 'Bearer manager', 'X-File-Name': 'fixture.csv'}, content=b'fixture')
+                self.assertEqual(response.status_code, 403)
+            validate.assert_not_called()
+            commit.assert_not_called()
+
+    def test_management_keeps_business_mapping_read(self):
+        with patch.object(routes, 'product_mappings', return_value={'rows': []}), \
+             patch.object(routes, '_data_revision', return_value='fixture'):
+            self.assertEqual(self.get('/api/product-mappings', 'manager').status_code, 200)
+
+    def test_removed_modules_return_gone_without_live_database_access(self):
+        paths = ('/api/dashboard/overview', '/api/dashboard/trend', '/api/products',
+                 '/api/cpo-jobs', '/api/issues', '/api/rules/product-allocation', '/api/rules/ad-type')
+        for path in paths:
+            self.assertEqual(self.get(path).status_code, 401)
+            for user in ('manager', 'admin', 'xm'):
+                response = self.get(path, user)
+                self.assertEqual(response.status_code, 410, path)
+                self.assertEqual(response.json()['code'], 'MODULE_RETIRED')
+        for path in ('/api/product-mappings/discover', '/api/product-mappings'):
+            self.assertEqual(self.client.post(path, headers={'Authorization': 'Bearer admin'}).status_code, 410)
 
     def test_shared_summary_excludes_company_audit_and_full_funnel(self):
         data = {'operators': [{'group': 'XM1'}, {'group': 'AJ1'}],

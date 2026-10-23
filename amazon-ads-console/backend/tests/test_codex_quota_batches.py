@@ -259,14 +259,14 @@ class HistoryEndpointTests(unittest.IsolatedAsyncioTestCase):
         import httpx
         from fastapi import FastAPI
         from app.api.codex_devices import router
-        from app.api.auth import require_management_session
+        from app.api.auth import require_super_admin_session
         fixture=BatchTests();fixture.setUp()
         try:
             fixture.tick(0,0);fixture.add(1,100,10,20,30);result=fixture.tick(1,120)
             bid=result['latestBatches'][0]['batchId']
             fixture.add(2,300,15,25,150);fixture.tick(1,240,120)
             app=FastAPI();app.include_router(router,prefix='/api')
-            app.dependency_overrides[require_management_session]=lambda:('fixture',{'roleCode':'management'})
+            app.dependency_overrides[require_super_admin_session]=lambda:('fixture',{'roleCode':'super_admin'})
             with patch.object(service,'database_path',return_value=fixture.path):
                 async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app),base_url='http://fixture.test') as client:
                     response=await client.get('/api/codex/quota-batches/'+bid+'/revisions')

@@ -31,7 +31,7 @@ const reports = computed(() => [...rows.value].sort((a,b) => `${a.account}-${a.t
 </script>
 <template>
   <section class="page">
-    <div class="page-head"><div><h1>报告管理</h1><p>查看后台核对的报表覆盖快照；源数据更新后会自动重新统计。</p></div><button class="btn" :disabled="loading" @click="load">刷新状态</button></div>
+    <div class="page-head"><div><h1>报告覆盖</h1><p>查看后台核对的报表覆盖快照；源数据更新后会自动重新统计。</p></div><button class="btn" :disabled="loading" @click="load">刷新状态</button></div>
     <DataSkeleton v-if="loading" variant="cards" :rows="6" />
     <div v-else-if="error" role="alert" class="card panel"><p>{{error}}</p><button class="btn" @click="load">重新读取</button></div>
     <div v-else class="report-grid">

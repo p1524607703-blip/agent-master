@@ -45,6 +45,12 @@ async def require_management_session(session: Tuple[str, Dict[str, Any]] = Depen
     return session
 
 
+async def require_super_admin_session(session: Tuple[str, Dict[str, Any]] = Depends(require_session)):
+    if session[1].get('roleCode') != 'super_admin':
+        raise HTTPException(status_code=403, detail='Super administrator access required')
+    return session
+
+
 async def require_own_operator_session(session: Tuple[str, Dict[str, Any]] = Depends(require_session)):
     if session[1].get('roleCode') != 'operator' or not operator_group_of(session[1].get('operatorCode')):
         raise HTTPException(status_code=403, detail='An active operator group is required')

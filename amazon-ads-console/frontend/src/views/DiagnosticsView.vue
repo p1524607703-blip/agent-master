@@ -95,7 +95,7 @@ onMounted(load)
     </p>
 
     <div class="card panel">
-      <div class="panel-head"><h2>运行状态</h2><span class="muted small">管理层可见</span></div>
+      <div class="panel-head"><h2>运行状态</h2><span class="muted small">仅超级管理员可见</span></div>
       <div class="system-grid">
         <div><span>发布版本</span><strong>{{ status?.release?.release_version || '未提供' }}</strong></div>
         <div><span>Git 提交</span><strong class="mono">{{ status?.release?.git_commit || '未提供' }}</strong></div>
