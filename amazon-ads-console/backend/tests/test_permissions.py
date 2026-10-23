@@ -133,7 +133,18 @@ class PermissionTests(unittest.TestCase):
             for user, target in (('xm', 'AJ'), ('xm', '爱菊'), ('aj', 'XM'), ('aj', '雪敏'), ('xm', 'XM-private'), ('unbound', 'XM')):
                 with self.subTest(user=user, target=target):
                     self.assertEqual(self.get('/api/operators/' + target, user).status_code, 403)
-            self.assertEqual(detail.call_count, 3)
+            self.assertEqual(detail.call_count, 1)
+
+    def test_equivalent_group_aliases_share_one_cache_entry_after_authorization(self):
+        with patch.object(routes, 'operator_cpo_detail', return_value={'products': [{'group': 'XM2'}]}) as detail:
+            for target in ('XM', 'XM1', 'XM0002', 'xm9', '雪敏'):
+                response = self.get('/api/operators/' + target + '?date=2026-10-04', 'xm')
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(response.json()['products'], [{'group': 'XM2'}])
+            self.assertEqual(detail.call_count, 1)
+            self.assertEqual(cache.stats()['entries'], 1)
+            self.assertEqual(self.get('/api/operators/AJ0002?date=2026-10-04', 'xm').status_code, 403)
+            self.assertEqual(cache.stats()['entries'], 1)
 
     def test_my_cpo_ignores_frontend_group_and_omits_global_audit(self):
         data = {'operators': [{'groups': ['XM1'], 'name': '雪敏'}, {'groups': ['AJ1'], 'name': '爱菊'}], 'data_date': '2026-10-04', 'period': 'daily', 'businessUnmappedOrders': 999, 'businessOutOfScopeParents': ['private'], 'note': 'company-wide $999'}

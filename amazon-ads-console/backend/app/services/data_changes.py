@@ -14,6 +14,8 @@ from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
+from .operator_cpo import operator_group_of
+
 MANAGEMENT = {'management', 'super_admin'}
 COLUMNS = ['change_type', 'account_id', 'marketplace_id', 'operator_code', 'product_code',
            'parent_asin', 'no_parent', 'child_asin', 'sku', 'effective_from', 'effective_to',
@@ -74,12 +76,34 @@ class DataChangeService:
             raise ChangeError(403, 'SUBMITTER_ID_REQUIRED', 'A server-authenticated user ID is required.')
         if user.get('roleCode') not in MANAGEMENT | {'operator'}:
             raise ChangeError(403, 'ROLE_FORBIDDEN', 'This role cannot access mapping proposals.')
+        if user.get('roleCode') == 'operator' and not operator_group_of(user.get('operatorCode')):
+            raise ChangeError(403, 'OPERATOR_SCOPE_REQUIRED', 'An active operator group is required.')
         return str(user['userId'])
+
+    @staticmethod
+    def _visible(batch, user):
+        if user.get('roleCode') in MANAGEMENT:
+            return True
+        group = operator_group_of(user.get('operatorCode'))
+        if (user.get('roleCode') != 'operator' or not group
+                or batch['created_by'] != str(user.get('userId'))
+                or operator_group_of(batch.get('operator_code')) != group
+                or batch.get('created_role') in MANAGEMENT):
+            return False
+        if batch.get('created_role') == 'operator':
+            # Invalid CSV targets are the submitter's own input, so their
+            # validation errors remain readable within the original group.
+            return True
+        # Older batches have no role snapshot. A former manager's operator
+        # binding alone cannot authorize a batch containing other groups.
+        return all(operator_group_of(values.get('operator_code')) == group
+                   for row in batch.get('rows', [])
+                   for values in (row.get('old_values'), row.get('new_values')) if values)
 
     def _batch(self, state, tenant, user, batch_id):
         uid = self._identity(user)
         batch = state['batches'].get(batch_id)
-        if not batch or batch['tenant_id'] != tenant or (batch['created_by'] != uid and user.get('roleCode') not in MANAGEMENT):
+        if not batch or batch['tenant_id'] != tenant or not self._visible(batch, user):
             raise ChangeError(404, 'BATCH_NOT_FOUND', 'Proposal not found.')
         return batch
 
@@ -112,7 +136,8 @@ class DataChangeService:
         if existing:
             if existing['request_hash'] != request_hash:
                 raise ChangeError(409, 'IDEMPOTENCY_CONFLICT', 'The same key was used with different content.')
-            return token, request_hash, copy.deepcopy(existing['response'])
+            batch = self._batch(state, tenant, user, existing['response']['id'])
+            return token, request_hash, self._view(batch, user)
         return token, request_hash, None
 
     @staticmethod
@@ -271,12 +296,13 @@ class DataChangeService:
                     raise ChangeError(409, 'REVISION_NOT_ALLOWED', 'Create a revision only after rejection, conflict, validation failure or withdrawal.')
             content_hash = digest({'file_hash': hashlib.sha256(csv_text.encode()).hexdigest(), 'context': context, 'parent_id': parent_id})
             for batch in state['batches'].values():
-                if batch['tenant_id'] == tenant and batch['created_by'] == str(user['userId']) and batch['content_hash'] == content_hash:
+                if batch['tenant_id'] == tenant and batch['created_by'] == str(user['userId']) and batch['content_hash'] == content_hash and self._visible(batch, user):
                     return self._remember(state, token, request_hash, self._view(batch, user))
             rows = self._validate(tenant, user, raw_rows, context)
             errors = sum(bool(row['errors']) for row in rows)
             batch = {'id': str(uuid4()), 'tenant_id': tenant, 'created_by': str(user['userId']),
-                     'operator_code': user.get('operatorCode'), 'file_name': file_name, 'file_content': csv_text,
+                     'operator_code': user.get('operatorCode'), 'created_role': user.get('roleCode'),
+                     'file_name': file_name, 'file_content': csv_text,
                      'file_hash': hashlib.sha256(csv_text.encode()).hexdigest(), 'content_hash': content_hash,
                      'rows_hash': digest(rows), 'row_count': len(rows), 'error_count': errors, 'rows': rows,
                      'status': 'VALIDATION_FAILED' if errors else 'READY', 'version': 1, 'created_at': now(),
@@ -290,7 +316,7 @@ class DataChangeService:
         self._identity(user)
         with self.repository.transaction() as state:
             batches = [batch for batch in state['batches'].values() if batch['tenant_id'] == tenant and
-                       (batch['created_by'] == str(user['userId']) or user.get('roleCode') in MANAGEMENT)]
+                       self._visible(batch, user)]
             batches.sort(key=lambda batch: (batch['created_at'], batch['id']), reverse=True)
             return {'items': [self._view(batch, user) for batch in batches[cursor:cursor + limit]],
                     'next_cursor': str(cursor + limit) if len(batches) > cursor + limit else None}
