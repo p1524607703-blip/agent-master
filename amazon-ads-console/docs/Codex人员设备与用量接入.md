@@ -16,6 +16,10 @@
 
 验收须分别确认原Key、审批取消／恢复、停用、撤销、硬件可选、真实SSE及非流式Doctor、并发与用量去重。服务器验证不等于Windows桌面已验收；短请求成功不能承诺所有大上下文请求或外部上游永不超时。
 
+### 新旧压缩请求兼容
+
+现场真实请求确认，模型源原生 v2 `compaction_trigger` 经 `/responses` 正常完成，而其旧 `/responses/compact` 上游路径返回404。控制台将客户端的旧压缩请求一次转换成原生 v2 请求，按 `output_index` 保留完整结果窗口与上游原有 `encrypted_content`，返回 JSON `response.compaction`。原生 v2 请求继续直接透传。缺少原生压缩项、纯文本摘要、伪装为加密内容的本地摘要或截断响应明确失败；不拼造加密状态、不重放请求，用量沿同一 Key 记一次。压缩结果须原样传入下一轮，不能只截取压缩项；格式依据 [OpenAI Docs](https://developers.openai.com/api/docs/guides/compaction)。
+
 ## rc.11 主机模型源等待修复
 
 现场进一步确认：原 Codex++ v1.8 模型源把流式响应头等待固定为120秒，网关更长的读取时间无法覆盖这一内层截止。主机专用 source worker 复用固定上游源码 `9a581df9394b6fb9340beb5453862e202079298b` 的 launcher、协议转换和既有授权读取流程；仅将流式响应头等待改成私有进程配置 `CPO_SOURCE_HEADER_TIMEOUT_SECONDS`（60–900秒，当前主机600秒），不改变普通非流式请求的原30秒策略。不复制、导出或重置OAuth，不改原主管窗口与登录。

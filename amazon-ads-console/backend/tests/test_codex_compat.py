@@ -40,6 +40,19 @@ class PreparationTests(unittest.TestCase):
         for payload in ({'stream':'false'},{'stream':0},{'store':True},{'store':None}):
             with self.assertRaises(HTTPException):codex_responses.prepare(payload)
 
+    def test_compact_preserves_opaque_history_and_adds_only_one_native_trigger(self):
+        value = {'model':'fixture','input':[{'type':'compaction','encrypted_content':'prior-opaque-state'},
+                    {'role':'user','content':'Continue'}],'instructions':'preserve constraints'}
+        body, stream = codex_responses.prepare_compact(value)
+        expected = {**value,'input':[*value['input'],{'type':'compaction_trigger'}],'stream':True,'store':False}
+        self.assertEqual(json.loads(body),expected)
+        self.assertFalse(stream)
+        body2,_ = codex_responses.prepare_compact({**expected,'stream':False})
+        self.assertEqual(json.loads(body2),expected)
+        self.assertEqual(len(value['input']),2)
+        for extra in ({'input':None},{'input':{}},{'input':[],'stream':True}):
+            with self.assertRaises(HTTPException):codex_responses.prepare_compact(extra)
+
     def test_buffered_final_response_supports_split_unicode_and_large_output(self):
         final = {'id':'response-fixture','status':'completed','output':[{'type':'message','role':'assistant',
                   'content':[{'type':'output_text','text':'你好'+'a'*(1024*1024)}]}],
@@ -108,6 +121,66 @@ class CompatibilityAndAccessTests(unittest.TestCase):
     def doctor(self,**extra):
         return self.client.post('/api/codex/v1/responses',headers=self.headers,
                                 json={'model':'fixture-model','input':'hi','max_output_tokens':16,**extra})
+
+    def compact_upstream(self,kind='native'):
+        original = httpx.AsyncClient
+        self.compact_calls = []
+        self.retained_item = {'type':'message','role':'user','content':[{'type':'input_text','text':'retained context'}]}
+        self.native_item = {'type':'compaction','id':'cmp_fixture','encrypted_content':'opaque-native-checkpoint'}
+        def handler(request):
+            payload = json.loads(request.content)
+            self.compact_calls.append(payload)
+            self.assertEqual(request.url.path,'/v1/responses')
+            self.assertEqual(payload['input'][-1],{'type':'compaction_trigger'})
+            self.assertEqual(payload['input'][0],{'type':'compaction','encrypted_content':'prior-opaque-state'})
+            self.assertEqual(payload['instructions'],'Keep all constraints')
+            self.assertIs(payload['stream'],True);self.assertIs(payload['store'],False)
+            if kind=='limited':return httpx.Response(429,headers={'Retry-After':'7','X-Relay-Limit-Origin':'upstream'},json={'error':{'code':'upstream_fixture_limit'}})
+            items = [self.retained_item,self.native_item]
+            if kind=='plaintext':items = [self.retained_item]
+            elif kind=='local-summary':items = [{**self.native_item,'encrypted_content':'codexplusplus:summary:v1:"not native"'}]
+            elif kind=='duplicate':items = [self.native_item,{**self.native_item,'id':'cmp_second'}]
+            # Completion order can differ from canonical output_index order.
+            events = [{'type':'response.output_item.done','output_index':i,'item':item} for i,item in reversed(list(enumerate(items)))]
+            final = {**self.final,'id':self.final['id']+'-'+kind}
+            if kind!='truncated':events.append({'type':'response.completed','response':final})
+            wire = ''.join('data: '+json.dumps(e)+'\n\n' for e in events).encode()
+            return httpx.Response(200,headers={'Content-Type':'text/event-stream'},content=wire)
+        return patch.object(relay.httpx,'AsyncClient',side_effect=lambda **kwargs:original(transport=httpx.MockTransport(handler),**kwargs))
+
+    def compact(self):
+        return self.client.post('/api/codex/v1/responses/compact',headers=self.headers,json={'model':'fixture-model',
+            'input':[{'type':'compaction','encrypted_content':'prior-opaque-state'},{'role':'user','content':'Recent turn'}],
+            'instructions':'Keep all constraints'})
+
+    def test_legacy_compact_returns_native_checkpoint_and_retained_window_once(self):
+        with self.compact_upstream():result = self.compact()
+        self.assertEqual(result.status_code,200,result.text)
+        self.assertEqual(result.json(),{'id':self.final['id']+'-native','object':'response.compaction',
+            'output':[self.retained_item,self.native_item],'usage':self.final['usage']})
+        self.assertEqual(len(self.compact_calls),1)
+        rows = self.query('SELECT device_id,completed,total_tokens FROM codex_ops.model_requests')
+        self.assertEqual(len(rows),1)
+        self.assertEqual(str(rows[0]['device_id']),self.device['deviceId'])
+        self.assertEqual(rows[0]['total_tokens'],20)
+        self.assertTrue(rows[0]['completed'])
+
+    def test_compact_rejects_missing_or_fake_checkpoint_and_interruption_without_replay(self):
+        for kind in ('plaintext','local-summary','duplicate','truncated'):
+            with self.subTest(kind=kind),self.compact_upstream(kind):result = self.compact()
+            self.assertEqual(result.status_code,502,result.text)
+            self.assertEqual(len(self.compact_calls),1)
+        rows = self.query('SELECT total_tokens FROM codex_ops.model_requests')
+        self.assertEqual(len(rows),4)
+        self.assertEqual(sum(r['total_tokens'] is None for r in rows),1)
+
+    def test_compact_retains_upstream_limit_and_retry_guidance_without_replay(self):
+        with self.compact_upstream('limited'):result = self.compact()
+        self.assertEqual(result.status_code,429)
+        self.assertEqual(result.headers['retry-after'],'7')
+        self.assertEqual(result.headers['x-relay-limit-origin'],'upstream')
+        self.assertEqual(result.json()['error']['code'],'upstream_fixture_limit')
+        self.assertEqual(len(self.compact_calls),1)
 
     def test_unmodified_codexplusplus_doctor_gets_actual_json_and_measured_usage(self):
         with self.upstream():result = self.doctor()

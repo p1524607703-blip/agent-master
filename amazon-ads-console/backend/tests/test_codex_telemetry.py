@@ -144,7 +144,8 @@ class IntegrationTests(unittest.TestCase):
                 'input_tokens_details':{'cached_tokens':6},'output_tokens_details':{'reasoning_tokens':3}}
             response = {'id':response_id,'status':'completed'}
             if kind!='missing':response['usage']=usage
-            if request.url.path.endswith('/compact'):return httpx.Response(200,json=response)
+            if any(item.get('type')=='compaction_trigger' for item in json.loads(request.content).get('input',[]) if isinstance(item,dict)):
+                response['output']=[{'type':'compaction','id':'cmp_fixture','encrypted_content':'opaque-fixture'}]
             event = {'type':'response.completed','response':response}
             return httpx.Response(200,headers={'Content-Type':'text/event-stream'},content=('data: '+json.dumps(event)+'\n\n').encode())
         return patch.object(service.httpx,'AsyncClient',side_effect=lambda **kwargs:original(transport=httpx.MockTransport(handler),**kwargs))

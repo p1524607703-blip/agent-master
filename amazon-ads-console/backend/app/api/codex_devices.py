@@ -287,17 +287,19 @@ async def responses(request: Request,device=Depends(require_device)):
         raise HTTPException(400,'Expected JSON model request')
     if not isinstance(value,dict):
         raise HTTPException(400,'Expected JSON model object')
-    route = '/responses/compact' if request.url.path.endswith('/compact') else '/responses'
-    wire_body, stream_requested = (bytes(body), True) if route.endswith('/compact') else codex_responses.prepare(value)
+    compact = request.url.path.endswith('/compact')
+    # The account source supports native compaction on /responses, while its
+    # legacy /responses/compact URL is unavailable. Submit exactly once.
+    wire_body, stream_requested = codex_responses.prepare_compact(value) if compact else codex_responses.prepare(value)
     if len(wire_body)>16*1024*1024:
         raise HTTPException(413,'Model request too large')
-    observer = telemetry.UsageObserver(capture_response=True) if not stream_requested else None
+    observer = telemetry.UsageObserver(capture_response=True,capture_output_items=compact) if not stream_requested else None
     headers = {'Cache-Control':'no-store'}
-    status,content_type,rid,stream = await telemetry.proxy_response(device,wire_body,route,request.headers,
+    status,content_type,rid,stream = await telemetry.proxy_response(device,wire_body,'/responses',request.headers,
                                                                   observer=observer,response_headers=headers)
     headers['X-Request-ID'] = rid
     if not stream_requested:
-        return await codex_responses.collect(status,content_type,stream,observer,headers)
+        return await codex_responses.collect(status,content_type,stream,observer,headers,compact=compact)
     return StreamingResponse(stream,status_code=status,background=BackgroundTask(stream.aclose),headers={
         **headers,'Content-Type':content_type,'X-Accel-Buffering':'no'})
 

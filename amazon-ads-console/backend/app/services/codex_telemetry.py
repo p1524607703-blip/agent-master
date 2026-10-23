@@ -94,7 +94,7 @@ async def heartbeat(device, codex_running, client_version):
 
 class UsageObserver:
     """Bounded accounting parser; optionally retain terminal JSON in memory, never on disk."""
-    def __init__(self, capture_response=False):
+    def __init__(self, capture_response=False, capture_output_items=False):
         self.decoder = codecs.getincrementaldecoder('utf-8')('replace')
         self.buffer = ''
         self.skipping = False
@@ -105,6 +105,8 @@ class UsageObserver:
         self.first_output_at = None
         self.capture_response = capture_response
         self.response = None
+        self.capture_output_items = capture_output_items
+        self.output_items = {}
         # A terminal event repeats the generated output. Use the same bounded
         # limit for streamed and collected responses so a valid large terminal
         # event is not mistaken for a truncated stream. Parsed output is discarded
@@ -127,6 +129,10 @@ class UsageObserver:
             if not isinstance(event,dict):
                 continue
             kind = event.get('type')
+            if self.capture_output_items and kind == 'response.output_item.done' and isinstance(event.get('item'),dict):
+                index = event.get('output_index')
+                if type(index) is int and index >= 0:
+                    self.output_items[index] = event['item']
             # Record only a timestamp, never the generated text or tool arguments.
             if self.first_output_at is None and kind in (
                     'response.output_text.delta', 'response.reasoning_text.delta',
