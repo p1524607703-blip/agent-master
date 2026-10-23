@@ -133,7 +133,7 @@ onMounted(init)
   <section class="page cpo-page">
     <div class="page-head cpo-head">
       <div>
-        <h1>CPO 处理中心</h1>
+        <h1>手动补传报告</h1>
         <p>自动化负责日常入库；这里负责查看数据是否齐全，以及手动补传缺失报告。</p>
       </div>
       <div class="date-box">
@@ -245,16 +245,6 @@ onMounted(init)
           </div>
         </div>
       </section>
-    </div>
-
-    <div v-if="!loading" class="publish-bar card">
-      <div>
-        <strong v-if="blockers.length">当前数据源未齐</strong>
-        <strong v-else>数据已齐，可以进入 CPO 计算</strong>
-        <p v-if="blockers.length">待处理：{{ blockers.join('、') }}</p>
-        <p v-else>下一步进入产品范围、Campaign 归属、守恒校验与发布。</p>
-      </div>
-      <NButton type="primary" disabled>开始 CPO 计算</NButton>
     </div>
 
     <p v-if="!loading" class="dev-note">业务报告正式口径为子 ASIN 日报；父 ASIN 报告仅作兼容 fallback。日期仍由规范文件名或人工确认的目标数据日确定，不使用下载时间或文件 mtime 推断。</p>

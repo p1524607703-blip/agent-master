@@ -134,7 +134,7 @@ class ControlApiTests(unittest.TestCase):
 
     def setUp(self):
         compat.CompatibilityAndAccessTests.setUp(self)
-        self.app.dependency_overrides[require_session]=lambda:('fixture',{'roleCode':'management','userId':1})
+        self.app.dependency_overrides[require_session]=lambda:('fixture',{'roleCode':'super_admin','userId':1})
         self.other=self.client.post('/api/codex/devices',json={'userId':1,'deviceName':'XT Fixture','platform':'windows'}).json()
 
     def state(self):return self.client.get('/api/codex/access-control').json()
@@ -184,8 +184,8 @@ class ControlApiTests(unittest.TestCase):
         self.assertEqual(self.change(self.device,maxConcurrent=None).status_code,200)
         self.assertNotIn(self.device['apiKey'],self.client.get('/api/codex/access-control').text)
 
-    def test_only_management_and_super_admin_can_change_controls(self):
-        for role in ('operator','ai','viewer'):
+    def test_only_super_admin_can_change_controls(self):
+        for role in ('management','operator','ai','viewer'):
             self.app.dependency_overrides[require_session]=lambda role=role:('fixture',{'roleCode':role,'userId':1})
             self.assertEqual(self.client.get('/api/codex/access-control').status_code,403)
             self.assertEqual(self.client.patch('/api/codex/access-control',json={'revision':0,'maxConcurrent':1}).status_code,403)

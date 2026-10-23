@@ -1,17 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { nextTick } from 'vue'
-import { canViewDiagnostics } from '../diagnostics/permissions'
+import { homeFor, canAccessRoute } from './access'
+export { ROLE_HOME, homeFor } from './access'
 import { enterPage, completePageRender } from '../diagnostics/browserTrace'
 import { useSessionStore } from '../stores/session'
 import { beginNavigation, finishNavigation, navigationState, recoverNavigation } from './navigation'
 
 const DiagnosticsView = () => import('../views/DiagnosticsView.vue')
 const CodexDevicesView = () => import('../views/CodexDevicesView.vue')
-const DashboardView = () => import('../views/DashboardView.vue')
-const CpoJobsView = () => import('../views/CpoJobsView.vue')
-const IssuesView = () => import('../views/IssuesView.vue')
-const RulesView = () => import('../views/RulesView.vue')
-const ReportsView = () => import('../views/ReportsView.vue')
 const OperatorDetailView = () => import('../views/OperatorDetailView.vue')
 const ProductMappingsView = () => import('../views/ProductMappingsView.vue')
 const OperatorCpoView = () => import('../views/OperatorCpoView.vue')
@@ -19,46 +15,27 @@ const MyCpoView = () => import('../views/MyCpoView.vue')
 const LoginView = () => import('../views/LoginView.vue')
 const AllocationView = () => import('../views/AllocationView.vue')
 const DataChangesView = () => import('../views/DataChangesView.vue')
-
-// 已下架模块（2026-09-15 用户要求暂时隐藏，视图文件保留以便随时恢复）：
-//   /products   产品明细 → ProductsView.vue
-//   /ad-types   广告类型 → AdTypesView.vue
-const RETIRED: Record<string, string> = { '/products': '产品明细', '/ad-types': '广告类型' }
-
-// 角色首页：运营登录后直接落到自己的页面（只含「CPO 单双数据情况」一个模块）
-export const ROLE_HOME: Record<string, string> = {
-  super_admin: '/operator-cpo',
-  management: '/operator-cpo',
-  operator: '/my-cpo',
-}
-export const homeFor = (role?: string | null) => ROLE_HOME[role || ''] || '/dashboard'
-
-// 运营可访问的路由白名单：只有自己的 CPO 页面
-const OPERATOR_ALLOWED = new Set(['/my-cpo', '/operator-cpo', '/ad-allocation', '/data-changes'])
+const DataMaintenanceView = () => import('../views/DataMaintenanceView.vue')
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
     { path: '/login', component: LoginView, meta: { public: true } },
     { path: '/', component: OperatorCpoView, meta: { roleHome: true } },
-    { path: '/dashboard', component: DashboardView },
-    { path: '/cpo-jobs', component: CpoJobsView },
-    { path: '/issues', component: IssuesView },
     { path: '/operator-cpo', component: OperatorCpoView, meta: { keepAlive: true } },
-    // 运营页：只保留 CPO 单双数据情况，且只能看到自己的数据
+    // Personal detail remains scoped to the authenticated operator group.
     { path: '/my-cpo', component: MyCpoView, meta: { keepAlive: true } },
     { path: '/ad-allocation', component: AllocationView },
     { path: '/data-changes', component: DataChangesView },
     { path: '/product-mappings', component: ProductMappingsView },
-    { path: '/rules', component: RulesView },
-    { path: '/reports', component: ReportsView },
-    { path: '/diagnostics', component: DiagnosticsView, meta: { managementOnly: true } },
-    { path: '/codex-devices', component: CodexDevicesView, meta: { managementOnly: true } },
+    { path: '/data-maintenance', component: DataMaintenanceView },
+    { path: '/reports', redirect: '/data-maintenance' },
+    { path: '/cpo-jobs', redirect: '/data-maintenance?tab=imports' },
+    { path: '/diagnostics', component: DiagnosticsView },
+    { path: '/codex-devices', component: CodexDevicesView },
     { path: '/operators/:operator', component: OperatorDetailView },
-    // 已下架模块直达链接 → 回看板（不暴露「模块已下线」这种信息给终端用户）
-    ...Object.keys(RETIRED).map(p => ({ path: p, redirect: '/dashboard' })),
-    // 其余未知路径一律兜到看板
-    { path: '/:pathMatch(.*)*', redirect: '/dashboard' },
+    // Old bookmarks and unknown URLs return to the authenticated role's home.
+    { path: '/:pathMatch(.*)*', component: OperatorCpoView, meta: { roleHome: true } },
   ],
 })
 
@@ -66,7 +43,7 @@ const prefetched = new Set<string>()
 // Fetch only the code for a visible menu item on hover/focus; component setup
 // and its data requests still run only after an authorized navigation.
 export function prefetchRoute(path: string): void {
-  if (prefetched.has(path)) return
+  if (!canAccessRoute(useSessionStore().user?.roleCode, path) || prefetched.has(path)) return
   const records = router.resolve(path).matched
   const component = records[records.length - 1]?.components?.default
   if (typeof component !== 'function') return
@@ -80,7 +57,8 @@ router.beforeEach(async (to) => {
   const session = useSessionStore()
   if (to.meta.public) {
     if (to.path === '/login' && session.token && await session.ensureUser()) {
-      return homeFor(session.user?.roleCode)
+      const home = homeFor(session.user?.roleCode)
+      return home === '/login' ? true : home
     }
     return true
   }
@@ -94,15 +72,7 @@ router.beforeEach(async (to) => {
 
   const role = session.user?.roleCode
   if (to.meta.roleHome) return homeFor(role)
-  if (to.meta.managementOnly && !canViewDiagnostics(role)) return homeFor(role)
-  // 运营：只能进自己的页面，其余访问一律回 /my-cpo
-  if (role === 'operator' && !OPERATOR_ALLOWED.has(to.path)) {
-    return '/my-cpo'
-  }
-  // 管理层 / 超级管理员：/my-cpo 不是他们的页面，回管理页
-  if (role !== 'operator' && to.path === '/my-cpo') {
-    return '/operator-cpo'
-  }
+  if (!canAccessRoute(role, to.path)) return homeFor(role)
   return true
 })
 

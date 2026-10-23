@@ -11,7 +11,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, field_validator, model_validator
 from starlette.background import BackgroundTask
 
-from app.api.auth import require_management_session
+from app.api.auth import require_super_admin_session
 from app.services.codex_devices import overview as read_overview
 from app.services import codex_telemetry as telemetry
 from app.services import codex_responses, codex_control
@@ -106,21 +106,21 @@ async def control_state():
                 **counts.get(str(r['device_id']),{'activeRequests':0,'queuedRequests':0})} for r in rows]}
 
 
-@router.get('/access-control',dependencies=[Depends(require_management_session)])
+@router.get('/access-control',dependencies=[Depends(require_super_admin_session)])
 async def access_control():
     telemetry.require_enabled()
     return JSONResponse(await control_state(),headers={'Cache-Control':'no-store'})
 
 
 @router.patch('/access-control')
-async def total_concurrency(payload: TotalConcurrency, actor=Depends(require_management_session)):
+async def total_concurrency(payload: TotalConcurrency, actor=Depends(require_super_admin_session)):
     telemetry.require_enabled()
     codex_control.update(revision=payload.revision,actor=actor[1]['userId'],max_concurrent=payload.maxConcurrent)
     return JSONResponse(await control_state(),headers={'Cache-Control':'no-store'})
 
 
 @router.post('/devices/status')
-async def bulk_status(payload: BulkStatus, actor=Depends(require_management_session)):
+async def bulk_status(payload: BulkStatus, actor=Depends(require_super_admin_session)):
     telemetry.require_enabled()
     rows = await control_devices()
     valid = {r['device_id'] for r in rows if not r['revoked_at']}
@@ -132,7 +132,7 @@ async def bulk_status(payload: BulkStatus, actor=Depends(require_management_sess
 
 
 @router.patch('/devices/{device_id}/control')
-async def device_control(device_id: uuid.UUID,payload: DeviceControl,actor=Depends(require_management_session)):
+async def device_control(device_id: uuid.UUID,payload: DeviceControl,actor=Depends(require_super_admin_session)):
     telemetry.require_enabled()
     rows = await control_devices()
     if not any(r['device_id']==device_id and not r['revoked_at'] for r in rows):
@@ -142,13 +142,13 @@ async def device_control(device_id: uuid.UUID,payload: DeviceControl,actor=Depen
     return JSONResponse(await control_state(),headers={'Cache-Control':'no-store'})
 
 
-@router.post('/devices',dependencies=[Depends(require_management_session)])
+@router.post('/devices',dependencies=[Depends(require_super_admin_session)])
 async def register(payload: Registration):
     value = await telemetry.register_device(payload.userId,payload.deviceName,payload.platform)
     return JSONResponse(value,headers={'Cache-Control':'no-store'})
 
 
-@router.patch('/devices/{device_id}',dependencies=[Depends(require_management_session)])
+@router.patch('/devices/{device_id}',dependencies=[Depends(require_super_admin_session)])
 async def rename(device_id: uuid.UUID, payload: AccessName):
     telemetry.require_enabled()
     conn = await _connect()
@@ -162,7 +162,7 @@ async def rename(device_id: uuid.UUID, payload: AccessName):
         await conn.close()
 
 
-@router.get('/access-config',dependencies=[Depends(require_management_session)])
+@router.get('/access-config',dependencies=[Depends(require_super_admin_session)])
 async def access_config():
     telemetry.require_enabled()
     base = settings.codex_public_base_url.strip().rstrip('/')
@@ -185,7 +185,7 @@ async def access_config():
                          'protocol':'Responses API','keyShownOnce':True},headers={'Cache-Control':'no-store'})
 
 
-@router.delete('/devices/{device_id}',dependencies=[Depends(require_management_session)])
+@router.delete('/devices/{device_id}',dependencies=[Depends(require_super_admin_session)])
 async def revoke(device_id: uuid.UUID):
     telemetry.require_enabled()
     conn = await _connect()
@@ -238,12 +238,12 @@ async def responses(request: Request,device=Depends(require_device)):
         **headers,'Content-Type':content_type,'X-Accel-Buffering':'no'})
 
 
-@router.get('/account-quota', dependencies=[Depends(require_management_session)])
+@router.get('/account-quota', dependencies=[Depends(require_super_admin_session)])
 async def account_quota():
     return quota_snapshot()
 
 
-@router.get('/quota-batches/{batch_id}/revisions', dependencies=[Depends(require_management_session)])
+@router.get('/quota-batches/{batch_id}/revisions', dependencies=[Depends(require_super_admin_session)])
 async def quota_batch_revisions(batch_id: str):
     from app.services.codex_quota_batches import revisions
     try:
@@ -253,6 +253,6 @@ async def quota_batch_revisions(batch_id: str):
         raise HTTPException(404,'Batch history is unavailable')
 
 
-@router.get('/overview', dependencies=[Depends(require_management_session)])
+@router.get('/overview', dependencies=[Depends(require_super_admin_session)])
 async def overview():
     return await read_overview()
