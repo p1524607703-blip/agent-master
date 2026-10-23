@@ -5,6 +5,12 @@ description: 为已授权的 Windows 或 Mac 设备配置已有 Codex++ HTTPS �
 
 # Codex 多设备接入
 
+## rc.10 硬件绑定入口（当前流程优先）
+
+已发布rc.10的HTTPS入口不接受直接Bearer Key，也不能再使用下文旧probe/windows_pilot直接验证。优先读取 [设备绑定步骤](references/device-binding.md) 和公开连接器包内 `使用说明.md`；从控制台下载固定版本包，校验SHA256SUMS。安装前核对Codex++主项目与所需Codex/Python环境，保留原窗口及主配置摘要。Windows双击1-安装并申请.cmd；Mac运行同名.command；输入管理员设备Key和HTTPS地址，硬件不可用必须停止，不用软件密钥替代。
+
+管理员核对设备端完整指纹并批准后，从当前用户私有provider.txt读取本地地址和本地Key，新建非当前纯API/Responses供应商，使用Codex多开。禁止设为当前、全局重启、读取复制主OAuth、改默认auth.json或内部数据库。安装器只操作自己的私有目录和当前用户登录启动。确认独立目录、模型目录、真实流式及文件工具和服务端Token分别验收；不能把Mac协议通过冒充Windows桌面通过。旧设备须一次升级；换机撤销旧Key再创建。下文为旧包历史参考，不适用于已强制绑定的入口。
+
 沿用管理员已授权并部署的模型入口，给设备新增非当前的纯 API 供应商，再从 Codex++「Codex多开」启动独立测试实例。设备只持独立 Key，保留原主管窗口与官方账户。v0.2 试点按已核对的 BigPizzaV3/CodexPlusPlus v1.9.0 菜单执行；软件、桌面与 Windows 原生兼容性以目标机检查为准。
 
 ## 安装前置检查
