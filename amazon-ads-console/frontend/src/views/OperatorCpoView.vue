@@ -199,8 +199,8 @@ const ratio = (v:any,s='') => v == null ? '—' : `${Number(v).toFixed(2)}${s}`
   <section class="page operator-cpo-page">
     <div class="page-head">
       <div>
-        <h1>运营单双情况</h1>
-        <p>按运营本人汇总全部业务账户与 AMS；不提供账户拆分。</p>
+        <h1>{{ isManager ? '运营单双情况' : '团队 CPO 汇总' }}</h1>
+        <p>{{ isManager ? '按运营本人汇总全部业务账户与 AMS；不提供账户拆分。' : '查看各运营的费用、订单和 CPO 汇总；产品明细仅本人可见。' }}</p>
       </div>
       <div class="operator-date-filter">
         <SbAttributionToggle :model-value="sbAttributionMode" @update:model-value="changeSbMode" />

@@ -30,11 +30,11 @@ const naiveTheme: GlobalThemeOverrides = {
         <div v-if="navigationState.error" class="navigation-error" role="alert">
           {{ navigationState.error }} <button class="btn compact" type="button" @click="retryNavigation">重新加载</button>
         </div>
-        <router-view v-slot="{ Component, route: viewRoute }">
-          <KeepAlive :max="4">
-            <component :is="Component" v-if="viewRoute.meta.keepAlive" />
+        <router-view v-slot="{ Component }">
+          <!-- One route vnode must keep the same parent across cached and uncached pages. -->
+          <KeepAlive :include="['MyCpoView', 'OperatorCpoView']" :max="4">
+            <component :is="Component" />
           </KeepAlive>
-          <component :is="Component" v-if="!viewRoute.meta.keepAlive" />
         </router-view>
       </div>
     </div>

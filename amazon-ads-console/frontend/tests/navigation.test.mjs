@@ -87,7 +87,7 @@ test('role menus have three business entries and reserve system entries for supe
   const paths = role => access.navigationFor(role).flatMap(group => group.items.map(([path]) => path))
   assert.deepEqual(paths('management'), ['/operator-cpo', '/ad-allocation', '/product-mappings'])
   assert.equal(paths('super_admin').length, 6)
-  assert.equal(paths('operator').length, 3)
+  assert.deepEqual(paths('operator'), ['/my-cpo', '/operator-cpo', '/ad-allocation', '/data-changes'])
   for (const role of ['management','operator','viewer',null]) {
     for (const path of ['/codex-devices','/diagnostics','/data-maintenance']) assert.equal(access.canAccessRoute(role,path), false)
   }

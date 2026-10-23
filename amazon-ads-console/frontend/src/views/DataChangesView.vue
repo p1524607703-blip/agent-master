@@ -84,7 +84,7 @@ onMounted(refresh)
 
 <template>
   <section class="page data-changes-page">
-    <div class="page-head"><div><h1>数据提交与审批</h1><p>上传映射变更表，核对后提交，由独立管理人员审核。</p></div><div class="actions"><router-link to="/ad-allocation" class="btn">返回费用分摊</router-link><button :disabled="busy || loading" @click="refresh">刷新</button><button :disabled="busy || disabled" @click="template">下载 CSV 模板</button></div></div>
+    <div class="page-head"><div><h1>{{ isManager ? '数据提交与审批' : '新品 / ASIN 提交' }}</h1><p>新品、父子 ASIN 和产品映射变更在这里提交；上传表格并核对后，由独立管理人员审核。</p></div><div class="actions"><router-link to="/ad-allocation" class="btn">返回费用分摊</router-link><button :disabled="busy || loading" @click="refresh">刷新</button><button :disabled="busy || disabled" @click="template">下载 CSV 模板</button></div></div>
     <div class="notice">开发验收，尚未接入正式数据。批准结果会保留为“待正式生效”，正式主数据接入完成并验收后才可生效。</div>
     <p v-if="error" class="error" role="alert">{{ error }}</p><p v-if="notice" class="success" role="status">{{ notice }}</p>
     <p v-if="loading" role="status">正在读取申请…</p>

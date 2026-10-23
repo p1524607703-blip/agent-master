@@ -205,7 +205,7 @@ const tablePeriod = computed(() => period.value==='weekly'
   <section class="page operator-cpo-page">
     <div class="page-head">
       <div>
-        <h1>CPO 单双数据情况</h1>
+        <h1>我的 CPO 明细</h1>
         <p>{{ myName }} 登录 · {{ data.me?.group || '—' }} 运营组 · 组内成员共享本组全部 ASIN 数据。</p>
       </div>
       <div class="operator-date-filter">
