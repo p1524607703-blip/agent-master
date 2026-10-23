@@ -8,18 +8,37 @@ from typing import Literal, Optional
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi.routing import APIRoute
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, field_validator, model_validator
 from starlette.background import BackgroundTask
 
 from app.api.auth import require_super_admin_session
 from app.services.codex_devices import overview as read_overview
 from app.services import codex_telemetry as telemetry
-from app.services import codex_responses, codex_control, codex_binding
+from app.services import codex_responses, codex_control, codex_binding, codex_access
 from app.core.config import settings
 from app.services.auth import _connect
 from app.services.codex_quota import snapshot as quota_snapshot
 
-router = APIRouter(prefix='/codex', tags=['codex'])
+class ModelRoute(APIRoute):
+    def get_route_handler(self):
+        handler = super().get_route_handler()
+        async def wrapped(request):
+            try:
+                return await handler(request)
+            except HTTPException as exc:
+                if '/codex/v1/' not in request.url.path:
+                    raise
+                detail = exc.detail if isinstance(exc.detail,dict) else {'message':str(exc.detail)}
+                code = detail.get('code') or {401:'invalid_api_key',403:'device_access_denied',429:'rate_limit_exceeded',502:'upstream_unavailable',503:'service_unavailable'}.get(exc.status_code,'invalid_request')
+                return JSONResponse({'error':{'message':detail.get('message','Request denied'),'code':code,
+                    'type':'authentication_error' if exc.status_code==401 else 'permission_error' if exc.status_code==403 else 'rate_limit_error' if exc.status_code==429 else 'server_error' if exc.status_code>=500 else 'invalid_request_error',
+                    'source':detail.get('source','access' if exc.status_code in (401,403) else 'relay')}},
+                    status_code=exc.status_code,headers={**(exc.headers or {}),'Cache-Control':'no-store'})
+        return wrapped
+
+
+router = APIRouter(prefix='/codex', tags=['codex'], route_class=ModelRoute)
 device_bearer = HTTPBearer(auto_error=False)
 
 
@@ -30,7 +49,7 @@ async def device_credential(credentials: HTTPAuthorizationCredentials = Depends(
 
 async def require_device(request: Request, credential=Depends(device_credential)):
     device, key = credential
-    await codex_binding.require_proof(device, key, request)
+    await codex_access.require_access(device, key, request)
     return device
 
 
@@ -56,6 +75,20 @@ class BindingApproval(BaseModel):
 async def approve_binding(claim_id: uuid.UUID, payload: BindingApproval, actor=Depends(require_super_admin_session)):
     telemetry.require_enabled()
     return await codex_binding.approve(claim_id, payload.fingerprint, actor[1]['userId'])
+
+
+class AccessPolicy(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    revision: StrictInt = Field(ge=0)
+    authMode: Literal['api_key','hardware']
+    approved: StrictBool
+
+
+@router.patch('/devices/{device_id}/access')
+async def device_access(device_id: uuid.UUID, payload: AccessPolicy, actor=Depends(require_super_admin_session)):
+    telemetry.require_enabled()
+    return await codex_access.update(device_id,revision=payload.revision,auth_mode=payload.authMode,
+                                    approved=payload.approved,actor=actor[1]['userId'])
 
 
 class AccessName(BaseModel):
@@ -172,9 +205,9 @@ async def device_control(device_id: uuid.UUID,payload: DeviceControl,actor=Depen
     return JSONResponse(await control_state(),headers={'Cache-Control':'no-store'})
 
 
-@router.post('/devices',dependencies=[Depends(require_super_admin_session)])
-async def register(payload: Registration):
-    value = await telemetry.register_device(payload.userId,payload.deviceName,payload.platform)
+@router.post('/devices')
+async def register(payload: Registration,actor=Depends(require_super_admin_session)):
+    value = await telemetry.register_device(payload.userId,payload.deviceName,payload.platform,approved=False,actor=actor[1]['userId'])
     return JSONResponse(value,headers={'Cache-Control':'no-store'})
 
 

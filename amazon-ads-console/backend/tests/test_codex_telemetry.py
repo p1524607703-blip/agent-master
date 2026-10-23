@@ -115,16 +115,18 @@ class IntegrationTests(unittest.TestCase):
         return asyncio.run(run())
 
     def setUp(self):
-        self.query('TRUNCATE codex_ops.model_requests,codex_ops.devices')
+        self.query('TRUNCATE codex_ops.model_requests,codex_ops.devices CASCADE')
         self.query("UPDATE iam.users SET status='active'")
         self.app = FastAPI()
         self.app.include_router(api.router,prefix='/api')
-        self.app.dependency_overrides[require_session] = lambda:('test',{'roleCode':'super_admin'})
+        self.app.dependency_overrides[require_session] = lambda:('test',{'roleCode':'super_admin','userId':1})
         self.client = TestClient(self.app)
         result = self.client.post('/api/codex/devices',json={'userId':1,'deviceName':'Test Windows','platform':'windows'})
         self.assertEqual(result.status_code,200,result.text)
         self.device = result.json()
         self.headers = {'Authorization':'Bearer '+self.device['apiKey']}
+        self.assertEqual(self.client.patch('/api/codex/devices/'+self.device['deviceId']+'/access',
+            json={'revision':0,'authMode':'api_key','approved':True}).status_code,200)
 
     def overview_device(self):
         response = self.client.get('/api/codex/overview')
@@ -381,7 +383,7 @@ class LiveProxyTests(unittest.TestCase):
             settings.codex_event_spool_dir=temporary
             device=asyncio.run(service.register_device(1,'Synthetic live acceptance','windows'))
             app=FastAPI();app.include_router(api.router,prefix='/api')
-            app.dependency_overrides[require_session]=lambda:('test',{'roleCode':'super_admin'})
+            app.dependency_overrides[require_session]=lambda:('test',{'roleCode':'super_admin','userId':1})
             marker='candidate-live-'+secrets.token_hex(8)
             with TestClient(app) as client:
                 response=client.post('/api/codex/v1/responses',

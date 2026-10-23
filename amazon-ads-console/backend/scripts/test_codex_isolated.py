@@ -31,15 +31,18 @@ INSERT INTO iam.users VALUES (1,'fixture_ai','Synthetic AI','ai','active');
 CREATE SCHEMA codex_ops; CREATE VIEW codex_ops.personnel_roster AS SELECT *, 'ai'::text group_code,'AI test'::text group_name,'TEST'::text person_code FROM iam.users;"""
             subprocess.run([str(pg/'psql'),dsn,'-v','ON_ERROR_STOP=1','-q','-c',seed],check=True)
             subprocess.run([str(pg/'psql'),dsn,'-v','ON_ERROR_STOP=1','-q','-f',str(backend/'migrations/20261018_codex_device_telemetry.sql')],check=True)
+            for migration in ['20261023_codex_device_binding.sql','20261023_codex_api_access.sql']:
+                subprocess.run([str(pg/'psql'),dsn,'-v','ON_ERROR_STOP=1','-q','-f',str(backend/'migrations'/migration)],check=True)
             env_file=root/'isolated.env'
             env_file.write_text('DATABASE_URL='+dsn+'\nOPERATOR_WARMUP_ENABLED=false\n')
             env_file.chmod(0o600)
             env=os.environ.copy()
             for key in ['DATABASE_URL','RDS_DATABASE_URL','CPO_ENV_FILE','CODEX_TELEMETRY_ENABLED']:
                 env.pop(key,None)
-            env.update(CPO_ENV_FILE=str(env_file),CODEX_ISOLATED_DB_TEST='1')
+            env.update(CPO_ENV_FILE=str(env_file),CODEX_ISOLATED_DB_TEST='1',CODEX_BINDING_DB_TEST='1')
             targets=['tests.test_codex_devices','tests.test_codex_telemetry','tests.test_codex_windows_handoff',
-                     'tests.test_codex_compat','tests.test_codex_concurrent','tests.test_codex_gateway','tests.test_codex_control']
+                     'tests.test_codex_compat','tests.test_codex_concurrent','tests.test_codex_gateway','tests.test_codex_control',
+                     'tests.test_codex_binding','tests.test_codex_access','tests.test_codex_stream_outcomes','tests.test_codex_supervisor']
             if args.live_key_file:
                 env.update(CODEX_LIVE_KEY_FILE=str(Path(args.live_key_file).resolve()),
                     CODEX_LIVE_BASE_URL=args.live_base_url,CODEX_LIVE_RECEIPT=str(Path(args.receipt_file).resolve()))

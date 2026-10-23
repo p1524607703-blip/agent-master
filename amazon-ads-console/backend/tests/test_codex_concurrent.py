@@ -50,7 +50,7 @@ class ConcurrentFlowTests(unittest.IsolatedAsyncioTestCase):
             try:
                 conn=await _connect()
                 try:
-                    await conn.execute('TRUNCATE codex_ops.model_requests,codex_ops.devices')
+                    await conn.execute('TRUNCATE codex_ops.model_requests,codex_ops.devices CASCADE')
                     await conn.execute("INSERT INTO iam.users(user_id,username,display_name,role_code,status) SELECT n,'fixture-'||n,'Fixture '||n,'operator','active' FROM generate_series(1,20) n ON CONFLICT(user_id) DO UPDATE SET status='active'")
                 finally:await conn.close()
                 snapshots(0,0,0);atomic(attribution_path,dict(schemaVersion=1,confirmations=[]))

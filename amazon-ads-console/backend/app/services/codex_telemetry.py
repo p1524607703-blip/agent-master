@@ -18,7 +18,7 @@ from fastapi import HTTPException
 from app.core.config import settings
 from app.core import observability
 from app.services.auth import _connect
-from app.services import codex_activity, codex_control
+from app.services import codex_activity, codex_control, codex_access
 
 log = logging.getLogger(__name__)
 
@@ -49,7 +49,7 @@ async def authenticate(key):
         await conn.close()
 
 
-async def register_device(user_id, device_name, platform, key=None, device_id=None):
+async def register_device(user_id, device_name, platform, key=None, device_id=None, *, auth_mode='api_key', approved=True, actor=None):
     require_enabled()
     key = key or ('sk-cpo-' + secrets.token_urlsafe(32))
     if not 40 <= len(key) <= 256:
@@ -70,6 +70,10 @@ async def register_device(user_id, device_name, platform, key=None, device_id=No
                 await conn.execute('''INSERT INTO codex_ops.devices
                     (device_id,user_id,device_name,platform,key_hash) VALUES ($1,$2,$3,$4,$5)''',
                     device_id,user_id,device_name,platform,key_hash(key))
+                await conn.execute('''INSERT INTO codex_ops.device_access(device_id,auth_mode,approved_at,approved_by)
+                    VALUES($1,$2,CASE WHEN $3 THEN now() ELSE NULL END,$4)''', device_id, auth_mode, approved, actor if approved else None)
+                await conn.execute('''INSERT INTO codex_ops.device_access_audit(device_id,action,auth_mode,actor)
+                    VALUES($1,$2,$3,$4)''', device_id, 'create_approved' if approved else 'create_pending', auth_mode, actor)
         return {'deviceId':str(device_id),'apiKey':key}
     finally:
         await conn.close()
@@ -304,11 +308,34 @@ async def model_catalog():
         raise HTTPException(502,'Model catalog is unavailable')
 
 
+async def keepalive_chunks(source, interval=15):
+    """Keep downstream SSE alive without cancelling a pending upstream read."""
+    iterator = source.__aiter__()
+    pending = asyncio.create_task(iterator.__anext__())
+    try:
+        while True:
+            ready, _ = await asyncio.wait({pending}, timeout=interval)
+            if not ready:
+                yield None
+                continue
+            try:
+                chunk = pending.result()
+            except StopAsyncIteration:
+                break
+            yield chunk
+            pending = asyncio.create_task(iterator.__anext__())
+    finally:
+        if not pending.done():
+            pending.cancel()
+        await asyncio.gather(pending, return_exceptions=True)
+
+
 async def proxy_response(device, body, route='/responses',forward_headers=None, observer=None, response_headers=None):
     queued_at = time.perf_counter()
     lease = await codex_control.acquire(device['device_id'])
     queue_ms = round((time.perf_counter() - queued_at) * 1000, 3)
     try:
+        await codex_access.recheck_queued(device)
         status, content_type, request_id, stream = await _proxy_response(
             device, body, route, forward_headers, observer, response_headers, queue_ms)
         return status, content_type, request_id, codex_control.ControlledStream(stream, lease)
@@ -345,9 +372,18 @@ async def _proxy_response(device, body, route='/responses',forward_headers=None,
     # Generated locally: never forward an untrusted caller correlation header.
     headers['X-Request-ID'] = request_id
     client = httpx.AsyncClient(trust_env=False,follow_redirects=False,
-        timeout=httpx.Timeout(300,connect=10,pool=10))
+        timeout=httpx.Timeout(610,connect=10,pool=10))
     try:
-        response = await client.send(client.build_request('POST',base+route,headers=headers,content=body),stream=True)
+        for attempt in range(2):
+            try:
+                response = await client.send(client.build_request('POST',base+route,headers=headers,content=body),stream=True)
+                break
+            except (httpx.ConnectError,httpx.ConnectTimeout):
+                # A connection was never established: no model request was sent.
+                # HTTP failures, read failures and partial output are never replayed.
+                if attempt:
+                    raise
+                await asyncio.sleep(.2)
     except asyncio.CancelledError:
         if trace_context is not None:
             trace_context.update(model_outcome='client_cancelled',model_http_status=499,model_completed=False)
@@ -375,7 +411,24 @@ async def _proxy_response(device, body, route='/responses',forward_headers=None,
             log.error('codex_accounting_pending request_id=%s',request_id)
         finally:
             finish_activity(activity)
-        raise HTTPException(502,'Model upstream is unavailable')
+        raise HTTPException(502,{'code':'upstream_connection_failed','message':'Model upstream is unavailable','source':'upstream'})
+    if response.status_code in (401,403):
+        upstream_status = response.status_code
+        await response.aclose()
+        await client.aclose()
+        try:
+            await save_event({**timing,'request_id':request_id,'device_id':str(device['device_id']),
+                'response_id':None,'finished_at':datetime.now(timezone.utc).isoformat(),
+                'http_status':502,'completed':False,'usage':None})
+        except Exception:
+            log.error('codex_accounting_pending request_id=%s',request_id)
+        finally:
+            finish_activity(activity)
+        if trace_context is not None:
+            trace_context.update(model_outcome='upstream_authentication_failed',model_http_status=502,
+                                 model_completed=False,model_error_type='UpstreamHTTP'+str(upstream_status))
+        raise HTTPException(502,{'code':'upstream_authentication_failed',
+            'message':'The model source rejected its server credential; contact the administrator','source':'upstream'})
     headers_ms = round((time.perf_counter() - started_clock) * 1000, 3)
     upstream_request_id = response.headers.get('x-upstream-request-id') or response.headers.get('x-request-id')
     if not isinstance(upstream_request_id,str) or not observability._REQUEST_ID.fullmatch(upstream_request_id):
@@ -407,7 +460,11 @@ async def _proxy_response(device, body, route='/responses',forward_headers=None,
                 'request_id':trace_id,'model_request_id':request_id}) + '\n\n').encode()
 
         try:
-            async for chunk in response.aiter_bytes():
+            chunks = keepalive_chunks(response.aiter_bytes()) if is_sse else response.aiter_bytes()
+            async for chunk in chunks:
+                if chunk is None:
+                    yield b': keep-alive\n\n'
+                    continue
                 if chunk and first_byte_ms is None:
                     first_byte_ms = round((time.perf_counter() - started_clock) * 1000, 3)
                 if status == 200:

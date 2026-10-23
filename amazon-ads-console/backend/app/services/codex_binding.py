@@ -93,8 +93,13 @@ async def require_proof(device, key, request):
         async with conn.transaction():
             row = await conn.fetchrow('SELECT * FROM codex_ops.device_bindings WHERE device_id=$1 FOR SHARE', device['device_id'])
             if row is None or not row['approved_at'] or not row['public_key']:
-                raise HTTPException(403, 'Device enrollment and administrator approval required')
-            nonce = verify(key, request.method, path, request.headers, body, row['public_key'])
+                raise HTTPException(403, {'code':'hardware_binding_required','message':'Hardware mode requires device enrollment and fingerprint approval','source':'access'})
+            try:
+                nonce = verify(key, request.method, path, request.headers, body, row['public_key'])
+            except HTTPException as exc:
+                if exc.status_code != 403:
+                    raise
+                raise HTTPException(403, {'code':'hardware_proof_invalid','message':'Hardware proof is missing, expired or invalid','source':'access'}) from None
             await use_nonce(conn, device['device_id'], nonce)
     finally:
         await conn.close()
@@ -139,8 +144,10 @@ async def listing():
     conn = await _connect()
     try:
         rows = await conn.fetch('''SELECT d.device_id,d.device_name,b.fingerprint,b.approved_at,b.generation,
+            a.auth_mode,a.approved_at AS access_approved_at,a.revision AS access_revision,
             c.claim_id,c.fingerprint AS candidate_fingerprint,c.provider,c.created_at
             FROM codex_ops.devices d LEFT JOIN codex_ops.device_bindings b USING(device_id)
+            LEFT JOIN codex_ops.device_access a USING(device_id)
             LEFT JOIN codex_ops.device_binding_claims c ON c.device_id=d.device_id AND c.generation=b.generation
             AND b.approved_at IS NULL WHERE d.revoked_at IS NULL ORDER BY d.created_at,c.created_at''')
         return {'items': [dict(r, device_id=str(r['device_id']), claim_id=str(r['claim_id']) if r['claim_id'] else None) for r in rows]}
@@ -166,6 +173,9 @@ async def approve(claim_id, expected_fingerprint, actor):
             await conn.execute('''UPDATE codex_ops.device_bindings SET public_key=$2,fingerprint=$3,provider=$4,
                 approved_at=now(),approved_by=$5 WHERE device_id=$1''', candidate['device_id'], candidate['public_key'], expected_fingerprint, candidate['provider'], actor)
             await conn.execute("INSERT INTO codex_ops.device_binding_audit(device_id,action,fingerprint,actor) VALUES($1,'approve',$2,$3)", candidate['device_id'], expected_fingerprint, actor)
+            await conn.execute('''UPDATE codex_ops.device_access SET auth_mode='hardware',approved_at=now(),
+                approved_by=$2,revision=revision+1,updated_at=now() WHERE device_id=$1''', candidate['device_id'], actor)
+            await conn.execute("INSERT INTO codex_ops.device_access_audit(device_id,action,auth_mode,actor) VALUES($1,'approve_hardware','hardware',$2)", candidate['device_id'], actor)
             return {'approved': True, 'deviceId': str(candidate['device_id'])}
     except UniqueViolationError:
         raise HTTPException(409, 'Device public key already assigned')

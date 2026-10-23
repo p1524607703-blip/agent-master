@@ -202,7 +202,8 @@ class Handler(BaseHTTPRequestHandler):
         upstream_request_id = None
         try:
             connection = http.client.HTTPConnection(
-                self.server.settings['upstreamHost'], self.server.settings['upstreamPort'], timeout=180)
+                self.server.settings['upstreamHost'], self.server.settings['upstreamPort'],
+                timeout=self.server.settings.get('upstreamIdleTimeoutSeconds',600))
             headers = {'Content-Type': 'application/json', 'Accept-Encoding': 'identity', 'X-Request-ID':request_id}
             for name in FORWARD_HEADERS:
                 if self.headers.get(name):
@@ -277,7 +278,8 @@ def main():
     args = parser.parse_args()
     settings = json.loads(Path(args.config).read_text())
     for name, default, maximum in [('maxConcurrent', 6, 32), ('maxQueued', 24, 128),
-                                    ('maxConnections', 32, 192), ('queueWaitSeconds', 120, 240)]:
+                                    ('maxConnections', 32, 192), ('queueWaitSeconds', 120, 240),
+                                    ('upstreamIdleTimeoutSeconds',600,3600)]:
         value = settings.get(name, default)
         if name == 'maxConnections' and value is None:
             continue

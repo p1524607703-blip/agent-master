@@ -70,7 +70,7 @@ class BindingIntegrationTests(unittest.IsolatedAsyncioTestCase):
             await conn.execute('TRUNCATE codex_ops.devices CASCADE')
             await conn.execute("UPDATE iam.users SET status='active'")
         finally: await conn.close()
-        self.material = await telemetry.register_device(1, 'Device A', 'macos')
+        self.material = await telemetry.register_device(1, 'Device A', 'macos',auth_mode='hardware',approved=False)
         self.key = self.material['apiKey']; self.a, self.public = identity(); self.b, self.other_public = identity()
         self.app = FastAPI(); self.app.include_router(api.router, prefix='/api')
         self.app.dependency_overrides[require_session] = lambda: ('fixture', {'roleCode':'super_admin','userId':1})
@@ -119,7 +119,7 @@ class BindingIntegrationTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_parallel_devices_do_not_bind_by_shared_ip(self):
         await self.approve(await self.claim())
-        second = await telemetry.register_device(1,'Device B','windows')
+        second = await telemetry.register_device(1,'Device B','windows',auth_mode='hardware',approved=False)
         akey = self.key; self.key = second['apiKey']
         await self.approve(await self.claim(self.b,self.other_public))
         path = '/api/codex/v1/models'
@@ -154,7 +154,7 @@ class BindingIntegrationTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_one_public_key_cannot_approve_two_credentials_even_concurrently(self):
         first=await self.claim()
-        second=await telemetry.register_device(1,'Second credential','macos')
+        second=await telemetry.register_device(1,'Second credential','macos',auth_mode='hardware',approved=False)
         self.key=second['apiKey']; other=await self.claim()
         results=await asyncio.gather(self.approve(first),self.approve(other))
         self.assertEqual(sorted(r.status_code for r in results),[200,409])

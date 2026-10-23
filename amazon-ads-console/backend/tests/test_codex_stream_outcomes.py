@@ -109,6 +109,39 @@ class StreamOutcomeTests(unittest.IsolatedAsyncioTestCase):
         self.assertIsNone(record['model_first_byte_ms'])
         self.assertIsNone(record['model_first_output_ms'])
 
+    async def test_only_connection_failure_before_submission_is_retried_once(self):
+        original=httpx.AsyncClient
+        calls=[]
+        async def handler(request):
+            calls.append(request)
+            if len(calls)==1:raise httpx.ConnectError('private connection details')
+            return httpx.Response(200,headers={'content-type':'text/event-stream'},content=event())
+        self.stack.enter_context(patch.object(relay.httpx,'AsyncClient',side_effect=lambda **kw:
+            original(transport=httpx.MockTransport(handler),**kw)))
+        _,_,_,stream=await relay.proxy_response(self.device,b'{}')
+        body=b''.join([chunk async for chunk in stream])
+        self.assertEqual(len(calls),2)
+        self.assertEqual(calls[0].headers['x-request-id'],calls[1].headers['x-request-id'])
+        self.assertNotIn(b'event: error',body)
+        self.assertEqual(len(list(Path(self.tmp).glob('*.json'))),1)
+
+    async def test_upstream_credential_failure_is_separate_from_device_key_and_not_retried(self):
+        from fastapi import HTTPException
+        original=httpx.AsyncClient
+        for status in (401,403):
+            calls=[]
+            def handler(request):
+                calls.append(request)
+                return httpx.Response(status,json={'error':{'message':'private upstream auth material'}})
+            with patch.object(relay.httpx,'AsyncClient',side_effect=lambda **kw:original(transport=httpx.MockTransport(handler),**kw)):
+                with self.assertRaises(HTTPException) as raised:await relay.proxy_response(self.device,b'{}')
+            self.assertEqual(raised.exception.status_code,502)
+            self.assertEqual(raised.exception.detail['code'],'upstream_authentication_failed')
+            self.assertNotIn('private upstream',json.dumps(raised.exception.detail))
+            self.assertEqual(len(calls),1)
+            self.assertEqual(list((Path(self.tmp)/'control'/'leases').glob('*.json')),[])
+
+
     async def test_large_valid_terminal_is_not_mistaken_for_truncation(self):
         final = {'id':'large-response','status':'completed','output':[{'text':'x'*(1024*1024+32)}],
                  'usage':{'input_tokens':2,'output_tokens':3,'total_tokens':5}}
@@ -167,6 +200,34 @@ class StreamOutcomeTests(unittest.IsolatedAsyncioTestCase):
         self.assertIsNone(records[0]['usage'])
         self.assertEqual(self.flush.await_count,1)
         self.assertEqual(list((Path(self.tmp)/'control'/'leases').glob('*.json')),[])
+
+
+class KeepaliveTests(unittest.IsolatedAsyncioTestCase):
+    async def test_idle_stream_gets_comments_without_cancelling_or_replaying_source(self):
+        import asyncio
+        calls=[]
+        async def source():
+            calls.append('start')
+            await asyncio.sleep(.035)
+            yield b'actual-upstream-data'
+        chunks=[part async for part in relay.keepalive_chunks(source(),interval=.01)]
+        self.assertGreaterEqual(chunks.count(None),2)
+        self.assertEqual([part for part in chunks if part is not None],[b'actual-upstream-data'])
+        self.assertEqual(calls,['start'])
+
+    async def test_closing_during_idle_read_cancels_source_and_frees_task(self):
+        import asyncio
+        closed=[]
+        async def source():
+            try:
+                await asyncio.sleep(60)
+                yield b'never'
+            finally:closed.append(True)
+        stream=relay.keepalive_chunks(source(),interval=.005)
+        self.assertIsNone(await stream.__anext__())
+        await stream.aclose()
+        self.assertEqual(closed,[True])
+
 
 
 class ASGIStreamDiagnosticTests(unittest.TestCase):

@@ -73,13 +73,14 @@ class CompatibilityAndAccessTests(unittest.TestCase):
                                 codex_public_base_url='https://relay.example.test/api/codex/v1',
                                 codex_upstream_base_url='http://127.0.0.1:1/v1',codex_upstream_key_file=str(key)).items():
             self.stack.enter_context(patch.object(settings,field,value))
-        self.query('TRUNCATE codex_ops.model_requests,codex_ops.devices')
+        self.query('TRUNCATE codex_ops.model_requests,codex_ops.devices CASCADE')
         self.query("UPDATE iam.users SET status='active'")
         self.app = FastAPI();self.app.include_router(api.router,prefix='/api')
-        self.app.dependency_overrides[require_session] = lambda:('fixture',{'roleCode':'super_admin'})
+        self.app.dependency_overrides[require_session] = lambda:('fixture',{'roleCode':'super_admin','userId':1})
         self.client = TestClient(self.app)
         self.device = self.client.post('/api/codex/devices',json={'userId':1,'deviceName':'YE 测试 Key','platform':'windows'}).json()
         self.headers = {'Authorization':'Bearer '+self.device['apiKey']}
+        self.assertEqual(self.client.patch('/api/codex/devices/'+self.device['deviceId']+'/access',json={'revision':0,'authMode':'api_key','approved':True}).status_code,200)
         self.final = {'id':'response-doctor','object':'response','status':'completed',
                       'output':[{'type':'message','role':'assistant','content':[{'type':'output_text','text':'你好！'}]}],
                       'usage':{'input_tokens':7,'output_tokens':13,'total_tokens':20,
@@ -181,7 +182,7 @@ class CompatibilityAndAccessTests(unittest.TestCase):
             self.assertEqual(self.client.get('/api/codex/access-config').status_code,403)
             self.assertEqual(self.client.patch('/api/codex/devices/'+self.device['deviceId'],json={'deviceName':'bad'}).status_code,403)
             self.assertEqual(self.client.post('/api/codex/devices',json={'userId':1,'deviceName':'forbidden','platform':'windows'}).status_code,403)
-        self.app.dependency_overrides[require_session]=lambda:('fixture',{'roleCode':'super_admin'})
+        self.app.dependency_overrides[require_session]=lambda:('fixture',{'roleCode':'super_admin','userId':1})
         for name in ['   ','a\nb','x'*81]:
             self.assertEqual(self.client.patch('/api/codex/devices/'+self.device['deviceId'],json={'deviceName':name}).status_code,422)
         self.assertEqual(self.client.patch('/api/codex/devices/'+self.device['deviceId'],json={'deviceName':'name','userId':2}).status_code,422)
