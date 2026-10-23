@@ -1,19 +1,21 @@
 from urllib.parse import unquote
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple, Literal
 from fastapi import APIRouter, Depends, Query, Header, Request, HTTPException
 from fastapi.responses import JSONResponse
 from app.services.mock_data import JOBS,ISSUES,PRODUCT_RULES,AD_TYPE_RULES
 # 业务读全部走「一份报告一张表」的新事实层（core.report_*_daily）
 from app.services.report_data import dashboard_overview, dashboard_trend, products, reports
-from app.services.operator_cpo import operator_cpo_summary, operator_cpo_detail, operator_period_options, my_cpo_summary
+from app.services.operator_cpo import operator_cpo_summary, operator_cpo_detail, operator_period_options, my_cpo_summary, _data_revision, operator_group_of
 # 运营页权限在读取缓存之前验证角色与运营组绑定
 from app.api.auth import require_session, require_management_session, require_operator_access, require_own_operator_session
-# 产品主数据：直接读应用库 app.product_roster，只读直显，无「管理/确认」写入路径
+# 产品主数据：读取V2正式映射视图，只读直显，无控制台确认写入路径
+from app.services.full_funnel_visibility import full_funnel_for_viewer
 from app.services.roster import product_mappings, not_supported
 from app.services.rds_query import ping
 from app.services.cpo_imports import validate_upload, commit_upload, source_status
 from app.services.cache import cache
 from app.services.diagnostics import diagnostic_status, request_traces
+from app.api.cpo_dates import validate_cpo_report_date
 
 router = APIRouter()
 
@@ -54,16 +56,51 @@ def trend(account_id: Optional[str] = None, end_date: Optional[str] = None, days
 def operator_periods():
     return operator_period_options()
 
-@router.get('/operator-cpo', dependencies=[Depends(require_management_session)])
-def operator_cpo(date: Optional[str] = None, period: str = Query('daily')):
+def _full_funnel_response(data, user):
+    if 'fullFunnel' not in data:
+        return data
+    try:
+        ledger = full_funnel_for_viewer(data['fullFunnel'], user.get('roleCode'),
+                                      user.get('operatorCode') or user.get('operator_code'))
+    except Exception:
+        raise HTTPException(status_code=503, detail='全流域权限规则暂时不可用，请稍后重试。') from None
+    return {**data, 'fullFunnel': ledger}
+
+
+@router.get('/operator-cpo')
+def operator_cpo(date: Optional[str] = None, period: str = Query('daily'),
+                 sb_attribution_mode: Literal['name','asin'] = 'name',
+                 session: Tuple[str, Dict[str, Any]] = Depends(require_session)):
+    user = session[1]
+    if user.get('roleCode') not in ('management', 'super_admin') and (
+            user.get('roleCode') != 'operator' or not operator_group_of(user.get('operatorCode'))):
+        raise HTTPException(403, 'An active operator group is required')
+    date = validate_cpo_report_date(date, period)
     period = period if period in ('daily','weekly','monthly') else 'daily'
-    return cache.get_or_set(f'operator:summary:{period}:{date or "latest"}', lambda: operator_cpo_summary(date, period), 60)
+    data = cache.get_or_set(f'operator:summary:{sb_attribution_mode}:{period}:{date or "latest"}', lambda: operator_cpo_summary(date, period, sb_attribution_mode), 60)
+    if session[1].get('roleCode') == 'operator':
+        # Shared totals do not include company-wide full-funnel disclosure.
+        data = {k: v for k, v in data.items() if k in {
+            'operators', 'data_date', 'period', 'period_start', 'period_end', 'final_cpo', 'period_label', 'sbAttributionMode'}}
+        own = operator_group_of(user.get('operatorCode') or user.get('operator_code'))
+        data['operators'] = [
+            dict(row) if any(str(g or '').upper()[:2] == own for g in (row.get('groups') or [row.get('group')]))
+            else {k: v for k, v in row.items() if k != 'pendingProductSpend'}
+            for row in data.get('operators', [])
+        ]
+    return _full_funnel_response(data, session[1])
 
 @router.get('/operators/{operator}', dependencies=[Depends(require_operator_access)])
 def operator_view(operator: str, date: Optional[str] = None, period: str = Query('daily'),
+                  sb_attribution_mode: Literal['name','asin'] = 'name',
                   session: Tuple[str, Dict[str, Any]] = Depends(require_operator_access)):
+    date = validate_cpo_report_date(date, period)
     period = period if period in ('daily','weekly','monthly') else 'daily'
-    data = cache.get_or_set(f'operator:detail:{operator}:{period}:{date or "latest"}', lambda: operator_cpo_detail(operator,date,period), 60)
+    data = cache.get_or_set(f'operator:detail:{operator}:{sb_attribution_mode}:{period}:{date or "latest"}', lambda: operator_cpo_detail(operator,date,period,sb_attribution_mode=sb_attribution_mode), 60)
+    if session[1].get('roleCode') != 'operator':
+        # Management uses the aggregate disclosure panel, never an operator detail panel.
+        return {key: value for key, value in data.items() if key != 'fullFunnel'}
+    data = _full_funnel_response(data, session[1])
     if session[1].get('roleCode') == 'operator':
         # Group detail is shared, but global audit volumes are management-only.
         return {key: value for key, value in data.items()
@@ -76,13 +113,16 @@ def operator_view(operator: str, date: Optional[str] = None, period: str = Query
 #   2) 跨全部广告账户汇总（管理页只取单账户），否则运营自己的量分散在多个账户里看不到。
 @router.get('/my-cpo')
 def my_cpo(date: Optional[str] = None, period: str = Query('daily'),
+           sb_attribution_mode: Literal['name','asin'] = 'name',
            session: Tuple[str, Dict[str, Any]] = Depends(require_own_operator_session)):
+    date = validate_cpo_report_date(date, period)
     period = period if period in ('daily','weekly','monthly') else 'daily'
     user = session[1] or {}
     code = user.get('operatorCode') or user.get('operator_code') or ''
     display_name = user.get('displayName') or user.get('display_name') or ''
-    return cache.get_or_set(f'my-cpo:{code or "none"}:{display_name}:{period}:{date or "latest"}',
-                            lambda: my_cpo_summary(code, date, period, display_name), 60)
+    data = cache.get_or_set(f'my-cpo:{code or "none"}:{display_name}:{sb_attribution_mode}:{period}:{date or "latest"}',
+                            lambda: my_cpo_summary(code, date, period, display_name, sb_attribution_mode), 60)
+    return _full_funnel_response(data, user)
 
 @router.get('/products', dependencies=[Depends(require_management_session)])
 def product_list(account_id: Optional[str] = None, date: Optional[str] = None, limit: int = Query(50,ge=1,le=200)):
@@ -91,7 +131,7 @@ def product_list(account_id: Optional[str] = None, date: Optional[str] = None, l
 
 @router.get('/product-mappings', dependencies=[Depends(require_management_session)])
 def product_mapping_list():
-    return cache.get_or_set('roster:v1', product_mappings, 300)
+    return cache.get_or_set('roster:v2:'+_data_revision(), product_mappings, 300)
 
 @router.post('/product-mappings/discover', dependencies=[Depends(require_management_session)])
 def product_mapping_discover(date: Optional[str] = None, account: Optional[str] = None):
@@ -128,7 +168,7 @@ def ad_type_rules():
     # 已下架：广告类型模块。原实现返回 app.services.mock_data.AD_TYPE_RULES
     return _retired('ad_type_rule')
 @router.get('/reports', dependencies=[Depends(require_management_session)])
-def report_list(): return cache.get_or_set('reports:all', reports, 60)
+def report_list(): return reports()
 
 @router.get('/cache/stats', dependencies=[Depends(require_management_session)])
 def cache_stats(): return cache.stats()

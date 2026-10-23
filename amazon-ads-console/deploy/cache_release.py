@@ -25,7 +25,7 @@ def clear_snapshots(client):
     """SCAN in bounded batches, retaining every live or abandoned lock key."""
     client.ping()
     deleted = locks = 0
-    for pattern in ('cpo:build:v1:*', 'cpo:complete-days:v1:*'):
+    for pattern in ('cpo:build:v1:*', 'cpo:complete-days:v1:*', 'cpo:complete-days:v2:*'):
         batch = []
         for key in client.scan_iter(match=pattern, count=200):
             raw = key.encode() if isinstance(key, str) else key

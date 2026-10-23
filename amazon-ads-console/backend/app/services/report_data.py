@@ -35,6 +35,7 @@ from typing import Any, Optional
 
 from .app_db import query_rows as app_query_rows
 from .rds_query import query_one, query_rows
+from .report_coverage import coverage_catalog
 
 # 运营组前缀（campaign_name 首段）→ 运营姓名
 OPERATOR_NAMES = {
@@ -358,36 +359,10 @@ def dashboard_trend(account_id: Optional[str] = None, end_date: Optional[str] = 
 
 # ---------------------------------------------------------------- 报告覆盖
 
-REPORT_SPECS = [
-    ("广告活动", "core.report_campaign_daily", "spend"),
-    ("广告位", "core.report_placement_daily", "spend"),
-    ("投放", "core.report_targeting_daily", "spend"),
-    ("推广的商品", "core.report_advertised_product_daily", "spend"),
-    ("达成转化的商品", "core.report_purchased_product_daily", None),
-    ("搜索词", "core.report_search_term_daily", "spend"),
-]
-
-
 def reports():
-    out = []
-    for label, table, metric in REPORT_SPECS:
-        metric_sql = f"COALESCE(sum({metric}),0)::float8" if metric else "NULL::float8"
-        for r in query_rows(f"""
-            SELECT account_id, max(account_name) AS account_name,
-                   min(stat_date)::text AS min_date, max(stat_date)::text AS max_date,
-                   count(*)::int AS rows, {metric_sql} AS metric_sum,
-                   count(source_file_name)::int AS lineage_rows
-            FROM {table} GROUP BY account_id ORDER BY account_name
-        """):
-            out.append({
-                "account": r["account_name"], "account_id": r["account_id"],
-                "type": label, "table": table,
-                "date": r["max_date"], "min_date": r["min_date"], "rows": r["rows"],
-                "status": "READY", "source": "rds",
-                "lineage": "完整（source_file_name 已回填）"
-                           if r["lineage_rows"] == r["rows"] else "缺失",
-            })
-    return out
+    # The reader only touches the persisted catalog and import revision ledger.
+    # Expensive exact fact counts run in the independent maintenance process.
+    return coverage_catalog()
 
 
 # ---------------------------------------------------------------- 产品维度

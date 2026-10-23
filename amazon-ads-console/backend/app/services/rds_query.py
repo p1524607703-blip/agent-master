@@ -9,15 +9,42 @@ import json
 import os
 import subprocess
 import time
+import re
 from typing import Any, Optional
 
-from app.core.observability import increment
+from app.core.observability import increment, record_query_timing, request_context
 
 
 class DatabaseQueryError(RuntimeError):
     """Sanitized SQL subprocess failure; query and stderr stay private."""
 
 _PREFIX = "RDS_PG"
+STATEMENT_TIMEOUT_MS = 28000
+
+def bounded_query_env(env):
+    """Cancel in PostgreSQL before the 30s subprocess deadline closes its socket."""
+    result = dict(env)
+    result['PGOPTIONS'] = (result.get('PGOPTIONS', '') +
+                           f' -c statement_timeout={STATEMENT_TIMEOUT_MS}').strip()
+    return result
+
+
+
+_QUERY_SOURCES = frozenset({
+    "core.import_batches", "core.report_coverage_snapshots", "core.report_campaign_daily", "core.report_placement_daily",
+    "core.report_targeting_daily", "core.report_advertised_product_daily",
+    "core.report_purchased_product_daily", "core.report_search_term_daily",
+    "core.report_business_child_asin_daily", "core.report_business_parent_asin_period",
+    "ops_products.child_asin_mapping", "ops_products.product_mapping",
+    "ops_products.product_ownership", "ops_products.product_roster",
+    "ops_products.confirmed_sku_registry", "ops_products.cpo_campaign_cost_rules",
+})
+
+
+def _query_label(sql: str) -> str:
+    # Whitelist table labels instead of retaining SQL, values or error messages.
+    sources = set(re.findall(r"\b(?:core|ops_products)\.[a-z_]+\b", sql)) & _QUERY_SOURCES
+    return ",".join(sorted(sources)) or "warehouse_query"
 
 
 def _pg_setting(name: str) -> str:
@@ -29,7 +56,8 @@ def _pg_setting(name: str) -> str:
 
 
 def _run(sql: str) -> str:
-    env = os.environ.copy()
+    env = bounded_query_env(os.environ)
+    env['PGAPPNAME'] = 'cpo-query:' + str((request_context.get() or {}).get('request_id') or 'maintenance')[:48]
     for key in ('PASSWORD', 'SSLMODE', 'SSLROOTCERT'):
         value = env.get(f'RDS_PG{key}')
         if value is not None:
@@ -38,6 +66,7 @@ def _run(sql: str) -> str:
             env.pop(f'PG{key}', None)
     started = time.perf_counter()
     increment('psql_calls')
+    status = 'failed'
     try:
         proc = subprocess.run(
             ['psql', '-h', _pg_setting('HOST'), '-p', _pg_setting('PORT'),
@@ -45,10 +74,15 @@ def _run(sql: str) -> str:
              '-X', '-q', '-t', '-A', '-v', 'ON_ERROR_STOP=1', '-c', sql],
             env=env, capture_output=True, text=True, timeout=30,
         )
+        status = ('ok' if proc.returncode == 0 else
+                  'timeout' if 'statement timeout' in proc.stderr.lower() else 'failed')
     except subprocess.TimeoutExpired:
+        status = 'timeout'
         raise DatabaseQueryError('Database query timed out') from None
     finally:
-        increment('db_wall_ms', (time.perf_counter() - started) * 1000)
+        elapsed_ms = (time.perf_counter() - started) * 1000
+        increment('db_wall_ms', elapsed_ms)
+        record_query_timing(_query_label(sql), elapsed_ms, status)
     if proc.returncode != 0:
         raise DatabaseQueryError('Database query failed')
     return proc.stdout.strip()

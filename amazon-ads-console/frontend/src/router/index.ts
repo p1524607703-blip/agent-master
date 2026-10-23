@@ -1,19 +1,24 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { nextTick } from 'vue'
-import DiagnosticsView from '../views/DiagnosticsView.vue'
 import { canViewDiagnostics } from '../diagnostics/permissions'
 import { enterPage, completePageRender } from '../diagnostics/browserTrace'
-import DashboardView from '../views/DashboardView.vue'
-import CpoJobsView from '../views/CpoJobsView.vue'
-import IssuesView from '../views/IssuesView.vue'
-import RulesView from '../views/RulesView.vue'
-import ReportsView from '../views/ReportsView.vue'
-import OperatorDetailView from '../views/OperatorDetailView.vue'
-import ProductMappingsView from '../views/ProductMappingsView.vue'
-import OperatorCpoView from '../views/OperatorCpoView.vue'
-import MyCpoView from '../views/MyCpoView.vue'
-import LoginView from '../views/LoginView.vue'
 import { useSessionStore } from '../stores/session'
+import { beginNavigation, finishNavigation, navigationState, recoverNavigation } from './navigation'
+
+const DiagnosticsView = () => import('../views/DiagnosticsView.vue')
+const CodexDevicesView = () => import('../views/CodexDevicesView.vue')
+const DashboardView = () => import('../views/DashboardView.vue')
+const CpoJobsView = () => import('../views/CpoJobsView.vue')
+const IssuesView = () => import('../views/IssuesView.vue')
+const RulesView = () => import('../views/RulesView.vue')
+const ReportsView = () => import('../views/ReportsView.vue')
+const OperatorDetailView = () => import('../views/OperatorDetailView.vue')
+const ProductMappingsView = () => import('../views/ProductMappingsView.vue')
+const OperatorCpoView = () => import('../views/OperatorCpoView.vue')
+const MyCpoView = () => import('../views/MyCpoView.vue')
+const LoginView = () => import('../views/LoginView.vue')
+const AllocationView = () => import('../views/AllocationView.vue')
+const DataChangesView = () => import('../views/DataChangesView.vue')
 
 // 已下架模块（2026-09-15 用户要求暂时隐藏，视图文件保留以便随时恢复）：
 //   /products   产品明细 → ProductsView.vue
@@ -29,7 +34,7 @@ export const ROLE_HOME: Record<string, string> = {
 export const homeFor = (role?: string | null) => ROLE_HOME[role || ''] || '/dashboard'
 
 // 运营可访问的路由白名单：只有自己的 CPO 页面
-const OPERATOR_ALLOWED = new Set(['/my-cpo'])
+const OPERATOR_ALLOWED = new Set(['/my-cpo', '/operator-cpo', '/ad-allocation', '/data-changes'])
 
 const router = createRouter({
   history: createWebHistory(),
@@ -42,10 +47,13 @@ const router = createRouter({
     { path: '/operator-cpo', component: OperatorCpoView, meta: { keepAlive: true } },
     // 运营页：只保留 CPO 单双数据情况，且只能看到自己的数据
     { path: '/my-cpo', component: MyCpoView, meta: { keepAlive: true } },
+    { path: '/ad-allocation', component: AllocationView },
+    { path: '/data-changes', component: DataChangesView },
     { path: '/product-mappings', component: ProductMappingsView },
     { path: '/rules', component: RulesView },
     { path: '/reports', component: ReportsView },
     { path: '/diagnostics', component: DiagnosticsView, meta: { managementOnly: true } },
+    { path: '/codex-devices', component: CodexDevicesView, meta: { managementOnly: true } },
     { path: '/operators/:operator', component: OperatorDetailView },
     // 已下架模块直达链接 → 回看板（不暴露「模块已下线」这种信息给终端用户）
     ...Object.keys(RETIRED).map(p => ({ path: p, redirect: '/dashboard' })),
@@ -54,7 +62,21 @@ const router = createRouter({
   ],
 })
 
+const prefetched = new Set<string>()
+// Fetch only the code for a visible menu item on hover/focus; component setup
+// and its data requests still run only after an authorized navigation.
+export function prefetchRoute(path: string): void {
+  if (prefetched.has(path)) return
+  const records = router.resolve(path).matched
+  const component = records[records.length - 1]?.components?.default
+  if (typeof component !== 'function') return
+  prefetched.add(path)
+  void Promise.resolve().then(() => (component as () => Promise<unknown>)())
+    .catch(() => { prefetched.delete(path) })
+}
+
 router.beforeEach(async (to) => {
+  beginNavigation(to.fullPath)
   const session = useSessionStore()
   if (to.meta.public) {
     if (to.path === '/login' && session.token && await session.ensureUser()) {
@@ -85,10 +107,17 @@ router.beforeEach(async (to) => {
 })
 
 router.afterEach(async (to, _from, failure) => {
+  finishNavigation(to.fullPath)
   if (failure) return
   const pageId = enterPage(to.path)
   await nextTick()
   requestAnimationFrame(() => completePageRender(pageId, 'shell'))
+})
+
+router.onError((error, to) => {
+  if (navigationState.target !== to.fullPath) return
+  if (recoverNavigation(error, to.fullPath)) return
+  finishNavigation(to.fullPath, '页面加载失败，请重新加载后重试。')
 })
 
 export default router

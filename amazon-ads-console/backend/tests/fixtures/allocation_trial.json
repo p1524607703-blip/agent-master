@@ -1,0 +1,44 @@
+{
+  "period": "2026-09",
+  "report_timezone": "America/Los_Angeles",
+  "snapshot": {
+    "currency": "USD",
+    "mode": "FULL",
+    "products": [
+      {"id": "AJ1-S87", "group": "AJ1", "style": "S87", "manual_baseline": "1.44", "unit": "双", "product_category": "合成测试品类", "classification_status": "confirmed"},
+      {"id": "ZJ1-DU03+DU06", "group": "ZJ1", "style": "DU03+DU06", "manual_baseline": "5.00", "unit": "双", "product_category": "合成测试品类", "classification_status": "confirmed"},
+      {"id": "ZJ1-W21", "group": "ZJ1", "style": "W21", "clearance": true, "unit": "双", "classification_status": "unclassified"}
+    ],
+    "campaigns": [
+      {
+        "source": "AMS",
+        "account_id": "synthetic-ams-account-00001",
+        "campaign_id": "0000000000000101",
+        "creator_group": "AJ1",
+        "ad_product": "SP",
+        "spend": "120.00",
+        "units": 12,
+        "rows": [
+          {"id": "synthetic-row-101-own", "product_id": "AJ1-S87", "units": 2, "purchases": 2, "promoted_product_id": "AJ1-S87", "promotion_confirmed": true, "source_isolation_required": false},
+          {"id": "synthetic-row-101-halo", "product_id": "ZJ1-DU03+DU06", "units": 6, "purchases": 4, "promoted_product_id": "AJ1-S87", "promotion_confirmed": true, "source_isolation_required": true, "source_eligibility": "ELIGIBLE", "source_evidence_id": "synthetic-source-positive-evidence-1"},
+          {"id": "synthetic-row-101-clearance", "product_id": "ZJ1-W21", "units": 4, "purchases": 3, "promoted_product_id": "AJ1-S87", "promotion_confirmed": true, "source_isolation_required": false}
+        ],
+        "remainder": {"promotion_scope_complete": true, "promoted_products": [{"product_id": "AJ1-S87", "weight": "120.00", "evidence_id": "synthetic-promoted-scope-101"}]}
+      },
+      {
+        "source": "WHITIN",
+        "account_id": "synthetic-selling-account-00002",
+        "campaign_id": "0000000000000201",
+        "creator_group": "ZJ1",
+        "ad_product": "STV",
+        "spend": "80.00",
+        "units": 8,
+        "rows": [
+          {"id": "synthetic-row-201-own", "product_id": "ZJ1-DU03+DU06", "units": 2, "purchases": 2, "promoted_product_id": "ZJ1-DU03+DU06", "promotion_confirmed": true, "source_isolation_required": false},
+          {"id": "synthetic-row-201-unknown-promotion-halo", "product_id": "AJ1-S87", "units": 6, "purchases": null, "promoted_product_id": null, "promotion_confirmed": false, "source_isolation_required": false}
+        ],
+        "remainder": {"manual_payer_id": "ZJ1-DU03+DU06", "manual_evidence_id": "synthetic-approved-financial-payer-201"}
+      }
+    ]
+  }
+}

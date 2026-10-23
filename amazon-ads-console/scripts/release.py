@@ -36,12 +36,15 @@ def main():
     parser.add_argument('ref', help='Existing Git tag or commit; deployment is always pinned to its commit')
     parser.add_argument('--server', default='Agent-server')
     parser.add_argument('--public-url', default='https://193.112.27.91:80')
+    parser.add_argument('--expected-current', help='Refuse activation if another release changed production')
     args = parser.parse_args()
+    if args.expected_current and not re.fullmatch(r'[0-9a-f]{40}', args.expected_current):
+        parser.error('--expected-current must be a full commit SHA')
     commit = git('rev-parse', '--verify', args.ref + '^{commit}')
     assert re.fullmatch(r'[0-9a-f]{40}', commit)
     # Only a commit already present in GitHub can reach the server.
     published = published_commit(commit)
-    # A rollback to an old application must retain today's safe stop/clear/warm
+    # A rollback to an old application must retain today's safe rolling
     # engine. Pin that engine to this checkout's *published* HEAD separately.
     engine_commit = git('rev-parse', 'HEAD^{commit}')
     engine_published = published if engine_commit == commit else published_commit(engine_commit)
@@ -49,6 +52,8 @@ def main():
                 'actor': os.environ.get('USER', 'local-user'),
                 'verified_at': datetime.now(timezone.utc).isoformat(),
                 'public_url': args.public_url}
+    if args.expected_current:
+        approval['expected_current_commit'] = args.expected_current
     # A small partial Git mirror: commit + trees + CPO blobs, not the whole knowledge vault.
     objects = {commit, published['tree']['sha'], engine_commit, engine_published['tree']['sha']}
     for object_commit in {commit, engine_commit}:
@@ -95,6 +100,7 @@ fi
  mkdir -p {SERVER_ROOT}/tooling/engine-{engine_commit}
  git --git-dir={SERVER_ROOT}/repository.git show {engine_commit}:amazon-ads-console/scripts/deploy.sh > {SERVER_ROOT}/tooling/engine-{engine_commit}/deploy.sh
  git --git-dir={SERVER_ROOT}/repository.git show {engine_commit}:amazon-ads-console/deploy/cache_release.py > {SERVER_ROOT}/tooling/engine-{engine_commit}/cache_release.py
+ git --git-dir={SERVER_ROOT}/repository.git show {engine_commit}:amazon-ads-console/deploy/rolling_release.py > {SERVER_ROOT}/tooling/engine-{engine_commit}/rolling_release.py
 ''')
     writer = 'import sys,json; from pathlib import Path; d=json.load(sys.stdin); p=Path("/opt/agent/cpo/shared/approvals")/(d["commit"]+".json"); p.write_text(json.dumps(d)); p.chmod(0o600)'
     ssh(args.server, 'python3 -c ' + shlex.quote(writer), input=json.dumps(approval), text=True)

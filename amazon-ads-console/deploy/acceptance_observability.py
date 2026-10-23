@@ -81,7 +81,9 @@ def main():
         assert request('/operators/AJ'+date_query, xm)[0] == 403
         assert request('/operators/XM'+date_query, aj)[0] == 403
         assert request('/diagnostics/requests', xm)[0] == 403
-        assert request('/operator-cpo'+date_query, xm)[0] == 403
+        shared_status, shared, _ = request('/operator-cpo'+date_query, xm)
+        assert shared_status == 200 and shared.get('operators')
+        assert 'fullFunnel' not in shared and 'businessMappingConflictOrders' not in shared
         status, own, _ = request('/operators/XM'+date_query, xm)
         assert status == 200 and own.get('products')
         if own.get('final_cpo') is False:

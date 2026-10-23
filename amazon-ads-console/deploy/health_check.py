@@ -9,6 +9,7 @@ from pathlib import Path
 parser = argparse.ArgumentParser()
 parser.add_argument('release', type=Path)
 parser.add_argument('--public-url')
+parser.add_argument('--backend-url', default='http://127.0.0.1:8000')
 args = parser.parse_args()
 backend = args.release / 'amazon-ads-console/backend'
 sys.path.insert(0, str(backend))
@@ -25,7 +26,7 @@ if args.public_url:
         actual = json.load(response)
     assert actual['commit'] == expected, 'Public frontend version does not match release'
     try:
-        opener.open('http://127.0.0.1:8000/api/auth/me', timeout=10)
+        opener.open(args.backend_url.rstrip('/') + '/api/auth/me', timeout=10)
         raise AssertionError('Authentication boundary unexpectedly allowed anonymous access')
     except urllib.error.HTTPError as error:
         assert error.code == 401, 'Backend did not return the expected authentication response'

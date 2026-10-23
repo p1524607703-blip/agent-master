@@ -1,0 +1,10 @@
+[Unit]
+Description=Check CPO report coverage revisions every five minutes
+
+[Timer]
+OnBootSec=3m
+OnUnitActiveSec=5m
+AccuracySec=15s
+
+[Install]
+WantedBy=timers.target

@@ -7,6 +7,7 @@ from app.main import app
 from app.api import auth, routes
 from app.services import operator_cpo
 from app.services.build_cache import BuildBusyError
+from test_full_funnel_visibility import POLICIES, LEDGER
 from app.services.cache import cache
 
 
@@ -28,6 +29,8 @@ class PermissionTests(unittest.TestCase):
         self.resolver.start()
         self.query_block = patch('app.services.rds_query.subprocess.run', side_effect=AssertionError('No live DB calls in permission tests'))
         self.query_block.start()
+        self.policy = patch('app.services.full_funnel_visibility.query_rows', return_value=POLICIES)
+        self.policy_reader = self.policy.start()
         self.logger = patch('app.core.observability.logger.info')
         self.logger.start()
         self.client = TestClient(app)
@@ -37,6 +40,7 @@ class PermissionTests(unittest.TestCase):
     def tearDown(self):
         self.client.__exit__(None, None, None)
         self.query_block.stop()
+        self.policy.stop()
         self.logger.stop()
         self.resolver.stop()
         self.warmup.stop()
@@ -60,9 +64,22 @@ class PermissionTests(unittest.TestCase):
         with patch.object(routes, 'operator_cpo_summary', return_value={'operators': [{'group': 'XM1'}, {'group': 'AJ1'}]}):
             self.assertEqual(self.get('/api/operator-cpo?date=2026-10-04', 'manager').status_code, 200)
         for user in ('xm', 'aj', 'unknown'):
-            for path in ('/api/operator-cpo?date=2026-10-04', '/api/dashboard/overview', '/api/product-mappings', '/api/cache/stats', '/api/health', '/api/reports', '/api/diagnostics/status', '/api/diagnostics/requests'):
+            for path in ('/api/dashboard/overview', '/api/product-mappings', '/api/cache/stats', '/api/health', '/api/reports', '/api/diagnostics/status', '/api/diagnostics/requests'):
                 with self.subTest(user=user, path=path):
                     self.assertEqual(self.get(path, user).status_code, 403)
+
+    def test_shared_summary_excludes_company_audit_and_full_funnel(self):
+        data = {'operators': [{'group': 'XM1'}, {'group': 'AJ1'}],
+                'fullFunnel': {'private': 'company detail'}, 'businessMappingConflictOrders': 99,
+                'businessUnmappedOrders': 101}
+        with patch.object(routes, 'operator_cpo_summary', return_value=data):
+            self.assertEqual(self.get('/api/operator-cpo', 'manager').status_code, 200)
+            for user in ('xm', 'aj'):
+                response = self.get('/api/operator-cpo', user)
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(response.json(), {'operators': data['operators']})
+            for user in ('unknown', 'unbound'):
+                self.assertEqual(self.get('/api/operator-cpo', user).status_code, 403)
 
     def test_management_and_admin_access_all_groups(self):
         with patch.object(routes, 'operator_cpo_detail', return_value={'products': []}) as detail:
@@ -84,7 +101,8 @@ class PermissionTests(unittest.TestCase):
 
     def test_my_cpo_ignores_frontend_group_and_omits_global_audit(self):
         data = {'operators': [{'groups': ['XM1'], 'name': '雪敏'}, {'groups': ['AJ1'], 'name': '爱菊'}], 'data_date': '2026-10-04', 'period': 'daily', 'businessUnmappedOrders': 999, 'businessOutOfScopeParents': ['private'], 'note': 'company-wide $999'}
-        def detail(name, *args):
+        def detail(name, *args, **kwargs):
+            self.assertEqual(kwargs.get('sb_attribution_mode'), 'name')
             group = 'XM1' if name == '雪敏' else 'AJ1'
             return {'products': [{'group': group}], 'summary': {}, 'final_cpo': True}
         with patch.object(operator_cpo, 'operator_cpo_summary', return_value=data), patch.object(operator_cpo, 'operator_cpo_detail', side_effect=detail):
@@ -112,6 +130,35 @@ class PermissionTests(unittest.TestCase):
                 self.assertEqual(self.get('/api/my-cpo', 'xm').status_code, 403)
             finally:
                 USERS['xm']['operatorCode'] = 'XM1'
+
+    def test_warm_detail_cache_has_no_management_panel_and_scoped_operator_rows(self):
+        payload = {'products': [], 'fullFunnel': LEDGER}
+        path = '/api/operators/XM?date=2026-10-04'
+        with patch.object(routes, 'operator_cpo_detail', return_value=payload) as loader:
+            for user in ('manager','xm','admin'):
+                response = self.get(path, user)
+                self.assertEqual(response.status_code, 200)
+                if user == 'xm':
+                    self.assertEqual([m['account'] for m in response.json()['fullFunnel']['modules']], ['BLOOMNEXT'])
+                else:
+                    self.assertNotIn('fullFunnel',response.json())
+            self.assertEqual(loader.call_count, 1)
+        self.assertEqual(len(payload['fullFunnel']['rows']), 6)
+
+    def test_warm_my_cache_revocation_and_policy_failure(self):
+        with patch.object(routes, 'my_cpo_summary', return_value={'products': [], 'fullFunnel': LEDGER}) as loader:
+            path = '/api/my-cpo?date=2026-10-04&operatorCode=AJ1'
+            first = self.get(path, 'xm')
+            self.assertEqual([m['account'] for m in first.json()['fullFunnel']['modules']], ['BLOOMNEXT'])
+            self.policy_reader.return_value = [p for p in POLICIES if p['account_name'] != 'BLOOMNEXT']
+            revoked = self.get(path, 'xm')
+            self.assertEqual([m['account'] for m in revoked.json()['fullFunnel']['modules']], [])
+            self.assertNotIn('private-xm', revoked.text)
+            self.policy_reader.side_effect = RuntimeError('unavailable')
+            failed = self.get(path, 'xm')
+            self.assertEqual(failed.status_code, 503)
+            self.assertNotIn('private-', failed.text)
+            self.assertEqual(loader.call_count, 1)
 
     def test_busy_build_is_controlled_503(self):
         with patch.object(routes, 'operator_cpo_summary', side_effect=BuildBusyError('busy')):

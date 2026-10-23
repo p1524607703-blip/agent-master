@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
@@ -9,6 +10,11 @@ ENV_FILE = Path(os.environ.get("CPO_ENV_FILE", str(Path(__file__).resolve().pare
 
 
 class Settings(BaseSettings):
+    cpo_allocation_enabled: bool = False
+    cpo_allocation_storage: str = 'sqlite'
+    cpo_allocation_environment: str = 'DEVELOPMENT_ACCEPTANCE'
+    cpo_allocation_can_create_run: bool = True
+    cpo_allocation_reference_available: bool = False
     app_name: str = "Amazon Ads Console API"
     api_prefix: str = "/api"
 
@@ -22,6 +28,17 @@ class Settings(BaseSettings):
 
     auth_session_hours: int = 12
     operator_warmup_enabled: bool = True
+    # Disabled until the device migration and a separately approved release.
+    codex_telemetry_enabled: bool = False
+    codex_upstream_base_url: str = ""
+    codex_public_base_url: str = ""
+    codex_upstream_key_file: Optional[str] = None
+    codex_event_spool_dir: str = "~/.local/share/cpo-codex-events"
+    codex_deployment_target: str = "测试入口（非日本生产部署）"
+    codex_quota_snapshot_file: Optional[str] = None
+    codex_quota_attribution_file: Optional[str] = None
+    codex_host_usage_snapshot_file: Optional[str] = None
+    codex_ledger_started_at: Optional[datetime] = None
     model_config = SettingsConfigDict(env_file=ENV_FILE, extra="ignore")
 
     @property

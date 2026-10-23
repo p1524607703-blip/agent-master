@@ -1,7 +1,15 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { isNavigatingAway } from '../router/navigation'
+import SbAttributionToggle from '../components/SbAttributionToggle.vue'
+import { CpoRequestGate, normalizeCpoDate, normalizeSbMode, sbModeLabel, type SbAttributionMode } from '../api/cpoReport'
+import FullFunnelRows from '../components/FullFunnelRows.vue'
+import PendingGroupExpenses from '../components/PendingGroupExpenses.vue'
+import { useSessionStore } from '../stores/session'
+import CampaignCostNotes from '../components/CampaignCostNotes.vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getJson, getJsonStrict } from '../api/client'
+import { downloadOperatorReport } from '../api/operatorExports'
 import { NButton, NDatePicker, NSelect } from 'naive-ui'
 import DataSkeleton from '../components/DataSkeleton.vue'
 import CpoDataQuality from '../components/CpoDataQuality.vue'
@@ -10,8 +18,9 @@ import { usePageRenderTrace } from '../diagnostics/pageTrace'
 
 type Period = 'daily'|'weekly'|'monthly'
 type PeriodOption = { value:string; label:string; start?:string; end?:string }
-type PeriodData = { daily:PeriodOption[]; weekly:PeriodOption[]; monthly:PeriodOption[]; latestDate?:string; weekRule?:string; note?:string }
+type PeriodData = { daily:PeriodOption[]; weekly:PeriodOption[]; monthly:PeriodOption[]; latestDate?:string; latestCompleteDate?:string; weekRule?:string; note?:string }
 
+const session = useSessionStore()
 const route = useRoute()
 const router = useRouter()
 const operatorAliases: Record<string,string> = {
@@ -29,6 +38,20 @@ const showDsp = ref(false)
 const visibleAdTypes = computed(() => showDsp.value ? [...baseAdTypes, 'DSP'] : [...baseAdTypes])
 const typeGroupColspan = computed(() => visibleAdTypes.value.length)
 const detailColumnCount = computed(() => 9 + visibleAdTypes.value.length * 2)
+const exportBusy = ref(false)
+const exportError = ref('')
+async function exportCurrentTable(){
+  if (exportBusy.value || loading.value) return
+  exportBusy.value = true; exportError.value = ''
+  try {
+    await downloadOperatorReport('detail',period.value,selectedDate.value,operatorName.value,sbAttributionMode.value)
+  } catch(e) {
+    exportError.value = e instanceof Error ? e.message : '导出失败'
+  } finally {
+    exportBusy.value = false
+  }
+}
+const sbAttributionMode = ref<SbAttributionMode>(normalizeSbMode(route.query.sb_attribution_mode))
 const selectedDate = ref(String(route.query.date || ''))
 const period = ref<Period>(['weekly','monthly'].includes(String(route.query.period)) ? route.query.period as Period : 'daily')
 const periods = ref<PeriodData>({ daily:[],weekly:[],monthly:[] })
@@ -36,7 +59,10 @@ const detail = ref<any>({ operator:operatorName.value, products:[], summary:{}, 
 const loading = ref(false)
 usePageRenderTrace(loading)
 const loadError = ref('')
-let requestSeq = 0
+const requestGate = new CpoRequestGate()
+let preparationSequence = 0
+let disposed = false
+onBeforeUnmount(() => { disposed = true; ++preparationSequence; requestGate.cancel() })
 
 const reportRangeOptions = [
   { label:'每日', value:'daily' },
@@ -64,69 +90,85 @@ const normalizeSelection = () => {
     const containing=opts.find(x=>x.start && x.end && raw>=x.start && raw<=x.end)
     if (containing) { selectedDate.value=containing.value; return }
   }
+  if (period.value === 'daily' && periods.value.latestCompleteDate) {
+    const latestComplete=opts.find(x=>x.value===periods.value.latestCompleteDate)
+    if (latestComplete) { selectedDate.value=latestComplete.value; return }
+  }
   selectedDate.value=opts[0].value
 }
 
-const loadPeriods = async () => {
-  periods.value = await getJson<PeriodData>('/operator-periods', { daily:[],weekly:[],monthly:[] })
-  normalizeSelection()
+let periodsRequest: Promise<void> | undefined
+const loadPeriods = () => {
+  if (!periodsRequest) periodsRequest = getJson<PeriodData>('/operator-periods', { daily:[],weekly:[],monthly:[] })
+    .then(result => { periods.value = result })
+  return periodsRequest
+}
+const reportQuery = () => ({
+  period:period.value,
+  ...(selectedDate.value ? { date:selectedDate.value } : {}),
+  sb_attribution_mode:sbAttributionMode.value,
+})
+const invalidateReport = () => {
+  ++preparationSequence
+  requestGate.cancel()
+  loading.value = true
+}
+const changeSbMode = async (mode:SbAttributionMode) => {
+  if (mode === sbAttributionMode.value) return
+  invalidateReport()
+  sbAttributionMode.value = mode
+  await router.replace({ path:route.path, query:reportQuery() })
 }
 
-const syncControlsFromRoute = () => {
-  const routePeriod = String(route.query.period || '')
-  period.value = ['weekly','monthly'].includes(routePeriod) ? routePeriod as Period : 'daily'
-  selectedDate.value = String(route.query.date || '')
-}
-
-const load = async () => {
-  const seq = ++requestSeq
+const load = async (force=false) => {
+  const sourcePath = route.path
+  const preparation = ++preparationSequence
+  // Explicit dates can load immediately; date choices are fetched concurrently.
+  if (!selectedDate.value) {
+    await loadPeriods()
+    if (disposed || preparation !== preparationSequence) return
+    normalizeSelection()
+  } else void loadPeriods()
+  if (disposed) return
   const targetOperator = operatorName.value
+  const targetPeriod = period.value
+  const targetDate = selectedDate.value
+  const targetMode = sbAttributionMode.value
+  const key = JSON.stringify([targetOperator,targetPeriod,targetDate,targetMode])
+  const request = requestGate.start(key, force)
+  if (!request) return
   loading.value = true
   loadError.value = ''
+  exportError.value = ''
   try {
-    if (!periods.value.daily.length) await loadPeriods()
-    if (seq !== requestSeq) return
-
-    normalizeSelection()
-    const targetPeriod = period.value
-    const targetDate = selectedDate.value
-    const params = new URLSearchParams({ period:targetPeriod })
-    if (targetDate) params.set('date', targetDate)
-
-    const result = await getJsonStrict<any>(`/operators/${encodeURIComponent(targetOperator)}?${params.toString()}`)
-    if (seq !== requestSeq || operatorName.value !== targetOperator) return
-
+    const params = new URLSearchParams({ period:targetPeriod, sb_attribution_mode:targetMode })
+    if (targetDate) params.set('date',targetDate)
+    const result = await getJsonStrict<any>(`/operators/${encodeURIComponent(targetOperator)}` + '?' + params.toString(), { signal:request.signal })
+    if (!request.current()) return
+    if (result.sbAttributionMode !== targetMode) throw new Error('服务器返回的 SB 归属方式与当前选择不一致')
     detail.value = result
     if (!selectedDate.value && result.data_date) selectedDate.value = result.data_date
-
-    const canonicalDate = selectedDate.value
-    const currentOperator = operatorName.value
-    const currentPeriod = period.value
-    const routeOperator = String(route.params.operator || '')
-    const routePeriod = String(route.query.period || 'daily')
-    const routeDate = String(route.query.date || '')
-    if (
-      currentOperator === targetOperator &&
-      (routeOperator !== currentOperator || routePeriod !== currentPeriod || routeDate !== canonicalDate)
-    ) {
-      await router.replace({
-        path:`/operators/${encodeURIComponent(currentOperator)}`,
-        query:{ period:currentPeriod, ...(canonicalDate ? { date:canonicalDate } : {}) },
-      })
-    }
+    request.finish(JSON.stringify([targetOperator,targetPeriod,selectedDate.value,targetMode]))
+    if (route.path === sourcePath && !isNavigatingAway(sourcePath)) await router.replace({ path:`/operators/${encodeURIComponent(operatorName.value)}`, query:reportQuery() })
   } catch (error) {
-    if (seq !== requestSeq) return
-    loadError.value = error instanceof Error ? error.message : '数据读取失败，请稍后重试'
-    detail.value = { operator:targetOperator, products:[], summary:{}, data_date:selectedDate.value, period:period.value }
+    if (!request.current()) return
+    loadError.value = request.signal.aborted ? '数据读取超时，请重试' : error instanceof Error ? error.message : '数据读取失败，请稍后重试'
+    detail.value = { operator:operatorName.value, products:[], summary:{}, account_split:false }
+    request.finish()
   } finally {
-    if (seq === requestSeq) loading.value = false
+    if (request.current()) loading.value = false
   }
 }
 
 watch(
-  () => [String(route.params.operator || ''), String(route.query.period || ''), String(route.query.date || '')],
-  async () => {
-    syncControlsFromRoute()
+  () => route.path.startsWith('/operators/')
+    ? [String(route.params.operator || ''), String(route.query.period || ''), String(route.query.date || ''), String(route.query.sb_attribution_mode || '')]
+    : null,
+  async value => {
+    if (!value) { ++preparationSequence; requestGate.cancel(); return }
+    period.value = ['weekly','monthly'].includes(String(route.query.period)) ? route.query.period as Period : 'daily'
+    selectedDate.value = normalizeCpoDate(route.query.date, period.value)
+    sbAttributionMode.value = normalizeSbMode(route.query.sb_attribution_mode)
     await load()
   },
   { immediate:true },
@@ -147,35 +189,38 @@ const typeTotal = (field: 'adTypeSpend' | 'adTypeOrders', type: string) => {
 
 const onOperatorChange = async (name:string) => {
   if (!name || name === operatorName.value) return
+  invalidateReport()
   // Show the detail skeleton immediately instead of leaving stale operator data visible
   loading.value = true
   await router.push({
     path:`/operators/${encodeURIComponent(name)}`,
-    query:{ period:period.value, ...(selectedDate.value ? { date:selectedDate.value } : {}) },
+    query:reportQuery(),
   })
 }
 const changePeriod = async (value:Period) => {
   if (period.value === value) return
+  invalidateReport()
   loading.value = true
   period.value = value
   selectedDate.value = ''
   normalizeSelection()
   await router.replace({
     path:`/operators/${encodeURIComponent(operatorName.value)}`,
-    query:{ period:value, ...(selectedDate.value ? { date:selectedDate.value } : {}) },
+    query:reportQuery(),
   })
 }
 const changeRange = async (value:string) => {
-  const nextDate = value || ''
+  const nextDate = normalizeCpoDate(value, period.value)
   if (!nextDate || nextDate === selectedDate.value) return
+  invalidateReport()
   loading.value = true
   selectedDate.value = nextDate
   await router.replace({
     path:`/operators/${encodeURIComponent(operatorName.value)}`,
-    query:{ period:period.value, date:nextDate },
+    query:reportQuery(),
   })
 }
-const backToList = () => router.push({ path:'/operator-cpo', query:{period:period.value,...(selectedDate.value ? {date:selectedDate.value} : {})} })
+const backToList = () => router.push({ path:'/operator-cpo', query:reportQuery() })
 const displayPeriod = computed(() => period.value === 'weekly'
   ? `${detail.value.period_start || ''} ~ ${detail.value.period_end || ''}`
   : period.value === 'monthly'
@@ -200,6 +245,7 @@ const tablePeriod = computed(() => period.value === 'weekly'
         <p>按固定报告范围查看该运营在全部业务账户与 AMS 汇总后的产品广告结构与经营指标。</p>
       </div>
       <div class="simple-filters">
+        <SbAttributionToggle :model-value="sbAttributionMode" @update:model-value="changeSbMode" />
         <label>
           <span>运营</span>
           <NSelect :value="operatorName" :options="operatorSelectOptions" style="width:120px" @update:value="onOperatorChange" />
@@ -221,17 +267,20 @@ const tablePeriod = computed(() => period.value === 'weekly'
           />
           <NSelect v-else :value="selectedDate || null" :options="currentRangeOptions" :placeholder="rangeLabel" style="width:280px" @update:value="changeRange" />
         </label>
-        <NButton type="primary" :disabled="loading || !selectedDate" @click="load">应用</NButton>
+        <NButton type="primary" :disabled="loading || !selectedDate" @click="load(true)">应用</NButton>
       </div>
     </div>
 
     <DataSkeleton v-if="loading" variant="detail" :rows="8" />
+
+    <FullFunnelRows v-if="!loading && session.user?.roleCode === 'operator'" :ledger="detail.fullFunnel" />
 
     <div v-if="!loading" class="simple-data-note">
       <strong>{{ displayPeriod }}</strong>
       <span>{{ detail.summary?.dataProducts ?? 0 }} / {{ detail.summary?.products ?? products.length }} {{ period === 'weekly' ? '周内命中' : period === 'monthly' ? '月内命中' : '有数据' }}</span>
       <span v-if="period !== 'daily'">覆盖 {{ detail.coverageDays ?? 0 }}/{{ detail.expectedDays ?? (period==='weekly' ? 7 : 0) }} 天</span>
       <span>全部账户合并</span>
+      <span>{{ sbModeLabel(sbAttributionMode) }}</span>
       <span>{{ qualityLabel(detail) }}</span>
       <span>DSP 默认折叠，可在明细表中展开</span>
     </div>
@@ -239,6 +288,8 @@ const tablePeriod = computed(() => period.value === 'weekly'
     <p v-if="loadError && !loading" class="load-error" role="alert">{{ loadError }}。本次数据未读取成功，请重试后确认口径。</p>
 
     <CpoDataQuality v-if="!loading" :data="detail" />
+    <PendingGroupExpenses v-if="!loading" :entries="detail.groupPendingExpenses"
+      :total="detail.summary?.operatorPendingSpend" :operator-name="detail.operator" />
 
     <div v-if="!loading" class="card ad-detail-card">
       <div class="ad-detail-title">
@@ -246,11 +297,17 @@ const tablePeriod = computed(() => period.value === 'weekly'
           <h2>广告类型明细</h2>
           <p>广告费用与广告单按类型展开；总费用、全部订单、CPO、ROAS、TACOS 保留在同一行。</p>
         </div>
-        <NButton size="small" quaternary @click="showDsp = !showDsp">{{ showDsp ? '收起 DSP' : '展开 DSP' }}</NButton>
+        <div class="ad-detail-toolbar">
+          <NButton size="small" secondary @click="showDsp=!showDsp">{{ showDsp ? '收起 DSP' : '展开 DSP' }}</NButton>
+          <NButton type="primary" size="small" :loading="exportBusy" :disabled="loading || !selectedDate"
+            @click="exportCurrentTable">导出表格</NButton>
+        </div>
+        <p v-if="exportError" class="export-error" role="alert">{{ exportError }}</p>
       </div>
 
+      <CampaignCostNotes :products="products" />
       <div class="ad-detail-table-wrap">
-        <table class="operator-ad-table">
+        <table class="operator-ad-table" :style="{minWidth:showDsp?'1860px':'1660px'}">
           <thead>
             <tr class="group-head">
               <th rowspan="2" class="sticky-product">产品</th>
@@ -346,6 +403,8 @@ const tablePeriod = computed(() => period.value === 'weekly'
 
 .ad-detail-card { overflow: hidden; }
 .ad-detail-title { display:flex; align-items:center; justify-content:space-between; gap:12px; padding: 16px 18px 12px; border-bottom: 1px solid #e8ebf0; }
+.ad-detail-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;margin-top:12px}
+.export-error{font-size:12px;color:#b42318;margin:8px 0 0}
 .ad-detail-title h2 { margin: 0 0 5px; font-size: 16px; color: #2f3a4d; }
 .ad-detail-title p { margin: 0; color: #8a93a2; font-size: 11px; }
 
@@ -387,7 +446,7 @@ thead .sticky-date { z-index: 2; background: #f8f9fb !important; }
   .simple-filters { justify-content: flex-start; width: 100%; }
 }
 
-.simple-filters{flex-wrap:nowrap!important}.simple-filters label{display:flex;flex-direction:column;gap:5px;flex:0 0 auto}
+.simple-filters{flex-wrap:wrap!important}.simple-filters label{display:flex;flex-direction:column;gap:5px;flex:0 0 auto}
 </style>
 
 <style scoped>

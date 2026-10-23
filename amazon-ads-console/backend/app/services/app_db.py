@@ -15,7 +15,7 @@ import subprocess
 import time
 from typing import Any, Optional
 from app.core.observability import increment
-from .rds_query import DatabaseQueryError
+from .rds_query import DatabaseQueryError, bounded_query_env
 
 _PREFIX = "PG"
 
@@ -36,7 +36,7 @@ def _run(sql: str) -> str:
             ["psql", "-h", _setting("HOST"), "-p", _setting("PORT"),
              "-U", _setting("USER"), "-d", _setting("DATABASE"),
              "-X", "-q", "-t", "-A", "-v", "ON_ERROR_STOP=1", "-c", sql],
-            env=os.environ.copy(), capture_output=True, text=True, timeout=30,
+            env=bounded_query_env(os.environ), capture_output=True, text=True, timeout=30,
         )
     except subprocess.TimeoutExpired:
         raise DatabaseQueryError('Application database query timed out') from None
