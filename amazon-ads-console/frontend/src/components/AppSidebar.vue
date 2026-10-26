@@ -10,7 +10,7 @@ const groups = computed(() => navigationFor(session.user?.roleCode))
 
 <template>
   <aside class="sidebar compact-sidebar">
-    <div class="brand"><span class="logo">A</span><span>AdSight</span></div>
+    <div class="brand" aria-label="AdSight运营控制台"><span class="logo" aria-hidden="true">A</span><span class="brand-name">AdSight<span class="brand-subtitle">运营控制台</span></span></div>
     <nav aria-label="主导航">
       <section v-for="group in groups" :key="group.title" class="nav-group">
         <div class="nav-title">{{ group.title }}</div>
@@ -22,6 +22,9 @@ const groups = computed(() => navigationFor(session.user?.roleCode))
 </template>
 
 <style scoped>
+.brand .logo{flex-shrink:0}
+.brand-name{min-width:0;line-height:1.2}
+.brand-subtitle{display:block;font-size:12px;font-weight:500;margin-top:4px}
 .compact-sidebar{display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden}
 .nav-group + .nav-group{margin-top:16px;padding-top:8px;border-top:1px solid var(--border,#e7eaf0)}
 @media(max-width:760px){.nav-group + .nav-group{margin-top:0;padding-top:0;border-top:0}}

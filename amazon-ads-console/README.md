@@ -1,6 +1,10 @@
-# Amazon Ads Console
+# AdSight运营控制台
 
-Amazon 多店铺广告数据控制台第一版骨架。技术栈：Vue 3 + TypeScript + ECharts + FastAPI + PostgreSQL。
+AdSight运营控制台统一承载业务数据与运营协作。现有广告分析、CPO 单双、费用分摊和权限审批作为业务模块，后续逐步集成 ERP；ERP 接入属于后续建设范围。
+
+产品展示名称统一为 **AdSight运营控制台**。技术栈：Vue 3 + TypeScript + ECharts + FastAPI + PostgreSQL。
+
+代码目录 `amazon-ads-console/`、已有 API 路径和部署服务标识保留兼容；CPO 继续作为具体业务模块名称，而非整个平台名称。
 
 ## 当前页面
 

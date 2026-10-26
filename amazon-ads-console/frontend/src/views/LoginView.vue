@@ -33,8 +33,8 @@ async function submit() {
   <main class="login-page">
     <section class="login-card">
       <div class="brand-mark">A</div>
-      <h1>AdSight</h1>
-      <p class="subtitle">亚马逊广告数据系统</p>
+      <h1>AdSight运营控制台</h1>
+      <p class="subtitle">业务数据与运营协作</p>
       <form @submit.prevent="submit">
         <label for="username">账号</label>
         <input id="username" v-model="username" autocomplete="username" placeholder="请输入账号" required />

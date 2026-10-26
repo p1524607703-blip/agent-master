@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     cpo_allocation_environment: str = 'DEVELOPMENT_ACCEPTANCE'
     cpo_allocation_can_create_run: bool = True
     cpo_allocation_reference_available: bool = False
-    app_name: str = "Amazon Ads Console API"
+    app_name: str = "AdSight运营控制台 API"
     api_prefix: str = "/api"
 
     # 应用库：iam 身份与角色、会话、CPO 应用层表
