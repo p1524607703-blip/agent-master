@@ -1,0 +1,11 @@
+# Model availability and personal-device page (rc.12)
+
+The personal-device page has three sections: personnel/devices, usage analysis, and access management. Device controls keep the existing admission and concurrency policies. Global operations explicitly affect all registered child devices; selected operations affect only selected visible rows. Token comparisons use the same today/current-window period; estimated account attribution remains separate. A lack of recent requests is not an assertion that a computer is offline.
+
+Super administrators use Access management → Model availability to open/close models from the source gateway's verified catalog. `GET/PATCH /api/codex/model-settings` uses the existing authenticated administrator session and optimistic revision control. Public `/api/codex/v1/models` shows only enabled models. Both Responses and compaction requests enforce the setting before queueing and again after admission. Closing a model does not interrupt a response already admitted to the source. All approved API Keys share this model policy; existing keys and device identities are unchanged.
+
+Settings persist privately in `<codex_event_spool_dir>/control/models.json`, independent of release directories and device-concurrency policy. No saved setting means preserve the verified source catalog for backward compatibility. An explicitly empty selection closes all models; invalid or unreadable saved settings fail closed. Unknown source models cannot be enabled. Restoring a release predating rc.12 also removes model-policy enforcement, so rollback must account for the desired model availability.
+
+Adding a new model first requires a real, completed source response. Then add its exact ID to the private gateway `verifiedModels` setting during a drained gateway restart. Do not change the source worker or personal OAuth profile. The verified Astra ID is `gpt-6-astra`; Sol remains `gpt-6.1-sol`. Model availability does not increase account quota or upstream rate limits.
+
+Validation: isolated PostgreSQL tests cover catalog filtering, permissions, revision conflicts, invalid policy, compaction rejection, queued recheck, running-stream preservation, and unchanged device limits. The UI can be built with the existing frontend build, and utility tests validate same-period aggregation and unknown values.

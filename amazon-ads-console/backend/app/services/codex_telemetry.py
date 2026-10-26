@@ -18,7 +18,7 @@ from fastapi import HTTPException
 from app.core.config import settings
 from app.core import observability
 from app.services.auth import _connect
-from app.services import codex_activity, codex_control, codex_access
+from app.services import codex_activity, codex_control, codex_access, codex_models
 
 log = logging.getLogger(__name__)
 
@@ -302,14 +302,17 @@ def upstream():
     return base,{'Authorization':'Bearer '+key,'Accept-Encoding':'identity'}
 
 
-async def model_catalog():
+async def model_catalog(include_disabled=False):
     base,headers = upstream()
     try:
         async with httpx.AsyncClient(trust_env=False,follow_redirects=False,timeout=15) as client:
             response = await client.get(base+'/models',headers=headers)
             if response.status_code != 200:
                 raise HTTPException(502,'Model catalog is unavailable')
-            return response.json()
+            catalog = response.json()
+            if not isinstance(catalog,dict) or not isinstance(catalog.get('data'),list):
+                raise ValueError('Invalid upstream model catalog')
+            return catalog if include_disabled else codex_models.filter_catalog(catalog)
     except (httpx.HTTPError,ValueError):
         raise HTTPException(502,'Model catalog is unavailable')
 
@@ -337,11 +340,13 @@ async def keepalive_chunks(source, interval=15):
 
 
 async def proxy_response(device, body, route='/responses',forward_headers=None, observer=None, response_headers=None):
+    codex_models.require_model(body)
     queued_at = time.perf_counter()
     lease = await codex_control.acquire(device['device_id'])
     queue_ms = round((time.perf_counter() - queued_at) * 1000, 3)
     try:
         await codex_access.recheck_queued(device)
+        codex_models.require_model(body)
         status, content_type, request_id, stream = await _proxy_response(
             device, body, route, forward_headers, observer, response_headers, queue_ms)
         return status, content_type, request_id, codex_control.ControlledStream(stream, lease)

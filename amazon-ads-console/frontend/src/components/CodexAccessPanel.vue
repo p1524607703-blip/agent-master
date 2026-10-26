@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { getJsonStrict, mutateJsonStrict } from '../api/client'
 import CodexDeviceBinding from './CodexDeviceBinding.vue'
 
@@ -7,7 +7,7 @@ type Device = {deviceId:string; deviceName:string; platform:string; revoked:bool
 type Member = {userId:number; displayName:string; devices:Device[]}
 type Credential = Device & {userId:number; displayName:string}
 type Access = {baseUrl:string|null; models:string[]; modelsAvailable:boolean; protocol:string}
-const props = defineProps<{members:Member[]; selectedId:number|null}>()
+const props = defineProps<{members:Member[]; selectedId:number|null;externalRefresh?:number}>()
 const emit = defineEmits<{changed:[]}>()
 const access = ref<Access|null>(null)
 const configLoading = ref(false)
@@ -83,6 +83,7 @@ async function copy(text:string|undefined|null) {
     if (!stopped) notice.value = '已复制。'
   } catch { if (!stopped) notice.value = '浏览器未允许复制，请选中内容手动复制。' }
 }
+watch(()=>props.externalRefresh,()=>{void load()})
 onMounted(()=>{void load()})
 onUnmounted(()=>{stopped=true;issued.value=null;reveal.value=false})
 </script>
@@ -92,7 +93,7 @@ onUnmounted(()=>{stopped=true;issued.value=null;reveal.value=false})
     <header><div><h2>API 接入与密钥</h2><p>管理员签发、批准独立 Key，按归属人员记录用量；普通接入无需安装连接器。</p></div><button class="primary" :disabled="!access?.baseUrl || !members.length" @click="open('create')">创建 API Key</button></header>
     <div class="connection-fields">
       <label><span>HTTPS 服务器地址</span><div class="copy-field"><input aria-label="HTTPS Base URL" readonly :value="access?.baseUrl || ''" :placeholder="configLoading ? '正在读取…' : '管理员尚未发布接入地址'" /><button :disabled="!access?.baseUrl" @click="copy(access?.baseUrl)">复制地址</button></div></label>
-      <div class="model-info"><span>协议：Responses API</span><span>模型：{{ access?.models.join('、') || (configLoading ? '读取中…' : '暂未取得模型列表') }}</span><button @click="load" :disabled="configLoading">刷新接入信息</button></div>
+      <div class="model-info"><span>协议：Responses API</span><span>模型：{{ access?.models.join('、') || (configLoading ? '读取中…' : access?.modelsAvailable ? '当前未开放模型' : '暂未取得模型列表') }}</span><button @click="load" :disabled="configLoading">刷新接入信息</button></div>
     </div>
     <div class="key-toolbar"><span>Key 新建时仅显示一次；在下方批准后，将服务器地址和 Key 填入 Codex++。</span><button @click="expanded=!expanded">{{ expanded ? '收起密钥列表' : `管理 API Key（${credentials.length}）` }}</button></div>
     <p v-if="notice" class="notice" role="status">{{ notice }}</p>
@@ -140,3 +141,5 @@ button{border:1px solid #d6e0ec;border-radius:7px;background:white;padding:6px 1
 .access-overlay{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:24px;background:rgba(28,42,60,.4)}.access-dialog{width:min(540px,100%);max-height:85vh;overflow:auto;background:#fff;border-radius:14px;padding:22px;box-shadow:0 15px 70px #17233430}.access-dialog label{margin-top:14px}.access-dialog footer{display:flex;justify-content:flex-end;gap:9px;margin-top:20px}.operation-error{color:#b34040}
 @media(max-width:750px){.connection-fields{grid-template-columns:1fr}.key-toolbar{align-items:flex-start}.access-panel header{align-items:flex-start}.access-overlay{padding:12px}}
 </style>
+
+<style scoped>.access-panel{margin-top:0;padding:22px}.access-panel h2{font-size:16px}.access-panel p,.key-toolbar,.access-panel label,.model-info{font-size:13px}.access-panel button,.access-panel td,.access-panel th{font-size:12px}.access-panel .key-table-wrap{max-height:none}</style>

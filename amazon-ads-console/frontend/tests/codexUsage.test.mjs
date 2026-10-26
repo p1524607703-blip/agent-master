@@ -45,3 +45,9 @@ test('recorded-history share is not divided by today or the empty activation win
   assert.notEqual(percentLabel(usageShare(279566, 469345)), '40.6%')
   assert.equal(percentLabel(usageShare(null, null)), '—')
 })
+
+test('same-period comparison uses the current window and leaves an absent window unknown', () => {
+  const devices=[{todayTokens:99,totalTokens:5000,currentWindowTokens:12},{todayTokens:88,totalTokens:8000,currentWindowTokens:'8'}]
+  assert.equal(sumTokens(devices,'currentWindowTokens'),20)
+  assert.equal(sumTokens([{todayTokens:99,totalTokens:5000}],'currentWindowTokens'),null)
+})

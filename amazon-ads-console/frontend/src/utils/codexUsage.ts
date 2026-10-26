@@ -1,8 +1,8 @@
-export type TokenField = 'todayTokens' | 'totalTokens'
-export type TokenRecord = { todayTokens: number | string | null; totalTokens: number | string | null }
+export type TokenField = 'todayTokens' | 'totalTokens' | 'currentWindowTokens'
+export type TokenRecord = { todayTokens: number | string | null; totalTokens: number | string | null; currentWindowTokens?: number | string | null }
 
-function tokenNumber(value: number | string | null): number | null {
-  if (value === null || (typeof value === 'string' && !/^\d+$/.test(value))) return null
+function tokenNumber(value: number | string | null | undefined): number | null {
+  if (value == null || (typeof value === 'string' && !/^\d+$/.test(value))) return null
   const parsed = Number(value)
   return Number.isSafeInteger(parsed) && parsed >= 0 ? parsed : null
 }

@@ -15,7 +15,7 @@ from starlette.background import BackgroundTask
 from app.api.auth import require_super_admin_session
 from app.services.codex_devices import overview as read_overview
 from app.services import codex_telemetry as telemetry
-from app.services import codex_responses, codex_control, codex_binding, codex_access
+from app.services import codex_responses, codex_control, codex_binding, codex_access, codex_models
 from app.core.config import settings
 from app.services.auth import _connect
 from app.services.codex_quota import snapshot as quota_snapshot
@@ -121,6 +121,27 @@ class ControlRevision(BaseModel):
 
 class TotalConcurrency(ControlRevision):
     maxConcurrent: Optional[StrictInt] = Field(...,ge=1,le=100000)
+
+
+class ModelAvailability(ControlRevision):
+    enabledModels: list[str] = Field(max_length=64)
+
+
+@router.get('/model-settings',dependencies=[Depends(require_super_admin_session)])
+async def model_settings():
+    telemetry.require_enabled()
+    catalog = await telemetry.model_catalog(include_disabled=True)
+    policy = codex_models.snapshot()
+    ids = [item['id'] for item in catalog.get('data',[]) if isinstance(item,dict) and isinstance(item.get('id'),str)]
+    return JSONResponse({**policy,'availableModels':ids,'enabledModels':ids if policy['enabledModels'] is None else policy['enabledModels']},headers={'Cache-Control':'no-store'})
+
+
+@router.patch('/model-settings')
+async def update_model_settings(payload:ModelAvailability,actor=Depends(require_super_admin_session)):
+    telemetry.require_enabled()
+    catalog = await telemetry.model_catalog(include_disabled=True)
+    ids = [item['id'] for item in catalog.get('data',[]) if isinstance(item,dict) and isinstance(item.get('id'),str)]
+    return codex_models.update(revision=payload.revision,enabled_models=payload.enabledModels,available_models=ids,actor=actor[1]['userId'])
 
 
 class DeviceControl(ControlRevision):
